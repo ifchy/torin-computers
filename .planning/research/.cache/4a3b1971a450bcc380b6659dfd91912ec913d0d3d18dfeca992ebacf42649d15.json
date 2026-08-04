@@ -1,0 +1,1 @@
+{"content":"PHPMailer 6.x requires PHP 5.5 or later (up through PHP 8.x). Per GitHub PHPMailer/PHPMailer official docs and discussion #3093. This is a hard blocker if the target host's live PHP version is below 5.5.","source":"web","provider":"websearch","confidence":"MEDIUM","fetched_at":"2026-08-04T18:31:25.392Z","ttl":86400000,"kind":"web"}

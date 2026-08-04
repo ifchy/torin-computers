@@ -1,0 +1,1 @@
+{"content":"PHP 5.2 lacks namespaces (added 5.3), closures (added 5.3), and short array syntax [] (added 5.4). Code targeting PHP 5.2 compatibility must use array(), no namespaces, no closures — plain functions/variables only.","source":"web","provider":"websearch","confidence":"MEDIUM","fetched_at":"2026-08-04T18:31:25.461Z","ttl":86400000,"kind":"web"}
