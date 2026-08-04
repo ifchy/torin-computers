@@ -86,35 +86,35 @@ Which phases cover which requirements. Populated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DESIGN-01 | TBD | Pending |
-| DESIGN-02 | TBD | Pending |
-| IA-01 | TBD | Pending |
-| IA-02 | TBD | Pending |
-| TRUST-01 | TBD | Pending |
-| TRUST-02 | TBD | Pending |
-| TRUST-03 | TBD | Pending |
-| DIFF-01 | TBD | Pending |
-| DIFF-02 | TBD | Pending |
-| DIFF-03 | TBD | Pending |
-| CONTENT-01 | TBD | Pending |
-| CONTENT-02 | TBD | Pending |
-| CONTACT-01 | TBD | Pending |
-| CONTACT-02 | TBD | Pending |
-| CONTACT-03 | TBD | Pending |
-| CONTACT-04 | TBD | Pending |
-| SEO-01 | TBD | Pending |
-| SEO-02 | TBD | Pending |
-| SEO-03 | TBD | Pending |
-| SEO-04 | TBD | Pending |
-| MIGR-01 | TBD | Pending |
-| MIGR-02 | TBD | Pending |
-| MIGR-03 | TBD | Pending |
+| DESIGN-01 | Phase 2 | Pending |
+| DESIGN-02 | Phase 4 | Pending |
+| IA-01 | Phase 2 | Pending |
+| IA-02 | Phase 2 | Pending |
+| TRUST-01 | Phase 3 | Pending |
+| TRUST-02 | Phase 3 | Pending |
+| TRUST-03 | Phase 3 | Pending |
+| DIFF-01 | Phase 3 | Pending |
+| DIFF-02 | Phase 3 | Pending |
+| DIFF-03 | Phase 3 | Pending |
+| CONTENT-01 | Phase 3 | Pending |
+| CONTENT-02 | Phase 3 | Pending |
+| CONTACT-01 | Phase 4 | Pending |
+| CONTACT-02 | Phase 4 | Pending |
+| CONTACT-03 | Phase 4 | Pending |
+| CONTACT-04 | Phase 4 | Pending |
+| SEO-01 | Phase 3 | Pending |
+| SEO-02 | Phase 2 | Pending |
+| SEO-03 | Phase 4 | Pending |
+| SEO-04 | Phase 1 | Pending |
+| MIGR-01 | Phase 1 | Pending |
+| MIGR-02 | Phase 4 | Pending |
+| MIGR-03 | Phase 1 | Pending |
 
 **Coverage:**
 - v1 requirements: 23 total
-- Mapped to phases: 0
-- Unmapped: 23 ⚠️ (roadmap creation next)
+- Mapped to phases: 23
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-08-04*
-*Last updated: 2026-08-04 after initial definition*
+*Last updated: 2026-08-04 after roadmap creation (4 phases, full coverage)*
