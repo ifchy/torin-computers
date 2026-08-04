@@ -1,0 +1,57 @@
+#rssBlock{
+  left:0px;
+  height: 30px;
+  background: #FFFFFF;
+  position: absolute;
+  width:200%;
+  overflow: hidden;
+  font-weight: 600;
+  color:#0e305d;
+  font-size: 16px;
+  padding-top: 3px;
+}
+
+
+@media screen and (min-width: 480px) {
+  #rssBlock {
+    left:0px;
+    top: 19px;
+    height: 30px;
+    background: #FFFFFF;
+    position: absolute;
+    width:100%;
+    overflow: hidden;
+    font-weight: 600;
+    color:#0e305d;
+    font-size: 16px;
+    padding-top: 3px;
+  }
+}
+
+.marqueeStyle {
+  display:inline-block;
+  -webkit-animation: scrolling-left1 12s linear infinite;
+  animation: scrolling-left1 12s linear infinite;
+}
+
+@media screen and (min-width: 480px) {
+  .marqueeStyle {
+    display:inline-block;
+    /* Apply animation to this element */
+    -webkit-animation: scrolling-left1 30s linear infinite;
+    animation: scrolling-left1 30s linear infinite;
+  }
+}
+/* scrolling-left is continuous/repeatly text */
+@keyframes scrolling-left1 {
+    0% {transform: translateX(calc(100vw));
+        -webkit-transform: translateX(calc(100vw));}
+      100% {transform: translateX(-100%);
+          -webkit-transform: translateX(-100%);}
+}
+
+@-webkit-keyframes scrolling-left1 {
+    0% {-webkit-transform: translateX(100%);}
+      100% {-webkit-transform: translateX(-100%);}
+}
+
