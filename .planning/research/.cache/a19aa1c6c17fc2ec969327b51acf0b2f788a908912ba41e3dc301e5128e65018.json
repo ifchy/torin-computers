@@ -1,0 +1,1 @@
+{"content":"301 redirects preserve ~90-99% of link equity when mapped 1:1 old-URL to new-URL; avoid redirect chains and avoid 302 for permanent moves; keep redirects live indefinitely, not just for a grace period.","source":"web","provider":"websearch","confidence":"MEDIUM","fetched_at":"2026-08-04T15:50:11.102Z","ttl":86400000,"kind":"web"}
