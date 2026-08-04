@@ -28,7 +28,14 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. The new page templates are built to use the exact same filenames/URLs as the live site — no visitor-facing link will change through the redesign.
   3. A pre-deploy backup-and-rollback process is established and proven: a full local backup of the live site exists, git is the source of truth, and the process has been exercised at least once before real content work begins.
   4. The PHP-include foundation (shared `header.php`/`footer.php`/`site-config.php`, `.htaccess` behavior for serving `.html` as PHP) is scaffolded and verified working via local preview against the real host's configuration.
-**Plans**: TBD
+**Plans**: 5 plans
+Plans:
+- [ ] 01-01-PLAN.md — Tracer: PHP-include foundation, .htaccess spike + canonicalization, live-verified on bell.host.bg
+- [ ] 01-02-PLAN.md — Full 16-page URL inventory with per-page disposition (GSC-substitute method)
+- [ ] 01-03-PLAN.md — Backup script exercised once + git-based rollback drill
+- [ ] 01-04-PLAN.md — Wire private GitHub remote as off-site backup (checkpoint: repo creation)
+- [ ] 01-05-PLAN.md — Scaffold + live-verify the remaining 15 page filenames
+**UI hint**: no
 
 ### Phase 2: Design System & Information Architecture
 **Goal**: Visitors see a modern, mobile-responsive site organized around the six owner-priority service categories, replacing the outdated jQuery/parallax "Liquid" theme and its undifferentiated scroll of icon boxes.
@@ -75,7 +82,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Migration Safety Net & Foundation | 0/TBD | Not started | - |
+| 1. Migration Safety Net & Foundation | 0/5 | Not started | - |
 | 2. Design System & Information Architecture | 0/TBD | Not started | - |
 | 3. Content & Trust-Signal Build-Out | 0/TBD | Not started | - |
 | 4. Hardening & Cutover | 0/TBD | Not started | - |
