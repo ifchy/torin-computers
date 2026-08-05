@@ -144,3 +144,7 @@ None - no external service configuration required. The script reuses the existin
 ---
 *Phase: 01-migration-safety-net-foundation*
 *Completed: 2026-08-05*
+
+## Self-Check: PASSED
+
+`scripts/backup-live-site.sh` and the exercised `backups/20260805T064013Z/public_html/` snapshot both confirmed present on disk. `ROLLBACK-DRILL.md` confirmed absent (by design — reverted). All 4 commits (`aa998f7`, `e582dac`, `7d6cdeb`, plus this summary commit) verified present in `git log --oneline --all`. Targeted grep of the last 4 commits' full diffs against the decoded (in-memory only) FTP password confirmed no credential leaked into any committed content.

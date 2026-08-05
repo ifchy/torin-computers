@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 01
 current_phase_name: migration-safety-net-foundation
 status: executing
-stopped_at: Completed 01-04-PLAN.md
-last_updated: "2026-08-05T06:40:29.518Z"
+stopped_at: Completed 01-03-PLAN.md
+last_updated: "2026-08-05T06:46:59.970Z"
 last_activity: 2026-08-05
 last_activity_desc: Phase 01 execution started
 progress:
   total_phases: 1
   completed_phases: 0
   total_plans: 5
-  completed_plans: 3
+  completed_plans: 4
 ---
 
 # Project State
@@ -28,11 +28,11 @@ See: .planning/PROJECT.md (updated 2026-08-04)
 ## Current Position
 
 Phase: 01 (migration-safety-net-foundation) — EXECUTING
-Plan: 4 of 5
+Plan: 5 of 5
 Status: Ready to execute
 Last activity: 2026-08-05 — Phase 01 execution started
 
-Progress: [██████░░░░] 60%
+Progress: [████████░░] 80%
 
 ## Performance Metrics
 
@@ -61,6 +61,7 @@ Progress: [██████░░░░] 60%
 | Phase 01 P02 | 18min | 2 tasks | 2 files |
 | Phase 01 P01 | 18min | 2 tasks | 7 files |
 | Phase 01 P4 | 55min | 2 tasks | 1 files |
+| Phase 01 P03 | 20min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -76,6 +77,7 @@ Recent decisions affecting current work:
 - [Phase ?]: PHP-as-.html handler on bell.host.bg requires AddHandler application/x-httpd-php52 (CloudLinux Alt-PHP version-specific name), not the generic application/x-httpd-php variants
 - [Phase ?]: FTPS to bell.host.bg uses curl --ftp-ssl -k: TLS handshake succeeds but the shared-hosting wildcard cert (*.superhosting.bg) doesn't match the vanity hostname, so hostname verification is skipped while transport stays encrypted
 - [Phase ?]: 01-04: GitHub off-site backup wired to private repo torin-computers, verified in sync with local main
+- [Phase ?]: MIGR-03: scripts/backup-live-site.sh detects FTP directory-vs-file type from the LIST type column (not name heuristics) and percent-encodes remote paths -- both discovered necessary via live run against bell.host.bg (dotted directory name, spaced filename)
 
 ### Pending Todos
 
@@ -102,6 +104,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-05T06:40:29.507Z
-Stopped at: Completed 01-04-PLAN.md
+Last session: 2026-08-05T06:46:59.964Z
+Stopped at: Completed 01-03-PLAN.md
 Resume file: None
