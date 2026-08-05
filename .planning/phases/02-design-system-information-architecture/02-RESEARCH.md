@@ -1383,23 +1383,33 @@ curl -sI -H 'Accept-Encoding: gzip' https://torin.bg/new/css/base.css | grep -i 
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
+
+All five carried a plan-level disposition before Phase 2 planning closed. Each is annotated
+below with where it was resolved. None remains open as ambiguity leaking into execution; two
+(Q2, Q3) resolve to a **recorded assumption plus an owner question**, which is a disposition,
+not an evasion.
 
 1. **Which font ships? (N-1)** — the single highest-impact unresolved item.
    - *Known:* Inter has zero Bulgarian localization (definitively verified). Sofia Sans's defaults are Bulgarian. Manrope/Montserrat/Commissioner have proper `BGR locl`.
    - *Unclear:* whether the user/owner values authentic Bulgarian letterforms enough to override D-06.
    - *Recommendation:* surface all three options with the payload and risk table; recommend Sofia Sans. **Must be decided before Phase 3 writes content** (D-06 is flagged "costly to reverse", and the x-height difference re-tunes the whole type scale).
+   - **— RESOLVED: 02-CONTEXT.md D-06a.** The user selected Sofia Sans, self-hosted, on 2026-08-05; D-06 (Inter) is superseded and D-07's `locl` verification is moot. Implemented in 02-01 Task 1, gated by V1 below.
 
 2. **Working hours — 8:00–16:00 or 9:00–17:00? (N-3)**
    - *Known:* two of three sources plus the «НОВО» banner say 8:00–16:00.
    - *Unclear:* whether `profilaktika-laptop.html` is stale or the others are.
    - *Recommendation:* add to OWNER-QUESTIONS.md; ship 8:00–16:00 marked `[ASSUMED]` in `site-config.php`.
+   - **— RESOLVED: 02-03 Task 2.** The recommendation is adopted verbatim: 8:00–16:00 ships marked `[ASSUMED]` inline in `site-config.php` citing N-3, and Task 2 appends a new **Blocking** item to `.planning/OWNER-QUESTIONS.md` (D-37, append-only). Threat T-02-14 records that a wrong value reaches sixteen pages and Google's structured data at once, and must be closed before the Phase 4 cutover.
 
 3. **Is `otpuska.js`'s banner kept?** (OWNER-QUESTIONS #8) — it needs no library, so preserving an equivalent is nearly free. Recommendation: rebuild as a PHP-rendered notice band driven from `site-config.php`, so it is content, not a script.
+   - **— RESOLVED: 02-03 Task 2.** Rebuilt as a static, PHP-rendered `.notice--info` band driven by a `notice` key in `site-config.php`, marked `[ASSUMED]` citing OWNER-QUESTIONS #8. The banner carries genuine content rather than decoration, so preserving an equivalent is the safe default; zero JavaScript survives from the original.
 
 4. **Do the three new category pages exist as files before they publish?** (A10 / D-23) — recommendation: no; create the file at publish time. Needs an explicit planner call.
+   - **— RESOLVED: 02-04 Task 2, explicit planner call, recorded in that plan's flagged-assumptions table.** They do **not** exist as files in Phase 2. Their `published` flags are false, so `torin_category_href()` routes both the cards and the Услуги dropdown to homepage anchors and nothing is broken. Phase 3 creates each file and flips one boolean.
 
 5. **`mod_deflate` availability** (N-6) — resolve with a Wave-0 spike; changes the CSS budget from a target to a hard limit.
+   - **— RESOLVED: 02-01 Task 1**, as the `.htaccess` compression spike inside the tracer rather than a separate Wave-0 plan. Both `mod_deflate` and `mod_expires` are appended under their own `<IfModule>` guards, and a live `Accept-Encoding: gzip` probe records whether a `content-encoding` header comes back. The result is recorded in `02-01-SUMMARY.md` and decides whether the 20 KB CSS budget is a target or a hard wire-cost limit for plans 02-02 through 02-04.
 
 ---
 
