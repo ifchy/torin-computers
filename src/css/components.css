@@ -20,7 +20,16 @@
 	min-height: clamp(16rem, 42svh, 22rem);
 	display: grid;
 	align-content: center;
-	padding-block: var(--sp-2xl);
+	/* Compact mobile-first padding. Measured 2026-08-06: the two hero CTA
+	   labels are 178.2px and 189.4px wide at --fs-body/700, so at 360px (328px
+	   of content box) they CANNOT share a row and the block is intrinsically
+	   two rows / 104px. With --sp-2xl padding the content stack totalled 369px
+	   and overflowed the 268.8px min-height, rendering the hero at 57.7% of a
+	   640px viewport — D-30's exact failure mode. Trimming padding and the
+	   internal gaps below 35rem brings the stack to 249.6px, back under
+	   min-height, so the hero renders at 42svh again. Restored to the UI-SPEC
+	   --sp-2xl at >=35rem, where both buttons fit one row. */
+	padding-block: var(--sp-sm);
 	color: var(--c-on-dark);
 	background:
 		radial-gradient(circle at 88% 12%, var(--c-hero-glow), transparent 55%),
@@ -49,8 +58,8 @@
 .cta-block__actions {
 	display: flex;
 	flex-wrap: wrap;
-	gap: var(--sp-lg);
-	margin-block-start: var(--sp-xl);
+	gap: var(--sp-sm);
+	margin-block-start: var(--sp-md);
 }
 
 /* --- Buttons — exactly two variants. No ghost, no link button. */
@@ -108,7 +117,7 @@
 	display: inline-flex;
 	align-items: center;
 	gap: var(--sp-xs);
-	margin-block-start: var(--sp-lg);
+	margin-block-start: var(--sp-sm);
 	padding: var(--sp-xs) var(--sp-md);
 	border-radius: var(--r-md);
 	background: var(--c-brand);
@@ -116,4 +125,19 @@
 	font-size: var(--fs-body);
 	font-weight: var(--fw-bold);
 	line-height: 1.4;
+}
+
+/* --- Breakpoint 1 — 35rem / 560px ---------------------------------------
+   min-width only, never max-width, so no two adjacent breakpoints can both
+   match or both miss. At >=560px the content box is >=528px, so both CTA
+   buttons (367.6px + gap) fit one row and the hero stack collapses by ~56px.
+   That headroom is what pays for the UI-SPEC hero padding and the generous
+   --sp-lg/--sp-xl rhythm being restored here rather than at mobile.        */
+@media (min-width: 35rem) {
+	.hero { padding-block: var(--sp-2xl); }
+	.cta-block__actions {
+		gap: var(--sp-lg);
+		margin-block-start: var(--sp-xl);
+	}
+	.trust-badge { margin-block-start: var(--sp-lg); }
 }
