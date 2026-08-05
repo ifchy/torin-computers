@@ -1,0 +1,15 @@
+/* DEV ONLY (D-02/D-03). Theme A = logo-derived, for live comparison only;
+   D-02a ships Theme B. Colour only: radius, spacing, type and motion are not
+   overridden, which keeps the Phase 4 cutover `rm src/css/theme-a.css`. */
+[data-theme="a"] {
+	--c-brand: #fbad03;
+	--c-brand-dim: #dd9803;
+	--c-ink-deep: #0547dc;
+	--c-ink-deep-2: #1c56d8;
+	--c-ink-deepest: #062f8f;
+	--c-on-brand: #1a1200;
+	--c-link: #0440c2;
+	--c-link-hover: #0334a0;
+	--c-shadow-tint: 5 71 220;
+	--c-hero-glow: rgba(251, 173, 3, .16);
+}

@@ -9,6 +9,18 @@
 // dirname(__FILE__) is the 5.2-safe idiom; the 5.3+ magic directory constant
 // must never be introduced anywhere in this tree.
 require_once(dirname(__FILE__) . '/site-config.php');
+require_once(dirname(__FILE__) . '/icons.php');
+
+// ── DEV-ONLY THEME SWITCHER (D-03) — delete this block at the Phase 4 cutover.
+// The guard is file existence and nothing else: never a request-path check
+// (request values are client-influenced) and never a constant in
+// site-config.php (that file does ship to production). "Is the switcher live?"
+// must be answerable from an FTP directory listing.
+$torin_html_attr = '';
+$torin_extra_head = '';
+$torin_dev_switcher = dirname(__FILE__) . '/dev-switcher.php';
+if (file_exists($torin_dev_switcher)) { include($torin_dev_switcher); }
+// ── END DEV-ONLY ─────────────────────────────────────────────────────────────
 
 // Per-page metadata mechanism (02-RESEARCH N-5). A page assigns these before
 // the include; anything left unset falls back to the site-level default, so a
@@ -21,7 +33,7 @@ if (!isset($torin_desc)) {
 }
 ?>
 <!DOCTYPE html>
-<html lang="bg">
+<html lang="bg"<?php echo $torin_html_attr; ?>>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -43,9 +55,15 @@ if (!isset($torin_desc)) {
 <link rel="stylesheet" href="css/base.css">
 <link rel="stylesheet" href="css/layout.css">
 <link rel="stylesheet" href="css/components.css">
+<?php echo $torin_extra_head; ?>
 </head>
 
 <body class="site-body">
+<?php
+// ── DEV-ONLY (D-03) — delete these lines at the Phase 4 cutover ──────────────
+if (file_exists($torin_dev_switcher)) { torin_render_theme_switcher($torin_theme); }
+// ── END DEV-ONLY ─────────────────────────────────────────────────────────────
+?>
 
 <div id="wrap">
 

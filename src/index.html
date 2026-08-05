@@ -12,11 +12,11 @@ require_once(dirname(__FILE__) . '/includes/header.php');
 				<h1>Ремонт на лаптопи и компютри в София</h1>
 
 				<div class="cta-block__actions">
-					<a class="btn btn--primary" href="tel:+35929549710">Обадете се сега</a>
+					<a class="btn btn--primary" href="tel:+35929549710"><?php echo torin_icon('phone'); ?>Обадете се сега</a>
 					<?php // [ASSUMED] Which of the three shop numbers is reachable on Viber is
 					      // an open owner question (02-UI-SPEC C-9). This href uses the main
 					      // line until the owner confirms it. ?>
-					<a class="btn btn--primary" href="viber://chat?number=%2B35929549710">Пишете във Viber</a>
+					<a class="btn btn--primary" href="viber://chat?number=%2B35929549710"><?php echo torin_icon('chat'); ?>Пишете във Viber</a>
 				</div>
 
 				<p class="trust-badge">Безплатна диагностика</p>

@@ -127,6 +127,38 @@
 	line-height: 1.4;
 }
 
+/* --- Dev-only theme switcher (D-03) -------------------------------------
+   Pinned bottom-right, away from the hero CTA buttons, which sit top-centre
+   and wrap to two rows at 360px. Deleted at the Phase 4 cutover along with
+   theme-a.css and dev-switcher.php.                                        */
+.dev-switcher {
+	position: fixed;
+	right: var(--sp-sm);
+	bottom: var(--sp-sm);
+	z-index: 50;
+	display: flex;
+	gap: 2px;
+	padding: 2px;
+	border-radius: var(--r-sm);
+	background: var(--c-ink-deepest);
+	box-shadow: var(--sh-2);
+}
+
+.dev-switcher a {
+	padding: var(--sp-xs) var(--sp-sm);
+	border-radius: var(--r-sm);
+	color: var(--c-on-dark-muted);
+	font-size: var(--fs-body);
+	line-height: 1.3;
+	text-decoration: none;
+}
+
+.dev-switcher a[aria-current="true"] {
+	background: var(--c-brand);
+	color: var(--c-on-brand);
+	font-weight: var(--fw-bold);
+}
+
 /* --- Breakpoint 1 — 35rem / 560px ---------------------------------------
    min-width only, never max-width, so no two adjacent breakpoints can both
    match or both miss. At >=560px the content box is >=528px, so both CTA
