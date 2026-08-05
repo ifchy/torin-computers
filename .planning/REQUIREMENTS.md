@@ -50,7 +50,7 @@ Requirements for the redesign launch. Each maps to roadmap phases.
 
 ### Migration Safety
 
-- [ ] **MIGR-01**: A complete URL inventory of all 16 live pages is captured and cross-checked against Search Console before rebuild work starts
+- [x] **MIGR-01**: A complete URL inventory of all 16 live pages is captured and cross-checked against Search Console before rebuild work starts
 - [ ] **MIGR-02**: A "must-carry" checklist (`.htaccess`, Search Console verification file, favicon, `robots.txt`) is preserved through the FTP cutover
 - [ ] **MIGR-03**: A pre-deploy full backup of the live site is taken before every FTP upload, with git as local source of truth for rollback
 
@@ -106,11 +106,12 @@ Which phases cover which requirements. Populated during roadmap creation.
 | SEO-02 | Phase 2 | Pending |
 | SEO-03 | Phase 4 | Pending |
 | SEO-04 | Phase 1 | Pending |
-| MIGR-01 | Phase 1 | Pending |
+| MIGR-01 | Phase 1 | Complete |
 | MIGR-02 | Phase 4 | Pending |
 | MIGR-03 | Phase 1 | Pending |
 
 **Coverage:**
+
 - v1 requirements: 23 total
 - Mapped to phases: 23
 - Unmapped: 0 ✓
