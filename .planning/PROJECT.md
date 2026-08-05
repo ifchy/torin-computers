@@ -55,8 +55,9 @@ A visitor with a specific problem (cracked screen, spilled liquid, dead motherbo
 - **Current tech**: Static HTML/CSS/JS, built on a purchased "Liquid" theme (jQuery + Bootstrap-era vendor libraries: jQuery UI, Font Awesome, ScrollMagic, pagePiling, etc.)
 - **Source pulled locally**: Full FTP mirror of the live site downloaded into `site-current/` (committed to git as the baseline reference) — 215 files, ~15MB, includes all HTML pages, CSS, JS, images, fonts
 - **FTP access**: Credentials live in `filezilla-server-data.xml` in the project root (gitignored — contains real hosting passwords, never commit this file). Two saved server entries exist in that file; the one for torin.bg is named "TORIN" (host `bell.host.bg`, user `torin`)
-- **Rebuild approach undecided**: whether to do a full modern rebuild (new stack) or a reskin-in-place (keep current template/structure, update visuals/content) — deferred until after competitive research and requirements are clearer
+- **Rebuild approach decided**: PHP-include restructuring on the existing host (shared `header.php`/`footer.php`/`site-config.php` via native PHP `include()`), not a Node/Astro rebuild — chosen because it fully solves the actual technical debt (duplicated markup across 16 pages) with zero new tooling/build step, and makes URL preservation the default behavior rather than something to configure around (the project's single biggest risk). Full rationale in `.planning/research/SUMMARY.md` §"Resolving the Stack/Architecture Tension". Proven live end-to-end on bell.host.bg in Phase 1.
 - **Company name variants seen in source**: "ТОРИН КОМПЮТЪРС" (site title), domain torin.bg
+- **Phase 1 complete (2026-08-05)**: Migration safety net proven — full 16-page URL inventory, pre-deploy backup script (exercised live, ~12MB snapshots), git-based rollback drill exercised, off-site GitHub mirror wired (`github.com/ifchy/torin-computers`), and the PHP-include foundation live-verified on bell.host.bg (`public_html/new/`, CloudLinux Alt-PHP handler `application/x-httpd-php52`). All 16 live filenames preserved byte-identical. Next: Phase 2 (design system/IA).
 
 ## Constraints
 
@@ -70,9 +71,10 @@ A visitor with a specific problem (cracked screen, spilled liquid, dead motherbo
 |----------|-----------|---------|
 | Pulled live site via FTP into `site-current/` as a working baseline | Needed the real current source to redesign against, not assumptions | ✓ Good |
 | `filezilla-server-data.xml` excluded from git via `.gitignore` | Contains real hosting passwords in reversible base64 encoding | ✓ Good |
-| Rebuild approach (full rebuild vs. reskin) deferred until after competitive research | Owner wants research findings to inform this, not decide upfront | — Pending |
+| Rebuild approach: PHP-include reskin-in-place, not an Astro/Node rebuild | Fully solves the real technical debt (duplicated markup) with zero new tooling, and makes URL preservation (the biggest risk) the default rather than something to configure around | ✓ Good — proven live on bell.host.bg in Phase 1 |
 | Keep existing FTP/shared hosting for deploy | Owner confirmed — avoids infra migration scope creep | ✓ Good |
 | Competitor set to be identified by research, not owner-supplied | Owner has no specific competitors in mind, wants a market scan | — Pending |
+| All Phase 1-4 build work happens in `public_html/new/` on the live host, swapped to root only at Phase 4 cutover | Lets the owner watch progress live at `torin.bg/new` without touching the real site (D-01/D-02, 01-CONTEXT.md) | ✓ Good |
 
 ## Evolution
 
@@ -92,4 +94,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-04 after initialization*
+*Last updated: 2026-08-05 after Phase 1 completion*
