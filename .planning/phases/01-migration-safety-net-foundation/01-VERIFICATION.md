@@ -1,7 +1,8 @@
 ---
 phase: 01-migration-safety-net-foundation
 verified: 2026-08-05T12:00:00Z
-status: human_needed
+status: passed
+uat_signoff: 2026-08-05T07:35:00Z
 score: 16/17 must-haves verified
 behavior_unverified: 0
 overrides_applied: 0
@@ -18,7 +19,7 @@ human_verification:
 
 **Phase Goal:** Before any rebuild work touches the live site, a complete safety net guarantees URL/ranking continuity and rollback capability, and the PHP-include technical foundation is proven to work on the actual host.
 **Verified:** 2026-08-05
-**Status:** human_needed
+**Status:** passed (human_needed → passed after UAT sign-off 2026-08-05T07:35:00Z; see `01-UAT.md`, both items marked pass, owner accepted code-inspection evidence for the interrupted-transfer test and confirmed all 4 judgment-tier prohibitions)
 **Re-verification:** No — initial verification
 
 ## Goal Achievement
