@@ -1,0 +1,20 @@
+# public_html/new/.htaccess — Phase 1 rehearsal file, scoped to the /new/ staging subtree only.
+# At Phase 4 cutover, this file (or its rules) is promoted to the root .htaccess with the
+# redirect target changed from https://torin.bg/new/$1 to https://torin.bg/$1 (drop /new/).
+
+RewriteEngine On
+
+# Canonicalize all 4 protocol/host variants to https://torin.bg/new/... in exactly 1 hop.
+# Target is a hardcoded literal, never %{HTTP_HOST} reflection — reflecting the client-supplied
+# Host header into a redirect Location is a host-header-injection/open-redirect vector (T-01-03).
+RewriteCond %{HTTPS} off [OR]
+RewriteCond %{HTTP_HOST} ^www\.torin\.bg$ [NC]
+RewriteRule ^(.*)$ https://torin.bg/new/$1 [R=301,L]
+
+# Keep this staging subtree out of Google's index — robots.txt is ignored outside the true
+# domain root, so X-Robots-Tag via HTTP header is the correct mechanism here (RESEARCH.md Pitfall C).
+<IfModule mod_headers.c>
+	Header set X-Robots-Tag "noindex, nofollow"
+</IfModule>
+
+AddHandler application/x-httpd-php52 .html .htm
