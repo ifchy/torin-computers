@@ -34,6 +34,20 @@
 	border-radius: var(--r-sm);
 }
 
+/* --- Six-category grid (IA-01, D-09) ------------------------------------
+   The set is fixed at exactly six, so the column counts are declared
+   explicitly at each breakpoint rather than left to content-driven track
+   placement: with a known six, a minmax()-based track function produces 4+2
+   and 5+1 orphan rows at intermediate widths, which is precisely the
+   undifferentiated look IA-01 exists to remove. Explicit 1/2/3 gives
+   6 -> 3+3 -> 2+2+2 and no orphan row at any width (02-UI-SPEC §Layout).  */
+.cat-grid {
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: var(--sp-xl);
+	margin-block-start: var(--sp-md);
+}
+
 /* --- Site header shell */
 .site-header {
 	background: var(--c-page);
@@ -75,10 +89,19 @@
 	.site-header__inner {
 		min-height: 64px;
 	}
+
+	.cat-grid {
+		grid-template-columns: repeat(2, 1fr);
+		margin-block-start: var(--sp-lg);
+	}
 }
 
 /* --- Breakpoint 2 — 56.25rem / 900px */
 @media (min-width: 56.25rem) {
+	.cat-grid {
+		grid-template-columns: repeat(3, 1fr);
+	}
+
 	.site-footer {
 		padding-block: var(--sp-3xl) var(--sp-2xl);
 	}

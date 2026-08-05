@@ -110,6 +110,98 @@
 	border-color: var(--c-on-dark);
 }
 
+/* --- Category card (IA-01, D-09, D-10, D-38) ----------------------------
+   White card on the --c-surface-2 section band, so the six read as raised.
+   Below 35rem the card is HORIZONTAL (media left, body right) — a deliberate
+   departure from 02-RESEARCH §5b, computed in 02-UI-SPEC C-5: a vertical card
+   at 360px pushes the first title to ~620px, below the fold, which defeats
+   D-30's entire purpose. The horizontal form keeps card 1 fully visible.
+   Same DOM, same classes, same aspect-ratio mechanism.                     */
+.cat-card {
+	position: relative;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	/* --sp-sm, not --sp-md, and the 8px is load-bearing. Measured live
+	   2026-08-06 at 360px: the body column is 328 - 32 card padding - 80 media
+	   - gap. At a 16px gap it is 200px, and card 1's symptom line needs 202px
+	   to fit two lines, so it wrapped to three and pushed card 1's bottom edge
+	   to 602.9px — past the 584px left once the sticky call bar takes 56px.
+	   An 8px gap yields 208px and card 1 renders at two lines again. See the
+	   symptom-width table in 02-02-SUMMARY: three of the six lines need
+	   244-274px and cannot fit two lines at this viewport at ANY gap. */
+	gap: var(--sp-sm);
+	padding: var(--sp-md);
+	border-radius: var(--r-lg);
+	background: var(--c-surface);
+	box-shadow: var(--sh-1);
+	/* Only transform and box-shadow: no geometry animation anywhere. */
+	transition: box-shadow var(--dur-base) var(--ease),
+		transform var(--dur-base) var(--ease);
+}
+
+.cat-card:hover,
+.cat-card:focus-within {
+	box-shadow: var(--sh-2);
+	transform: translateY(-2px);
+}
+
+/* The D-38 photo-swap mechanism. aspect-ratio sizes the box INDEPENDENTLY of
+   its contents, and the two child rules below are mutually exclusive, so
+   replacing the inline SVG with an owner-supplied <img> changes nothing about
+   card height, grid geometry or section rhythm. Ship width/height on any such
+   <img> so the box is right before the file loads.                         */
+.cat-card__media {
+	flex: none;
+	display: grid;
+	place-items: center;
+	overflow: hidden;
+	width: 5rem;
+	aspect-ratio: 4/3;
+	border-radius: var(--r-sm);
+	background: var(--c-surface-3);
+}
+
+.cat-card__media > svg {
+	width: 42%;
+	height: auto;
+	color: var(--c-ink-deep);
+}
+
+.cat-card__media > img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.cat-card__body {
+	min-width: 0;   /* lets long Bulgarian names wrap instead of forcing overflow */
+}
+
+/* The <a> sits INSIDE the h3 rather than wrapping the whole card, so the
+   accessible name stays short and specific; the stretched-link pseudo-element
+   makes the whole card clickable while the anchor remains the only tab stop.
+   Size, weight and colour of the h3 itself come from base.css.             */
+.cat-card__title a {
+	color: var(--c-ink-deep);
+	text-decoration: none;
+}
+
+.cat-card__title a::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	border-radius: var(--r-lg);
+}
+
+.cat-card__symptoms {
+	margin-block-start: var(--sp-sm);
+	color: var(--c-ink-muted);
+	font-size: var(--fs-body);
+	font-weight: var(--fw-regular);
+}
+
 /* --- Trust badge «Безплатна диагностика» (D-15) -------------------------
    A trust/conversion element, never a line item in a service list. Amber
    fill with dark on-brand ink = 10.14:1.                                   */
@@ -172,4 +264,24 @@
 		margin-block-start: var(--sp-xl);
 	}
 	.trust-badge { margin-block-start: var(--sp-lg); }
+
+	/* Card flips vertical: media on top, edge to edge. The aspect-ratio box
+	   is what changes shape — the DOM and the class names do not.          */
+	.cat-card {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 0;
+		padding: 0;
+		overflow: hidden;
+	}
+
+	.cat-card__media {
+		width: 100%;
+		aspect-ratio: 16/10;
+		border-radius: 0;
+	}
+
+	.cat-card__body {
+		padding: var(--sp-lg);
+	}
 }
