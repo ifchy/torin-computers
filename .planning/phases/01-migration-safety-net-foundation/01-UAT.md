@@ -1,23 +1,14 @@
 ---
-status: testing
+status: complete
 phase: 01-migration-safety-net-foundation
 source: [01-VERIFICATION.md]
 started: 2026-08-05T07:22:43Z
-updated: 2026-08-05T07:22:43Z
+updated: 2026-08-05T07:35:00Z
 ---
 
 ## Current Test
 
-number: 1
-name: Interrupted/dropped FTP connection mid-transfer detection
-expected: |
-  Simulate an interrupted/dropped FTP connection mid-transfer while running scripts/backup-live-site.sh
-  (e.g. kill the connection partway through the assets1/ recursion) and confirm the script's
-  file-count/size checks catch the shortfall and exit non-zero rather than reporting success.
-  Script should exit non-zero with an explicit "truncated pull" message; no "Backup complete" line
-  printed; the partial backups/<timestamp>/ directory left on disk but not represented as a
-  successful/complete snapshot.
-awaiting: user response
+[testing complete]
 
 ## Tests
 
@@ -29,7 +20,8 @@ expected: |
   Code inspection confirms the file-count/size checks exist and are structurally capable of catching
   this, and two different real failures were already caught during development, but the specific
   "dropped connection mid-transfer" scenario has not been directly exercised.
-result: [pending]
+result: pass
+reported: "sign off on both, mark phase 1 complete" — owner accepted code-inspection evidence as sufficient; declined to hand-simulate a dropped connection.
 
 ### 2. Judgment-tier prohibition sign-off
 expected: |
@@ -46,14 +38,15 @@ expected: |
         "Backup complete" message; no early/unconditional success path.
     P4. MUST NOT rename/restructure any of the 16 live page filenames/extensions during
         scaffolding. Evidence: filename-set diff confirms byte-identical match.
-result: [pending]
+result: pass
+reported: "sign off on both, mark phase 1 complete" — owner accepted the LLM's judgment-tier verdicts as correct without amendment.
 
 ## Summary
 
 total: 2
-passed: 0
+passed: 2
 issues: 0
-pending: 2
+pending: 0
 skipped: 0
 blocked: 0
 
