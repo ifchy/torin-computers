@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_phase: 1
-current_phase_name: Migration Safety Net & Foundation
+current_phase: 01
+current_phase_name: migration-safety-net-foundation
 status: executing
 stopped_at: Phase 1 context gathered
-last_updated: "2026-08-04T19:08:28.313Z"
-last_activity: 2026-08-04
-last_activity_desc: Roadmap created (4 phases, 23/23 v1 requirements mapped)
+last_updated: "2026-08-05T05:53:01.973Z"
+last_activity: 2026-08-05
+last_activity_desc: Phase 01 execution started
 progress:
   total_phases: 1
   completed_phases: 0
@@ -23,14 +23,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-04)
 
 **Core value:** A visitor with a specific repair problem must immediately see that Torin fixes exactly that, and find a clear path to contact the shop.
-**Current focus:** Phase 1 — Migration Safety Net & Foundation
+**Current focus:** Phase 01 — migration-safety-net-foundation
 
 ## Current Position
 
-Phase: 1 of 4 (Migration Safety Net & Foundation)
-Plan: 0 of TBD in current phase
-Status: Ready to execute
-Last activity: 2026-08-04 — Roadmap created (4 phases, 23/23 v1 requirements mapped)
+Phase: 01 (migration-safety-net-foundation) — EXECUTING
+Plan: 1 of 5
+Status: Executing Phase 01
+Last activity: 2026-08-05 — Phase 01 execution started
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -78,6 +78,8 @@ None yet.
 - [Phase 3]: Google Business Profile status (active with reviews?) unverified — confirm before committing to the Google rating badge.
 - [Phase 3/4]: Real price ranges, before/after photos, and turnaround-time commitments are v2 (deferred) but were owner-input-dependent gaps noted in research; not blocking v1.
 - [Phase 4]: Holiday-banner script (`otpuska.js`) intent needs an explicit owner decision (keep with maintained equivalent, or drop).
+- [Phase 1/3]: `covid.html`'s fate is undecided — pending-owner-decision, not silently retired. Content is slated to move to the About page per CONTENT-02 (Phase 3), but retiring the currently-indexed URL itself needs explicit owner sign-off before doing so, since an unreviewed retirement risks losing existing ranking/traffic. See `01-URL-INVENTORY.md`.
+- [Phase 1]: `problem-stari.html`'s fate is undecided — pending-owner-decision. No current v1 requirement addresses this page; suspected content overlap with `mehanichni-problemi.html` is unconfirmed. Flag for owner review before any retire/merge/redirect decision is made. See `01-URL-INVENTORY.md`.
 
 ## Deferred Items
 
