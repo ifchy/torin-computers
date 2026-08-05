@@ -59,7 +59,7 @@ Plans:
   3. A visitor can reach any part of the site via a flat, shallow navigation structured around the six categories, with no dense mega-menu.
   4. Every page declares `lang="bg"` and all Cyrillic text renders correctly in the new typography.
 
-**Plans**: 1/4 plans executed
+**Plans**: 2/4 plans executed
 Plans:
 **Wave 1**
 
@@ -67,7 +67,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1)*
 
-- [ ] 02-02-PLAN.md — Six-category information architecture: categories data file, card grid, catch-all disclosure, self-diagnostic block, CTA
+- [x] 02-02-PLAN.md — Six-category information architecture: categories data file, card grid, catch-all disclosure, self-diagnostic block, CTA
 
 **Wave 3** *(blocked on Wave 2)*
 
@@ -119,6 +119,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Migration Safety Net & Foundation | 5/5 | Complete    | 2026-08-05 |
-| 2. Design System & Information Architecture | 1/4 | In Progress|  |
+| 2. Design System & Information Architecture | 2/4 | In Progress|  |
 | 3. Content & Trust-Signal Build-Out | 0/TBD | Not started | - |
 | 4. Hardening & Cutover | 0/TBD | Not started | - |
