@@ -89,16 +89,35 @@ mkdir -p "$BACKUP_ROOT"
 CURL_BASE=(curl --fail --silent --show-error --netrc-file "$NETRC_FILE")
 
 # Prefer FTPS (explicit TLS), matching the pattern confirmed live against
-# bell.host.bg in plan 01-01: the transport TLS handshake succeeds but the
-# shared-hosting wildcard cert (*.superhosting.bg) doesn't match the vanity
-# hostname, so `-k` skips hostname verification while keeping the session
-# encrypted. Fall back to plain FTP only if TLS is rejected outright.
-PROTO_FLAGS=(--ftp-ssl -k)
+# bell.host.bg in plan 01-01. The certificate chain itself is validly signed
+# by a public CA (Sectigo) -- it is NOT self-signed or untrusted -- but the
+# shared-hosting wildcard cert (*.superhosting.bg) doesn't cover the vanity
+# hostname bell.host.bg, so hostname verification fails. `-k`/--insecure
+# disables the ENTIRE verification chain (hostname, CA trust, expiry), not
+# just hostname checking, which alone would leave an active MITM presenting
+# any other cert accepted silently. To compensate, --pinnedpubkey cryptographically
+# pins to this specific host's known public key, independent of and in addition to
+# whatever -k skips: only a peer holding the exact matching private key is accepted.
+# NOTE: this pin will need updating if bell.host.bg's certificate is ever reissued
+# with a new key (e.g. cert renewal/rotation) -- recompute via:
+#   echo | openssl s_client -connect bell.host.bg:21 -starttls ftp 2>/dev/null | \
+#     openssl x509 -pubkey -noout | openssl pkey -pubin -outform der | \
+#     openssl dgst -sha256 -binary | base64
+FTP_HOST_PUBKEY_PIN="sha256//Z7N5Hk+6AzND7F/ToDmzG91E2tHDk6WVlyWLfDqXcRU="
+PROTO_FLAGS=(--ftp-ssl -k --pinnedpubkey "$FTP_HOST_PUBKEY_PIN")
 if ! "${CURL_BASE[@]}" "${PROTO_FLAGS[@]}" --list-only "ftp://${FTP_HOST}/${REMOTE_ROOT}/" >/dev/null 2>&1; then
-  echo "FTPS probe failed against ${FTP_HOST} -- falling back to plain FTP" >&2
-  PROTO_FLAGS=()
-  if ! "${CURL_BASE[@]}" "${PROTO_FLAGS[@]}" --list-only "ftp://${FTP_HOST}/${REMOTE_ROOT}/" >/dev/null 2>&1; then
-    echo "ERROR: could not connect to ftp://${FTP_HOST}/${REMOTE_ROOT}/ over FTPS or plain FTP" >&2
+  echo "ERROR: FTPS probe failed against ${FTP_HOST} (TLS handshake, or pubkey pin mismatch -- possible MITM or cert rotation)." >&2
+  echo "Refusing to fall back to plaintext FTP with live credentials." >&2
+  if [ "${BACKUP_ALLOW_PLAINTEXT_FTP:-0}" = "1" ]; then
+    echo "BACKUP_ALLOW_PLAINTEXT_FTP=1 set -- proceeding over unencrypted plain FTP as explicitly requested." >&2
+    PROTO_FLAGS=()
+    if ! "${CURL_BASE[@]}" "${PROTO_FLAGS[@]}" --list-only "ftp://${FTP_HOST}/${REMOTE_ROOT}/" >/dev/null 2>&1; then
+      echo "ERROR: could not connect to ftp://${FTP_HOST}/${REMOTE_ROOT}/ over plain FTP either." >&2
+      exit 1
+    fi
+  else
+    echo "If the pin failure is due to an expected cert rotation, recompute FTP_HOST_PUBKEY_PIN (see comment above)." >&2
+    echo "To explicitly accept the plaintext-FTP risk instead, re-run with BACKUP_ALLOW_PLAINTEXT_FTP=1." >&2
     exit 1
   fi
 fi
@@ -187,6 +206,12 @@ recurse_dir() {
     [ -z "$name" ] && continue
     [ "$name" = "." ] && continue
     [ "$name" = ".." ] && continue
+    case "$name" in
+      */*|*..*)
+        echo "ERROR: suspicious entry name '${name}' in ${remote_dir} (contains '/' or '..') -- skipping, not writing outside the backup root" >&2
+        continue
+        ;;
+    esac
     remote_entry="${remote_dir}${name}"
     if [ "$type_char" = "d" ]; then
       if ! recurse_dir "${remote_entry}/"; then

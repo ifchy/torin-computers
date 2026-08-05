@@ -50,6 +50,18 @@ The good news first, since it matters for the specific risks called out for this
 
 That said, two real security defects were found in the backup script's transport handling (credentials/content can end up transmitted in cleartext, and the "secure" path's TLS verification is more permissive than its own comment claims), a genuine HTML structural bug was found in the shared header/footer scaffolding that affects every one of the 17 pages built on it, and several robustness gaps were found in the backup script's completeness/error handling that could let it report success on a partial or truncated backup — directly undermining the "pre-deploy safety net" purpose of this phase.
 
+## Post-Review Fixes (2026-08-05)
+
+CR-01, CR-02, and WR-02 were addressed directly by the orchestrator after this review, since they are genuine credential/transport-security defects in a script handling live production FTP credentials:
+
+- **CR-01** fixed: the FTPS-probe-fails path now exits non-zero by default instead of silently retrying over plaintext FTP; plaintext fallback requires an explicit `BACKUP_ALLOW_PLAINTEXT_FTP=1` opt-in.
+- **CR-02** fixed: added `--pinnedpubkey` (SHA-256 public-key pin for bell.host.bg's actual certificate, verified live) alongside the existing `-k`. The chain itself is validly Sectigo-signed (not self-signed); `-k` was only needed for the wildcard/vanity-hostname mismatch. The pin now cryptographically rejects any peer not holding the exact matching private key, closing the MITM gap `-k` alone left open. Comment corrected to no longer mischaracterize `-k` as hostname-only.
+- **WR-02** fixed: FTP `LIST` entry names containing `/` or `..` are now rejected before being used to build local backup paths.
+
+Re-ran `scripts/backup-live-site.sh` live against bell.host.bg after the fix: completed successfully, 16/16 pages + 7/7 must-carry files + all 4 directories, ~12MB assets1/ (consistent with the pre-fix baseline) — confirms the fix does not regress the backup's core function.
+
+WR-01, WR-03, WR-04, WR-05, WR-06, and the Info items remain open as documented below (robustness/quality issues, not credential-security defects) — candidates for `/gsd-code-review 01 --fix` or manual follow-up.
+
 ## Critical Issues
 
 ### CR-01: Backup script silently falls back to cleartext FTP, transmitting credentials unencrypted
