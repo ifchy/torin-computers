@@ -46,7 +46,7 @@ Requirements for the redesign launch. Each maps to roadmap phases.
 - [ ] **SEO-01**: Every page has a unique `<title>` and `<meta name="description">` (currently identical/empty across all 16 pages)
 - [ ] **SEO-02**: Every page declares `lang="bg"` instead of the current `lang="en"`
 - [ ] **SEO-03**: Site has a `robots.txt` and `sitemap.xml`, submitted to Search Console
-- [ ] **SEO-04**: All existing page URLs are preserved unchanged through the redesign (no slug/filename changes)
+- [x] **SEO-04**: All existing page URLs are preserved unchanged through the redesign (no slug/filename changes)
 
 ### Migration Safety
 
@@ -105,7 +105,7 @@ Which phases cover which requirements. Populated during roadmap creation.
 | SEO-01 | Phase 3 | Pending |
 | SEO-02 | Phase 2 | Pending |
 | SEO-03 | Phase 4 | Pending |
-| SEO-04 | Phase 1 | Pending |
+| SEO-04 | Phase 1 | Complete |
 | MIGR-01 | Phase 1 | Complete |
 | MIGR-02 | Phase 4 | Pending |
 | MIGR-03 | Phase 1 | Pending |

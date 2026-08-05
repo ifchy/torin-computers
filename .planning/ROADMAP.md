@@ -32,11 +32,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. A pre-deploy backup-and-rollback process is established and proven: a full local backup of the live site exists, git is the source of truth, and the process has been exercised at least once before real content work begins.
   4. The PHP-include foundation (shared `header.php`/`footer.php`/`site-config.php`, `.htaccess` behavior for serving `.html` as PHP) is scaffolded and verified working via local preview against the real host's configuration.
 
-**Plans**: 1/5 plans executed
+**Plans**: 2/5 plans executed
 Plans:
 **Wave 1**
 
-- [ ] 01-01-PLAN.md — Tracer: PHP-include foundation, .htaccess spike + canonicalization, live-verified on bell.host.bg
+- [x] 01-01-PLAN.md — Tracer: PHP-include foundation, .htaccess spike + canonicalization, live-verified on bell.host.bg
 - [x] 01-02-PLAN.md — Full 16-page URL inventory with per-page disposition (GSC-substitute method)
 - [ ] 01-03-PLAN.md — Backup script exercised once + git-based rollback drill
 - [ ] 01-04-PLAN.md — Wire private GitHub remote as off-site backup (checkpoint: repo creation)
@@ -101,7 +101,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Migration Safety Net & Foundation | 1/5 | In Progress|  |
+| 1. Migration Safety Net & Foundation | 2/5 | In Progress|  |
 | 2. Design System & Information Architecture | 0/TBD | Not started | - |
 | 3. Content & Trust-Signal Build-Out | 0/TBD | Not started | - |
 | 4. Hardening & Cutover | 0/TBD | Not started | - |
