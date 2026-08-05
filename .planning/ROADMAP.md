@@ -13,7 +13,7 @@ Torin.bg is being rebuilt in place on its existing FTP/shared host, moving from 
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Migration Safety Net & Foundation** - Lock down URL/ranking continuity and rollback discipline, and prove the PHP-include foundation on the real host, before any rebuild work touches the live site.
+- [x] **Phase 1: Migration Safety Net & Foundation** - Lock down URL/ranking continuity and rollback discipline, and prove the PHP-include foundation on the real host, before any rebuild work touches the live site. (completed 2026-08-05)
 - [ ] **Phase 2: Design System & Information Architecture** - Replace the dated jQuery/parallax theme with a modern, mobile-responsive design organized around the six owner-priority service categories.
 - [ ] **Phase 3: Content & Trust-Signal Build-Out** - Rebuild all sixteen pages with correct SEO metadata and surface the shop's genuine trust signals and differentiators that no competitor has.
 - [ ] **Phase 4: Hardening & Cutover** - Harden the contact path, tighten performance and SEO plumbing, and cut over the live site with verified URL/ranking continuity.
@@ -59,7 +59,24 @@ Plans:
   3. A visitor can reach any part of the site via a flat, shallow navigation structured around the six categories, with no dense mega-menu.
   4. Every page declares `lang="bg"` and all Cyrillic text renders correctly in the new typography.
 
-**Plans**: TBD
+**Plans**: 4 plans
+Plans:
+**Wave 1**
+
+- [ ] 02-01-PLAN.md — Tracer: design system foundation (font, tokens, CSS, shared chrome, dev theme switcher) proven end-to-end on the live homepage
+
+**Wave 2** *(blocked on Wave 1)*
+
+- [ ] 02-02-PLAN.md — Six-category information architecture: categories data file, card grid, catch-all disclosure, self-diagnostic block, CTA
+
+**Wave 3** *(blocked on Wave 2)*
+
+- [ ] 02-03-PLAN.md — Five-item nav with Услуги disclosure, contact-first footer, promoted phone list, LocalBusiness JSON-LD
+
+**Wave 4** *(blocked on Wave 3)*
+
+- [ ] 02-04-PLAN.md — Site-wide rollout: 15-page metadata pass, category page template, full live verification sweep
+
 **UI hint**: yes
 
 ### Phase 3: Content & Trust-Signal Build-Out
@@ -101,7 +118,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Migration Safety Net & Foundation | 5/5 | In Progress|  |
+| 1. Migration Safety Net & Foundation | 5/5 | Complete    | 2026-08-05 |
 | 2. Design System & Information Architecture | 0/TBD | Not started | - |
 | 3. Content & Trust-Signal Build-Out | 0/TBD | Not started | - |
 | 4. Hardening & Cutover | 0/TBD | Not started | - |
