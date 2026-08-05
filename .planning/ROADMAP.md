@@ -32,7 +32,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. A pre-deploy backup-and-rollback process is established and proven: a full local backup of the live site exists, git is the source of truth, and the process has been exercised at least once before real content work begins.
   4. The PHP-include foundation (shared `header.php`/`footer.php`/`site-config.php`, `.htaccess` behavior for serving `.html` as PHP) is scaffolded and verified working via local preview against the real host's configuration.
 
-**Plans**: 4/5 plans executed
+**Plans**: 5/5 plans executed
 Plans:
 **Wave 1**
 
@@ -43,7 +43,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 01-05-PLAN.md — Scaffold + live-verify the remaining 15 page filenames
+- [x] 01-05-PLAN.md — Scaffold + live-verify the remaining 15 page filenames
 
 **UI hint**: no
 
@@ -101,7 +101,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Migration Safety Net & Foundation | 4/5 | In Progress|  |
+| 1. Migration Safety Net & Foundation | 5/5 | In Progress|  |
 | 2. Design System & Information Architecture | 0/TBD | Not started | - |
 | 3. Content & Trust-Signal Build-Out | 0/TBD | Not started | - |
 | 4. Hardening & Cutover | 0/TBD | Not started | - |

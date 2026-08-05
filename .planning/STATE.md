@@ -4,16 +4,16 @@ milestone: v1.0
 milestone_name: milestone
 current_phase: 01
 current_phase_name: migration-safety-net-foundation
-status: executing
-stopped_at: Completed 01-03-PLAN.md
-last_updated: "2026-08-05T06:46:59.970Z"
+status: verifying
+stopped_at: Completed 01-05-PLAN.md
+last_updated: "2026-08-05T06:55:01.656Z"
 last_activity: 2026-08-05
 last_activity_desc: Phase 01 execution started
 progress:
   total_phases: 1
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 5
-  completed_plans: 4
+  completed_plans: 5
 ---
 
 # Project State
@@ -29,10 +29,10 @@ See: .planning/PROJECT.md (updated 2026-08-04)
 
 Phase: 01 (migration-safety-net-foundation) — EXECUTING
 Plan: 5 of 5
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-08-05 — Phase 01 execution started
 
-Progress: [████████░░] 80%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -62,6 +62,7 @@ Progress: [████████░░] 80%
 | Phase 01 P01 | 18min | 2 tasks | 7 files |
 | Phase 01 P4 | 55min | 2 tasks | 1 files |
 | Phase 01 P03 | 20min | 2 tasks | 3 files |
+| Phase 01 P05 | 15min | 2 tasks | 15 files |
 
 ## Accumulated Context
 
@@ -78,6 +79,7 @@ Recent decisions affecting current work:
 - [Phase ?]: FTPS to bell.host.bg uses curl --ftp-ssl -k: TLS handshake succeeds but the shared-hosting wildcard cert (*.superhosting.bg) doesn't match the vanity hostname, so hostname verification is skipped while transport stays encrypted
 - [Phase ?]: 01-04: GitHub off-site backup wired to private repo torin-computers, verified in sync with local main
 - [Phase ?]: MIGR-03: scripts/backup-live-site.sh detects FTP directory-vs-file type from the LIST type column (not name heuristics) and percent-encodes remote paths -- both discovered necessary via live run against bell.host.bg (dotted directory name, spaced filename)
+- [Phase ?]: 01-05: All 16 live page filenames scaffolded and live-verified under public_html/new/ - SEO-04 URL-preservation guarantee proven site-wide, completing Phase 1
 
 ### Pending Todos
 
@@ -104,6 +106,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-05T06:46:59.964Z
-Stopped at: Completed 01-03-PLAN.md
+Last session: 2026-08-05T06:55:01.650Z
+Stopped at: Completed 01-05-PLAN.md
 Resume file: None
