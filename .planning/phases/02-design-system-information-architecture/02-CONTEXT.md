@@ -22,6 +22,7 @@ Delivers structure and system, not finished copy. Where a decision would require
   - **Theme A (logo-derived):** amber `#fbad03` + electric blue `#0547dc` — extracted directly from `site-current/assets1/img/torin-logo.png`
   - **Theme B (business.css-derived):** amber `#ffc70a` + navy `#0e305d` — the current applied theme
   Remaining palette details (neutrals, surfaces, semantic/state colors, contrast ramps) are Claude's discretion.
+- **D-02a:** **Theme B (`#ffc70a` + `#0e305d`) is the default and the theme that ships live** at the Phase 4 cutover. Theme A remains available in the dev switcher as the alternative to compare against. Decided by the user 2026-08-05; resolves OWNER-QUESTIONS #10. Build Theme B first and treat it as the reference implementation — Theme A must not become the one that's better tested.
 - **D-03:** The theme switcher is **dev-only** — scaffolding so the owner/user can compare themes live at `torin.bg/new`. It is removed before the Phase 4 cutover, with the chosen theme hard-baked. It must NOT ship to visitors. — **Reversibility:** reversible — removing a dev-only control is a deletion, no migration.
 - **D-04:** Implement theming via CSS custom properties (design tokens) so the switch is a token swap, not duplicated stylesheets.
 - **D-05:** The current CSS theme is a near-miss on the company's own logo — `business.css` secondary `#0e305d` (dark navy) is NOT the logo's blue (`#0547dc`, electric blue). Recorded so the discrepancy is a deliberate choice, not an accident.
@@ -70,15 +71,31 @@ Delivers structure and system, not finished copy. Where a decision would require
   | 4 · Заляти и повредени дънни платки | Дозапояване на отпоени BGA чипове · Ребоулинг на BGA чипове · Подмяна на чипсет · Сервиз на захранващи вериги |
   | 2 · Матрици, клавиатури, USB, букси, панти | Подмяна на LCD дисплеи и клавиатури · Подмяна на лампа на матрица · Подмяна/ремонт на подсветка · Подмяна на USB, HDMI, аудио жакове · Подмяна на захранващ жак |
   | 3 · Оптимизация | Безплатни съвети за бързодействие · Профилактика (cross-listed) |
-  | 5 · Смяна на вентилатори | Смяна на вентилатор · Профилактика (cross-listed) |
-  | 1 · Ремонт на счупвания | *pending owner clarification — see D-27* |
-  | 6 · Нестандартно ел. оборудване | *no existing content* |
+  | 5 · Прегряване и охлаждане | Смяна на вентилатор · Профилактика (cross-listed) |
+  | 1 · Счупвания и механични повреди | Счупени панти *(moved from cat 2, D-41)* · корпус/шаси damage — largely new content |
+  | 6 · Нестандартна техника | *no existing content* |
   | Folded catch-all | Регенерация на батерии · Подмяна на кабел на адаптори |
   | Not a service | Безплатна диагностика → trust signal (D-15) |
 
-- **D-27:** **Categories 1 and 2 overlap materially.** "Ремонт на счупвания" and "Смяна на матрици, клавиатури, USB портове, захранващи букси, панти" describe the same jobs from different angles — a cracked screen is both. As written, category 1 has no services that are not already in category 2. Resolution deferred to the owner (OWNER-QUESTIONS #17); **working assumption until answered: category 1 = physical/impact damage (паднал, счупен корпус, счупени панти, изкривено шаси), category 2 = component replacement regardless of cause.**
+- **D-27:** **Categories 1 and 2 overlap materially.** "Ремонт на счупвания" and "Смяна на матрици, клавиатури, USB портове, захранващи букси, панти" describe the same jobs from different angles — a cracked screen is both. As written, category 1 has no services that are not already in category 2. **Resolved by the split in D-40** (user delegated the naming call 2026-08-05); OWNER-QUESTIONS #17 stays open as a *confirmation*, not a blocker.
 - **D-28:** **Профилактика is cross-listed** under both category 3 and category 5, as a **link to the single existing page** `profilaktika-laptop.html` — never as duplicated page content. One URL, one canonical, no duplicate-content exposure; internal links from two topical contexts are mildly beneficial. This also resolves category 5's thinness (it would otherwise hold exactly one service).
-- **D-29:** Owner question raised (OWNER-QUESTIONS #19): category 5 is both **thin and named as a solution rather than a problem** — customers experience «прегрява»/«шуми»/«изключва се сам», not «нужна ми е смяна на вентилатор». Proposed option for owner: rename to something symptom-led such as «Прегряване и охлаждане», which absorbs профилактика naturally and closes the recognition gap.
+- **D-29:** Category 5 was both **thin and named as a solution rather than a problem** — customers experience «прегрява»/«шуми»/«изключва се сам», not «нужна ми е смяна на вентилатор». **Resolved by the rename in D-40.**
+
+### Category Naming
+
+- **D-40:** Category names are set as follows (user delegated this call to Claude, 2026-08-05). The **symptom line under each card (D-10) carries the recognition load**, so names stay close to the owner's original intent rather than being rewritten into symptom phrases — except where a rename also fixes a structural problem.
+
+  | # | Name | Change from owner's original | Why |
+  |---|---|---|---|
+  | 1 | **Счупвания и механични повреди** | tightened; now owns impact damage only | Makes the D-27 split legible and matches the existing `mehanichni-problemi.html` page it maps to |
+  | 2 | **Екран, клавиатура и портове** | shortened from 66 chars | The original is unusable as a card title; covers матрици, клавиатури, USB, букси |
+  | 3 | **Оптимизация** | unchanged | Already short and clear; the symptom line handles «бавен е» |
+  | 4 | **Заливане и ремонт на дънни платки** | lightly tightened | Keeps «заливане» — the one word customers actually use — while naming the specialism |
+  | 5 | **Прегряване и охлаждане** | **renamed from «Смяна на вентилатори»** | Fixes two problems at once: customers recognise the symptom, and it naturally absorbs профилактика so the category is no longer thin |
+  | 6 | **Нестандартна техника** | shortened | Content still undefined (OWNER-QUESTIONS #3); a broad name keeps options open |
+
+- **D-41:** **Панти (hinges) move from category 2 to category 1**, following the D-27 physical-damage split. This is a **deviation from the owner's original grouping**, which listed панти under category 2. Flag it at the next owner review (OWNER-QUESTIONS #17) — it is a deliberate consequence of the split, not an oversight.
+- **D-42:** These names are the working set for Phase 2 structure and Phase 3 content. They are **not** URL slugs — the three new page filenames remain Claude's discretion under the transliterated-Latin convention, and the three existing pages keep their locked filenames regardless of what the category is called on screen.
 
 ### Hero
 

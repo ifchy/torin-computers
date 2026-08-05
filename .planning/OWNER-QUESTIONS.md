@@ -110,16 +110,16 @@
 ---
 
 ### 10. Which theme goes live?
-**Status:** OPEN
+**Status:** ANSWERED (2026-08-05, by the developer — worth confirming with the owner at review)
 **Question:** Two themes will be built and switchable at `torin.bg/new` during development:
 - **Theme A — logo colours:** amber `#fbad03` + electric blue `#0547dc`
 - **Theme B — current site colours:** amber `#ffc70a` + navy `#0e305d`
 
 Which should ship?
 **Why it matters:** The switcher is development-only and gets removed at cutover with one theme hard-baked.
-**Blocks:** Phase 4 cutover
+**Blocks:** ~~Phase 4 cutover~~ — resolved
 **Raised:** Phase 2 discussion
-**Answer:**
+**Answer:** **Theme B** (`#ffc70a` + `#0e305d`) is the default and ships live. Theme A stays in the dev switcher as the comparison option. Still worth showing the owner both at `torin.bg/new` before cutover, since it's their brand.
 
 ---
 
@@ -155,23 +155,42 @@ Which should ship?
 
 ---
 
-### 17. Categories 1 and 2 overlap — what was meant to be separate?
-**Status:** OPEN
-**Question:** "Ремонт на счупвания" and "Смяна на матрици, клавиатури, USB портове, захранващи букси, панти" describe overlapping work — a cracked screen is both a счупване and a смяна на матрица. What distinction was intended?
-**Working assumption until answered:** Category 1 = physical/impact damage (паднал, счупен корпус, счупени панти, изкривено шаси); Category 2 = component replacement regardless of cause.
-**Why it matters:** As written, category 1 has no services that aren't already in category 2 — it would launch with nothing of its own.
-**Blocks:** Phase 3 content structure
+### 17. Categories 1 and 2 overlap — confirm the split and the new names
+**Status:** DECIDED — needs confirmation, not blocking
+**Question:** "Ремонт на счупвания" and "Смяна на матрици, клавиатури, USB портове, захранващи букси, панти" describe overlapping work — a cracked screen is both a счупване and a смяна на матрица. As originally written, category 1 had no services that weren't already in category 2.
+
+**Decision taken (developer delegated this to Claude, 2026-08-05):**
+- **Category 1 → «Счупвания и механични повреди»** — owns physical/impact damage: паднал лаптоп, счупен корпус, изкривено шаси, **счупени панти**
+- **Category 2 → «Екран, клавиатура и портове»** — owns component replacement regardless of cause: матрици, клавиатури, USB/HDMI/аудио жакове, захранващи букси
+
+**⚠ One thing to flag to the owner:** **панти (hinges) moved from category 2 to category 1.** The owner's original list put them under category 2, but under a physical-damage split they belong with breakage. Deliberate, not an oversight — worth a sentence at review.
+
+**Why it matters:** Determines what content each of the two pages carries.
+**Blocks:** Nothing — Phase 3 can proceed on this split
 **Raised:** Phase 2 discussion
 **Answer:**
 
 ---
 
-### 19. Category 5 is thin, and named as a solution rather than a problem
-**Status:** OPEN
-**Question:** "Смяна на вентилатори" describes the *fix*, but customers only know the *symptom* — «прегрява», «шуми», «изключва се сам». They may not recognise the category as theirs. It's also the thinnest of the six, holding essentially one service.
-**Proposed option:** Rename to something symptom-led such as **«Прегряване и охлаждане»**, which customers would recognise immediately *and* which naturally absorbs профилактика (dust cleaning, thermal paste), fixing the thinness at the same time. Is that acceptable, or is there a reason to keep the fan-replacement framing?
-**Why it matters:** Same recognition gap applies in milder form to categories 4 and 6 — worth checking the naming of all six while this is open.
-**Blocks:** Phase 3 content structure
+### 19. Category 5 renamed — confirm
+**Status:** DECIDED — needs confirmation, not blocking
+**Question:** "Смяна на вентилатори" describes the *fix*, but customers only know the *symptom* — «прегрява», «шуми», «изключва се сам». They may not recognise the category as theirs. It was also the thinnest of the six, holding essentially one service.
+
+**Decision taken (developer delegated this to Claude, 2026-08-05):** renamed to **«Прегряване и охлаждане»**. Customers recognise the symptom immediately, and it naturally absorbs профилактика (dust cleaning, thermal paste), so the category is no longer thin.
+
+**Is there a reason to keep the fan-replacement framing?** Worth one question at review.
+
+**Full naming set now in use:**
+| # | Name |
+|---|---|
+| 1 | Счупвания и механични повреди |
+| 2 | Екран, клавиатура и портове |
+| 3 | Оптимизация |
+| 4 | Заливане и ремонт на дънни платки |
+| 5 | Прегряване и охлаждане |
+| 6 | Нестандартна техника |
+
+**Blocks:** Nothing
 **Raised:** Phase 2 discussion
 **Answer:**
 

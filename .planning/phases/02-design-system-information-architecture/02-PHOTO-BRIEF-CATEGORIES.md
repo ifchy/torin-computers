@@ -36,8 +36,8 @@ There is no deadline. Collect these as they naturally occur during work — a ph
 
 ## The six shots
 
-### 1 · Ремонт на счупвания
-*(working assumption: physical/impact damage — pending owner clarification, see OWNER-QUESTIONS #17)*
+### 1 · Счупвания и механични повреди
+*(physical/impact damage, including hinges — see OWNER-QUESTIONS #17)*
 
 **What it should show:** Visible physical damage being addressed — a cracked case, a broken hinge, a bent chassis. The damage should be legible at a glance in a small thumbnail.
 
@@ -47,7 +47,7 @@ There is no deadline. Collect these as they naturally occur during work — a ph
 
 ---
 
-### 2 · Смяна на матрици, клавиатури, USB портове, захранващи букси, панти
+### 2 · Екран, клавиатура и портове
 
 **What it should show:** A component mid-replacement — the moment of swapping, not the finished result.
 
@@ -70,7 +70,7 @@ There is no deadline. Collect these as they naturally occur during work — a ph
 
 ---
 
-### 4 · Заляти и повредени дънни платки
+### 4 · Заливане и ремонт на дънни платки
 *This is your BGA/chip-level expertise (DIFF-03) — the most technically impressive category. Worth the most effort.*
 
 **What it should show:** Board-level work under magnification. This is what separates you from shops that only swap parts.
@@ -87,8 +87,8 @@ There is no deadline. Collect these as they naturally occur during work — a ph
 
 ---
 
-### 5 · Смяна на вентилатори
-*(possible rename to «Прегряване и охлаждане» — see OWNER-QUESTIONS #19; if renamed, this shot should lean toward cooling/dust rather than the fan part alone)*
+### 5 · Прегряване и охлаждане
+*(renamed from «Смяна на вентилатори» — this category now covers cooling broadly, including профилактика, so lean toward dust/thermal work rather than the fan part alone)*
 
 **What it should show:** Cooling work — ideally the dramatic version.
 
@@ -100,7 +100,7 @@ There is no deadline. Collect these as they naturally occur during work — a ph
 
 ---
 
-### 6 · Сервиз на нестандартно ел. оборудване
+### 6 · Нестандартна техника
 *Content for this category is still undefined — see OWNER-QUESTIONS #3. Once the owner clarifies what it covers, this brief should be updated with a specific shot.*
 
 **What it should show:** Whatever the least-expected device you've repaired is. The whole point of this category is "we fix things other shops turn away," so the photo should make someone think *"I didn't know anyone could fix that."*
