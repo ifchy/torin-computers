@@ -18,3 +18,38 @@ RewriteRule ^(.*)$ https://torin.bg/new/$1 [R=301,L]
 </IfModule>
 
 AddHandler application/x-httpd-php52 .html .htm
+
+# ── Phase 2 (plan 02-01): compression + caching spike (DESIGN-02, RESEARCH N-6) ──
+# Verified live 2026-08-05: this host returns NO Content-Encoding and NO
+# Cache-Control/Expires on any asset, so every CSS/font byte is raw wire cost and
+# the 20 KB CSS budget is currently a hard limit rather than a target.
+# mod_deflate and mod_expires availability on bell.host.bg is UNVERIFIED. Each
+# block below is therefore individually module-guarded: an unguarded directive for
+# an absent module returns 500 for the entire /new/ subtree (T-02-02), which would
+# take down every page here at once.
+
+# Serve woff2 with its registered media type. Some budget shared hosts still map
+# .woff2 to application/octet-stream, which suppresses compression negotiation and
+# can confuse `as="font"` preload matching (D-06a's two self-hosted subsets).
+<IfModule mod_mime.c>
+	AddType font/woff2 .woff2
+</IfModule>
+
+<IfModule mod_deflate.c>
+	AddOutputFilterByType DEFLATE text/html text/plain text/css text/xml
+	AddOutputFilterByType DEFLATE application/javascript application/x-javascript
+	AddOutputFilterByType DEFLATE application/json image/svg+xml
+	# woff2 is already Brotli-compressed internally — re-deflating it wastes CPU
+	# for no byte saving, so it is deliberately absent from the list above.
+</IfModule>
+
+<IfModule mod_expires.c>
+	ExpiresActive On
+	# HTML must stay uncached while /new/ is a live staging preview being reviewed;
+	# tuning for the real cutover is Phase 4's job (DESIGN-02).
+	ExpiresByType text/html "access plus 0 seconds"
+	ExpiresByType text/css "access plus 7 days"
+	ExpiresByType font/woff2 "access plus 1 year"
+	ExpiresByType image/png "access plus 30 days"
+	ExpiresByType image/svg+xml "access plus 30 days"
+</IfModule>

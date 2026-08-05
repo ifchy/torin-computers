@@ -1,7 +1,28 @@
-<?php require_once(dirname(__FILE__) . '/includes/header.php'); ?>
+<?php
+// Per-page metadata (02-RESEARCH N-5 mechanism). SEO-01 copy is Phase 3.
+$torin_title = 'ТОРИН КОМПЮТЪРС - ТОТАЛЕН РЕМОНТ НА ЛАПТОПИ';
+$torin_desc  = 'Ремонт на лаптопи и компютри в София — счупвания, екран и клавиатура, оптимизация, заливане и дънни платки, прегряване, нестандартна техника. Безплатна диагностика.';
+require_once(dirname(__FILE__) . '/includes/header.php');
+?>
 
-<main class="container py-5">
-	<p>Строим новия сайт на ТОРИН КОМПЮТЪРС тук. Тази страница е временен скелет, използван за да докаже, че PHP-include основата работи на живия хостинг.</p>
+<main>
+	<section class="hero">
+		<div class="container">
+			<div class="hero__inner">
+				<h1>Ремонт на лаптопи и компютри в София</h1>
+
+				<div class="cta-block__actions">
+					<a class="btn btn--primary" href="tel:+35929549710">Обадете се сега</a>
+					<?php // [ASSUMED] Which of the three shop numbers is reachable on Viber is
+					      // an open owner question (02-UI-SPEC C-9). This href uses the main
+					      // line until the owner confirms it. ?>
+					<a class="btn btn--primary" href="viber://chat?number=%2B35929549710">Пишете във Viber</a>
+				</div>
+
+				<p class="trust-badge">Безплатна диагностика</p>
+			</div>
+		</div>
+	</section>
 </main>
 
 <?php require_once(dirname(__FILE__) . '/includes/footer.php'); ?>

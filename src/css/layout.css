@@ -1,0 +1,85 @@
+/* ==========================================================================
+   layout.css — container, section rhythm, eyebrow rule, header/footer shells.
+   Phase 2, plan 02-01. Linked SECOND: base.css -> layout.css -> components.css.
+   Exactly two breakpoints, both min-width: 35rem (560px) and 56.25rem (900px)
+   (02-UI-SPEC §Layout & Breakpoints). No container queries, no horizontal-
+   scroll escape hatches, no fixed pixel width of 300 or more.
+   ========================================================================== */
+
+/* --- Container */
+.container {
+	width: 100%;
+	max-width: var(--container);
+	margin-inline: auto;
+	padding-inline: var(--gutter);
+}
+
+/* --- Section rhythm */
+.section {
+	padding-block: var(--section-y);
+}
+
+.section--tint {
+	background: var(--c-surface-2);
+}
+
+/* --- Eyebrow: a 3px x 40px amber rule above an h2. Amber is a SURFACE here,
+       drawn as a filled block rather than a border, never a text colour. ---- */
+.eyebrow {
+	display: block;
+	width: 40px;
+	height: 3px;
+	margin-block-end: var(--sp-md);
+	background: var(--c-brand);
+	border-radius: var(--r-sm);
+}
+
+/* --- Site header shell */
+.site-header {
+	background: var(--c-page);
+	border-block-end: 1px solid var(--c-border);
+}
+
+.site-header__inner {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--sp-md);
+	min-height: 56px;
+	padding-block: var(--sp-sm);
+}
+
+.site-header__logo {
+	display: block;
+	width: auto;
+	height: 40px;   /* UI-SPEC C-9 defers the logo redraw; cap the 150x80 PNG */
+}
+
+/* --- Site footer shell */
+.site-footer {
+	/* 3px amber top keyline drawn as an inset shadow, not a border: amber may
+	   never appear in a `border` declaration anywhere in this system. */
+	box-shadow: inset 0 3px 0 var(--c-brand);
+	background: var(--c-ink-deepest);
+	color: var(--c-on-dark);
+	padding-block: var(--sp-2xl) var(--sp-xl);
+}
+
+.site-footer__legal {
+	max-width: none;
+	color: var(--c-on-dark-muted);
+}
+
+/* --- Breakpoint 1 — 35rem / 560px */
+@media (min-width: 35rem) {
+	.site-header__inner {
+		min-height: 64px;
+	}
+}
+
+/* --- Breakpoint 2 — 56.25rem / 900px */
+@media (min-width: 56.25rem) {
+	.site-footer {
+		padding-block: var(--sp-3xl) var(--sp-2xl);
+	}
+}
