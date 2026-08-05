@@ -59,6 +59,138 @@ require_once(dirname(__FILE__) . '/includes/header.php');
 			</div>
 		</div>
 	</section>
+
+	<?php
+	// The symptom-organised catch-all (D-11). This exists for the visitor whose
+	// problem does not match one of the six cards — above all for symptoms like
+	// «не се включва», which legitimately map to several categories at once and
+	// therefore cannot be filed under any single card.
+	//
+	// Native <details>, zero JavaScript. Every body below is real HTML in the
+	// served response: never injected, never fetched on open, never hidden by a
+	// rule of ours (the element owns its own state). That is D-11's actual
+	// requirement, and it is what makes the content indexable.
+	//
+	// ⚠ CARRIED FORWARD, NOT PRICED (D-13 / OWNER-QUESTIONS #9): battery
+	// regeneration is DIFF-02, a differentiator no competitor offers, and it
+	// sits in a folded section. 02-RESEARCH §3c adds a cost the original
+	// trade-off did not account for — collapsed content is reliably indexed but
+	// practitioner evidence suggests it is weighted lower for ranking. Phase 3
+	// must treat DIFF-02 as knowingly unmet, not silently passing.
+	//
+	// Category names in these bodies are read from the data file, never retyped,
+	// so a D-40 rename cannot leave a stale name behind here.
+	$torin_cat_by_id = array();
+	foreach ($torin_categories as $cat) {
+		$torin_cat_by_id[$cat['id']] = $cat;
+	}
+	?>
+	<section class="section catch-all" aria-labelledby="ne-otkrivate-h">
+		<div class="container">
+			<span class="eyebrow" aria-hidden="true"></span>
+			<h2 id="ne-otkrivate-h">Не откривате проблема си?</h2>
+			<p class="catch-all__lede">Опишете какво прави лаптопът — ще намерим къде се вписва. Обадете се, диагностиката е безплатна.</p>
+
+			<details class="disc" id="sym-ne-se-vklyuchva" name="symptoms">
+				<summary><span class="disc__row">Не се включва / няма реакция <?php echo torin_icon('chevron-down'); ?></span></summary>
+				<div class="disc__body">
+					<p>Един и същ симптом, няколко възможни причини — от механична повреда след падане, през залята или повредена дънна платка, до прегряване. Проверяваме и трите, преди да дадем оценка.</p>
+					<ul class="disc__links">
+<?php foreach (array('kat-1', 'kat-4', 'kat-5') as $torin_ref) { ?>
+						<li><a href="#<?php echo htmlspecialchars($torin_ref, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($torin_cat_by_id[$torin_ref]['name'], ENT_QUOTES, 'UTF-8'); ?></a></li>
+<?php } ?>
+					</ul>
+				</div>
+			</details>
+
+			<details class="disc" id="sym-bateriya" name="symptoms">
+				<summary><span class="disc__row">Батерията не държи <?php echo torin_icon('chevron-down'); ?></span></summary>
+				<div class="disc__body">
+					<p>Регенерираме батерии — възстановяваме капацитета на клетките, вместо да сменяме цялата батерия. Това е услуга, която малко сервизи в София предлагат.</p>
+					<ul class="disc__links">
+						<li><a href="za-bateriite.html">За батериите и регенерацията</a></li>
+					</ul>
+				</div>
+			</details>
+
+			<details class="disc" id="sym-zahranvane" name="symptoms">
+				<summary><span class="disc__row">Проблем със захранването или адаптера <?php echo torin_icon('chevron-down'); ?></span></summary>
+				<div class="disc__body">
+					<p>Сменяме кабела на адаптера, ремонтираме захранващи вериги и букси. Не изхвърляйте адаптера, преди да сме го погледнали — често се поправя.</p>
+					<ul class="disc__links">
+						<li><a href="tokov-udar.html">Токов удар и захранване</a></li>
+					</ul>
+				</div>
+			</details>
+
+			<details class="disc" id="sym-profilaktika" name="symptoms">
+				<summary><span class="disc__row">Профилактика и поддръжка <?php echo torin_icon('chevron-down'); ?></span></summary>
+				<div class="disc__body">
+					<p>Почистване от прах, смяна на термопаста и профилактика. Работи и като предпазна мярка — най-евтиният ремонт е този, който не се е наложил.</p>
+					<?php // D-28: профилактика is cross-listed from two topical contexts as
+					      // LINKS to the one existing page, never as duplicated content. ?>
+					<ul class="disc__links">
+						<li><a href="profilaktika-laptop.html">Профилактика на лаптоп</a></li>
+<?php foreach (array('kat-3', 'kat-5') as $torin_ref) { ?>
+						<li><a href="#<?php echo htmlspecialchars($torin_ref, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($torin_cat_by_id[$torin_ref]['name'], ENT_QUOTES, 'UTF-8'); ?></a></li>
+<?php } ?>
+					</ul>
+				</div>
+			</details>
+		</div>
+	</section>
+
+	<?php // The self-diagnostic tool gets its own homepage block rather than
+	      // being reachable only from the navigation (D-12, DIFF-01). This is
+	      // the one place the informal ти-form survives, because «Тествай сам»
+	      // is the established, locked nav label (D-18). ?>
+	<section class="section section--tint selftest">
+		<div class="container">
+			<span class="eyebrow" aria-hidden="true"></span>
+			<h2>Тествай сам своя лаптоп</h2>
+			<p>Кратък тест, който помага да опишете проблема по-точно, преди да се обадите. Отнема няколко минути.</p>
+			<a class="btn btn--secondary selftest__cta" href="test-laptop.html">Тествай сам лаптопа си</a>
+		</div>
+	</section>
+
+	<?php // Repeated call-and-chat CTA (D-16): two equal-weight primary actions,
+	      // reachable without scrolling back to the hero. The id is the target
+	      // the nav's Контакти item points at in plan 02-03. ?>
+	<section class="section" id="contact-us">
+		<div class="container">
+			<span class="eyebrow" aria-hidden="true"></span>
+			<h2>Свържете се с нас</h2>
+
+			<div class="cta-block">
+				<div class="cta-block__actions">
+					<a class="btn btn--primary" href="tel:+35929549710"><?php echo torin_icon('phone'); ?>Обадете се</a>
+					<?php // [ASSUMED] Which of the three shop numbers is reachable on
+					      // Viber is an open owner question (02-UI-SPEC C-9); this uses
+					      // the main line until the owner confirms. Phase 4 / CONTACT-02
+					      // replaces it. The value is a literal, never assembled from a
+					      // request value (T-02-09). ?>
+					<a class="btn btn--primary" href="viber://chat?number=%2B35929549710"><?php echo torin_icon('chat'); ?>Пишете във Viber</a>
+				</div>
+				<p class="cta-block__note">Безплатна диагностика · Отговаряме в работно време</p>
+				<?php // OPTIONAL, pending OWNER-QUESTIONS #2 (should the form exist at
+				      // all?). Deliberately a SIBLING of the actions row, never a flex
+				      // child of it, and no stylesheet rule references it from a
+				      // parent's layout — so deleting this node is a subtraction, not a
+				      // redesign (D-17). Phase 4 / CONTACT-03 fills or removes it. ?>
+				<div class="cta-block__form"></div>
+			</div>
+		</div>
+	</section>
 </main>
+
+<?php // Sticky mobile call bar. Below 56.25rem the two conversion actions stay
+      // reachable from anywhere on the page; hidden at and above it, where the
+      // CTA block is already in reach. The header is deliberately NOT sticky —
+      // it would eat 56px of mobile viewport and fight D-30's above-the-fold
+      // arithmetic directly, while carrying no conversion action. ?>
+<div class="callbar">
+	<a class="btn btn--primary" href="tel:+35929549710"><?php echo torin_icon('phone'); ?>Обадете се</a>
+	<a class="btn btn--primary" href="viber://chat?number=%2B35929549710"><?php echo torin_icon('chat'); ?>Пишете във Viber</a>
+</div>
 
 <?php require_once(dirname(__FILE__) . '/includes/footer.php'); ?>

@@ -219,6 +219,141 @@
 	line-height: 1.4;
 }
 
+/* --- Folded catch-all «Не откривате проблема си?» (D-11) ----------------
+   Native <details>, zero JavaScript, and nothing here may hide a body: the
+   element manages its own state, and the content has to stay in the served
+   response to index. Open/close is deliberately NOT animated — animating the
+   height needs a pseudo-element that is enhancement-only, and the instant
+   toggle is the contract.                                                  */
+.catch-all__lede {
+	margin-block-start: var(--sp-md);
+	color: var(--c-ink-muted);
+}
+
+.disc {
+	margin-block-start: var(--sp-sm);
+	border: 1px solid var(--c-border);
+	border-radius: var(--r-lg);
+	background: var(--c-surface-2);
+}
+
+/* display stays BLOCK. The flex row lives on the inner .disc__row instead:
+   setting flex directly on the summary has a history of breaking disclosure
+   behaviour in WebKit, and the inner-wrapper form avoids that whole bug
+   class. The focus ring is never suppressed here.                          */
+.disc > summary {
+	display: block;
+	min-height: 44px;
+	padding: var(--sp-md);
+	color: var(--c-ink-deep);
+	font-size: var(--fs-title);
+	font-weight: var(--fw-bold);
+	line-height: 1.25;
+	list-style: none;
+	cursor: pointer;
+}
+
+.disc > summary::-webkit-details-marker {
+	display: none;
+}
+
+.disc__row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--sp-md);
+}
+
+.disc__row svg {
+	flex: none;
+	width: 1.25em;
+	height: 1.25em;
+	transition: transform var(--dur-fast) var(--ease);
+}
+
+.disc[open] > summary .disc__row svg {
+	transform: rotate(180deg);
+}
+
+.disc__body {
+	padding: 0 var(--sp-lg) var(--sp-lg);
+}
+
+.disc__body p {
+	color: var(--c-ink-muted);
+}
+
+.disc__links {
+	display: grid;
+	gap: var(--sp-sm);
+	margin-block-start: var(--sp-md);
+	list-style: none;
+}
+
+.disc__links a {
+	display: inline-flex;
+	align-items: center;
+	min-height: 44px;
+	font-weight: var(--fw-bold);
+}
+
+/* --- Self-diagnostic feature block (D-12, DIFF-01) */
+.selftest p {
+	margin-block-start: var(--sp-md);
+	color: var(--c-ink-muted);
+}
+
+.selftest__cta {
+	margin-block-start: var(--sp-lg);
+}
+
+/* --- Repeated CTA block (D-16, D-17) ------------------------------------
+   .cta-block__form is a SIBLING of the actions row and is referenced by no
+   rule in this stylesheet — not by a positional selector, not by a grid area,
+   not by a margin reset on a last child. Deleting the node must stay a
+   subtraction rather than a redesign, and that is only true while nothing
+   here depends on its presence or its position.                            */
+.cta-block {
+	margin-block-start: var(--sp-lg);
+}
+
+.cta-block__note {
+	margin-block-start: var(--sp-md);
+	color: var(--c-ink-muted);
+}
+
+/* --- Sticky mobile call bar (component 6) -------------------------------
+   Carries the two conversion actions below the desktop breakpoint, which is
+   what pays for the header NOT being sticky. The amber top keyline is drawn
+   as an inset shadow, never a border — amber may not appear in a border
+   declaration anywhere in this system.                                     */
+.callbar {
+	position: fixed;
+	inset-inline: 0;
+	bottom: 0;
+	z-index: 40;
+	display: flex;
+	height: 56px;
+	box-shadow: inset 0 3px 0 var(--c-brand);
+	background: var(--c-ink-deepest);
+}
+
+.callbar .btn {
+	flex: 1 1 50%;
+	/* The label «Пишете във Viber» measures ~141px of Sofia Sans at
+	   --fs-body/700; at 360px each half is 180px, so the button's normal
+	   --sp-lg side padding (48px total) would overflow it. */
+	min-width: 0;
+	padding: 0 var(--sp-sm);
+	border-radius: 0;
+}
+
+/* The bar overlays the page bottom, so reserve its height or it occludes the
+   last section and the footer. Removed at the breakpoint that hides it. */
+body {
+	padding-block-end: 3.5rem;
+}
+
 /* --- Dev-only theme switcher (D-03) -------------------------------------
    Pinned bottom-right, away from the hero CTA buttons, which sit top-centre
    and wrap to two rows at 360px. Deleted at the Phase 4 cutover along with
@@ -283,5 +418,19 @@
 
 	.cat-card__body {
 		padding: var(--sp-lg);
+	}
+}
+
+/* --- Breakpoint 2 — 56.25rem / 900px ------------------------------------
+   The call bar exists to keep the two conversion actions in reach on a small
+   screen. At desktop width the CTA block is already reachable, so the bar is
+   removed and the reserved bottom padding with it.                         */
+@media (min-width: 56.25rem) {
+	.callbar {
+		display: none;
+	}
+
+	body {
+		padding-block-end: 0;
 	}
 }
