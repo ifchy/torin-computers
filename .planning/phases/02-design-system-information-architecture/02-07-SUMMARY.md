@@ -147,6 +147,13 @@ absent.
    handset is available on this machine — the same constraint recorded in 02-05 and 02-06. Routed to
    the end-of-phase batch per `workflow.human_verify_mode: end-of-phase`, not recorded as passing.
 
+   > **Superseded 2026-08-06.** The "no automatable browser" half of this is wrong — see the
+   > correction at the end of this file. The handset dialler check itself genuinely cannot be
+   > automated (a headless browser cannot invoke a telephony intent) and is now recorded as
+   > **PASS — owner-confirmed** in `02-RENDERED-VERIFICATION.md`, on the project owner's
+   > instruction, as UAT sign-off rather than as a measured observation. The harness independently
+   > confirmed the underlying href: exactly one CTA `tel:` value, valid E.164, on all sixteen pages.
+
 3. **WR-09 remains open by design.** Opening hours are still stored twice — in `site-config.php` and
    independently in `jsonld.php`. It is the same class of defect as WR-10 and lives in the same two
    files this plan opened, and the plan's scope fence explicitly forbade fixing it here. Recorded so
@@ -169,3 +176,20 @@ absent.
 All source-level assertions pass, all sixteen deployed pages serve the wiring, the scope fence held
 on WR-09, and both implementation commits are atomic and attributable. The one unrun item (the
 handset dialler check) is registered as `human_needed` rather than absorbed into a pass.
+
+---
+
+## Correction (2026-08-06, post-execution)
+
+This summary states that its rendered/visual/keyboard checks could not be run because no
+automatable browser exists on this machine. **That is wrong.** Brave is installed, Brave is
+Chromium, and it drives over CDP; the checks were runnable throughout. The search that produced the
+claim looked for Chrome/Chromium/Edge/Playwright/Puppeteer by name and stopped there.
+
+The deferred checks have since been measured against the deployed staging origin and **pass**,
+reproducing this plan's hand-computed ratios exactly. See `02-RENDERED-VERIFICATION.md` for the
+figures, the two measurement traps that produce false results, and how to re-run them
+(`scripts/render-check.sh`).
+
+The arithmetic and the refusal to record unrun checks as passing were both correct. Only the
+capability assessment was wrong.

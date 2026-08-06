@@ -556,3 +556,20 @@ None — `user_setup: []` in the plan frontmatter, and nothing in this plan requ
 ---
 *Phase: 02-design-system-information-architecture*
 *Completed: 2026-08-06*
+
+---
+
+## Correction (2026-08-06, post-execution)
+
+This summary states that its rendered/visual/keyboard checks could not be run because no
+automatable browser exists on this machine. **That is wrong.** Brave is installed, Brave is
+Chromium, and it drives over CDP; the checks were runnable throughout. The search that produced the
+claim looked for Chrome/Chromium/Edge/Playwright/Puppeteer by name and stopped there.
+
+The deferred checks have since been measured against the deployed staging origin and **pass**,
+reproducing this plan's hand-computed ratios exactly. See `02-RENDERED-VERIFICATION.md` for the
+figures, the two measurement traps that produce false results, and how to re-run them
+(`scripts/render-check.sh`).
+
+The arithmetic and the refusal to record unrun checks as passing were both correct. Only the
+capability assessment was wrong.
