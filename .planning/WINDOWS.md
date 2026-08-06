@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 7
+open_count: 11
 waived_count: 0
 fixed_count: 0
-total_count: 7
-last_updated: 2026-08-06T13:58:23.302Z
+total_count: 11
+last_updated: 2026-08-06T14:09:24.636Z
 ---
 
 # Broken Windows Ledger
@@ -22,6 +22,10 @@ last_updated: 2026-08-06T13:58:23.302Z
 | 5 | 02 | unrun-verify | src/css/components.css |  | Hero stack height at 360x640 not re-measured after the CR-01 badge-margin fix: no Chrome/Chromium/Playwright on the build machine and Safari remote automation is disabled, so the comment records 241.6px as DERIVED (249.6 minus the 8px margin delta), not measured | open |  | 2026-08-06T13:58:23.175Z |  |
 | 6 | 02 | unrun-verify | src/css/base.css |  | Keyboard focus-ring human-check (six dark-surface CTAs, both themes, plus the light-surface CTA staying navy) not observed in a browser — ratios are computed, the rendered ring is not yet seen | open |  | 2026-08-06T13:58:23.244Z |  |
 | 7 | 02 | unrun-verify | src/css/components.css |  | FOUT/web-font-swap backstop re-opened by 02-05: the hero stack changed by 8px, so the Sofia Sans fallback-reflow check against hero CTA displacement on a throttled connection is unclosed, not inherited | open |  | 2026-08-06T13:58:23.302Z |  |
+| 8 | 02 | unrun-verify | src/css/no-js.css |  | No-script rendered nav human-check unrun: five top-level items + six category links visible/activatable at 360/900/1440px, and neither disclosure control visible or Tab-reachable. No automatable browser on the build machine. | open |  | 2026-08-06T14:09:24.452Z |  |
+| 9 | 02 | unrun-verify | src/css/no-js.css |  | UI-SPEC 'overflow' backstop RE-OPENED by 02-06's desktop no-script layout: scrollWidth <= innerWidth with scripting disabled at 900px and 1440px is unmeasured. Abstains to human_needed; must not be recorded as passing. | open |  | 2026-08-06T14:09:24.518Z |  |
+| 10 | 02 | deviation | src/css/no-js.css |  | Residual, not closed by 02-06: scripting ENABLED but site.js failing to load/throw leaves the nav hidden below 56.25rem. Closing it needs a scripting-capability marker written before first paint, which the project deliberately does not have. | open |  | 2026-08-06T14:09:24.578Z |  |
+| 11 | 02 | deviation | src/css/no-js.css |  | 02-06 desktop no-script row shape: 'flex: 1 0 100%' on .nav__item--has-sub (plan-mandated, grep-asserted) splits the four visible top-level links across two wrapped rows rather than one, because the has-sub item sits mid-list. Navigable and in-flow, but the plan's human-check phrasing 'five top-level items still read as a horizontal row' is NOT satisfied as worded. Open. | open |  | 2026-08-06T14:09:24.636Z |  |
 
 ````json
 [
@@ -107,6 +111,54 @@ last_updated: 2026-08-06T13:58:23.302Z
     "status": "open",
     "reason": "",
     "recorded_at": "2026-08-06T13:58:23.302Z",
+    "resolved_at": null
+  },
+  {
+    "id": 8,
+    "kind": "unrun-verify",
+    "phase": "02",
+    "file": "src/css/no-js.css",
+    "line": null,
+    "description": "No-script rendered nav human-check unrun: five top-level items + six category links visible/activatable at 360/900/1440px, and neither disclosure control visible or Tab-reachable. No automatable browser on the build machine.",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-08-06T14:09:24.452Z",
+    "resolved_at": null
+  },
+  {
+    "id": 9,
+    "kind": "unrun-verify",
+    "phase": "02",
+    "file": "src/css/no-js.css",
+    "line": null,
+    "description": "UI-SPEC 'overflow' backstop RE-OPENED by 02-06's desktop no-script layout: scrollWidth <= innerWidth with scripting disabled at 900px and 1440px is unmeasured. Abstains to human_needed; must not be recorded as passing.",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-08-06T14:09:24.518Z",
+    "resolved_at": null
+  },
+  {
+    "id": 10,
+    "kind": "deviation",
+    "phase": "02",
+    "file": "src/css/no-js.css",
+    "line": null,
+    "description": "Residual, not closed by 02-06: scripting ENABLED but site.js failing to load/throw leaves the nav hidden below 56.25rem. Closing it needs a scripting-capability marker written before first paint, which the project deliberately does not have.",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-08-06T14:09:24.578Z",
+    "resolved_at": null
+  },
+  {
+    "id": 11,
+    "kind": "deviation",
+    "phase": "02",
+    "file": "src/css/no-js.css",
+    "line": null,
+    "description": "02-06 desktop no-script row shape: 'flex: 1 0 100%' on .nav__item--has-sub (plan-mandated, grep-asserted) splits the four visible top-level links across two wrapped rows rather than one, because the has-sub item sits mid-list. Navigable and in-flow, but the plan's human-check phrasing 'five top-level items still read as a horizontal row' is NOT satisfied as worded. Open.",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-08-06T14:09:24.636Z",
     "resolved_at": null
   }
 ]
