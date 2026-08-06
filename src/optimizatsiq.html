@@ -1,17 +1,38 @@
 <?php
-// Per-page metadata (02-RESEARCH N-5). WORKING title and description carrying
-// the mechanism, derived from this page's existing subject; SEO-01 in Phase 3
-// owns the search-tuned copy, and CONTENT-01 owns the body below.
-$torin_title = 'Оптимизация · ТОРИН КОМПЮТЪРС';
-$torin_desc  = 'Оптимизация, ускоряване и ъпгрейд на лаптопи — безплатни съвети за бързодействие.';
+// Category 3 rendered through the D-24 template (includes/category-page.php).
+// The display name and the symptom line are read from the category record,
+// never retyped here.
+//
+// D-28: профилактика is cross-listed under this category as a LINK to the one
+// existing page, never as duplicated body copy. One URL, one canonical, no
+// duplicate-content exposure — the internal link from a second topical context
+// is the entire benefit. Do not paste that page's content here.
+//
+// Sub-service names come from D-26's mapping table. Depth (intro, гаранция,
+// process, FAQ, related, prices) is Phase 3 per D-25.
+require_once(dirname(__FILE__) . '/includes/category-page.php');
+
+$torin_cat = torin_category_by_id('kat-3');
+
+// Per-page metadata (02-RESEARCH N-5). The title is built from the shared
+// record for the same reason the h1 is; SEO-01 in Phase 3 owns the final copy.
+$torin_title = $torin_cat['name'] . ' · ТОРИН КОМПЮТЪРС';
+$torin_desc  = 'Ускоряване и ъпгрейд на лаптоп — безплатни съвети за бързодействие и профилактика.';
+
+$torin_cat_key  = $torin_cat['id'];
+$torin_cat_page = array(
+	'cat_id' => $torin_cat_key,
+	'fixes'  => array(
+		array('text' => 'Безплатни съвети за бързодействие'),
+		array('text' => 'Профилактика на лаптоп', 'href' => 'profilaktika-laptop.html'),
+	),
+);
+
 require_once(dirname(__FILE__) . '/includes/header.php');
 ?>
 
-<main class="section">
-	<div class="container">
-		<h1>Оптимизация</h1>
-		<p>Строим новия сайт на ТОРИН КОМПЮТЪРС тук. Тази страница е временен скелет, използван за да докаже, че PHP-include основата работи на живия хостинг.</p>
-	</div>
+<main>
+<?php torin_render_category_page($torin_cat_page); ?>
 </main>
 
 <?php require_once(dirname(__FILE__) . '/includes/footer.php'); ?>

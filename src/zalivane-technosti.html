@@ -1,17 +1,39 @@
 <?php
-// Per-page metadata (02-RESEARCH N-5). WORKING title and description carrying
-// the mechanism, derived from this page's existing subject; SEO-01 in Phase 3
-// owns the search-tuned copy, and CONTENT-01 owns the body below.
-$torin_title = 'Заливане и ремонт на дънни платки · ТОРИН КОМПЮТЪРС';
-$torin_desc  = 'Ремонт след заливане с течности и сервиз на дънни платки — BGA чипове и захранващи вериги.';
+// Category 4 rendered through the D-24 template (includes/category-page.php).
+// The display name and the symptom line are read from the category record,
+// never retyped here.
+//
+// This is the DEEP case — four sub-services against category 1's two — and it
+// is where the BGA and chip-level expertise lives naturally (D-14/DIFF-03)
+// rather than needing its own homepage treatment. The same template must
+// render both shapes correctly; that is why both are instantiated in this
+// phase. Sub-service names come from D-26's mapping table and nowhere else.
+// Depth (intro, гаранция, process, FAQ, related, prices) is Phase 3 per D-25.
+require_once(dirname(__FILE__) . '/includes/category-page.php');
+
+$torin_cat = torin_category_by_id('kat-4');
+
+// Per-page metadata (02-RESEARCH N-5). The title is built from the shared
+// record for the same reason the h1 is; SEO-01 in Phase 3 owns the final copy.
+$torin_title = $torin_cat['name'] . ' · ТОРИН КОМПЮТЪРС';
+$torin_desc  = 'Ремонт след заливане с течност и сервиз на дънни платки — BGA чипове, чипсет и захранващи вериги.';
+
+$torin_cat_key  = $torin_cat['id'];
+$torin_cat_page = array(
+	'cat_id' => $torin_cat_key,
+	'fixes'  => array(
+		array('text' => 'Дозапояване на отпоени BGA чипове'),
+		array('text' => 'Ребоулинг на BGA чипове'),
+		array('text' => 'Подмяна на чипсет'),
+		array('text' => 'Сервиз на захранващи вериги'),
+	),
+);
+
 require_once(dirname(__FILE__) . '/includes/header.php');
 ?>
 
-<main class="section">
-	<div class="container">
-		<h1>Заливане и ремонт на дънни платки</h1>
-		<p>Строим новия сайт на ТОРИН КОМПЮТЪРС тук. Тази страница е временен скелет, използван за да докаже, че PHP-include основата работи на живия хостинг.</p>
-	</div>
+<main>
+<?php torin_render_category_page($torin_cat_page); ?>
 </main>
 
 <?php require_once(dirname(__FILE__) . '/includes/footer.php'); ?>

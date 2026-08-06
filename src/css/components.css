@@ -354,6 +354,21 @@ body {
 	padding-block-end: 3.5rem;
 }
 
+/* The bar's markup lives on the homepage only, but the reserve above is on
+   `body` and therefore applied to all sixteen pages — leaving 56px of empty
+   page below the footer on the fifteen that have no bar to occupy it (measured
+   at 360px: footer bottom 1270, document height 1326 on about.html).
+
+   Written as a negated :has() rather than a positive one deliberately. :not()
+   is NOT a forgiving selector list, so in a browser without :has() support this
+   whole rule is dropped and every page keeps the unconditional reserve — the
+   previous behaviour, never an occluded footer. A positive `body:has(.callbar)`
+   would instead drop the reserve on the homepage there and let the bar cover
+   the footer's last 56px.                                                   */
+body:not(:has(.callbar)) {
+	padding-block-end: 0;
+}
+
 /* --- Dev-only theme switcher (D-03) -------------------------------------
    Pinned bottom-right, away from the hero CTA buttons, which sit top-centre
    and wrap to two rows at 360px. Deleted at the Phase 4 cutover along with
@@ -634,6 +649,73 @@ body {
 .notice--success {
 	background: var(--c-success-surface);
 	color: var(--c-success-ink);
+}
+
+/* --- Category page template (D-24) ---------------------------------------
+   The three published category pages render through includes/category-page.php:
+   a required spine (title, intro, «Какво ремонтираме», symptom line, гаранция,
+   CTA) plus four blocks that appear only when they carry content.
+
+   There is deliberately NO rule in this group that hides an absent block. The
+   renderer omits it from the markup entirely, because a heading with nothing
+   under it is the exact thin-content signal the publish gate exists to avoid —
+   and a display rule would leave the empty heading in the served HTML, where
+   the crawler still reads it.
+
+   Everything below reuses the eyebrow, heading, list, disclosure and CTA
+   components already defined in this file: no new token, no fifth type size. */
+.svc__intro,
+.svc__symptoms {
+	margin-block-start: var(--sp-md);
+	color: var(--c-ink-muted);
+}
+
+.svc__fixes ul,
+.svc__related ul,
+.svc__prices ul {
+	list-style: none;
+	display: grid;
+	gap: var(--sp-sm);
+	margin-block-start: var(--sp-md);
+}
+
+.svc__fixes li,
+.svc__related li,
+.svc__prices li {
+	position: relative;
+	padding-inline-start: var(--sp-lg);
+}
+
+/* The bullet is a filled amber block, not a list marker and not a border:
+   amber is a SURFACE token and may never be a text or border colour.        */
+.svc__fixes li::before,
+.svc__related li::before,
+.svc__prices li::before {
+	content: "";
+	position: absolute;
+	inset-block-start: .6em;
+	inset-inline-start: 0;
+	width: 8px;
+	height: 8px;
+	border-radius: var(--r-sm);
+	background: var(--c-brand);
+}
+
+/* The symptom line follows the sub-service list, so it takes the larger step
+   to read as a separate thought rather than a trailing list item.           */
+.svc__fixes .svc__symptoms {
+	margin-block-start: var(--sp-lg);
+}
+
+.svc__process ol {
+	display: grid;
+	gap: var(--sp-sm);
+	margin-block-start: var(--sp-md);
+	padding-inline-start: var(--sp-lg);   /* base.css zeroes list padding */
+}
+
+.svc__warranty p {
+	margin-block-start: var(--sp-md);
 }
 
 /* --- Breakpoint 1 — 35rem / 560px ---------------------------------------
