@@ -59,7 +59,7 @@ Plans:
   3. A visitor can reach any part of the site via a flat, shallow navigation structured around the six categories, with no dense mega-menu.
   4. Every page declares `lang="bg"` and all Cyrillic text renders correctly in the new typography.
 
-**Plans**: 4/4 plans executed
+**Plans**: 7 plans (4 executed; 3 gap-closure plans pending after verification returned 2/4)
 Plans:
 **Wave 1**
 
@@ -76,6 +76,18 @@ Plans:
 **Wave 4** *(blocked on Wave 3)*
 
 - [x] 02-04-PLAN.md — Site-wide rollout: 15-page metadata pass, category page template, full live verification sweep
+
+**Wave 5** *(gap closure — blocked on Wave 4)*
+
+- [ ] 02-05-PLAN.md — Tracer: close the two CSS cascade defects (trust-badge contrast CR-01, dark-surface focus-ring contrast CR-02), proven against the live response
+
+**Wave 6** *(gap closure — blocked on Wave 5)*
+
+- [ ] 02-06-PLAN.md — No-script navigation: conditional override stylesheet making all five items and all six categories reachable without JavaScript, plus the corrected record (WR-08)
+
+**Wave 7** *(gap closure — blocked on Wave 6)*
+
+- [ ] 02-07-PLAN.md — Reachability and contact single-sourcing: discreet footer link to covid.html (D-35), one E.164 phone key read by every CTA and the structured data (WR-10)
 
 **UI hint**: yes
 
