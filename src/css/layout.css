@@ -60,7 +60,14 @@
 	justify-content: space-between;
 	gap: var(--sp-md);
 	min-height: 56px;
-	padding-block: var(--sp-sm);
+	/* --sp-xs, not --sp-sm, and the 4px is load-bearing below 35rem. Plan
+	   02-03 adds a 44x44 hamburger to this row; at 8px padding the row would
+	   compute to 60px and grow the header by 4px, and plan 02-02 measured only
+	   ~9px of margin left above the mobile fold (card 1 bottom 574.8px against
+	   584px usable). At 4px the row is 52px, so min-height still binds and the
+	   header stays exactly 56px. Restored to --sp-sm at >=35rem, where
+	   min-height is 64px and 44 + 16 = 60 still fits. */
+	padding-block: var(--sp-xs);
 }
 
 .site-header__logo {
@@ -88,6 +95,7 @@
 @media (min-width: 35rem) {
 	.site-header__inner {
 		min-height: 64px;
+		padding-block: var(--sp-sm);
 	}
 
 	.cat-grid {

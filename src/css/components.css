@@ -386,6 +386,137 @@ body {
 	font-weight: var(--fw-bold);
 }
 
+/* --- Navigation (IA-02, D-18/D-19) --------------------------------------
+   W3C APG Disclosure Navigation. EVERY visual state below is selected off
+   [aria-expanded="true"] and never off a parallel open-state class (the usual
+   name for one is asserted absent from this file by a plan-level grep, so it
+   is not written here). That is the structural guarantee that the announced
+   ARIA state and the rendered state cannot desynchronise — the single most
+   common bug in hand-rolled dropdowns. site.js writes only the attribute, so
+   there is no second source of truth to fall out of sync.
+
+   One implementation for both breakpoints: below 56.25rem the same markup,
+   the same JS and the same ARIA contract render as an IN-FLOW accordion panel
+   that pushes the page content down. A true overlay/drawer was rejected — it
+   needs focus trapping, background inerting and scroll locking, three more
+   things to get right for a five-item nav, and it forks the ARIA contract
+   into a second implementation that always rots first.
+
+   No hover-open rule exists anywhere here, at any width. Click and tap only. */
+.nav {
+	flex: 1 1 auto;
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: flex-end;
+}
+
+/* 44x44 exactly, and the size is load-bearing: .site-header__inner carries
+   min-height 56px with --sp-xs padding-block below 35rem, so 44 + 8 = 52 stays
+   UNDER the min-height and this button adds zero pixels to the header. The
+   mobile fold has only ~9px of margin left after plan 02-02 (card 1 bottom
+   574.8px against 584px usable), so a taller header would eat half of it. */
+.nav__toggle {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 44px;
+	height: 44px;
+	padding: 0;
+	border: 0;
+	border-radius: var(--r-sm);
+	background: transparent;
+	color: var(--c-ink-deep);
+	cursor: pointer;
+}
+
+.nav__toggle svg {
+	width: 24px;
+	height: 24px;
+}
+
+.nav__list {
+	display: none;
+	width: 100%;
+	margin-block: var(--sp-sm);
+	padding: var(--sp-sm);
+	list-style: none;
+	background: var(--c-surface-2);
+	border-radius: var(--r-lg);
+	box-shadow: var(--sh-1);
+}
+
+.nav__sub {
+	display: none;
+	margin: 0;
+	padding: 0 0 var(--sp-xs) var(--sp-md);
+	list-style: none;
+}
+
+/* The two reveal rules. Adjacent-sibling off the controlling button, so the
+   attribute the screen reader reads is literally the same bit the panel's
+   visibility depends on. */
+[aria-expanded="true"] + .nav__list { display: block; }
+[aria-expanded="true"] + .nav__sub { display: block; }
+
+/* base.css caps li at --measure for prose; nav items are not prose. */
+.nav__list li,
+.nav__sub li {
+	max-width: none;
+}
+
+.nav__link,
+.nav__disclosure {
+	display: flex;
+	align-items: center;
+	gap: var(--sp-sm);
+	min-height: 44px;
+	padding-inline: var(--sp-md);
+	border-radius: var(--r-sm);
+	color: var(--c-ink);
+	font-family: inherit;
+	font-size: var(--fs-body);
+	line-height: 1.3;
+	text-decoration: none;
+}
+
+.nav__disclosure {
+	width: 100%;
+	border: 0;
+	background: transparent;
+	font-weight: var(--fw-regular);
+	cursor: pointer;
+}
+
+.nav__link:hover,
+.nav__link:focus-visible,
+.nav__disclosure:hover,
+.nav__disclosure:focus-visible {
+	background: var(--c-surface-3);
+	color: var(--c-ink);
+}
+
+/* Amber as a SURFACE, drawn as an inset block rather than a border — amber
+   may never appear in a border or text declaration anywhere in this system.
+   One of the six permitted accent uses. */
+.nav__link[aria-current="page"] {
+	font-weight: var(--fw-bold);
+	box-shadow: inset 0 -3px 0 var(--c-brand);
+}
+
+.nav__chevron {
+	display: inline-flex;
+	transition: transform var(--dur-fast) var(--ease);
+}
+
+.nav__chevron svg {
+	width: 1.1em;
+	height: 1.1em;
+}
+
+[aria-expanded="true"] .nav__chevron {
+	transform: rotate(180deg);
+}
+
 /* --- Breakpoint 1 — 35rem / 560px ---------------------------------------
    min-width only, never max-width, so no two adjacent breakpoints can both
    match or both miss. At >=560px the content box is >=528px, so both CTA
@@ -432,5 +563,57 @@ body {
 
 	body {
 		padding-block-end: 0;
+	}
+
+	/* --- Nav becomes a horizontal bar with an absolute dropdown ---------- */
+	.nav__toggle {
+		display: none;
+	}
+
+	/* The first selector is not redundant. The mobile rule
+	   [aria-expanded="true"] + .nav__list is (0,2,0) and would otherwise beat
+	   a bare .nav__list (0,1,0) here, so a panel opened at a narrow width and
+	   then resized past 900px would render as a vertical block instead of the
+	   row. Restating it at (0,3,0) makes the desktop form unconditional. */
+	.nav__toggle[aria-expanded="true"] + .nav__list,
+	.nav__list {
+		display: flex;
+		align-items: center;
+		gap: var(--sp-xl);
+		width: auto;
+		margin-block: 0;
+		padding: 0;
+		background: none;
+		box-shadow: none;
+	}
+
+	.nav__item--has-sub {
+		position: relative;
+	}
+
+	/* width: max-content with the 22rem floor is what actually delivers D-19's
+	   "full readable length, one line each". UI-SPEC C-3 raised the floor from
+	   RESEARCH's 20rem because the 33-character name measures ~289px against a
+	   288px content box there — but 22rem alone is still only ~304px of text
+	   column once this panel's padding AND the item's own padding-inline are
+	   both subtracted, and --fs-body is fluid, so the name grows to ~306px at
+	   1440px. max-content sizes the box to the longest name by construction
+	   and the floor/ceiling keep it a sane dropdown shape either way. */
+	.nav__sub {
+		position: absolute;
+		inset-block-start: calc(100% + var(--sp-sm));
+		inset-inline-end: 0;
+		z-index: 20;
+		width: max-content;
+		min-width: 22rem;
+		max-width: 26rem;
+		padding: var(--sp-md);
+		background: var(--c-surface-2);
+		border-radius: var(--r-lg);
+		box-shadow: var(--sh-2);
+	}
+
+	.nav__sub .nav__link {
+		white-space: nowrap;
 	}
 }

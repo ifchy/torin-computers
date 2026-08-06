@@ -10,6 +10,22 @@
 // must never be introduced anywhere in this tree.
 require_once(dirname(__FILE__) . '/site-config.php');
 require_once(dirname(__FILE__) . '/icons.php');
+// The Услуги dropdown renders the same six records the homepage card grid
+// renders, through the same torin_category_href() publish gate — so the nav
+// and the cards can never disagree about a destination and publishing a page
+// stays a single boolean flip with zero nav edit (D-23). Required here rather
+// than relying on the page: fifteen of the sixteen pages include only this
+// file. require_once makes index.html's own earlier require a no-op.
+require_once(dirname(__FILE__) . '/categories.php');
+
+// Current-page detection for aria-current. SCRIPT_NAME is the ONLY acceptable
+// source here: the other self-referencing server variable appends
+// client-supplied PATH_INFO to the script path and is a classic reflected-XSS
+// vector (T-02-10). A plan-level grep asserts that variable's name appears
+// nowhere in this file, which is why it is not written out here. This value is
+// used ONLY for comparison and is never echoed — do not "improve" it into
+// output.
+$torin_page = basename($_SERVER['SCRIPT_NAME']);
 
 // ── DEV-ONLY THEME SWITCHER (D-03) — delete this block at the Phase 4 cutover.
 // The guard is file existence and nothing else: never a request-path check
@@ -55,6 +71,11 @@ if (!isset($torin_desc)) {
 <link rel="stylesheet" href="css/base.css">
 <link rel="stylesheet" href="css/layout.css">
 <link rel="stylesheet" href="css/components.css">
+<?php // The site's ONLY script (plan 02-03). defer, so it never blocks the
+      // parser and runs after the nav markup exists. With it blocked the six
+      // category links are unreachable from the nav — an accepted, recorded
+      // gap: all six stay reachable from the homepage card grid (IA-01). ?>
+<script src="js/site.js" defer></script>
 <?php echo $torin_extra_head; ?>
 </head>
 
@@ -72,6 +93,48 @@ if (file_exists($torin_dev_switcher)) { torin_render_theme_switcher($torin_theme
 			<a class="site-header__brand" href="index.html">
 				<img class="site-header__logo" src="img/torin-logo.png" width="150" height="80" alt="ТОРИН КОМПЮТЪРС">
 			</a>
-			<!-- NAV PLACEHOLDER — plan 02-03 inserts the Услуги disclosure nav here (IA-02, D-18/D-19). -->
+<?php
+			// The five-item navigation (IA-02, D-18) with ONE single-level
+			// disclosure (D-19). W3C APG Disclosure Navigation. The ARIA menu
+			// roles are deliberately absent, as is arrow-key handling: those
+			// make a screen reader announce a desktop application menu and
+			// hand navigation to the arrow keys, which is wrong for six links
+			// and a common, damaging mistake. (The prohibited role names are
+			// not spelled out here — a plan-level grep asserts this file
+			// contains neither of them, and a comment would defeat it.)
+			// The toggles are <button>s, never anchors with a fragment href.
+			?>
+			<nav class="nav" aria-label="Основна навигация">
+				<button class="nav__toggle" id="navToggle" type="button" aria-expanded="false" aria-controls="navList"><span class="visually-hidden">Меню</span><?php echo torin_icon('menu'); ?></button>
+
+				<ul class="nav__list" id="navList">
+					<li><a class="nav__link" href="index.html"<?php echo ($torin_page === 'index.html' ? ' aria-current="page"' : ''); ?>>Начало</a></li>
+
+					<li class="nav__item--has-sub">
+						<button class="nav__disclosure" id="uslugiBtn" type="button" aria-expanded="false" aria-controls="uslugiList">Услуги<span class="nav__chevron"><?php echo torin_icon('chevron-down'); ?></span></button>
+						<?php
+						// All six, regardless of publish state: one accessor,
+						// one rule, both surfaces. Nav shape stays constant as
+						// pages publish, all six categories stay discoverable
+						// from the nav (IA-02), and publishing costs zero nav
+						// edits. No category filename is typed here.
+						?>
+						<ul class="nav__sub" id="uslugiList">
+<?php foreach ($torin_categories as $cat) { ?>
+							<li><a class="nav__link" href="<?php echo htmlspecialchars(torin_category_href($cat), ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($cat['name'], ENT_QUOTES, 'UTF-8'); ?></a></li>
+<?php } ?>
+						</ul>
+					</li>
+
+					<?php // D-20's sales line: this item covers laptopi.html, and the
+					      // footer's secondary row carries rezervni-chasti.html, so both
+					      // sales pages are reachable from every page on the site. ?>
+					<li><a class="nav__link" href="laptopi.html"<?php echo ($torin_page === 'laptopi.html' ? ' aria-current="page"' : ''); ?>>Лаптопи и части</a></li>
+					<li><a class="nav__link" href="test-laptop.html"<?php echo ($torin_page === 'test-laptop.html' ? ' aria-current="page"' : ''); ?>>Тествай сам</a></li>
+					<?php // D-21: Запитване folds into Контакти, which targets the
+					      // homepage CTA block rather than a page of its own. ?>
+					<li><a class="nav__link" href="index.html#contact-us">Контакти</a></li>
+				</ul>
+			</nav>
 		</div>
 	</header>
