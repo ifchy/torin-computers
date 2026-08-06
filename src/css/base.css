@@ -161,11 +161,43 @@ p, li { max-width: var(--measure); }
 }
 
 .hero :focus-visible,
-.site-footer :focus-visible { outline-color: var(--c-focus-on-dark); }
+.site-footer :focus-visible,
+.callbar :focus-visible { outline-color: var(--c-focus-on-dark); }
 
-/* On amber the ring is the dark on-brand ink (10.14:1) — the lighter amber
-   ring is invisible there. Its own rule so it is not "simplified" away. */
+/* MECHANISM, not decoration. The ring is drawn with a 2px offset, so it is
+   painted on the surface BEHIND the button — in that gap and outward — and
+   never touches the button's own fill. The ring colour is therefore measured
+   against that SURFACE, never against the button. The comment this replaces
+   reasoned about the amber fill the ring never reaches, and the rule below
+   tied at (0,2,0) with the dark-surface group above, so source order alone
+   handed every dark surface a #16223a ring: 1.21:1 in the hero and 1.03:1 in
+   the footer and the call bar — effectively no visible focus at all for
+   keyboard users on the six most important controls on the site
+   (02-VERIFICATION gap 1 / CR-02).
+   Light surfaces keep --c-on-brand #16223a, which is 15.86:1 on white.
+   Dark surfaces take --c-focus-on-dark #ffd84d, recomputed against every
+   surface the offset ring actually lands on. Theme B: 9.49:1 on --c-ink-deep
+   #0e305d, 5.93:1 on the --c-ink-deep-2 #1a4f8f far gradient stop, 4.69:1 on
+   the worst-case #3f627a hero glow corner, 11.09:1 on --c-ink-deepest
+   #0a2547. Theme A: 5.16:1 on #0547dc, 4.50:1 on #1c56d8, 8.38:1 on #062f8f.
+   Every one clears the 3:1 floor of WCAG 2.1 SC 1.4.11. The same #ffd84d is
+   1.38:1 on white, which is why the group below names three surfaces by class
+   instead of styling all primary buttons.
+   LOAD-BEARING, do not simplify: the three dark-surface selectors below must
+   NOT be collapsed into the single primary-button rule. Both sit on
+   .btn--primary, so a collapse restores the equal-specificity tie that source
+   order then decides silently — the exact defect this replaces. .callbar is
+   named explicitly in BOTH groups because it is a position:fixed sibling of
+   <main>, inside neither .hero nor .site-footer; that omission is what caused
+   CR-02 and is the easiest thing for the next reader to lose again.        */
 .btn--primary:focus-visible { outline-color: var(--c-on-brand); }
+
+/* (0,3,0) — two classes plus one pseudo-class — beats the (0,2,0) rule above
+   unconditionally, so the on-dark ring wins by SPECIFICITY rather than by
+   being written later, and survives any future reordering of this file. */
+.hero .btn--primary:focus-visible,
+.site-footer .btn--primary:focus-visible,
+.callbar .btn--primary:focus-visible { outline-color: var(--c-focus-on-dark); }
 
 /* --- Reduced motion — mandatory */
 @media (prefers-reduced-motion: reduce) {
