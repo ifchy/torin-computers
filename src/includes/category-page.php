@@ -225,7 +225,10 @@ function torin_render_category_page($page) {
 
 			<div class="cta-block">
 				<div class="cta-block__actions">
-					<a class="btn btn--primary" href="tel:<?php echo torin_esc(str_replace(' ', '', $site['phones'][0])); ?>"><?php echo torin_icon('phone'); ?>Обадете се</a>
+					<?php // The E.164 key, not the first display entry of the phone list:
+					      // one telephone fact, one representation, every primary call CTA
+					      // on the site resolving the same string (see site-config.php). ?>
+					<a class="btn btn--primary" href="tel:<?php echo torin_esc($site['phone_e164']); ?>"><?php echo torin_icon('phone'); ?>Обадете се</a>
 					<a class="btn btn--primary" href="viber://chat?number=<?php echo rawurlencode($site['viber']); ?>"><?php echo torin_icon('chat'); ?>Пишете във Viber</a>
 				</div>
 				<p class="cta-block__note">Безплатна диагностика · Отговаряме в работно време</p>

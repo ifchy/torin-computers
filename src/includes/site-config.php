@@ -19,6 +19,27 @@ $site = array(
 	// is the entire reason this file exists.
 	'phones' => array('02 9549710', '088 9458404', '087 9128244'),
 
+	// The E.164 form of the FIRST entry above — the shop's main line — and the
+	// single source for every primary call CTA on the site (the homepage hero,
+	// the repeated CTA block, the sticky call bar, the footer, and the three
+	// category pages) as well as the structured-data telephone property. Change
+	// the shop's main number and this one line changes all of them; that is the
+	// whole reason the key exists, and it is what stops one page dialling a
+	// string another page no longer serves.
+	//
+	// It is a LITERAL and is deliberately NOT derived at runtime from the list
+	// above: mapping a local zero-prefixed Bulgarian number to its
+	// international form is a dialling rule, not a string operation, and
+	// jsonld.php already refused that same substitution for that same reason.
+	// The value is the one decoded from the legacy site, and it is identical to
+	// the literal jsonld.php previously carried independently.
+	//
+	// The two mobile entries have NO counterpart here on purpose: no source
+	// artifact supplies their international forms, and inventing them would
+	// publish two possibly-undialable numbers on sixteen pages while looking
+	// like a tidy-up.
+	'phone_e164' => '+35929549710',
+
 	'email' => 'office@torin.bg',   // site-current/mailer.php
 
 	'address' => 'ул. Свети Иван Рилски 46, София 1606',   // site-current/index.html hero block

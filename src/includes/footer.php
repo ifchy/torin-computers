@@ -60,9 +60,17 @@ require_once(dirname(__FILE__) . '/icons.php');
 					<p class="footer-item footer-item--muted"><?php echo torin_icon('clock'); ?><span><?php echo htmlspecialchars($site['hours'], ENT_QUOTES, 'UTF-8'); ?></span></p>
 
 					<?php // The same two equal-weight primary actions as the homepage CTA
-					      // block (D-16) — the same component, not a footer-only variant. ?>
+					      // block (D-16) — the same component, not a footer-only variant.
+					      //
+					      // The call action reads the E.164 key, not the first display
+					      // entry of the phone list: stripping spaces from that entry
+					      // yields the LOCAL form, which is why this footer and the
+					      // homepage hero used to dial two different strings for one
+					      // number. Every primary call CTA on the site now resolves the
+					      // one key. The three display links above are a different job
+					      // and deliberately keep their local form. ?>
 					<div class="cta-block__actions">
-						<a class="btn btn--primary" href="tel:<?php echo htmlspecialchars(str_replace(' ', '', $site['phones'][0]), ENT_QUOTES, 'UTF-8'); ?>"><?php echo torin_icon('phone'); ?>Обадете се</a>
+						<a class="btn btn--primary" href="tel:<?php echo htmlspecialchars($site['phone_e164'], ENT_QUOTES, 'UTF-8'); ?>"><?php echo torin_icon('phone'); ?>Обадете се</a>
 						<a class="btn btn--primary" href="viber://chat?number=<?php echo rawurlencode($site['viber']); ?>"><?php echo torin_icon('chat'); ?>Пишете във Viber</a>
 					</div>
 				</div>

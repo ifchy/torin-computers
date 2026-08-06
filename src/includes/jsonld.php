@@ -35,11 +35,15 @@ $torin_ld = array(
 	'@type'     => array('LocalBusiness', 'ComputerStore'),
 	'name'      => 'ТОРИН КОМПЮТЪРС',   // decoded from the legacy Maps embed
 	'url'       => 'https://torin.bg/',
-	// E.164 form of the main line. Kept as a literal rather than derived from
-	// $site['phones']: mapping a local 0-prefixed number to +359 is a dialling
-	// rule, not a string operation, and inventing one here would be the kind of
-	// silent guess this file exists to avoid.
-	'telephone' => '+35929549710',
+	// Read from the single-sourced E.164 key. It used to be an independent
+	// literal here, which meant the number a search engine publishes and the
+	// number the page's own call buttons dial could drift apart silently —
+	// nobody reading either one alone would see it. The reason the value is a
+	// stored literal rather than derived from the display list now lives beside
+	// the value in site-config.php, and is deliberately not restated here: an
+	// explanation kept in two places is the same defect as a value kept in two
+	// places.
+	'telephone' => $site['phone_e164'],
 	'email'     => $site['email'],
 	'hasMap'    => $site['maps_url'],
 	'address'   => array(
