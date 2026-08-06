@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 02
 current_phase_name: design-system-information-architecture
 status: executing
-stopped_at: Completed 02-02-PLAN.md
-last_updated: "2026-08-05T22:41:18.663Z"
+stopped_at: Completed 02-03-PLAN.md
+last_updated: "2026-08-06T03:13:05.607Z"
 last_activity: 2026-08-06
 last_activity_desc: Phase 02 execution started
 progress:
   total_phases: 2
   completed_phases: 1
   total_plans: 9
-  completed_plans: 7
+  completed_plans: 8
 ---
 
 # Project State
@@ -28,11 +28,11 @@ See: .planning/PROJECT.md (updated 2026-08-04)
 ## Current Position
 
 Phase: 02 (design-system-information-architecture) — EXECUTING
-Plan: 3 of 4
+Plan: 4 of 4
 Status: Ready to execute
 Last activity: 2026-08-06 — Phase 02 execution started
 
-Progress: [████████░░] 78%
+Progress: [█████████░] 89%
 
 ## Performance Metrics
 
@@ -65,6 +65,7 @@ Progress: [████████░░] 78%
 | Phase 01 P05 | 15min | 2 tasks | 15 files |
 | Phase 02 P01 | 55min | 2 tasks | 15 files |
 | Phase 02 P02 | 24min | 2 tasks | 4 files |
+| Phase 02 P03 | 62min | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -85,6 +86,10 @@ Recent decisions affecting current work:
 - [Phase ?]: 02-01: mod_deflate + mod_expires ARE available on bell.host.bg — production CSS costs 6,268 B gzipped vs 14,322 B raw, so the 20 KB budget is a target, not a hard wire cost
 - [Phase ?]: 02-01: FTPS to bell.host.bg must cap the data channel at TLS 1.2 — TLS 1.3 aborts any upload over ~16 KB with 451 AFTER reporting bytes sent, silently failing every binary asset
 - [Phase ?]: 02-01: Sofia Sans V1 shaping gate passed 15/15 (bg default outlines vs .loclRUS) — Bulgarian letterforms confirmed independent of browser locl support
+- [Phase ?]: closeAll() skips any disclosure whose aria-controls panel contains the button just used — the research JS would otherwise collapse the mobile panel when Услуги is tapped inside it
+- [Phase ?]: The mobile nav panel is in flow but right-aligned under the hamburger, not full-width: display:contents would risk the nav landmark and an absolutely-positioned brand breaks if the logo is ever redrawn taller
+- [Phase ?]: geo coordinates are emitted as JSON strings, not floats — schema.org accepts Text, and PHP 5.2 float serialisation risks precision artefacts
+- [Phase ?]: The 02-RESEARCH V3 PHP-5.2 lint regex false-positives on any config subscript right of a =>, which the plan's own key_link requires — narrow it to short-array literals
 
 ### Pending Todos
 
@@ -102,6 +107,7 @@ None yet.
 - [Phase 1]: `problem-stari.html`'s fate is undecided — pending-owner-decision. No current v1 requirement addresses this page; suspected content overlap with `mehanichni-problemi.html` is unconfirmed. Flag for owner review before any retire/merge/redirect decision is made. See `01-URL-INVENTORY.md`.
 - [Phase 2] Web-font swap backstop is observed but UNMITIGATED: cold-cache first paint shows a brief flash of invisible text (font-display: swap's block period). No layout shift (CLS 0.00053). Closing it properly means size-adjusting the fallback stack — deliberately deferred, not fixed in 02-01.
 - [Phase 2] UI-SPEC's above-the-fold arithmetic assumed the hero min-height would bind, but the two CTA labels (178.2px + 189.4px) cannot share a 328px content box at 360px, so the CTA block is intrinsically two rows. Plans adding hero content must re-check the 42% budget.
+- OWNER-QUESTIONS #20 (working hours) and #21 (chat-capable number) block the Phase 4 cutover: both ship on all 16 pages and #20 also feeds Google's structured data
 
 ## Deferred Items
 
@@ -113,6 +119,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-05T22:41:18.656Z
-Stopped at: Completed 02-02-PLAN.md
+Last session: 2026-08-06T03:13:05.599Z
+Stopped at: Completed 02-03-PLAN.md
 Resume file: None

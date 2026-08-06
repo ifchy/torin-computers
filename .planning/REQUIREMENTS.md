@@ -15,7 +15,7 @@ Requirements for the redesign launch. Each maps to roadmap phases.
 ### Information Architecture
 
 - [ ] **IA-01**: User sees services organized into the six owner-priority categories as clear, distinct sections — not one undifferentiated scroll of ~18 icon-boxes
-- [ ] **IA-02**: User can navigate via a flat, shallow nav structured around the six categories (not a dense mega-menu)
+- [x] **IA-02**: User can navigate via a flat, shallow nav structured around the six categories (not a dense mega-menu)
 
 ### Trust Signals
 
@@ -89,7 +89,7 @@ Which phases cover which requirements. Populated during roadmap creation.
 | DESIGN-01 | Phase 2 | Complete |
 | DESIGN-02 | Phase 4 | Pending |
 | IA-01 | Phase 2 | Pending |
-| IA-02 | Phase 2 | Pending |
+| IA-02 | Phase 2 | Complete |
 | TRUST-01 | Phase 3 | Pending |
 | TRUST-02 | Phase 3 | Pending |
 | TRUST-03 | Phase 3 | Pending |
