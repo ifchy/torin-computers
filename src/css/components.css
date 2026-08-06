@@ -517,6 +517,125 @@ body {
 	transform: rotate(180deg);
 }
 
+/* --- Contact-first footer (D-33, D-34) ----------------------------------
+   base.css colours h2 with --c-ink-deep, which is invisible on the footer's
+   --c-ink-deepest fill, so the headings take the on-dark colour explicitly. */
+.footer-heading {
+	color: var(--c-on-dark);
+	font-size: var(--fs-title);
+	margin-block-end: var(--sp-md);
+}
+
+/* Icon column + content column. Fixed first track so a wrapped second line
+   aligns under the first rather than under the icon. */
+.footer-item {
+	display: grid;
+	grid-template-columns: 1.25em 1fr;
+	gap: var(--sp-sm);
+	align-items: start;
+	max-width: none;
+	margin-block-end: var(--sp-md);
+	color: var(--c-on-dark);
+}
+
+.footer-item > svg {
+	width: 1.25em;
+	height: 1.25em;
+	margin-block-start: .2em;
+	color: var(--c-on-dark-muted);
+}
+
+.footer-item--muted {
+	color: var(--c-on-dark-muted);
+}
+
+.footer-item a {
+	color: var(--c-on-dark);
+}
+
+/* A wrapping stack, not a joined string: three numbers today, but one or five
+   would lay out identically. Each entry keeps its own >=44px hit area. */
+.footer-phones {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: var(--sp-xs);
+}
+
+.footer-phone {
+	display: inline-flex;
+	align-items: center;
+	min-height: 44px;
+	font-weight: var(--fw-bold);
+	color: var(--c-on-dark);
+}
+
+.footer-links {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--sp-sm) var(--sp-lg);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.footer-links li {
+	max-width: none;
+}
+
+.footer-links a {
+	display: inline-flex;
+	align-items: center;
+	min-height: 44px;
+	color: var(--c-on-dark-muted);
+}
+
+.footer-legal {
+	margin-block-start: var(--sp-2xl);
+	padding-block-start: var(--sp-md);
+	border-block-start: 1px solid rgb(255 255 255 / .14);
+}
+
+/* --- Notice bands -------------------------------------------------------
+   .notice--info is the static replacement for the legacy holiday/hours banner
+   script (OWNER-QUESTIONS #8). The error and success variants have NO handler
+   behind them until Phase 4 (CONTACT-03): they are built now because the
+   tokens and the Bulgarian copy are specified now, and their appearance is a
+   carried-forward visual check rather than something this phase can prove
+   end to end. Each pair is a UI-SPEC computed-contrast pair — do not mix an
+   ink from one variant with a surface from another.                        */
+.notice {
+	display: grid;
+	grid-template-columns: 1.25em 1fr;
+	gap: var(--sp-sm);
+	align-items: start;
+	max-width: none;
+	margin-block-end: var(--sp-xl);
+	padding: var(--sp-md);
+	border-radius: var(--r-md);
+}
+
+.notice > svg {
+	width: 1.25em;
+	height: 1.25em;
+	margin-block-start: .2em;
+}
+
+.notice--info {
+	background: var(--c-surface-2);
+	color: var(--c-ink);
+}
+
+.notice--error {
+	background: var(--c-danger-surface);
+	color: var(--c-danger-ink);
+}
+
+.notice--success {
+	background: var(--c-success-surface);
+	color: var(--c-success-ink);
+}
+
 /* --- Breakpoint 1 — 35rem / 560px ---------------------------------------
    min-width only, never max-width, so no two adjacent breakpoints can both
    match or both miss. At >=560px the content box is >=528px, so both CTA

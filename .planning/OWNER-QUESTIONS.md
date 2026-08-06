@@ -77,6 +77,34 @@
 
 ---
 
+### 20. Working hours — 8:00–16:00 or 9:00–17:00?
+**Status:** OPEN
+**Question:** The current site contradicts itself about the shop's working hours:
+
+| Source | Hours |
+|---|---|
+| `index.html`, `about.html` | Понеделник–Петък **8:00–16:00** |
+| `profilaktika-laptop.html` | Понеделник–Петък **9:00–17:00** |
+| `otpuska.js` banner, labelled «НОВО» | Понеделник–Петък **8:00 до 16:00** |
+
+Which is correct today? (And are Saturday hours ever worked?)
+**Why it matters:** Two of the three sources plus the banner agree on 8:00–16:00, so `profilaktika-laptop.html` is almost certainly stale — but this is an inference, not a confirmation. The redesign puts working hours in the footer of **all 16 pages** (D-33) and into the `LocalBusiness` structured data Google reads (D-34), so a wrong value ships site-wide and into search results at once, sending real customers to a closed shop. The interim value is marked `[ASSUMED]` in `src/includes/site-config.php` until this is answered.
+**Blocks:** Must be resolved before the **Phase 4 cutover** — not before Phase 2 ends.
+**Raised:** Phase 2 research (N-3), filed during plan 02-03
+**Answer:**
+
+---
+
+### 21. Which of the three numbers is reachable on Viber or WhatsApp?
+**Status:** OPEN
+**Question:** Of `02 9549710`, `088 9458404` and `087 9128244` — which one can customers reach on Viber (or WhatsApp)? If more than one, which should the site advertise?
+**Why it matters:** D-16 makes chat an equal-weight primary action alongside calling, so the chat button needs one specific number. There is no basis in any existing source for choosing among the three, and the button currently points at the main line as an `[ASSUMED]` placeholder. A chat link to a number that has no Viber account is a dead end on the site's single most important conversion action.
+**Blocks:** Phase 4 (CONTACT-02) cannot be verified without it
+**Raised:** Phase 2 (UI-SPEC C-9), filed during plan 02-03
+**Answer:**
+
+---
+
 ## Sign-off needed — decisions made on the owner's behalf
 
 ### 7. Google Business Profile — is it active, with reviews?

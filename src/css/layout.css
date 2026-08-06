@@ -91,6 +91,15 @@
 	color: var(--c-on-dark-muted);
 }
 
+/* Contact-first footer grid (D-33). Explicit column counts per breakpoint,
+   same reasoning as .cat-grid: the slot count is known and fixed at three, so
+   a content-driven track function buys nothing and can orphan a column. */
+.footer-grid {
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: var(--sp-2xl);
+}
+
 /* --- Breakpoint 1 — 35rem / 560px */
 @media (min-width: 35rem) {
 	.site-header__inner {
@@ -102,11 +111,19 @@
 		grid-template-columns: repeat(2, 1fr);
 		margin-block-start: var(--sp-lg);
 	}
+
+	.footer-grid {
+		grid-template-columns: repeat(2, 1fr);
+	}
 }
 
 /* --- Breakpoint 2 — 56.25rem / 900px */
 @media (min-width: 56.25rem) {
 	.cat-grid {
+		grid-template-columns: repeat(3, 1fr);
+	}
+
+	.footer-grid {
 		grid-template-columns: repeat(3, 1fr);
 	}
 
