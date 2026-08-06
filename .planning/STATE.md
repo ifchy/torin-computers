@@ -4,16 +4,16 @@ milestone: v1.0
 milestone_name: milestone
 current_phase: 02
 current_phase_name: design-system-information-architecture
-status: executing
-stopped_at: Completed 02-03-PLAN.md
-last_updated: "2026-08-06T03:13:05.607Z"
+status: verifying
+stopped_at: Completed 02-04-PLAN.md
+last_updated: "2026-08-06T03:41:37.368Z"
 last_activity: 2026-08-06
 last_activity_desc: Phase 02 execution started
 progress:
   total_phases: 2
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 9
-  completed_plans: 8
+  completed_plans: 9
 ---
 
 # Project State
@@ -29,10 +29,10 @@ See: .planning/PROJECT.md (updated 2026-08-04)
 
 Phase: 02 (design-system-information-architecture) — EXECUTING
 Plan: 4 of 4
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-08-06 — Phase 02 execution started
 
-Progress: [█████████░] 89%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -66,6 +66,7 @@ Progress: [█████████░] 89%
 | Phase 02 P01 | 55min | 2 tasks | 15 files |
 | Phase 02 P02 | 24min | 2 tasks | 4 files |
 | Phase 02 P03 | 62min | 2 tasks | 8 files |
+| Phase 02 P04 | 40min | 3 tasks | 17 files |
 
 ## Accumulated Context
 
@@ -90,6 +91,9 @@ Recent decisions affecting current work:
 - [Phase ?]: The mobile nav panel is in flow but right-aligned under the hamburger, not full-width: display:contents would risk the nav landmark and an absolutely-positioned brand breaks if the logo is ever redrawn taller
 - [Phase ?]: geo coordinates are emitted as JSON strings, not floats — schema.org accepts Text, and PHP 5.2 float serialisation risks precision artefacts
 - [Phase ?]: The 02-RESEARCH V3 PHP-5.2 lint regex false-positives on any config subscript right of a =>, which the plan's own key_link requires — narrow it to short-array literals
+- [Phase ?]: The three unpublished category page files are deferred to Phase 3 (D-23/D-25): torin_category_href() already routes cards and dropdown to homepage anchors, so publishing is create-a-file plus flip-a-boolean
+- [Phase ?]: The category template guards the intro and the TRUST-03 warranty summary like optional blocks — D-24 puts them in the spine but D-25 assigns their content to Phase 3, and a spine slot shipping an empty heading is the thin-content shape the publish gate exists to prevent
+- [Phase ?]: The 56px call-bar reserve is scoped with body:not(:has(.callbar)) rather than a positive :has() — :not() is non-forgiving, so a browser without :has() keeps the safe unconditional reserve instead of letting the bar occlude the homepage footer
 
 ### Pending Todos
 
@@ -119,6 +123,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-06T03:13:05.599Z
-Stopped at: Completed 02-03-PLAN.md
+Last session: 2026-08-06T03:41:37.361Z
+Stopped at: Completed 02-04-PLAN.md
 Resume file: None
