@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 4
+open_count: 7
 waived_count: 0
 fixed_count: 0
-total_count: 4
-last_updated: 2026-08-06T03:41:56.325Z
+total_count: 7
+last_updated: 2026-08-06T13:58:23.302Z
 ---
 
 # Broken Windows Ledger
@@ -19,6 +19,9 @@ last_updated: 2026-08-06T03:41:56.325Z
 | 2 | 02 | stub | src/index.html |  | DIFF-02 (battery regeneration) ships inside a collapsed disclosure — knowingly unmet, must not pass silently in Phase 3 verification (D-13 / OWNER-QUESTIONS #9) | open |  | 2026-08-06T03:41:56.205Z |  |
 | 3 | 02 | stub | src/includes/site-config.php |  | hours, viber and notice are [ASSUMED] — OWNER-QUESTIONS #20/#21/#8 block the Phase 4 cutover | open |  | 2026-08-06T03:41:56.265Z |  |
 | 4 | 02 | stub | src/js/site.js |  | JS-disabled nav gap: with script blocked the six category links are unreachable from the nav; mitigated by the homepage card grid, accepted not solved | open |  | 2026-08-06T03:41:56.325Z |  |
+| 5 | 02 | unrun-verify | src/css/components.css |  | Hero stack height at 360x640 not re-measured after the CR-01 badge-margin fix: no Chrome/Chromium/Playwright on the build machine and Safari remote automation is disabled, so the comment records 241.6px as DERIVED (249.6 minus the 8px margin delta), not measured | open |  | 2026-08-06T13:58:23.175Z |  |
+| 6 | 02 | unrun-verify | src/css/base.css |  | Keyboard focus-ring human-check (six dark-surface CTAs, both themes, plus the light-surface CTA staying navy) not observed in a browser — ratios are computed, the rendered ring is not yet seen | open |  | 2026-08-06T13:58:23.244Z |  |
+| 7 | 02 | unrun-verify | src/css/components.css |  | FOUT/web-font-swap backstop re-opened by 02-05: the hero stack changed by 8px, so the Sofia Sans fallback-reflow check against hero CTA displacement on a throttled connection is unclosed, not inherited | open |  | 2026-08-06T13:58:23.302Z |  |
 
 ````json
 [
@@ -68,6 +71,42 @@ last_updated: 2026-08-06T03:41:56.325Z
     "status": "open",
     "reason": "",
     "recorded_at": "2026-08-06T03:41:56.325Z",
+    "resolved_at": null
+  },
+  {
+    "id": 5,
+    "kind": "unrun-verify",
+    "phase": "02",
+    "file": "src/css/components.css",
+    "line": null,
+    "description": "Hero stack height at 360x640 not re-measured after the CR-01 badge-margin fix: no Chrome/Chromium/Playwright on the build machine and Safari remote automation is disabled, so the comment records 241.6px as DERIVED (249.6 minus the 8px margin delta), not measured",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-08-06T13:58:23.175Z",
+    "resolved_at": null
+  },
+  {
+    "id": 6,
+    "kind": "unrun-verify",
+    "phase": "02",
+    "file": "src/css/base.css",
+    "line": null,
+    "description": "Keyboard focus-ring human-check (six dark-surface CTAs, both themes, plus the light-surface CTA staying navy) not observed in a browser — ratios are computed, the rendered ring is not yet seen",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-08-06T13:58:23.244Z",
+    "resolved_at": null
+  },
+  {
+    "id": 7,
+    "kind": "unrun-verify",
+    "phase": "02",
+    "file": "src/css/components.css",
+    "line": null,
+    "description": "FOUT/web-font-swap backstop re-opened by 02-05: the hero stack changed by 8px, so the Sofia Sans fallback-reflow check against hero CTA displacement on a throttled connection is unclosed, not inherited",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-08-06T13:58:23.302Z",
     "resolved_at": null
   }
 ]

@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 02
 current_phase_name: design-system-information-architecture
 status: executing
-stopped_at: Completed 02-04-PLAN.md
-last_updated: "2026-08-06T13:36:25.445Z"
+stopped_at: Completed 02-05-PLAN.md
+last_updated: "2026-08-06T14:01:00.725Z"
 last_activity: 2026-08-06
 last_activity_desc: Phase 02 execution started
 progress:
   total_phases: 2
-  completed_phases: 2
+  completed_phases: 1
   total_plans: 12
-  completed_plans: 9
+  completed_plans: 10
 ---
 
 # Project State
@@ -28,11 +28,11 @@ See: .planning/PROJECT.md (updated 2026-08-04)
 ## Current Position
 
 Phase: 02 (design-system-information-architecture) — EXECUTING
-Plan: 4 of 7
-Status: Ready to execute — 3 gap-closure plans pending (02-05, 02-06, 02-07)
-Last activity: 2026-08-06 — Phase 02 gap-closure plans created and verified
+Plan: 2 of 7
+Status: Ready to execute
+Last activity: 2026-08-06 — Phase 02 execution started
 
-Progress: [██████░░░░] 57%
+Progress: [████████░░] 83%
 
 ## Performance Metrics
 
@@ -67,6 +67,7 @@ Progress: [██████░░░░] 57%
 | Phase 02 P02 | 24min | 2 tasks | 4 files |
 | Phase 02 P03 | 62min | 2 tasks | 8 files |
 | Phase 02 P04 | 40min | 3 tasks | 17 files |
+| Phase 02 P05 | 20 min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -94,6 +95,10 @@ Recent decisions affecting current work:
 - [Phase ?]: The three unpublished category page files are deferred to Phase 3 (D-23/D-25): torin_category_href() already routes cards and dropdown to homepage anchors, so publishing is create-a-file plus flip-a-boolean
 - [Phase ?]: The category template guards the intro and the TRUST-03 warranty summary like optional blocks — D-24 puts them in the spine but D-25 assigns their content to Phase 3, and a spine slot shipping an empty heading is the thin-content shape the publish gate exists to prevent
 - [Phase ?]: The 56px call-bar reserve is scoped with body:not(:has(.callbar)) rather than a positive :has() — :not() is non-forgiving, so a browser without :has() keeps the safe unconditional reserve instead of letting the bar occlude the homepage footer
+- [Phase ?]: 02-05: CR-01/CR-02 closed by scoping the WINNING selector, never escalating the loser — .hero p (0,1,1) became .hero__inner > p:not(.trust-badge) (0,2,1), and the on-dark focus ring got a (0,3,0) per-surface group; no !important, no id selector, no @layer
+- [Phase ?]: 02-05: a focus ring drawn with outline-offset is painted on the surface BEHIND the control, so its contrast is measured against that surface — never against the button fill the old comment reasoned about
+- [Phase ?]: 02-05: .callbar is a position:fixed sibling of <main>, inside neither .hero nor .site-footer — it must be named explicitly in every dark-surface rule group; omitting it is what produced CR-02
+- [Phase ?]: 02-05: 02-REVIEW.md's 5.16:1 and 8.7:1 focus-ring figures are THEME A values reported as if they were the shipping theme — recomputed Theme B measures 9.49:1 and 11.09:1
 
 ### Pending Todos
 
@@ -112,6 +117,7 @@ None yet.
 - [Phase 2] Web-font swap backstop is observed but UNMITIGATED: cold-cache first paint shows a brief flash of invisible text (font-display: swap's block period). No layout shift (CLS 0.00053). Closing it properly means size-adjusting the fallback stack — deliberately deferred, not fixed in 02-01.
 - [Phase 2] UI-SPEC's above-the-fold arithmetic assumed the hero min-height would bind, but the two CTA labels (178.2px + 189.4px) cannot share a 328px content box at 360px, so the CTA block is intrinsically two rows. Plans adding hero content must re-check the 42% budget.
 - OWNER-QUESTIONS #20 (working hours) and #21 (chat-capable number) block the Phase 4 cutover: both ship on all 16 pages and #20 also feeds Google's structured data
+- [Phase 2] 02-05 rendered-geometry and keyboard human-checks are UNRUN: no automatable browser on the build machine (no Chrome/Chromium/Playwright; Safari remote automation disabled behind a GUI-only setting). The hero-stack figure in components.css is DERIVED (241.6px), not measured, and the FOUT backstop is re-opened by the 8px stack change.
 
 ## Deferred Items
 
@@ -123,6 +129,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-06T03:41:37.361Z
-Stopped at: Completed 02-04-PLAN.md
+Last session: 2026-08-06T14:00:47.034Z
+Stopped at: Completed 02-05-PLAN.md
 Resume file: None
