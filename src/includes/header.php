@@ -71,10 +71,44 @@ if (!isset($torin_desc)) {
 <link rel="stylesheet" href="css/base.css">
 <link rel="stylesheet" href="css/layout.css">
 <link rel="stylesheet" href="css/components.css">
+<?php // The conditional override (plan 02-06), requested ONLY by a user agent
+      // with scripting disabled — a scripting-capable one never parses this
+      // element's contents as markup and never fetches the file, so there is no
+      // state transition on load and no flash of an open nav collapsing.
+      // Emitted HERE, after all three unconditional stylesheets, so cascade
+      // order is still link order and every (0,1,0) rule in that file wins its
+      // target by source position rather than by any escalation. Its contents
+      // are static markup; no PHP reaches inside it. ?>
+<noscript><link rel="stylesheet" href="css/no-js.css"></noscript>
 <?php // The site's ONLY script (plan 02-03). defer, so it never blocks the
-      // parser and runs after the nav markup exists. With it blocked the six
-      // category links are unreachable from the nav — an accepted, recorded
-      // gap: all six stay reachable from the homepage card grid (IA-01). ?>
+      // parser and runs after the nav markup exists.
+      //
+      // CORRECTED RECORD (plan 02-06). This comment used to say that with the
+      // script blocked "the six category links are unreachable from the nav".
+      // That understated the failure. Below 56.25rem components.css hides the
+      // WHOLE list, and the only rules that reveal it are the two
+      // adjacent-sibling matches on the disclosure state attribute that this
+      // script alone writes — so with scripting blocked the entire five-item
+      // navigation was hidden, not merely the six category links. Only the logo
+      // and the footer links remained. A later phase reading the old wording
+      // would have closed the wrong defect, which is how this one survived a
+      // full code review; a record that is wrong gets corrected, never dropped.
+      //
+      // It is closed by the conditional override linked immediately above. That
+      // link is load-bearing and must NOT be deleted as a redundant fourth copy
+      // of the three links preceding it.
+      //
+      // The guarantee is unaffected: this script remains the sole writer of the
+      // disclosure state attribute, and the override touches only display and
+      // position. It declares no selector for that attribute and introduces no
+      // second source of truth, so the announced state and the rendered state
+      // still cannot disagree.
+      //
+      // One residual case, named rather than omitted: if scripting is ENABLED
+      // but this file fails to load or throws, the nav stays hidden below
+      // 56.25rem. Closing that would require a scripting-capability marker
+      // written before first paint, which this project deliberately does not
+      // have. ?>
 <script src="js/site.js" defer></script>
 <?php echo $torin_extra_head; ?>
 </head>
@@ -118,8 +152,14 @@ if (file_exists($torin_dev_switcher)) { torin_render_theme_switcher($torin_theme
 						// pages publish, all six categories stay discoverable
 						// from the nav (IA-02), and publishing costs zero nav
 						// edits. No category filename is typed here.
+						//
+						// The list carries its own accessible name because the
+						// button above it is removed in the no-script rendering
+						// (plan 02-06) — without it the six links would lose
+						// their grouping name there. Correct in both renderings:
+						// a named sub-list inside a named nav.
 						?>
-						<ul class="nav__sub" id="uslugiList">
+						<ul class="nav__sub" id="uslugiList" aria-label="Услуги">
 <?php foreach ($torin_categories as $cat) { ?>
 							<li><a class="nav__link" href="<?php echo htmlspecialchars(torin_category_href($cat), ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($cat['name'], ENT_QUOTES, 'UTF-8'); ?></a></li>
 <?php } ?>

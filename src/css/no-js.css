@@ -1,0 +1,101 @@
+/* no-js.css — the navigation, for user agents with scripting disabled.
+   Plan 02-06, closing the IA-02 gap that header.php had recorded as smaller
+   than it actually was.
+
+   REQUESTED ONLY WHEN SCRIPTING IS OFF. header.php wraps the link to this file
+   in a noscript element: a scripting-capable user agent never parses that
+   element's contents as markup and never fetches this file, while a user agent
+   with scripting disabled applies it from first paint. There is no state
+   transition on load either way, so no page ever flashes an open nav that then
+   collapses.
+
+   CASCADE POSITION IS THE WHOLE MECHANISM. The link is emitted AFTER all three
+   unconditional stylesheets, so this file is last and cascade order is still
+   link order. Every selector below is a single class — (0,1,0) — and beats its
+   counterpart in components.css by that documented source position and by
+   nothing else: no importance flag, no id selector, no cascade-layer construct.
+   Move the link earlier in the head and these rules stop applying, silently.
+
+   WHY THERE IS NO STATE SELECTOR HERE, AND WHY THERE NEVER MAY BE. With
+   scripting off there is no state to select on — the nav is statically open.
+   site.js stays the one and only writer of the disclosure state attribute for
+   the scripting-enabled rendering, and components.css keys every visual state
+   off that attribute, which is what makes the announced state and the rendered
+   state incapable of disagreeing. That attribute's own name is asserted absent
+   from THIS file by a plan-level grep, so it is not written out here — the same
+   idiom components.css uses for the parallel open-state class it forbids. A
+   mirror class, a data attribute, or a scripting-capability marker added later
+   to "improve" this would re-create exactly the desynchronisation the nav
+   contract exists to prevent, and would do it invisibly to anyone testing with
+   scripting on.
+
+   SCOPE. Display and position only, on five selectors that all already exist in
+   components.css. No colours, no typography, no new class names, no new tokens.
+
+   ACCEPTED COST, recorded rather than glossed. Below 56.25rem this renders the
+   nav exactly as the panel the hamburger opens when scripting is on — same
+   vertical list, same surface, same rows — so roughly eleven 44px rows sit
+   above the hero. Deliberate: an identical shape needs no second visual
+   contract and no second review, and these visitors currently get no navigation
+   at all.
+
+   RESIDUAL, NOT CLOSED HERE. If scripting is ENABLED but site.js fails to load
+   or throws, this file is never requested and the nav stays hidden below
+   56.25rem. Closing that would need a scripting-capability marker written
+   before first paint, which this project deliberately does not have.        */
+
+/* The two controls that cannot function without script are removed outright,
+   and that is load-bearing rather than tidiness: each carries a collapsed-state
+   ARIA attribute in the served markup, so leaving either visible above a list
+   that is rendered open would announce the exact opposite of what a sighted
+   visitor reads. display: none takes them out of the accessibility tree, so
+   nothing false is announced.                                               */
+.nav__toggle { display: none; }
+.nav__disclosure { display: none; }
+
+/* And the two panels those controls would have opened are simply open. At this
+   width the sub-list is already static and already carries its own inset
+   padding, so nothing further is needed.                                    */
+.nav__list { display: block; }
+.nav__sub { display: block; }
+
+/* --- Breakpoint 2 — 56.25rem / 900px ------------------------------------
+   The same value as components.css, reused verbatim, and min-width only —
+   that is a convention of this stylesheet set, so no two adjacent breakpoints
+   can both match or both miss.                                             */
+@media (min-width: 56.25rem) {
+	/* Restores the desktop horizontal row that the unconditional display: block
+	   above would otherwise destroy for a no-script desktop visitor, and permits
+	   the sub-list to wrap onto its own line. Only display needs restating —
+	   every other desktop declaration on this list still comes from
+	   components.css.                                                        */
+	.nav__list {
+		display: flex;
+		flex-wrap: wrap;
+	}
+
+	/* Gives the Услуги item the full container width, so the six category links
+	   have the whole row to lay out in and cannot push the nav past the
+	   container.                                                             */
+	.nav__item--has-sub {
+		flex: 1 0 100%;
+	}
+
+	/* Returns the desktop dropdown to the document flow. Left absolutely
+	   positioned it would be a permanently open floating panel overlaying page
+	   content; in flow it is an ordinary second nav row. The existing
+	   white-space: nowrap on desktop sub-links keeps each Bulgarian name on one
+	   line, and the full-width row above is what makes that safe.            */
+	.nav__sub {
+		position: static;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0 var(--sp-md);
+		width: auto;
+		min-width: 0;
+		max-width: none;
+		padding: 0;
+		background: none;
+		box-shadow: none;
+	}
+}
