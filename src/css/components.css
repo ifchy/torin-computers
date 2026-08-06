@@ -20,15 +20,27 @@
 	min-height: clamp(16rem, 42svh, 22rem);
 	display: grid;
 	align-content: center;
-	/* Compact mobile-first padding. Measured 2026-08-06: the two hero CTA
-	   labels are 178.2px and 189.4px wide at --fs-body/700, so at 360px (328px
-	   of content box) they CANNOT share a row and the block is intrinsically
-	   two rows / 104px. With --sp-2xl padding the content stack totalled 369px
-	   and overflowed the 268.8px min-height, rendering the hero at 57.7% of a
-	   640px viewport — D-30's exact failure mode. Trimming padding and the
-	   internal gaps below 35rem brings the stack to 249.6px, back under
-	   min-height, so the hero renders at 42svh again. Restored to the UI-SPEC
-	   --sp-2xl at >=35rem, where both buttons fit one row. */
+	/* INVARIANT (D-30): the mobile hero CONTENT STACK must stay strictly under
+	   the resolved clamp(16rem, 42svh, 22rem) min-height. If it does not, the
+	   hero is sized by its contents instead of by 42svh, it grows past the
+	   above-the-fold budget, and the first category card's title drops below
+	   the fold — D-30's exact failure mode. The trust badge's own
+	   margin-block-start is a term in that stack, so any change to it changes
+	   this arithmetic; re-derive the figure below when it moves.
+	   Evidence, measured 2026-08-06: the two hero CTA labels are 178.2px and
+	   189.4px wide at --fs-body/700, so at 360px (328px of content box) they
+	   CANNOT share a row and the block is intrinsically two rows / 104px. With
+	   --sp-2xl padding the stack totalled 369px against a 268.8px min-height,
+	   rendering the hero at 57.7% of a 640px viewport. Trimming padding and the
+	   internal gaps below 35rem brought it to 249.6px, back under min-height.
+	   That 249.6px was measured while `.hero p` was wrongly winning the badge's
+	   margin (--sp-md 16px in place of the badge's own --sp-sm 8px). With that
+	   collision closed (02-05/CR-01) the stack is 8px SHORTER — 241.6px, which
+	   is DERIVED from the prior measurement, not itself measured. The mobile
+	   fold therefore gains headroom rather than losing it. A fresh 360x640
+	   measurement is an open human-check carried by 02-05; the invariant above,
+	   not this figure, is what the comment exists to protect. Restored to the
+	   UI-SPEC --sp-2xl at >=35rem, where both buttons fit one row. */
 	padding-block: var(--sp-sm);
 	color: var(--c-on-dark);
 	background:
@@ -46,7 +58,19 @@
 	color: inherit;
 }
 
-.hero p {
+/* Hero PROSE only. Scoped as `.hero__inner > p:not(.trust-badge)` — (0,2,1):
+   one class from .hero__inner, one class contributed by the :not() argument,
+   one type from p. The former `.hero p` was (0,1,1) and therefore beat
+   `.trust-badge` (0,1,0) regardless of source order, overriding BOTH the
+   badge's colour and its margin-block-start (02-VERIFICATION gap 1 / CR-01).
+   The cascade is won by scoping this rule, never by escalating the badge —
+   specificity discipline is the only cascade mechanism this codebase has.
+   This rule matches NOTHING in the deployed tree today: no hero on the site
+   carries a prose paragraph. That is the intended result, not a mistake. It
+   stays so a Phase 3 hero paragraph inherits the on-dark MUTED colour rather
+   than full-white --c-on-dark; deleting it would invite the next author to
+   re-add the unscoped form and re-break the badge.                         */
+.hero__inner > p:not(.trust-badge) {
 	color: var(--c-on-dark-muted);
 	margin-block-start: var(--sp-md);
 }
@@ -203,8 +227,18 @@
 }
 
 /* --- Trust badge «Безплатна диагностика» (D-15) -------------------------
-   A trust/conversion element, never a line item in a service list. Amber
-   fill with dark on-brand ink = 10.14:1.                                   */
+   A trust/conversion element, never a line item in a service list. The pair
+   that actually applies is --c-on-brand ink on the --c-brand fill: #16223a on
+   #ffc70a = 10.14:1 in the shipping Theme B, #1a1200 on #fbad03 = 9.80:1 in
+   the dev-only Theme A — both far above the 4.5:1 WCAG 2.1 SC 1.4.3 floor for
+   normal text.
+   LOAD-BEARING, do not simplify: the hero's prose rule above is deliberately
+   scoped away from this element as `.hero__inner > p:not(.trust-badge)`.
+   Collapsing it back to a class plus a bare paragraph type re-creates a
+   (0,1,1)-beats-(0,1,0) collision that silently repaints this badge in
+   --c-on-dark-muted #c9d6ea on the amber fill = 1.06:1 (Theme A 1.29:1) —
+   invisible, above the fold, on the homepage — and steals the
+   margin-block-start below along with it.                                  */
 .trust-badge {
 	display: inline-flex;
 	align-items: center;
