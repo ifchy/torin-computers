@@ -645,6 +645,23 @@ body:not(:has(.callbar)) {
 	border-block-start: 1px solid rgb(255 255 255 / .14);
 }
 
+/* Load-bearing, not decoration — the same reason .footer-heading above exists.
+   base.css colours every anchor with --c-link, which measures 1.81:1 against
+   this footer's --c-ink-deepest fill: the legal-line link would have shipped
+   effectively invisible. --c-on-dark-muted measures 10.44:1 here and 7.89:1 on
+   Theme A's deepest ink, both clear of the 4.5:1 floor, and its muted weight is
+   what keeps the link subordinate to the contact block above it.
+
+   One class plus one type, (0,1,1), which beats base.css's bare type selector
+   at (0,0,1) — by specificity, not by an importance flag.
+
+   Deliberately no min-height: this is an inline link inside a sentence, which
+   is exempt from the standalone target size the footer link rows carry, and a
+   height here would break the legal line's flow. */
+.footer-legal a {
+	color: var(--c-on-dark-muted);
+}
+
 /* --- Notice bands -------------------------------------------------------
    .notice--info is the static replacement for the legacy holiday/hours banner
    script (OWNER-QUESTIONS #8). The error and success variants have NO handler

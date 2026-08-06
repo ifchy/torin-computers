@@ -88,7 +88,27 @@ require_once(dirname(__FILE__) . '/icons.php');
 
 			</div>
 
-			<p class="site-footer__legal footer-legal">TORIN Company Ltd. &copy; <?php echo date("Y"); ?> г.</p>
+			<?php // The EU-publicity page, reachable again. It had zero inbound links
+			      // across all sixteen deployed pages — a reachability regression,
+			      // since the legacy homepage linked it. D-35 permits keeping it live
+			      // and unlinked OR linked only from the footer, so this is inside the
+			      // decision as written and needs no new one; it closes the residual
+			      // publicity-audit exposure (Reg. EU 1303/2013 Art. 115 + Annex XII)
+			      // at the cost of one anchor.
+			      //
+			      // It belongs HERE, in the legal line, and must NOT be promoted into
+			      // the navigation, the contact block, or the secondary-links row
+			      // above. That row is D-33's five-item set and an EU-funding
+			      // disclosure is a legal notice, not a service link — promoting it
+			      // would re-create under a compliance justification exactly the
+			      // competition for attention D-35 removed.
+			      //
+			      // The link text is the same string covid.html carries as its own
+			      // title, so the two cannot drift into two names for one page.
+			      // components.css gives this anchor an explicit on-dark colour: the
+			      // page link colour it would otherwise inherit is unreadable on this
+			      // footer's fill. ?>
+			<p class="site-footer__legal footer-legal">TORIN Company Ltd. &copy; <?php echo date("Y"); ?> г. · <a href="covid.html">Проект BG16RFOP002-2.073</a></p>
 		</div>
 	</footer>
 <?php
