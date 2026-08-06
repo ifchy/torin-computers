@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 02
 current_phase_name: design-system-information-architecture
 status: executing
-stopped_at: Completed 02-05-PLAN.md
-last_updated: "2026-08-06T14:01:00.725Z"
+stopped_at: Completed 02-06-PLAN.md
+last_updated: "2026-08-06T14:13:31.944Z"
 last_activity: 2026-08-06
 last_activity_desc: Phase 02 execution started
 progress:
   total_phases: 2
   completed_phases: 1
   total_plans: 12
-  completed_plans: 10
+  completed_plans: 11
 ---
 
 # Project State
@@ -28,11 +28,11 @@ See: .planning/PROJECT.md (updated 2026-08-04)
 ## Current Position
 
 Phase: 02 (design-system-information-architecture) — EXECUTING
-Plan: 2 of 7
-Status: Ready to execute
+Plan: 7 of 7
+Status: Ready to execute (02-01..02-06 complete; 02-07 remains)
 Last activity: 2026-08-06 — Phase 02 execution started
 
-Progress: [████████░░] 83%
+Progress: [█████████░] 92%
 
 ## Performance Metrics
 
@@ -68,6 +68,7 @@ Progress: [████████░░] 83%
 | Phase 02 P03 | 62min | 2 tasks | 8 files |
 | Phase 02 P04 | 40min | 3 tasks | 17 files |
 | Phase 02 P05 | 20 min | 2 tasks | 2 files |
+| Phase 02 P06 | 12 min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -99,6 +100,10 @@ Recent decisions affecting current work:
 - [Phase ?]: 02-05: a focus ring drawn with outline-offset is painted on the surface BEHIND the control, so its contrast is measured against that surface — never against the button fill the old comment reasoned about
 - [Phase ?]: 02-05: .callbar is a position:fixed sibling of <main>, inside neither .hero nor .site-footer — it must be named explicitly in every dark-surface rule group; omitting it is what produced CR-02
 - [Phase ?]: 02-05: 02-REVIEW.md's 5.16:1 and 8.7:1 focus-ring figures are THEME A values reported as if they were the shipping theme — recomputed Theme B measures 9.49:1 and 11.09:1
+- [Phase ?]: 02-06: the no-script nav ships via a <noscript> override stylesheet, not by shipping the nav open and collapsing it with JS — the latter has an inherent flash on every one of 16 page loads and suppressing it needs a render-blocking capability marker, i.e. a second writer of nav state
+- [Phase ?]: 02-06: with scripting blocked the ENTIRE five-item nav was hidden below 56.25rem, not just the six category links — header.php's old comment understated it, and an understated record makes a later phase close the wrong defect
+- [Phase ?]: 02-06: the hamburger and Услуги button are display:none in the no-script rendering because each carries a collapsed-state ARIA attribute — left visible over an open list they would announce the opposite of what is rendered, which is worse than absent
+- [Phase ?]: 02-06: IA-02 deliberately NOT flipped to Complete — every rendered no-script check is unrun (no automatable browser), and commit abd5ba8 already reverted this exact class of premature flip once
 
 ### Pending Todos
 
@@ -118,6 +123,7 @@ None yet.
 - [Phase 2] UI-SPEC's above-the-fold arithmetic assumed the hero min-height would bind, but the two CTA labels (178.2px + 189.4px) cannot share a 328px content box at 360px, so the CTA block is intrinsically two rows. Plans adding hero content must re-check the 42% budget.
 - OWNER-QUESTIONS #20 (working hours) and #21 (chat-capable number) block the Phase 4 cutover: both ship on all 16 pages and #20 also feeds Google's structured data
 - [Phase 2] 02-05 rendered-geometry and keyboard human-checks are UNRUN: no automatable browser on the build machine (no Chrome/Chromium/Playwright; Safari remote automation disabled behind a GUI-only setting). The hero-stack figure in components.css is DERIVED (241.6px), not measured, and the FOUT backstop is re-opened by the 8px stack change.
+- [Phase 2] 02-06 rendered no-script checks are UNRUN (same no-browser blocker as 02-05): nav visibility/activation at 360/900/1440px, header focus order, and scrollWidth<=innerWidth with scripting disabled. The UI-SPEC overflow backstop is RE-OPENED by 02-06's desktop layout and abstains to human_needed. Also open: 'flex: 1 0 100%' on the mid-list has-sub item splits the visible top-level links across two wrapped rows rather than one.
 
 ## Deferred Items
 
@@ -129,6 +135,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-06T14:00:47.034Z
-Stopped at: Completed 02-05-PLAN.md
+Last session: 2026-08-06T14:13:13.175Z
+Stopped at: Completed 02-06-PLAN.md
 Resume file: None
