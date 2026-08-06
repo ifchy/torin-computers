@@ -1,8 +1,23 @@
-<?php require_once(dirname(__FILE__) . '/includes/header.php'); ?>
+<?php
+// Per-page metadata (02-RESEARCH N-5). WORKING title and description carrying
+// the mechanism, derived from this page's existing subject; SEO-01 in Phase 3
+// owns the search-tuned copy, and CONTENT-01 owns the body below.
+//
+// D-35: this page stays LIVE and deliberately unlinked from the navigation.
+// The EU grant publicity obligation has very likely lapsed, but the downside of
+// being wrong is an audit finding, and CONTENT-02 only requires that the
+// content stop competing for attention on the homepage. Do not retire the
+// filename — SEO-04 locks it, and any later retirement must be a 301 (D-36).
+$torin_title = 'Проект BG16RFOP002-2.073 · ТОРИН КОМПЮТЪРС';
+$torin_desc  = 'Подробности относно проект BG16RFOP002-2.073, изпълняван от ТОРИН КОМПЮТЪРС.';
+require_once(dirname(__FILE__) . '/includes/header.php');
+?>
 
-<main class="container py-5">
-	<h1>ТОРИН КОМПЮТЪРС - ТОТАЛЕН РЕМОНТ НА ЛАПТОПИ</h1>
-	<p>Строим новия сайт на ТОРИН КОМПЮТЪРС тук. Тази страница е временен скелет, използван за да докаже, че PHP-include основата работи на живия хостинг.</p>
+<main class="section">
+	<div class="container">
+		<h1>Проект BG16RFOP002-2.073</h1>
+		<p>Строим новия сайт на ТОРИН КОМПЮТЪРС тук. Тази страница е временен скелет, използван за да докаже, че PHP-include основата работи на живия хостинг.</p>
+	</div>
 </main>
 
 <?php require_once(dirname(__FILE__) . '/includes/footer.php'); ?>

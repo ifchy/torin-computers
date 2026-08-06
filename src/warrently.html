@@ -1,8 +1,21 @@
-<?php require_once(dirname(__FILE__) . '/includes/header.php'); ?>
+<?php
+// Per-page metadata (02-RESEARCH N-5). WORKING title and description carrying
+// the mechanism, derived from this page's existing subject; SEO-01 in Phase 3
+// owns the search-tuned copy, and CONTENT-01 owns the body below.
+//
+// The misspelled filename is deliberate: SEO-04 locks it byte-for-byte. It is
+// an indexed URL, and correcting the spelling would need a 301 and forfeit
+// accumulated ranking signal for a change no visitor ever sees.
+$torin_title = 'Гаранционни условия · ТОРИН КОМПЮТЪРС';
+$torin_desc  = 'Гаранционни условия и изисквания при ремонт в ТОРИН КОМПЮТЪРС.';
+require_once(dirname(__FILE__) . '/includes/header.php');
+?>
 
-<main class="container py-5">
-	<h1>ТОРИН КОМПЮТЪРС - ТОТАЛЕН РЕМОНТ НА ЛАПТОПИ</h1>
-	<p>Строим новия сайт на ТОРИН КОМПЮТЪРС тук. Тази страница е временен скелет, използван за да докаже, че PHP-include основата работи на живия хостинг.</p>
+<main class="section">
+	<div class="container">
+		<h1>Гаранционни условия</h1>
+		<p>Строим новия сайт на ТОРИН КОМПЮТЪРС тук. Тази страница е временен скелет, използван за да докаже, че PHP-include основата работи на живия хостинг.</p>
+	</div>
 </main>
 
 <?php require_once(dirname(__FILE__) . '/includes/footer.php'); ?>
