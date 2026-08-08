@@ -8,11 +8,11 @@ updated: 2026-08-07T00:00:00Z
 
 ## Current Test
 
-number: 3
-name: Трите нови URL адреса са правилните постоянни адреси
+number: 4
+name: Преместване на бутоните при зареждане на шрифта (FOUT)
 expected: |
-  profilaktika-laptop.html, optimizatsiq.html и zalivane-technosti.html са
-  адресите, на които тези три страници трябва да останат завинаги.
+  На бавна връзка при първо посещение двата бутона в началния екран не се
+  преместват видимо, когато шрифтът Sofia Sans се зареди.
 awaiting: user response
 
 ## Tests
@@ -45,7 +45,9 @@ source_summary: 02-02-SUMMARY.md
 
 ### 3. Трите нови URL адреса са правилните постоянни адреси
 expected: profilaktika-laptop.html, optimizatsiq.html и zalivane-technosti.html са адресите, на които тези страници трябва да останат завинаги
-result: [pending]
+result: pass
+reported: "pass"
+note: "Owner confirmed the three slugs are permanent. These are now committed URLs — a later change requires 301 redirects to preserve ranking and inbound links (MIGR-01/SEO-04 territory in Phase 4)."
 coverage_id: D11
 source_summary: 02-02-SUMMARY.md
 
@@ -183,9 +185,9 @@ gap_ref: G-02-1b
 ## Summary
 
 total: 23
-passed: 19
+passed: 20
 issues: 2
-pending: 2
+pending: 1
 skipped: 0
 blocked: 0
 
