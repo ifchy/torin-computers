@@ -28,6 +28,13 @@ expected: Сайтът изглежда модерен на телефон и к
 result: issue
 reported: "на телефон изглежда ок, но на компютър почти нищо не е както хората, лентата за навигиране вместо да показва отделните елементи на един ред ги подредило в колона като дори и съдържанието на 'Услуги' е видимо през цялото време и съответно само лентата за навигиране заема приблизително половината екран, скролвайки надолу всяка една от иконките заема целия екран и необходимо да оскролнеш още за да видиш и текста, не може и да става дума за карти за всяка една от тези услуги. като цяло всички икони са огромни и освен това ги намирам за трудни за разпознаване. мисля че ще е по-добре ако бъдат заменени с изображения"
 severity: blocker
+resolution: |
+  Hypothesis CONFIRMED by the user: a hard reload (Cmd+Shift+R) restored the
+  correct rendering — nav on one row, six cards, icons at normal size. The
+  stylesheets as deployed are correct; the defect is that a cached copy cannot
+  be invalidated. Gap G-02-1 is re-scoped accordingly: the rendering assertion
+  passes on a cold cache and FAILS for any returning visitor, which is the
+  condition that matters at cutover.
 
 ### 2. Симптомните редове на шестте карти звучат като езика на клиента
 expected: Кратките редове под всяко заглавие ("паднал лаптоп, счупен корпус, разхлабени панти" и т.н.) са формулировки, които клиентите наистина използват
@@ -195,7 +202,17 @@ blocked: 0
         <ul> renders as a column, sub-list has no display:none, SVG icons have
         no width/height, cards have no surface).
       - Phone is unaffected because it is a separate cache.
-    NOT YET CONFIRMED — awaiting a hard-reload result from the user.
+    CONFIRMED 2026-08-08: the user hard-reloaded and the rendering corrected
+    itself completely. The stylesheets are right; only cache invalidation is
+    missing.
+  impact_at_cutover: |
+    This is the reason the gap stays open rather than being closed as "not a
+    code defect". torin.bg is a live site with returning local customers. At the
+    Phase 4 cutover the HTML changes immediately (max-age=0) while every
+    returning visitor keeps a components.css from the OLD site for up to seven
+    days — new markup styled by old CSS, which is precisely the broken rendering
+    reported here. It would hit real customers, not reviewers, and there is no
+    way to flush it remotely once shipped.
   method_defect: |
     Every harness probe requested the page with a ?v=<timestamp> cache-buster,
     which bypassed exactly this cache. The automated verification therefore
