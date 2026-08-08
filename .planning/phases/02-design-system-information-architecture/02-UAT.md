@@ -172,17 +172,18 @@ measured: "Точно една CTA tel: стойност (+35929549710) на в�
 
 ### 23. Разпознаваемост на шестте иконки (след поправката на кеша)
 expected: Всяка от шестте иконки подсказва за коя услуга става дума още преди да се прочете заглавието
-result: issue
+result: skipped
 reported: "проблема с иконите не е в размера а абстрактността така да се каже, без да се види текста отдолу би било мн трудно да се предположи какво искат да кажат. определено не искам да слагам снимки на тяхно място точно поради причините които ти изброи, но все пак бих искал да са някак по разпознаваеми и по възможност да не са само един цвят а може би да ползват двата основни цвята от темата"
-severity: major
-gap_ref: G-02-1b
+reason: "Deferred follow-up: нека ги оставим за фаза 3, дотогава ще използвам времето да търся още идеи защото засега не съм удовлетворен, но и не искам да губя прекалено много време за тях сега при положения че замяната на иконките може да стане лесно във всеки един момент"
+gap_ref: G-02-1b (deferred, not blocking)
 
 ## Summary
 
 total: 23
 passed: 20
-issues: 3
+issues: 2
 pending: 0
+skipped: 1
 skipped: 0
 blocked: 0
 
@@ -192,8 +193,22 @@ blocked: 0
   truth: "Every page renders with the new responsive design system and displays correctly on mobile and desktop viewports"
   status: failed
   reason: "User reported the desktop rendering is broken: nav stacked in a column with the Услуги sub-list permanently expanded and consuming ~half the viewport, no card treatment on the six categories, icons rendering at full-viewport size with the text pushed below them. Phone renders correctly."
-  severity: blocker
+  severity: major
   test: 1
+  severity_correction: |
+    Originally recorded as blocker on the reasoning that returning torin.bg
+    customers would get new HTML with old CSS at cutover. That reasoning was
+    WRONG and is retracted. The owner asked why the CSS is not simply renamed in
+    the new version, which prompted the check: the legacy site loads
+    assets1/css/theme.min.css, business.css, animation.css; the new site loads
+    css/base.css, layout.css, components.css. Zero overlap in filename OR
+    directory, so at cutover no returning visitor holds any of the new files
+    cached and everyone gets fresh CSS.
+
+    What remains real, hence major rather than resolved: staging review is
+    unreliable while /new/ is being iterated (this is what bit the owner), and
+    every FUTURE css edit after launch leaves returning customers on a stale
+    copy for up to 7 days.
   hypothesis: |
     Stale CSS cache, not a defect in the current stylesheets. Evidence:
       - components.css is served with cache-control: max-age=604800 (7 days),
@@ -234,7 +249,9 @@ blocked: 0
 
 - gap_id: G-02-1b
   truth: "The six category icons are recognisable as the services they represent, without reading the label beneath"
-  status: failed
+  status: deferred
+  deferred_to_phase: 3
+  deferred_reason: "Owner decision 2026-08-09: wants time to gather more ideas, and the swap is cheap at any point. NOT a Phase 2 blocker and must not spawn a gap-closure plan. Tracked as .planning/todos/pending/redraw-category-icons.md (resolves_phase: 3). Premise verified: icon names occupy 6 lines in categories.php, the drawings live in icons.php, and components.css:195 already supports <img>, so even a switch to raster images touches nothing else." 
   reason: "Confirmed at correct size after the cache fix, so this is independent of G-02-1. User: the icons are too abstract — without the caption it would be very hard to guess what they depict. Photographs were explicitly REJECTED by the owner for the trust/weight reasons discussed. Direction given: keep icons, make them more literal, and use the theme's two main colours rather than a single flat colour."
   severity: major
   test: 23
@@ -296,3 +313,12 @@ blocked: 0
     regress the D-30 above-the-fold invariant — the hero content stack currently
     measures 233.4px against a 268.8px min-height (35.4px of headroom), verified
     in 02-RENDERED-VERIFICATION.md.
+
+## Deferred Follow-Ups
+
+- test: 23
+  gap_id: G-02-1b
+  idea: "Преначертаване на шестте иконки — по-конкретни и двуцветни. Собственикът иска време да събере идеи; смяната е евтина по всяко време."
+  deferred_at: 2026-08-09
+  deferred_to_phase: 3
+  tracked_as: .planning/todos/pending/redraw-category-icons.md
