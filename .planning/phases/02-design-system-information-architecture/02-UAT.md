@@ -8,12 +8,12 @@ updated: 2026-08-07T00:00:00Z
 
 ## Current Test
 
-number: 1
-name: Общо визуално приемане на редизайна
+number: 2
+name: Симптомните редове на шестте карти звучат като езика на клиента
 expected: |
-  Отваряте https://torin.bg/new/ на телефон и на компютър. Сайтът изглежда
-  модерен и подреден, а не като стария шаблон. Шестте категории услуги се
-  виждат ясно като отделни карти, а не като дълъг списък с еднакви иконки.
+  Кратките редове под всяко заглавие на карта — например «паднал лаптоп,
+  счупен корпус, разхлабени панти» — са формулировки, с които клиентите
+  наистина описват проблема си, когато се обадят или дойдат в сервиза.
 awaiting: user response
 
 ## Tests
@@ -172,11 +172,18 @@ source: automated
 coverage_id: 02-07/WR-10
 measured: "Точно една CTA tel: стойност (+35929549710) на всичките 16 страници"
 
+### 23. Разпознаваемост на шестте иконки (след поправката на кеша)
+expected: Всяка от шестте иконки подсказва за коя услуга става дума още преди да се прочете заглавието
+result: issue
+reported: "проблема с иконите не е в размера а абстрактността така да се каже, без да се види текста отдолу би било мн трудно да се предположи какво искат да кажат. определено не искам да слагам снимки на тяхно място точно поради причините които ти изброи, но все пак бих искал да са някак по разпознаваеми и по възможност да не са само един цвят а може би да ползват двата основни цвята от темата"
+severity: major
+gap_ref: G-02-1b
+
 ## Summary
 
-total: 22
+total: 23
 passed: 18
-issues: 1
+issues: 2
 pending: 3
 skipped: 0
 blocked: 0
@@ -228,11 +235,35 @@ blocked: 0
     - "Or a short CSS max-age while /new/ is an actively-reviewed staging preview"
 
 - gap_id: G-02-1b
-  truth: "The six category icons are recognisable as the services they represent"
+  truth: "The six category icons are recognisable as the services they represent, without reading the label beneath"
   status: failed
-  reason: "User finds the icons hard to recognise and suggests replacing them with photographs/images. Reported alongside G-02-1; the 'huge' half of the complaint is likely a symptom of the stale CSS, but the recognisability judgement is independent of size and survives the cache fix."
+  reason: "Confirmed at correct size after the cache fix, so this is independent of G-02-1. User: the icons are too abstract — without the caption it would be very hard to guess what they depict. Photographs were explicitly REJECTED by the owner for the trust/weight reasons discussed. Direction given: keep icons, make them more literal, and use the theme's two main colours rather than a single flat colour."
   severity: major
-  test: 1
-  note: "Separated from G-02-1 deliberately — one is a delivery defect, the other is a design decision. Confirm after the cache issue is resolved, since icons at the correct size may read differently."
-  artifacts: []
-  missing: []
+  test: 23
+  owner_direction:
+    - "Keep SVG icons — do NOT substitute photographs (owner decision, 2026-08-08)"
+    - "Make the depicted object more literal/concrete so it reads without the label"
+    - "Use the two main theme colours rather than one flat colour"
+  artifacts:
+    - path: "src/includes/icons.php"
+      issue: "All six category glyphs are single-colour line art (stroke=currentColor, fill=none, 15 of each) and depict abstract compositions: cat-1 fracture line across a lid corner, cat-2 panel lifting with ribbon connector, cat-3 rising arrow over a laptop, cat-4 droplet over a chip grid, cat-5 fan blades with heat waves, cat-6 wrench crossing an instrument outline"
+  missing:
+    - "Redrawn cat-1..cat-6 with more literal subject matter"
+    - "A two-tone treatment using --c-brand (#ffc70a) and the navy ink token"
+  constraints: |
+    Three constraints the redraw must respect, all established earlier in this phase:
+
+    1. THEME SWITCHING. The icons currently inherit their colour via
+       stroke="currentColor", which is why they work unchanged in Theme A and
+       Theme B. Hardcoding two hex values would break that. The accent must come
+       from a CSS custom property or a class, so both themes still resolve.
+
+    2. CONTRAST. Amber #ffc70a measures roughly 1.7:1 on white — this phase just
+       spent two plans (CR-01, CR-02) fixing exactly that class of defect. Amber
+       may carry a filled accent area, but it must NOT be the stroke that carries
+       the meaning of the glyph, and it must never be the only thing
+       distinguishing one icon from another.
+
+    3. CARD SURFACE. The icons sit on --c-surface-2 in the card header, not on
+       white and not on the amber fill, so the navy/amber pairing has to be
+       checked against that surface specifically.
