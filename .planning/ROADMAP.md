@@ -59,7 +59,7 @@ Plans:
   3. A visitor can reach any part of the site via a flat, shallow navigation structured around the six categories, with no dense mega-menu.
   4. Every page declares `lang="bg"` and all Cyrillic text renders correctly in the new typography.
 
-**Plans**: 7/7 plans executed
+**Plans**: 7/9 plans executed
 Plans:
 **Wave 1**
 
@@ -88,6 +88,11 @@ Plans:
 **Wave 7** *(gap closure — blocked on Wave 6)*
 
 - [x] 02-07-PLAN.md — Reachability and contact single-sourcing: discreet footer link to covid.html (D-35), one E.164 phone key read by every CTA and the structured data (WR-10)
+
+**Wave 8** *(gap closure from UAT — blocked on Wave 7; the two plans touch disjoint files and run in parallel)*
+
+- [ ] 02-08-PLAN.md — G-02-1 CSS cache invalidation: `?v=<filemtime>` on every stylesheet and script URL, staging-bounded cache lifetime, and a committed non-cache-busted gate over all sixteen pages
+- [ ] 02-09-PLAN.md — G-02-4 web-font swap reflow: probe-calibrated metric-adjusted fallback face so the hero heading sets the same line count before and after the swap
 
 **UI hint**: yes
 
