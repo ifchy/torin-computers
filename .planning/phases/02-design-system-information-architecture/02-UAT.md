@@ -8,12 +8,11 @@ updated: 2026-08-07T00:00:00Z
 
 ## Current Test
 
-number: 2
-name: Симптомните редове на шестте карти звучат като езика на клиента
+number: 3
+name: Трите нови URL адреса са правилните постоянни адреси
 expected: |
-  Кратките редове под всяко заглавие на карта — например «паднал лаптоп,
-  счупен корпус, разхлабени панти» — са формулировки, с които клиентите
-  наистина описват проблема си, когато се обадят или дойдат в сервиза.
+  profilaktika-laptop.html, optimizatsiq.html и zalivane-technosti.html са
+  адресите, на които тези три страници трябва да останат завинаги.
 awaiting: user response
 
 ## Tests
@@ -38,7 +37,9 @@ resolution: |
 
 ### 2. Симптомните редове на шестте карти звучат като езика на клиента
 expected: Кратките редове под всяко заглавие ("паднал лаптоп, счупен корпус, разхлабени панти" и т.н.) са формулировки, които клиентите наистина използват
-result: [pending]
+result: pass
+reported: "нека да останат така засега"
+note: "Owner accepted the developer-written phrasing as-is for now. Explicitly provisional ('засега') — if real customer phrasing is gathered later, this is a low-cost content edit in categories.php, not a structural change. Does NOT block the phase."
 coverage_id: D10
 source_summary: 02-02-SUMMARY.md
 
@@ -182,9 +183,9 @@ gap_ref: G-02-1b
 ## Summary
 
 total: 23
-passed: 18
+passed: 19
 issues: 2
-pending: 3
+pending: 2
 skipped: 0
 blocked: 0
 
