@@ -1,5 +1,5 @@
 ---
-status: testing
+status: diagnosed
 phase: 02-design-system-information-architecture
 source: [02-01-SUMMARY.md, 02-02-SUMMARY.md, 02-03-SUMMARY.md, 02-04-SUMMARY.md, 02-05-SUMMARY.md, 02-06-SUMMARY.md, 02-07-SUMMARY.md]
 started: 2026-08-07T00:00:00Z
@@ -8,12 +8,7 @@ updated: 2026-08-07T00:00:00Z
 
 ## Current Test
 
-number: 4
-name: Преместване на бутоните при зареждане на шрифта (FOUT)
-expected: |
-  На бавна връзка при първо посещение двата бутона в началния екран не се
-  преместват видимо, когато шрифтът Sofia Sans се зареди.
-awaiting: user response
+[testing complete]
 
 ## Tests
 
@@ -186,8 +181,8 @@ gap_ref: G-02-1b
 
 total: 23
 passed: 20
-issues: 2
-pending: 1
+issues: 3
+pending: 0
 skipped: 0
 blocked: 0
 
@@ -270,3 +265,34 @@ blocked: 0
     3. CARD SURFACE. The icons sit on --c-surface-2 in the card header, not on
        white and not on the amber fill, so the navy/amber pairing has to be
        checked against that surface specifically.
+
+- gap_id: G-02-4
+  truth: "The web-font swap does not visibly displace the two hero CTA buttons on a throttled first visit"
+  status: failed
+  reason: "Measured FAIL: hero CTAs move 27.1px upward across the font swap (threshold 8px). At 360x640 the h1 renders 110.4px tall in the fallback stack (three lines) and 73.6px with Sofia Sans (two lines); the 36.8px collapse pulls both CTAs up. Owner chose the reserve-space option over font-display:optional, so first-paint Cyrillic readability (the stated reason swap was chosen) is preserved."
+  severity: major
+  test: 4
+  owner_direction:
+    - "Option 3 — reserve space for the heading. NOT font-display:optional (would leave slow first visits permanently in the fallback face), NOT accept-as-is."
+  artifacts:
+    - path: "src/css/base.css"
+      issue: "Two @font-face blocks declare font-display:swap with no metric-matched fallback, so the fallback stack sets a different line count for the same string"
+  missing:
+    - "A metrics-matched fallback so the fallback and Sofia Sans occupy the same block height for the hero h1"
+  implementation_note: |
+    IMPORTANT — a naive min-height on the h1 does NOT fix this, and the plan must
+    not reach for one. The fallback needs MORE lines than Sofia Sans (three vs
+    two), not fewer, so a min-height sized to the Sofia Sans height would be
+    overflowed by the fallback rather than absorbing it; the CTAs would still move.
+
+    The mechanism that actually reserves the space is a metric-adjusted fallback
+    @font-face — a local() fallback declared with size-adjust (and, if needed,
+    ascent-override / descent-override) tuned so the fallback sets the SAME
+    number of lines for the hero string at the narrow breakpoint. Widely
+    supported in current Chrome, Firefox and Safari.
+
+    Whatever mechanism is chosen must be re-measured with
+    scripts/render-check.sh scripts/probes/font-swap.js at 360x640, and must not
+    regress the D-30 above-the-fold invariant — the hero content stack currently
+    measures 233.4px against a 268.8px min-height (35.4px of headroom), verified
+    in 02-RENDERED-VERIFICATION.md.
