@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 02
 current_phase_name: design-system-information-architecture
 status: executing
-stopped_at: Completed 02-06-PLAN.md
-last_updated: "2026-08-06T14:13:31.944Z"
-last_activity: 2026-08-06
+stopped_at: Completed 02-08-PLAN.md
+last_updated: "2026-08-09T13:51:37.471Z"
+last_activity: 2026-08-09
 last_activity_desc: Phase 02 execution started
 progress:
   total_phases: 2
   completed_phases: 1
-  total_plans: 12
-  completed_plans: 11
+  total_plans: 14
+  completed_plans: 13
 ---
 
 # Project State
@@ -28,11 +28,11 @@ See: .planning/PROJECT.md (updated 2026-08-04)
 ## Current Position
 
 Phase: 02 (design-system-information-architecture) — EXECUTING
-Plan: 7 of 7
-Status: Ready to execute (02-01..02-06 complete; 02-07 remains)
-Last activity: 2026-08-06 — Phase 02 execution started
+Plan: 9 of 9
+Status: Executing (02-01..02-08 complete; 02-09 remains — same wave as 02-08)
+Last activity: 2026-08-09 — Phase 02 execution started
 
-Progress: [█████████░] 92%
+Progress: [█████████░] 93%
 
 ## Performance Metrics
 
@@ -69,6 +69,7 @@ Progress: [█████████░] 92%
 | Phase 02 P04 | 40min | 3 tasks | 17 files |
 | Phase 02 P05 | 20 min | 2 tasks | 2 files |
 | Phase 02 P06 | 12 min | 2 tasks | 2 files |
+| Phase 02 P08 | 50m | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -104,6 +105,9 @@ Recent decisions affecting current work:
 - [Phase ?]: 02-06: with scripting blocked the ENTIRE five-item nav was hidden below 56.25rem, not just the six category links — header.php's old comment understated it, and an understated record makes a later phase close the wrong defect
 - [Phase ?]: 02-06: the hamburger and Услуги button are display:none in the no-script rendering because each carries a collapsed-state ARIA attribute — left visible over an open list they would announce the opposite of what is rendered, which is worse than absent
 - [Phase ?]: 02-06: IA-02 deliberately NOT flipped to Complete — every rendered no-script check is unrun (no automatable browser), and commit abd5ba8 already reverted this exact class of premature flip once
+- [Phase ?]: G-02-1 closed with ?v=<filemtime> query-string stamping in PHP, not per-version file renames — rename is manual and every manual step is eventually skipped
+- [Phase ?]: Sofia Sans woff2 preload deliberately NOT version-stamped: it must byte-match the @font-face src in base.css, and a query string defeats font-swap.js's *.woff2 block glob, which would blind plan 02-09's G-02-4 gate rather than fail it
+- [Phase ?]: Staging text/css and both JavaScript media types bounded to max-age=300 as a second line of defence behind the stamp; Phase 4 raises this once proven in production (DESIGN-02)
 
 ### Pending Todos
 
@@ -135,6 +139,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-06T14:13:13.175Z
-Stopped at: Completed 02-06-PLAN.md
+Last session: 2026-08-09T13:51:37.233Z
+Stopped at: Completed 02-08-PLAN.md
 Resume file: None

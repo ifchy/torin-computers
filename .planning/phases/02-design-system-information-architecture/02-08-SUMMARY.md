@@ -200,6 +200,20 @@ None. No placeholder value, no hardcoded empty, no TODO was introduced.
 - **`dev-switcher.php` line 34 emits `$torin_extra_head` outside the `if ($torin_theme === 'a')` branch**, so `theme-a.css` is linked on every page load including the default Theme B. Observed during this plan and deliberately **not** fixed: it is a one-line move inside a file Phase 4 deletes outright, and its whole effect is one wasted request for a stylesheet whose single `[data-theme="a"]` block is inert on a Theme-B page. **Task 2's assertion of exactly one stamped `theme-a.css` on the default page depends on this defect** and would read 0 once it is fixed. Task 3's committed gate asserts the same link **conditionally** precisely so it survives that fix and the Phase 4 deletion — the two assertions differ **on purpose**, not by oversight, and the reason is stated at the code in both places.
 - **The Sofia Sans preload must stay unstamped for a second reason invisible from `header.php`:** `scripts/probes/font-swap.js` line 39 blocks fonts with the glob `['*.woff2','*.woff','*.ttf']`, which stops matching once a query string is appended. Stamping the font would let the fallback pass load the real font, making both passes identical, and plan 02-09's G-02-4 gate would report `maxAbsDeltaPx: 0` — a clean-looking pass that measures nothing. **Stamping this href does not fail that gate, it blinds it.** Both plans in this wave carry the coupling in their own text so a future change to either side cannot silently break the other. The checker enforces it: `WOFF2Q` is asserted 0 on all sixteen pages, with the reason in the failure message.
 
+### 3. [Rule 2 — project precedent] DESIGN-01 deliberately NOT flipped to Complete
+
+The plan's frontmatter carries `requirements: [DESIGN-01]`, which would normally be marked complete on plan completion. It was deliberately left open:
+
+- DESIGN-01 is claimed by **eight** plans in this phase, including **02-09**, which is still outstanding in this same wave.
+- Its traceability row in `REQUIREMENTS.md` reads **`Gaps Found`**, and G-02-4 (font-swap reflow) is the gap 02-09 exists to close.
+- This project has already reverted exactly this class of premature flip once (commit `abd5ba8`, recorded as a phase-02 decision).
+
+Flipping it here would claim a phase-wide requirement on the strength of one gap closure. `roadmap update-plan-progress 02` was run and correctly reports 8/9 plans, `In Progress`.
+
+### 4. [Rule 1] `state.advance-plan` wrote an incorrect Current Position
+
+The handler read a stale `Plan: 7 of 7` line and emitted `Plan: 2 of 9`. Corrected in `STATE.md` to `Plan: 9 of 9` with status `02-01..02-08 complete; 02-09 remains`. The frontmatter counts (`completed_plans: 13 / total_plans: 14`) come from a disk scan and were already correct.
+
 ## Threat Flags
 
 None. No new network endpoint, auth path, file-access pattern or schema change at a trust boundary. `T-02-27` (the `?v=<filemtime>` query publishing each asset's deploy timestamp) remains **accepted**: the origin already publishes the identical value in the `Last-Modified` response header on every one of these assets, as the Check B table above shows directly — the query string discloses nothing the response headers do not.
