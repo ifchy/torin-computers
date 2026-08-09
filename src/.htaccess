@@ -48,7 +48,24 @@ AddHandler application/x-httpd-php52 .html .htm
 	# HTML must stay uncached while /new/ is a live staging preview being reviewed;
 	# tuning for the real cutover is Phase 4's job (DESIGN-02).
 	ExpiresByType text/html "access plus 0 seconds"
-	ExpiresByType text/css "access plus 7 days"
+	# CSS and JS lifetimes are bounded to MINUTES for the staging window, down
+	# from the 7 days that produced gap G-02-1 (a reviewer stuck on a stylesheet
+	# from an earlier state of the design system, with no remote way to flush
+	# it). This is the SECOND line of defence, not the first: the ?v=<filemtime>
+	# stamp that header.php now puts on every one of these URLs is the primary
+	# mechanism, and both must fail before the condition recurs. If the stamp
+	# ever fails (asset-version.php emits a ?v=0 sentinel when a stat fails) a
+	# returning visitor is stale for 5 minutes instead of a week.
+	# js/site.js previously matched NO expiry rule at all and therefore fell to
+	# heuristic caching derived from Last-Modified — undeclared behaviour for
+	# the file that owns the navigation. Both registered JavaScript media types
+	# are listed because this host's mapping for .js is not verified.
+	# Phase 4 raises these once the stamp is proven in production (DESIGN-02),
+	# and must NOT raise them before: /new/ is a reviewed staging preview whose
+	# CSS changes several times a day.
+	ExpiresByType text/css "access plus 5 minutes"
+	ExpiresByType application/javascript "access plus 5 minutes"
+	ExpiresByType text/javascript "access plus 5 minutes"
 	ExpiresByType font/woff2 "access plus 1 year"
 	ExpiresByType image/png "access plus 30 days"
 	ExpiresByType image/svg+xml "access plus 30 days"

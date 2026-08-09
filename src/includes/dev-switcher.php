@@ -31,7 +31,20 @@ if (isset($_GET['theme']) && in_array($_GET['theme'], $torin_allowed_themes, tru
 if ($torin_theme === 'a') {
 	$torin_html_attr = ' data-theme="a"';
 }
-$torin_extra_head = '<link rel="stylesheet" href="css/theme-a.css">';
+// Version-stamped by the same helper as every other stylesheet (G-02-1,
+// plan 02-08). header.php requires includes/asset-version.php before it
+// includes this file, so torin_asset_url() is already in scope. A reviewer
+// comparing Theme A against Theme B must not be served a stale override
+// either — that reviewer is precisely who G-02-1 bit.
+//
+// NOTE, deliberately not fixed here: this assignment sits OUTSIDE the
+// `if ($torin_theme === 'a')` branch above, so the override is linked on
+// every page load including the default Theme B. That is a real pre-existing
+// wrong-condition bug, but it is out of scope for a cache-invalidation plan:
+// the fix is a one-line move inside a file the Phase 4 cutover deletes
+// outright, and its whole effect is one wasted request for a stylesheet whose
+// single [data-theme="a"] block is inert on a Theme-B page.
+$torin_extra_head = '<link rel="stylesheet" href="' . htmlspecialchars(torin_asset_url('css/theme-a.css'), ENT_QUOTES, 'UTF-8') . '">';
 
 function torin_render_theme_switcher($current) {
 	echo '<div class="dev-switcher" role="group" aria-label="Тема (само за разработка)">';

@@ -69,7 +69,34 @@ if (!isset($torin_desc)) {
 <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
 <?php // D-06a: Sofia Sans is self-hosted; the Cyrillic subset is what renders
       // the visible Bulgarian headline, so it alone is preloaded. crossorigin
-      // is required even same-origin or the file downloads twice. ?>
+      // is required even same-origin or the file downloads twice.
+      //
+      // THIS HREF IS DELIBERATELY NOT VERSION-STAMPED (plan 02-08), unlike
+      // every other asset URL in this file. Two independent reasons, and a
+      // future reader weighing "why not stamp this one too?" needs BOTH —
+      // the second is invisible from this file.
+      //
+      // 1. The preload URL must byte-match the URL the @font-face src in
+      //    css/base.css requests, or the preload misses and the browser
+      //    downloads the subset TWICE on every cold visit. base.css declares
+      //    that source as url('../fonts/sofia-sans-cyrillic.woff2') with no
+      //    query string, and it is a static stylesheet with no way to stamp
+      //    one in. Stamping only the preload is a performance regression
+      //    introduced under cover of a cache fix, on the one asset D-06a was
+      //    chosen for its payload size. Under D-06a a font change means a new
+      //    subset, which means a new FILENAME — its own invalidation — so the
+      //    one-year woff2 expiry stays correct with no stamp.
+      //
+      // 2. scripts/probes/font-swap.js line 39 builds its fallback-only pass
+      //    with Network.setBlockedURLs on the glob ['*.woff2','*.woff','*.ttf'],
+      //    and that glob STOPS MATCHING the moment a query string is appended
+      //    to the URL. A stamped woff2 would sail straight through the block:
+      //    pass 1 would render with the real font, both passes would be
+      //    identical, and the G-02-4 font-swap-reflow gate (plan 02-09) would
+      //    report maxAbsDeltaPx: 0 — reading as the cleanest possible pass
+      //    while measuring nothing whatsoever. Stamping this href does not
+      //    FAIL that gate, it BLINDS it, and a blinded gate is worse than a
+      //    failing one. Plan 02-09 records the same coupling from its side. ?>
 <link rel="preload" href="fonts/sofia-sans-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
 
 <?php // Cascade order IS link order — no @layer, no nesting. Three separate
@@ -87,9 +114,21 @@ if (!isset($torin_desc)) {
       // state transition on load and no flash of an open nav collapsing.
       // Emitted HERE, after all three unconditional stylesheets, so cascade
       // order is still link order and every (0,1,0) rule in that file wins its
-      // target by source position rather than by any escalation. Its contents
-      // are static markup; no PHP reaches inside it. ?>
-<noscript><link rel="stylesheet" href="css/no-js.css"></noscript>
+      // target by source position rather than by any escalation.
+      //
+      // CORRECTED RECORD (plan 02-08). This comment used to end "its contents
+      // are static markup; no PHP reaches inside it." That is now false — the
+      // href below is version-stamped by torin_asset_url() exactly like the
+      // three links above it, because a reviewer with scripting disabled is
+      // just as capable of holding a stale override as anyone else (G-02-1).
+      // A wrong record gets corrected here, never dropped. The accurate
+      // mechanism: PHP runs server-side regardless of which element it renders
+      // into, so this override is stamped identically in both renderings.
+      // The load-bearing half of the original claim is untouched — a
+      // scripting-capable user agent never parses this element's contents as
+      // markup and never fetches the file, so there is still no state
+      // transition on load and no flash of an open nav collapsing. ?>
+<noscript><link rel="stylesheet" href="<?php echo htmlspecialchars(torin_asset_url('css/no-js.css'), ENT_QUOTES, 'UTF-8'); ?>"></noscript>
 <?php // The site's ONLY script (plan 02-03). defer, so it never blocks the
       // parser and runs after the nav markup exists.
       //
@@ -119,7 +158,7 @@ if (!isset($torin_desc)) {
       // 56.25rem. Closing that would require a scripting-capability marker
       // written before first paint, which this project deliberately does not
       // have. ?>
-<script src="js/site.js" defer></script>
+<script src="<?php echo htmlspecialchars(torin_asset_url('js/site.js'), ENT_QUOTES, 'UTF-8'); ?>" defer></script>
 <?php echo $torin_extra_head; ?>
 </head>
 
