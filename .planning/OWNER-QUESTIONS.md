@@ -96,10 +96,17 @@ Which is correct today? (And are Saturday hours ever worked?)
 ---
 
 ### 21. Which of the three numbers is reachable on Viber or WhatsApp?
-**Status:** OPEN
+**Status:** OPEN — ESCALATED 2026-08-09, no longer hypothetical
 **Question:** Of `02 9549710`, `088 9458404` and `087 9128244` — which one can customers reach on Viber (or WhatsApp)? If more than one, which should the site advertise?
 **Why it matters:** D-16 makes chat an equal-weight primary action alongside calling, so the chat button needs one specific number. There is no basis in any existing source for choosing among the three, and the button currently points at the main line as an `[ASSUMED]` placeholder. A chat link to a number that has no Viber account is a dead end on the site's single most important conversion action.
 **Blocks:** Phase 4 (CONTACT-02) cannot be verified without it
+
+**CONFIRMED BROKEN 2026-08-09 (UAT test 28, gap G-02-5, severity blocker).** This stopped being a precaution and became a measured defect. Tested on Android against the deployed staging site: pressing «Пишете във Viber» returns Viber's *"the requested page is unavailable. please update to the latest version"*, and the update prompt leads to a store page showing the latest version is already installed — so the client is current and the deep link simply does not resolve. Cause: `02 954 9710` is a Sofia **landline**, and Viber accounts are provisioned against mobile numbers. The two mobiles, `088 9458404` and `087 9128244`, are the only plausible candidates. The prediction written in this entry on the day it was filed — "a dead end on the site's single most important conversion action" — is exactly what happened, on 16 deployed pages.
+
+**Interim state:** `site-config.php` now carries a **developer's own number** (`+359888216639`) as a dev placeholder, supplied 2026-08-09 for the sole purpose of separating two root causes that are otherwise confounded: whether the *number* was wrong, or whether `viber://chat` is the wrong deep-link path. It is NOT the shop's number, it is loudly marked in `site-config.php`, and it **must be replaced by the owner's answer before the Phase 4 cutover** — shipping it would route customer enquiries to a private individual.
+
+**Also needs deciding alongside the number:** what should happen for a visitor who has no Viber installed at all? Today the button is a dead end for them too, with no fallback.
+
 **Raised:** Phase 2 (UI-SPEC C-9), filed during plan 02-03
 **Answer:**
 

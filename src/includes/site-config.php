@@ -61,9 +61,35 @@ $site = array(
 	// BOTH when the owner answers.
 	'hours' => 'Понеделник – Петък, 8:00 – 16:00',
 
+	// ############################################################
+	// ## DEV PLACEHOLDER — MUST NOT REACH PRODUCTION (Phase 4)  ##
+	// ############################################################
+	//
 	// [ASSUMED] OWNER-QUESTIONS #21 (and 02-UI-SPEC C-9). Which of the three
-	// numbers is reachable on Viber is unanswered; the main line stands in.
-	'viber' => '+35929549710',
+	// shop numbers is reachable on Viber is STILL unanswered.
+	//
+	// The previous value here was the main line, +35929549710. UAT test 28
+	// proved that is a dead end: 02 954 9710 is a Sofia LANDLINE, Viber accounts
+	// are provisioned against mobile numbers, and pressing the button on Android
+	// returns Viber's "the requested page is unavailable, please update to the
+	// latest version" — the client is current, the deep link simply does not
+	// resolve. OWNER-QUESTIONS.md:101 predicted exactly this.
+	//
+	// This value is a DEVELOPER'S OWN number, supplied 2026-08-09 solely to
+	// disambiguate the two root-cause candidates for G-02-5, which cannot be
+	// separated otherwise:
+	//   (a) the number has no Viber account          <- proven for the landline
+	//   (b) viber://chat is the wrong deep-link path <- untestable until (a) is
+	//                                                   removed as a variable
+	// A number that definitely HAS Viber isolates (b). If the button works with
+	// this value, the scheme is correct and only the number was wrong; if it
+	// still fails, the scheme needs changing too (viber://add, or an https
+	// fallback for visitors with no Viber installed).
+	//
+	// It is NOT the shop's number and must be replaced by the owner's answer
+	// before the Phase 4 cutover. Shipping it would route customer enquiries to
+	// a private individual.
+	'viber' => '+359888216639',
 
 	// [ASSUMED] OWNER-QUESTIONS #8 asks whether the legacy otpuska.js
 	// holiday/hours banner should survive at all. It carried genuine content
