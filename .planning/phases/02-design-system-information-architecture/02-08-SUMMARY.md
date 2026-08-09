@@ -136,7 +136,7 @@ sha256 after  = 25c5daa2c8cdf781619e31b366953453a9c0020ba63456a01136929c1de58f8f
 
 Source byte-identical (`git diff --quiet HEAD -- src/js/site.js` clean, sha256 unchanged), token moved. Gate re-run green afterwards.
 
-### Rendered non-regression versus `02-RENDERED-VERIFICATION.md`
+### Rendered non-regression versus `02-RENDERED-CHECKS.md`
 
 | Probe | Baseline | Re-measured | Verdict |
 |---|---|---|---|

@@ -20,7 +20,7 @@ round: 2
 
 <!-- Entries 1-20 are deterministically covered: either by a SUMMARY coverage
      block whose verification refs pass, or by a measured run of the
-     scripts/render-check.sh harness recorded in 02-RENDERED-VERIFICATION.md.
+     scripts/render-check.sh harness recorded in 02-RENDERED-CHECKS.md.
      They are NOT presented to the user. -->
 
 ### 1. Общо визуално приемане на редизайна
@@ -611,7 +611,7 @@ source: 02-VERIFICATION.md (status: human_needed, 4/4 success criteria verified)
     scripts/render-check.sh scripts/probes/font-swap.js at 360x640, and must not
     regress the D-30 above-the-fold invariant — the hero content stack currently
     measures 233.4px against a 268.8px min-height (35.4px of headroom), verified
-    in 02-RENDERED-VERIFICATION.md.
+    in 02-RENDERED-CHECKS.md.
 
 ## Deferred Follow-Ups
 

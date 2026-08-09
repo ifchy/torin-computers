@@ -150,7 +150,7 @@ absent.
    > **Superseded 2026-08-06.** The "no automatable browser" half of this is wrong — see the
    > correction at the end of this file. The handset dialler check itself genuinely cannot be
    > automated (a headless browser cannot invoke a telephony intent) and is now recorded as
-   > **PASS — owner-confirmed** in `02-RENDERED-VERIFICATION.md`, on the project owner's
+   > **PASS — owner-confirmed** in `02-RENDERED-CHECKS.md`, on the project owner's
    > instruction, as UAT sign-off rather than as a measured observation. The harness independently
    > confirmed the underlying href: exactly one CTA `tel:` value, valid E.164, on all sixteen pages.
 
@@ -187,7 +187,7 @@ Chromium, and it drives over CDP; the checks were runnable throughout. The searc
 claim looked for Chrome/Chromium/Edge/Playwright/Puppeteer by name and stopped there.
 
 The deferred checks have since been measured against the deployed staging origin and **pass**,
-reproducing this plan's hand-computed ratios exactly. See `02-RENDERED-VERIFICATION.md` for the
+reproducing this plan's hand-computed ratios exactly. See `02-RENDERED-CHECKS.md` for the
 figures, the two measurement traps that produce false results, and how to re-run them
 (`scripts/render-check.sh`).
 

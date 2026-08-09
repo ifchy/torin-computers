@@ -567,7 +567,7 @@ Chromium, and it drives over CDP; the checks were runnable throughout. The searc
 claim looked for Chrome/Chromium/Edge/Playwright/Puppeteer by name and stopped there.
 
 The deferred checks have since been measured against the deployed staging origin and **pass**,
-reproducing this plan's hand-computed ratios exactly. See `02-RENDERED-VERIFICATION.md` for the
+reproducing this plan's hand-computed ratios exactly. See `02-RENDERED-CHECKS.md` for the
 figures, the two measurement traps that produce false results, and how to re-run them
 (`scripts/render-check.sh`).
 

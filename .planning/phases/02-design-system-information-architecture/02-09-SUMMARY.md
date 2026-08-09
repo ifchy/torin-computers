@@ -10,7 +10,7 @@ requirements: [DESIGN-01]
 
 requires:
   - "src/css/base.css @font-face blocks and --font-sans token (02-01)"
-  - "scripts/render-check.sh + scripts/lib/cdp-client.js harness (02-RENDERED-VERIFICATION)"
+  - "scripts/render-check.sh + scripts/lib/cdp-client.js harness (02-RENDERED-CHECKS)"
   - "scripts/probes/font-swap.js — the probe that measured G-02-4 and closes it"
   - "unstamped Sofia Sans woff2 preload (02-08) — without it this plan's gate is blinded"
 provides:
@@ -274,7 +274,7 @@ class of failure that once made three runs at supposedly different widths all me
 defaulting. Re-run with explicit `W`/`H` variables; both probes confirm their own viewport in the
 report (`"viewport": "390x844"`, `"1440x900"`).
 
-## Non-regression, all re-measured against `02-RENDERED-VERIFICATION.md`
+## Non-regression, all re-measured against `02-RENDERED-CHECKS.md`
 
 | Check | Baseline | Measured now | Verdict |
 |---|---|---|---|
@@ -322,7 +322,7 @@ Sans first in the loaded state. No `font-display: optional` anywhere, and no `mi
    side — the same line count or fewer, never more. **That is a reasoned expectation, not a
    measurement.** This fix is *not* verified on Windows or Android.
 2. **What `size-adjust` can and cannot do.** It affects only text rendered before Sofia Sans
-   arrives. The loaded-state rendering — every baseline in `02-RENDERED-VERIFICATION.md` — is
+   arrives. The loaded-state rendering — every baseline in `02-RENDERED-CHECKS.md` — is
    untouched by construction, which is why task 3 re-measured rather than assuming: movement there
    would have meant something other than this plan moved.
 3. **Graceful degradation.** An engine without `size-adjust` support, or a platform where no
