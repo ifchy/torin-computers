@@ -9,11 +9,15 @@ round: 2
 
 ## Current Test
 
-number: 24
-name: Български буквени форми в Sofia Sans
+number: 26
+name: Sticky лентата за обаждане на iPhone с home indicator (WR-11)
 expected: |
-  Кирилицата се изписва с българските буквени форми (локализирани д, л, п, ц, ш),
-  а не с руските подразбиращи се очертания.
+  Отвори https://torin.bg/new/index.html на iPhone X или по-нов (модел с
+  home indicator) и опитай да натиснеш ДОЛНАТА половина на двата бутона в
+  лепкавата лента за обаждане.
+
+  И двата бутона се натискат изцяло; никоя част не се прихваща от системната
+  жестова зона и долният колонтитул не е закрит.
 awaiting: user response
 
 ## Tests
@@ -25,9 +29,18 @@ awaiting: user response
 
 ### 1. Общо визуално приемане на редизайна
 expected: Сайтът изглежда модерен на телефон и компютър; шестте категории се четат като отделни карти
-result: issue
+result: pass
 reported: "на телефон изглежда ок, но на компютър почти нищо не е както хората, лентата за навигиране вместо да показва отделните елементи на един ред ги подредило в колона като дори и съдържанието на 'Услуги' е видимо през цялото време и съответно само лентата за навигиране заема приблизително половината екран, скролвайки надолу всяка една от иконките заема целия екран и необходимо да оскролнеш още за да видиш и текста, не може и да става дума за карти за всяка една от тези услуги. като цяло всички икони са огромни и освен това ги намирам за трудни за разпознаване. мисля че ще е по-добре ако бъдат заменени с изображения"
-severity: blocker
+original_result: issue
+original_severity: blocker
+closed_by: 25
+closed_at: 2026-08-09
+closure_note: |
+  Затворен от тест 25: собственикът потвърди правилното рендиране на същия
+  компютър с нормално презареждане, след като план 02-08 достави
+  инвалидирането на кеша. Забележката за иконките в същия доклад НЕ се затваря
+  тук — тя е отделена като G-02-1b и отложена за фаза 3 по решение на
+  собственика (тест 23).
 resolution: |
   Hypothesis CONFIRMED by the user: a hard reload (Cmd+Shift+R) restored the
   correct rendering — nav on one row, six cards, icons at normal size. The
@@ -54,10 +67,22 @@ source_summary: 02-02-SUMMARY.md
 
 ### 4. Преместване на бутоните при зареждане на шрифта (FOUT)
 expected: На бавна връзка при първо посещение двата бутона в началния екран не се преместват видимо, когато шрифтът Sofia Sans се зареди
-result: [pending]
+result: pass
 coverage_id: D8
-source_summary: 02-05-SUMMARY.md
-measured: "FAIL — CTA бутоните се местят 27.1px нагоре (праг 8px). h1 минава от 110.4px на 73.6px."
+source_summary: 02-05-SUMMARY.md, 02-09-SUMMARY.md
+source: automated
+measured: "0px на 360x640, 390x844 и 1440x900 (праг 8px); heroHeightDeltaPx: 0 във всеки проход. Беше 27.1px."
+retested: 2026-08-09
+retest_note: |
+  Първоначалното измерване беше FAIL — 27.1px, h1 минаваше от 110.4px на 73.6px.
+  План 02-09 затвори пропуска G-02-4 с метрично напаснат резервен шрифт
+  ('Sofia Sans Fallback', size-adjust: 97%).
+
+  Резултатът 0px беше ПРОВЕРЕН, а не приет на доверие: точно такова число би
+  докладвал и заслепен тест. Верификаторът обори хипотезата за заслепяване с
+  CSS.getPlatformFontsForNode — при блокиран woff2 h1 се изрисува с Arial
+  (isCustomFont false), при разрешен — със Sofia Sans (isCustomFont true).
+  Наистина различни шрифтове, еднаква височина на блока.
 
 ### 5. Набиране на телефона от реален телефон
 expected: Докосването на бутона за обаждане отваря звънилката с попълнен номер +359 2 954 9710
@@ -189,15 +214,41 @@ gap_ref: G-02-1b (deferred, not blocking)
 
 ### 24. Български буквени форми в Sofia Sans
 expected: Кирилицата се изписва с българските буквени форми (локализирани д, л, п, ц, ш), а не с руските подразбиращи се очертания
-result: [pending]
-source: human
+result: pass
+source: human + automated (converted from judgment to measurement during testing)
+measured: |
+  Контролирано сравнение на живата страница: един и същ низ, същият шрифт и
+  размер, сменен само lang="bg" -> lang="ru".
+    - ширини ИДЕНТИЧНИ (1288.75px и в двата случая) — очаквано, locl сменя
+      формата на глифа, не ширината му
+    - пиксели РАЗЛИЧНИ -> шрифтът носи български locl форми И те са активни
+  Видимо: т->m, и->u, п->n, л->заоблено ʌ, д->g-подобно, г->r.
+  resolvedFamily: "Sofia Sans", "Sofia Sans Fallback", "Segoe UI", Roboto, ...
+method_note: |
+  Тестът беше записан като „човешка преценка", но се оказа измерим. Ако двата
+  реда бяха байт за байт еднакви, българските форми нямаше да се прилагат —
+  това е разграничението, което окото не може да направи без еталон.
+  Диагностиката беше еднократна (scratchpad, не в репото). Проверката с
+  CSS.getPlatformFontsForNode в нея НЕ се изпълни (грешка в probe-а); изводът
+  не зависи от нея, а верификаторът вече я беше направил отделно.
+reported: "pass"
 why_human: "Judgment-tier prohibition from plan 02-01 and the whole reason Sofia Sans was chosen (D-06a). Substantially de-risked: CSS.getPlatformFontsForNode confirms the live h1 is painted by the self-hosted Sofia Sans (postScriptName SofiaSans-Regular_Bold, isCustomFont true), and D-06a's premise is that Bulgarian forms are that family's DEFAULT outlines. What remains is eyes on the glyph shapes, which no probe can judge."
 how: "Отвори https://torin.bg/new/index.html и една категорийна страница; прочети заглавията и текста на десктоп и на телефон."
 
 ### 25. Потвърждение на десктоп рендирането след поправката на кеша
 expected: Навигацията е на един ред, шестте категории са с картов вид, иконките са с нормален размер — и остава така без hard reload
-result: [pending]
+result: pass
 source: human
+reported: "pass"
+closed_test: 1
+measured: |
+  Собственикът потвърди на същия компютър, който съобщи проблема в тест 1, с
+  НОРМАЛНО презареждане. Това е потвърждението, което липсваше: верификаторът
+  беше възпроизвел правилното рендиране headless на 1440x900 (навигация на
+  един ред, под-менюто display:none, картова мрежа 3 колони, иконки 143px), но
+  headless браузър винаги тръгва със студен кеш и затова НЕ може да докаже, че
+  механизмът за инвалидиране работи при реален посетител с топъл кеш.
+  Точно това доказва този тест.
 why_human: "Test 1 is still recorded as `issue` / severity blocker and has not been re-confirmed by the owner since 02-08 shipped. The verifier reproduced the correct rendering headlessly at 1440x900 (nav on one row, sub-menu display:none, 3-column card grid, 143px icons) and confirmed the invalidation mechanism works, but the owner's acceptance is what closes the entry."
 how: "На същия десктоп, който съобщи проблема в тест 1: зареди страницата с НОРМАЛНО презареждане (не Cmd+Shift+R), после я презареди пак след няколко минути."
 closes: 1
@@ -219,12 +270,21 @@ how: "Реши дали «Чести проблеми» (problem-stari.html) д�
 ## Summary
 
 total: 27
-passed: 20
+passed: 24
 issues: 0
-pending: 4
+pending: 2
 skipped: 1
 blocked: 0
-resolved: 2
+
+<!-- passed: 24 = the original 20, plus test 4 (re-measured 27.1px -> 0px by
+     02-09), plus test 1 (closed by test 25), plus tests 24 and 25.
+     skipped: 1 = test 23 (G-02-1b icons, deferred to Phase 3 by owner decision). -->
+
+## Current Round
+
+round: 2
+pending_tests: [26, 27]
+source: 02-VERIFICATION.md (status: human_needed, 4/4 success criteria verified)
 
 ## Gaps
 
