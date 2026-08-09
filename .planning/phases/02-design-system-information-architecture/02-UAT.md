@@ -1,5 +1,5 @@
 ---
-status: testing
+status: diagnosed
 phase: 02-design-system-information-architecture
 source: [02-01-SUMMARY.md, 02-02-SUMMARY.md, 02-03-SUMMARY.md, 02-04-SUMMARY.md, 02-05-SUMMARY.md, 02-06-SUMMARY.md, 02-07-SUMMARY.md, 02-08-SUMMARY.md, 02-09-SUMMARY.md, 02-VERIFICATION.md]
 started: 2026-08-07T00:00:00Z
@@ -9,16 +9,10 @@ round: 2
 
 ## Current Test
 
-number: 27
-name: Съдба на problem-stari.html
-expected: |
-  Решение, не проверка. Страницата «Чести проблеми» (problem-stari.html)
-  съществува, но НЯМА нито един входящ линк от която и да е от 16-те страници —
-  т.е. посетител не може да я достигне по никакъв начин.
+[testing complete — round 2]
 
-  Трябва ли да се линкне отнякъде, да се слее с друго съдържание, или да се
-  пенсионира? Ако се пенсионира, фаза 4 дължи 301 пренасочване, не гол 404 (D-36).
-awaiting: user response
+Всички 28 теста са отработени. Остава един отворен дефект: G-02-5
+(Viber бутонът), паркиран по изрично решение на собственика 2026-08-09.
 
 ## Tests
 
@@ -302,17 +296,54 @@ how: "Отвори https://torin.bg/new/index.html на iPhone X или по-н�
 
 ### 27. Съдба на problem-stari.html
 expected: Записано решение на собственика — да се линкне, да се слее с друго съдържание, или да се пенсионира
-result: [pending]
+result: pass
 source: human
+decision: RETIRE with a 301
+decided_at: 2026-08-09
+reported: "пенсионираме я"
+rationale: |
+  Страницата не попада в това, което собственикът заяви като фокус на новия
+  сайт — шестте категории. Това е продуктово решение и то надделява над
+  маргинална SEO стойност.
+implementation_for_phase_4: |
+  Пенсионирането НЕ е изтриване. Фаза 4 при cutover трябва да добави:
+
+    Redirect 301 /problem-stari.html /zalivane-technosti.html
+
+  Целта е избрана тематично, а не произволно: съдържанието на страницата НЕ е
+  за батерии въпреки заглавието си — то описва захранващата част на дънната
+  платка (Charger и StandBy процесорите, ACPI, управление на вентилатора и
+  клавиатурата). Батерията/адапторът са причината, дънната платка е темата.
+  Категория kat-4 «Заливане и ремонт на дънни платки» вече носи симптома
+  „не зарежда", което е точно това, което страницата обяснява.
+
+  Тематичната близост е задължителна, не козметична: 301 към несвързана
+  страница (напр. началната) може да бъде третирано от Google като soft 404 и
+  изобщо да не се зачете като пренасочване.
+
+  Правилото да остане постоянно. Google препоръчва минимум една година, но
+  цената е един ред, а външни линкове и отметки не изтичат.
+verified_feasible: |
+  mod_rewrite е активен на хоста — src/.htaccess вече съдържа работещо
+  RewriteEngine On и 301 правило (редовете 5-12). И двата URL-а връщат 200
+  към момента на решението.
+no_cleanup_needed: |
+  Няма вътрешни препратки за чистене: страницата има НУЛА входящи линка от
+  всичките 16 страници — това беше и оригиналната находка, довела до теста.
+open_question_for_owner: |
+  Не е проверено дали URL-ът изобщо получава импресии. Ако собственикът иска
+  да е сигурен, Google Search Console → Performance → филтър по URL показва
+  това за минути. Нула импресии прави решението безспорно; не променя
+  препоръката, само увереността в нея.
 why_human: "A content/product decision, not a code fact. The code fact is established: zero inbound links across all sixteen deployed pages. If retired, Phase 4 must serve a 301 rather than a bare 404 (D-36)."
 how: "Реши дали «Чести проблеми» (problem-stari.html) да остане в новия сайт."
 
 ## Summary
 
 total: 28
-passed: 25
+passed: 26
 issues: 1
-pending: 1
+pending: 0
 skipped: 1
 blocked: 0
 
@@ -323,8 +354,9 @@ blocked: 0
 ## Current Round
 
 round: 2
-pending_tests: [27]
+pending_tests: []
 issues_open: [28]
+round_complete: 2026-08-09
 source: 02-VERIFICATION.md (status: human_needed, 4/4 success criteria verified)
 
 ## Gaps
