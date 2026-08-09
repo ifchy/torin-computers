@@ -1,5 +1,5 @@
 ---
-status: diagnosed
+status: complete
 phase: 02-design-system-information-architecture
 source: [02-01-SUMMARY.md, 02-02-SUMMARY.md, 02-03-SUMMARY.md, 02-04-SUMMARY.md, 02-05-SUMMARY.md, 02-06-SUMMARY.md, 02-07-SUMMARY.md, 02-08-SUMMARY.md, 02-09-SUMMARY.md, 02-VERIFICATION.md]
 started: 2026-08-07T00:00:00Z
@@ -11,8 +11,10 @@ round: 2
 
 [testing complete — round 2]
 
-Всички 28 теста са отработени. Остава един отворен дефект: G-02-5
-(Viber бутонът), паркиран по изрично решение на собственика 2026-08-09.
+Всички 28 теста са отработени. Нула отворени дефекта за Фаза 2.
+Две отложени за по-късни фази, и двете със записано решение и проследяване:
+  - тест 23 / G-02-1b  -> Фаза 3 (преначертаване на иконките)
+  - тест 28 / G-02-5   -> Фаза 4 (cutover проверка на Viber бутона)
 
 ## Tests
 
@@ -264,13 +266,17 @@ note: |
 
 ### 28. Бутонът «Пишете във Viber» отваря разговор
 expected: Натискането на бутона отваря разговор във Viber с магазина
-result: issue
+result: deferred
 source: human
 reported: "there is a problem with the пишете във Viber button, when pressed on the android it says 'the requested page is unavailable. please update to the latest version.' pressing the update button takes me to the store only to see I am running the latest version of Viber"
-severity: blocker
+result_note: |
+  Дефектът е реален и потвърден, но НЕ е блокер за Фаза 2. Решение 2026-08-09:
+  бутонът остава на 088 945 8404, собственикът ще подсигури Viber акаунт на
+  този номер, а проверката се пренася като cutover gate за Фаза 4.
 found_during: 26
 gap_ref: G-02-5
-status: open — parked at owner's request 2026-08-09 ("we leave it for later")
+status: deferred to phase 4
+tracked_as: .planning/todos/pending/verify-viber-button-before-launch.md
 measured: |
   Четири деплоя на staging, всеки натиснат на реален Android телефон.
   Схемата viber://chat?number= е една и съща във всичките четири — сменя се
@@ -342,9 +348,10 @@ how: "Реши дали «Чести проблеми» (problem-stari.html) д�
 
 total: 28
 passed: 26
-issues: 1
+issues: 0
 pending: 0
 skipped: 1
+deferred: 1
 blocked: 0
 
 <!-- passed: 24 = the original 20, plus test 4 (re-measured 27.1px -> 0px by
@@ -355,7 +362,8 @@ blocked: 0
 
 round: 2
 pending_tests: []
-issues_open: [28]
+issues_open: []
+deferred_to_later_phases: [23, 28]
 round_complete: 2026-08-09
 source: 02-VERIFICATION.md (status: human_needed, 4/4 success criteria verified)
 
@@ -449,9 +457,20 @@ source: 02-VERIFICATION.md (status: human_needed, 4/4 success criteria verified)
 
 - gap_id: G-02-5
   truth: "The «Пишете във Viber» button opens a Viber conversation with the shop"
-  status: failed
+  status: deferred
+  deferred_to_phase: 4
+  deferred_at: 2026-08-09
+  deferred_reason: |
+    Решение 2026-08-09: бутонът ОСТАВА на 088 945 8404, а собственикът ще
+    подсигури Viber акаунт на този номер. Кодът е завършен и правилен —
+    липсва акаунт от другата страна, което не е задача за разработка.
+
+    Не е блокер за Фаза 2. Превръща се в CUTOVER gate: преди официалното
+    пускане бутонът трябва да се натисне на реален телефон с инсталиран Viber
+    и да се потвърди, че отваря разговор.
+  tracked_as: .planning/todos/pending/verify-viber-button-before-launch.md
+  original_severity: blocker
   reason: "User reported on Android: 'the requested page is unavailable. please update to the latest version.' The Viber update prompt leads to the store, which shows the latest version is already installed — i.e. Viber cannot resolve the deep link, not a stale client."
-  severity: blocker
   test: 28
   found_during: 26
   affects: "16 deployed pages — index.html (hero + mid-page + callbar), footer.php (every page), category-page.php"

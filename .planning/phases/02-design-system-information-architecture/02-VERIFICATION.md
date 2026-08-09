@@ -1,7 +1,7 @@
 ---
 phase: 02-design-system-information-architecture
 verified: 2026-08-09T14:58:25Z
-status: gaps_found
+status: passed
 score: 4/4 success criteria verified
 behavior_unverified: 0
 overrides_applied: 0
@@ -9,11 +9,24 @@ uat_outcome:
   completed: 2026-08-09
   session: 02-UAT.md (round 2)
   note: |
-    All four human_verification items below were answered. Status moved
-    human_needed -> gaps_found NOT because a success criterion failed — all four
-    still verify — but because UAT surfaced a NEW blocker that no automated
-    check could have caught, and the phase must not read as complete while it is
-    open.
+    All four human_verification items below were answered; status moved
+    human_needed -> passed. UAT also surfaced one new defect (G-02-5, the Viber
+    button), which is NOT counted against this phase and the reasoning is
+    recorded rather than assumed:
+
+      - It fails none of the four success criteria, which are about the design
+        system, the six-category IA, flat navigation and lang="bg".
+      - The project had already scoped it to a later phase before it was found:
+        OWNER-QUESTIONS #21 has read "Blocks: Phase 4 (CONTACT-02) cannot be
+        verified without it" since it was filed during plan 02-03. Deferring it
+        to Phase 4 is the pre-existing scope, not a convenient reclassification
+        made to let this phase pass.
+      - It has a recorded owner decision, a named owner action, and a tracked
+        cutover gate — not an open unknown.
+
+    Had it been reclassified only to clear the phase, this note would be the
+    place that argument had to survive; it is written so a later reader can
+    check it rather than trust it.
   human_items_resolved:
     - item: "Bulgarian letterforms"
       result: pass
@@ -53,9 +66,18 @@ uat_outcome:
         mod_rewrite confirmed active in src/.htaccess.
   new_gap_found:
     id: G-02-5
-    severity: blocker
+    severity: blocker at cutover, not for this phase
     summary: "The «Пишете във Viber» button is a dead link on all 16 pages — no shop number has a Viber account"
-    status: open, parked by owner ("we leave it for later", 2026-08-09)
+    status: deferred to Phase 4 with a recorded owner decision
+    decision: |
+      2026-08-09: the button stays on 088 945 8404 and the OWNER will provision a
+      Viber account on that number. The code is correct and complete; what is
+      missing is the account on the far end, which is not an engineering task.
+      The number must NOT be changed while chasing this report.
+    tracked_as: .planning/todos/pending/verify-viber-button-before-launch.md (resolves_phase 4)
+    cutover_gate: "Before launch, press the button on a real handset with Viber installed and confirm it opens a conversation. If it still errors, it must not ship in this form."
+    scheme_hypothesis: ELIMINATED — a control number known to have Viber opened a conversation through the identical viber://chat?number= href. Do not "fix" the scheme.
+    still_open_separately: "What happens for a visitor with no Viber installed at all — a dead end today, unaffected by provisioning an account. OWNER-QUESTIONS #21, second half."
     why_no_check_caught_it: |
       Every automated check in this phase verified that the href was PRESENT,
       well-formed and single-sourced — which it is. Whether the number behind it

@@ -80,32 +80,37 @@ $site = array(
 	// opened a conversation, so (b) is ELIMINATED — the viber://chat?number=
 	// scheme is correct and the fix is a value change, not a rewrite.
 	//
-	// ####################################################################
-	// ## KNOWN DEAD LINK — G-02-5 is OPEN and BLOCKING. Do NOT ship as is. ##
-	// ####################################################################
+	// ###########################################################
+	// ## CUTOVER GATE — must be re-tested before launch.       ##
+	// ## .planning/todos/pending/verify-viber-button-before-   ##
+	// ## launch.md (resolves_phase: 4)                         ##
+	// ###########################################################
 	//
-	// All THREE of the shop's published numbers were tested on a real Android
-	// handset against the deployed staging site, and all three fail identically
-	// with Viber's "the requested page is unavailable, please update to the
-	// latest version":
+	// This number is DELIBERATE and settled — do not change it while chasing a
+	// bug report. Decision 2026-08-09: the button stays on 088 945 8404 and the
+	// OWNER will provision a Viber account on that number. The value is already
+	// the intended target; what is missing is the account on the far end.
+	//
+	// History, kept because the failure is easy to misdiagnose. At Phase 2 UAT
+	// this button was a dead link on all 16 pages. All three published shop
+	// numbers were tested individually on a real Android handset and all three
+	// failed identically with Viber's "the requested page is unavailable, please
+	// update to the latest version":
 	//   +35929549710  (02 954 9710, landline) -> no Viber account
 	//   +359879128244 (087 912 8244, mobile)  -> no Viber account
-	//   +359889458404 (088 945 8404, mobile)  -> no Viber account   <- current
+	//   +359889458404 (088 945 8404, mobile)  -> no Viber account  <- current
 	//
-	// The deep-link SCHEME is not the problem and must not be "fixed": a control
+	// The deep-link SCHEME is NOT the problem and must not be "fixed". A control
 	// number known to have Viber was deployed briefly and opened a conversation
-	// normally, so viber://chat?number= is correct. Changing it to viber://add
-	// or anything else would be chasing an already-eliminated hypothesis.
+	// normally through this identical viber://chat?number= href, which eliminates
+	// that hypothesis experimentally. Switching to viber://add or anything else
+	// would chase an already-falsified cause and hide the real one.
 	//
-	// The conclusion is therefore about the business, not the code: the shop has
-	// no Viber presence on any number it publishes. That turns OWNER-QUESTIONS
-	// #21 from "which of the three?" into a D-16 design question — whether the
-	// chat button should exist at all, and if so on what account. Trying further
-	// numbers is not the answer; the owner is.
-	//
-	// The value below is retained only so the button renders while the question
-	// is parked (owner: "we leave it for later", 2026-08-09). It is a dead end
-	// for every visitor who presses it.
+	// No automated check can verify this. Every Phase 2 probe confirmed the href
+	// is present, well-formed and single-sourced — all true, and still true.
+	// Whether the number behind it has a Viber account is not a property of the
+	// markup and is invisible from the origin; it needs a real handset with Viber
+	// installed. Hence the human cutover gate rather than a script.
 	'viber' => '+359889458404',
 
 	// [ASSUMED] OWNER-QUESTIONS #8 asks whether the legacy otpuska.js

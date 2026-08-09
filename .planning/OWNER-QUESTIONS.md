@@ -121,7 +121,11 @@ The first two were each chosen by plausibility and each was wrong, which is why 
 2. If not, should the «Пишете във Viber» button be **removed**, **replaced** (WhatsApp? a written enquiry form? — note this interacts with question #2 above, whether the contact form should exist), or kept with some fallback?
 3. If it stays, what should happen for a visitor with no Viber installed? Today that visitor also hits a dead end.
 
-**Current state — parked at the owner's request** ("we leave it for later", 2026-08-09). `site-config.php` retains `+359889458404` purely so the button renders; it is a **known dead link on all 16 pages** and is loudly marked as such in the file. G-02-5 stays OPEN and BLOCKING.
+**RESOLVED 2026-08-09 — direction chosen, execution owed by the owner.** The button **stays**, on `088 9458404` (`+359889458404`), and the **owner will provision a Viber account on that number**. So the number in `site-config.php` is now the intended target rather than a placeholder, and it must not be changed while chasing this bug report.
+
+That turns the remaining work into a **cutover gate rather than a code change**: before the site goes live, someone must press «Пишете във Viber» on a real handset with Viber installed and confirm it opens a conversation. Tracked as `.planning/todos/pending/verify-viber-button-before-launch.md` (`resolves_phase: 4`). G-02-5 is downgraded from open blocker to deferred-with-owner-action.
+
+**STILL OPEN — the second half of this question.** What should happen for a visitor who has **no Viber installed at all**? Today the button is a dead end for them too, entirely independently of the account question, and that is not addressed by provisioning an account. If the answer is "nothing, accept it", that should be a recorded decision rather than an oversight. (Interacts with question #2 — whether a written enquiry form should exist as the alternative path.)
 
 **Also needs deciding alongside the number:** what should happen for a visitor who has no Viber installed at all? Today the button is a dead end for them too, with no fallback.
 
