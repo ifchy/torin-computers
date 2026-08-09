@@ -5,6 +5,23 @@ status: passed
 score: 4/4 success criteria verified
 behavior_unverified: 0
 overrides_applied: 0
+provenance:
+  - date: 2026-08-09
+    change: |
+      `02-RENDERED-VERIFICATION.md` was renamed to `02-RENDERED-CHECKS.md`, and
+      the ten citations of it across this phase's PLAN/SUMMARY/UAT files were
+      updated to match. Nothing about the measurements or the verdict changed.
+
+      The rename is a tooling fix, not cosmetic: `gsd-tools query
+      verification.status` globs `*-VERIFICATION.md`, alphabetically matched the
+      RENDERED file first, found no `status:` field in it, and reported the whole
+      phase as `missing` — "the verify step never completed" — while this report
+      sat beside it reading `passed`. That false negative blocked
+      `phase.complete` outright and would have cost a needless ~180k-token
+      verifier re-run to "reproduce" a report already on disk.
+
+      Recorded here because the failure is invisible from either file alone: each
+      one is individually correct, and only their coexistence breaks the query.
 uat_outcome:
   completed: 2026-08-09
   session: 02-UAT.md (round 2)
