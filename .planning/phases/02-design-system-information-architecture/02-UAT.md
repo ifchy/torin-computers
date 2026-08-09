@@ -9,17 +9,15 @@ round: 2
 
 ## Current Test
 
-number: 28
-name: Viber бутонът със служебния мобилен 087 9128244 (окончателно затваряне на G-02-5)
+number: 27
+name: Съдба на problem-stari.html
 expected: |
-  Последно натискане на «Пишете във Viber» на Android, вече със служебния номер.
+  Решение, не проверка. Страницата «Чести проблеми» (problem-stari.html)
+  съществува, но НЯМА нито един входящ линк от която и да е от 16-те страници —
+  т.е. посетител не може да я достигне по никакъв начин.
 
-  Деплойнато е: бутонът сочи към viber://chat?number=%2B359879128244 на
-  всичките 16 страници. Схемата вече е доказана — това проверява единственото
-  останало допускане, а именно че 087 9128244 наистина има Viber акаунт.
-
-  Отваря разговор -> G-02-5 се затваря.
-  Същата грешка   -> номерът също няма Viber и остава 088 9458404.
+  Трябва ли да се линкне отнякъде, да се слее с друго съдържание, или да се
+  пенсионира? Ако се пенсионира, фаза 4 дължи 301 пренасочване, не гол 404 (D-36).
 awaiting: user response
 
 ## Tests
@@ -278,6 +276,27 @@ reported: "there is a problem with the пишете във Viber button, when pr
 severity: blocker
 found_during: 26
 gap_ref: G-02-5
+status: open — parked at owner's request 2026-08-09 ("we leave it for later")
+measured: |
+  Четири деплоя на staging, всеки натиснат на реален Android телефон.
+  Схемата viber://chat?number= е една и съща във всичките четири — сменя се
+  само номерът, така че резултатът изолира точно една променлива:
+
+    +35929549710  (02 954 9710, стационарен) -> ГРЕШКА
+    +359879128244 (087 912 8244, мобилен)    -> ГРЕШКА
+    +359889458404 (088 945 8404, мобилен)    -> ГРЕШКА
+    контролен номер, за който се знае, че има Viber -> ОТВАРЯ РАЗГОВОР
+
+  Контролният номер е това, което прави останалите три показателни: без него
+  нямаше как да се разграничи „грешен номер" от „грешна схема". Схемата е
+  правилна и НЕ трябва да се пипа — viber://add или друга промяна би гонила
+  вече отхвърлена хипотеза.
+conclusion: |
+  Магазинът няма Viber акаунт на нито един от трите номера, които публикува.
+  Въпросът престава да е технически и става продуктов: D-16 прави чата
+  равнопоставено основно действие, а такова действие в момента е задънена
+  улица на всичките 16 страници. Решението е на собственика —
+  OWNER-QUESTIONS #21, преформулиран.
 why_human: "Review finding WR-11 is still UNMITIGATED and untriaged: `.callbar` is `position: fixed; bottom: 0; height: 56px` with no safe-area allowance, and `grep -rn 'env(' src/css/` returns zero hits. The code fact is established; the practical impact is device-specific and cannot be measured under viewport emulation. The fix is already written out at 02-REVIEW.md:479."
 how: "Отвори https://torin.bg/new/index.html на iPhone X или по-нов и опитай да натиснеш долната половина на двата бутона в лепкавата лента."
 
@@ -404,9 +423,17 @@ source: 02-VERIFICATION.md (status: human_needed, 4/4 success criteria verified)
   test: 28
   found_during: 26
   affects: "16 deployed pages — index.html (hero + mid-page + callbar), footer.php (every page), category-page.php"
+  root_cause: |
+    RESOLVED BY TEST 2026-08-09: the shop has no Viber account on ANY of the
+    three numbers it publishes. Candidate (b) — wrong deep-link scheme — is
+    ELIMINATED: a control number known to have Viber opened a conversation
+    normally through the identical viber://chat?number= href. Candidate (a) is
+    confirmed and is total, not partial: all three numbers fail, including both
+    mobiles. The fix is therefore NOT a code change and NOT another number.
+  escalated_to: "OWNER-QUESTIONS #21, reframed from 'which number' to a D-16 design decision: should the chat button exist at all, and on what account"
   root_cause_candidates:
     - candidate: "The linked number has no Viber account"
-      confidence: high
+      confidence: CONFIRMED — all three numbers tested and failed
       evidence: |
         site-config.php:66 sets 'viber' => '+35929549710'. That is 02 954 9710 —
         a SOFIA LANDLINE (area code 02). Viber accounts are provisioned against
@@ -419,7 +446,7 @@ source: 02-VERIFICATION.md (status: human_needed, 4/4 success criteria verified)
         account is a dead end on the site's single most important conversion
         action."
     - candidate: "viber://chat is the wrong deep-link path for a non-contact"
-      confidence: medium
+      confidence: ELIMINATED — control number opened a chat through this exact href
       evidence: |
         The emitted href is viber://chat?number=%2B35929549710. Viber also
         documents viber://add?number=... and the generic error text the user saw
@@ -427,11 +454,13 @@ source: 02-VERIFICATION.md (status: human_needed, 4/4 success criteria verified)
         cannot be exonerated by this report alone. Must be retested with a number
         that definitely HAS Viber before concluding the path is correct;
         otherwise a number fix could be credited with a scheme fix or vice versa.
-  blocked_on: "OWNER-QUESTIONS #21 — which of the three numbers is reachable on Viber"
+  blocked_on: "OWNER-QUESTIONS #21 (reframed) — the shop appears to have no Viber account at all; whether the button should exist is a D-16 decision"
   missing:
-    - "The owner's answer to OWNER-QUESTIONS #21"
-    - "Retest the viber:// scheme with a number known to have a Viber account, so the number fix and the scheme fix are not confounded"
-    - "A fallback for visitors with no Viber installed (currently the button is a dead end for them too)"
+    - "An owner decision: does a Viber account exist on any number, published or not (incl. Viber Business)?"
+    - "If not — remove the button, replace it (WhatsApp? enquiry form? interacts with OWNER-QUESTIONS #2), or keep it with a fallback"
+    - "A fallback for visitors with no Viber installed (currently a dead end for them too, independently of the account question)"
+  not_missing:
+    - "A scheme change. viber://chat?number= is proven correct; changing it would chase an eliminated hypothesis."
 
 - gap_id: G-02-1b
   truth: "The six category icons are recognisable as the services they represent, without reading the label beneath"

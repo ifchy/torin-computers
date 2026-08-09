@@ -105,9 +105,23 @@ Which is correct today? (And are Saturday hours ever worked?)
 
 **Root cause isolated 2026-08-09.** A developer's own number (known to have Viber) was deployed briefly as a control. The button opened a conversation — so the `viber://chat?number=` **scheme is correct** and candidate (b) is eliminated. The defect was purely the number. The dev placeholder has since been removed from the tree; it never needs to ship.
 
-**Interim state:** `site-config.php` now carries `+359879128244` (**087 9128244**, one of the shop's two mobiles), chosen 2026-08-09 as the likeliest candidate — **not confirmed by the owner**. This is still an assumption, and it is the same *class* of assumption that shipped the landline; the difference is only that a mobile is plausible where a landline was not. It is cheap to correct: one line in `site-config.php`.
+**ALL THREE NUMBERS ELIMINATED BY TEST, 2026-08-09.** Each was deployed to staging in turn and pressed on a real Android handset. All three fail identically:
 
-**What the owner still needs to answer:** (1) is `087 9128244` in fact the number customers should reach on Viber, or should it be `088 9458404`? (2) If both have Viber, which should the site advertise?
+| Number | Type | Result |
+|---|---|---|
+| `02 9549710` (`+35929549710`) | landline | no Viber account |
+| `087 9128244` (`+359879128244`) | mobile | no Viber account |
+| `088 9458404` (`+359889458404`) | mobile | no Viber account |
+
+The first two were each chosen by plausibility and each was wrong, which is why the third was tested rather than assumed. Being a mobile turned out not to be sufficient.
+
+**This is no longer a "which number" question.** The scheme is proven correct and the shop appears to have **no Viber presence on any number it publishes**. So the question the owner must actually answer is a design one under D-16, which makes chat an equal-weight primary action alongside calling:
+
+1. Does the shop have a Viber account at all — perhaps on a number not currently published, or a Viber Business account?
+2. If not, should the «Пишете във Viber» button be **removed**, **replaced** (WhatsApp? a written enquiry form? — note this interacts with question #2 above, whether the contact form should exist), or kept with some fallback?
+3. If it stays, what should happen for a visitor with no Viber installed? Today that visitor also hits a dead end.
+
+**Current state — parked at the owner's request** ("we leave it for later", 2026-08-09). `site-config.php` retains `+359889458404` purely so the button renders; it is a **known dead link on all 16 pages** and is loudly marked as such in the file. G-02-5 stays OPEN and BLOCKING.
 
 **Also needs deciding alongside the number:** what should happen for a visitor who has no Viber installed at all? Today the button is a dead end for them too, with no fallback.
 

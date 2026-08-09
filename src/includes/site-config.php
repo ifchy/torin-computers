@@ -80,14 +80,33 @@ $site = array(
 	// opened a conversation, so (b) is ELIMINATED — the viber://chat?number=
 	// scheme is correct and the fix is a value change, not a rewrite.
 	//
-	// [ASSUMED — still] OWNER-QUESTIONS #21 remains OPEN. 087 9128244 is one of
-	// the shop's two mobiles and was chosen 2026-08-09 as the likeliest, NOT
-	// confirmed by the owner. A mobile is far more plausible than a landline,
-	// but "more plausible" is exactly the reasoning that shipped the landline.
-	// Verified only to the extent that pressing the deployed button opens a
-	// Viber conversation — see 02-UAT.md test 28. If the owner names a different
-	// number, change this one line.
-	'viber' => '+359879128244',
+	// ####################################################################
+	// ## KNOWN DEAD LINK — G-02-5 is OPEN and BLOCKING. Do NOT ship as is. ##
+	// ####################################################################
+	//
+	// All THREE of the shop's published numbers were tested on a real Android
+	// handset against the deployed staging site, and all three fail identically
+	// with Viber's "the requested page is unavailable, please update to the
+	// latest version":
+	//   +35929549710  (02 954 9710, landline) -> no Viber account
+	//   +359879128244 (087 912 8244, mobile)  -> no Viber account
+	//   +359889458404 (088 945 8404, mobile)  -> no Viber account   <- current
+	//
+	// The deep-link SCHEME is not the problem and must not be "fixed": a control
+	// number known to have Viber was deployed briefly and opened a conversation
+	// normally, so viber://chat?number= is correct. Changing it to viber://add
+	// or anything else would be chasing an already-eliminated hypothesis.
+	//
+	// The conclusion is therefore about the business, not the code: the shop has
+	// no Viber presence on any number it publishes. That turns OWNER-QUESTIONS
+	// #21 from "which of the three?" into a D-16 design question — whether the
+	// chat button should exist at all, and if so on what account. Trying further
+	// numbers is not the answer; the owner is.
+	//
+	// The value below is retained only so the button renders while the question
+	// is parked (owner: "we leave it for later", 2026-08-09). It is a dead end
+	// for every visitor who presses it.
+	'viber' => '+359889458404',
 
 	// [ASSUMED] OWNER-QUESTIONS #8 asks whether the legacy otpuska.js
 	// holiday/hours banner should survive at all. It carried genuine content
