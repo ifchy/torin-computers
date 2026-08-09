@@ -25,6 +25,99 @@
 		U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
+/* Metric-adjusted fallback (G-02-4). Closes the measured 27.1px upward jump of
+   the two hero CTA buttons when Sofia Sans arrives on a throttled first visit.
+   At 360x640 the hero h1 sets THREE lines pre-swap (110.4px) and TWO with Sofia
+   Sans (73.6px); that 36.8px collapse pushes .hero under its own min-height, so
+   the hero stops being min-height-sized, align-content:center loses its offset,
+   and both buttons move. Owner chose "reserve the space" — NOT
+   font-display:optional (a slow first visit would stay in the fallback face
+   forever, and first-paint Cyrillic readability is why swap was chosen under
+   D-06a), NOT accept-as-is.
+
+   THE MECHANISM IS A LINE-COUNT MATCH, NOT A RESERVED HEIGHT. A min-height on
+   the h1 is the wrong tool and must not be reached for: the fallback needs MORE
+   lines than the web font, not fewer, so a min-height sized to Sofia Sans is
+   overflowed by the fallback and the CTAs still move, while one sized to the
+   fallback permanently spends 36.8px against a D-30 budget that holds only
+   35.4px of headroom. Make both states set two lines and the whole displacement
+   is zero by construction.
+
+   EVERY NUMBER BELOW WAS MEASURED. Re-derive them all in one command:
+     scripts/render-check.sh scripts/probes/font-fallback-metrics.js \
+       'https://torin.bg/new/index.html' 360 640
+
+   ONE FACE AT font-weight:400, NOT TWO — measured, not preferred. In Chromium
+   local() resolves only by FAMILY name: local('Arial Bold'), local('Arial-BoldMT'),
+   local('Helvetica Neue Bold'), local('HelveticaNeue-Bold') and every other
+   full-name/PostScript form reject outright, though the files are on disk. So a
+   font-weight:700 face could only ever be sourced from a family's REGULAR file
+   — and declaring it 700 makes the engine believe it already has bold, which
+   SUPPRESSES synthetic bolding and renders the heading light. Measured by canvas
+   ink coverage (advance width cannot see synthetic bold; Skia widens strokes
+   without moving advances): a 400 face drawn at 700 inks 40347 against Sofia
+   Sans 700's 40762, while a 700 face from the same regular file inks 32694 —
+   visibly lighter at identical width. A 400-plus-broken-700 pair is worse still:
+   it renders in the last-resort font. One 400 face, bold synthesised. Synthesis
+   leaves advances untouched, so this single percentage serves both shipped
+   weights and there is no second number to calibrate.
+
+   size-adjust:97% — the shipped value, with margin deliberately on the NARROW
+   side. Measured against Arial, the hero h1 sets two lines from 70% up to 106%
+   and three at 107%. 97% therefore sits 9 points below the cliff. The asymmetry
+   is the reason: one percent too WIDE costs a whole 36.8px line the moment the
+   balanced two-line layout no longer fits, while too narrow costs nothing until
+   the string would collapse to a single line — which at 32px/700 across 36
+   Cyrillic characters would need roughly a HALVING of the advance width. The
+   companion advance-width ratio (Sofia 700 / Arial regular over the live
+   heading string) reads 100.6%; the scan cliff sits 5.4 points above it,
+   because Sofia's own longest balanced line does not fill the 328px content box
+   exactly and the scan sees that slack while a pure ratio cannot. The scan is
+   the authority; the ratio is a sanity reading.
+
+   text-wrap: balance (base.css:136, on h1/h2/h3) IS AN INPUT TO 97%. The
+   calibrated value is the widest adjustment at which a BALANCED two-line
+   heading still fits, not the widest at which a greedy first line still fits.
+   Removing or overriding that declaration in a later phase would invalidate
+   this percentage without touching one line of font code — which is why it is
+   named here, where whoever removes it has a chance of seeing the coupling.
+
+   NO ascent-override / descent-override / line-gap-override, deliberately.
+   Those exist to match a fallback's LINE BOX when the line box comes from font
+   metrics, i.e. when line-height is normal. Every line-height in this design is
+   unitless (1.15/1.20/1.25/1.30/1.40/1.65) and no rule in src/css/ sets
+   line-height:normal, so line boxes are already metric-independent and block
+   height depends only on line COUNT — which depends only on advance width.
+   size-adjust is the entire mechanism; the other three would be decoration.
+
+   COVERAGE IS PARTLY UNMEASURED. Only fonts installed here could be calibrated:
+   Arial, Helvetica Neue, Helvetica, Verdana and Tahoma resolved; Segoe UI
+   (Windows) and Roboto (Android) did not, and their ratios were NOT measured.
+   Both are narrower than Arial, so an Arial-calibrated adjustment applied to
+   them errs on the safe side — same line count or fewer, never more. That is a
+   reasoned expectation, not a measurement. An engine without size-adjust
+   support, or a platform where no local() source resolves, falls through to the
+   named families below and renders exactly as the site does today: this can
+   no-op, it cannot regress.
+
+   THE GATE THAT MEASURES THIS CAN BE BLINDED, AND THE OTHER HALF LIVES IN
+   header.php. scripts/probes/font-swap.js builds its fallback-only pass with
+   Network.setBlockedURLs on the glob ['*.woff2','*.woff','*.ttf'] (line 39), and
+   a URL glob stops matching the moment a query string is appended. Plan 02-08
+   stamps ?v=<filemtime> onto every stylesheet and script URL and DELIBERATELY
+   leaves the Sofia Sans preload bare. If that exclusion is ever dropped, pass 1
+   loads the real font, both passes become identical, and font-swap.js reports
+   maxAbsDeltaPx: 0 — a flawless-looking pass measuring nothing. A stamped woff2
+   does not FAIL this gate, it BLINDS it. That is why the font alone is
+   unversioned. */
+@font-face {
+	font-family: 'Sofia Sans Fallback';
+	font-style: normal;
+	font-weight: 400;   /* 400 only: a 700 face here suppresses synthetic bolding */
+	src: local('Arial'), local('Helvetica Neue'), local('Roboto'), local('Segoe UI');
+	size-adjust: 97%;   /* two-line range 70–106% measured; 9 points of margin */
+}
+
 /* --- Reset */
 *, *::before, *::after { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
@@ -108,7 +201,7 @@ a:hover { color: var(--c-link-hover); }
 	/* Typography. Exactly four sizes; deliberately no fifth and no --fs-small —
 	   Sofia Sans's x-height is 488/1000 vs Inter's 546, so small print uses
 	   --fs-body differentiated by --c-ink-muted instead (02-UI-SPEC C-2). */
-	--font-sans: 'Sofia Sans', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+	--font-sans: 'Sofia Sans', 'Sofia Sans Fallback', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 	--fs-display: clamp(2.00rem, 1.55rem + 2.00vw, 3.00rem);
 	--fs-heading: clamp(1.55rem, 1.30rem + 1.11vw, 2.05rem);
 	--fs-title: clamp(1.20rem, 1.11rem + 0.42vw, 1.40rem);
