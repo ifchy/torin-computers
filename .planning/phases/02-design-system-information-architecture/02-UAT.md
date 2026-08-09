@@ -255,8 +255,27 @@ closes: 1
 
 ### 26. Sticky лентата за обаждане на iPhone с home indicator (WR-11)
 expected: И двата бутона се натискат изцяло; никоя част не се прихваща от системната жестова зона и долният колонтитул не е закрит
-result: [pending]
+result: pass
 source: human
+reported: "buttons can be pressed on iPhone"
+measured: |
+  WR-11 не се потвърждава на практика: и двата бутона се натискат изцяло на
+  реален iPhone. Кодовият факт остава — .callbar е position:fixed; bottom:0
+  без safe-area отстъп и grep -rn 'env(' src/css/ връща нула съвпадения — но
+  предвиденото практическо последствие не се възпроизвежда.
+  Оставя се като известен риск, не като дефект: заслужава повторна проверка,
+  ако лентата стане по-ниска или отстъпите ѝ се променят.
+note: |
+  По време на този тест изплува ОТДЕЛЕН дефект на Android — виж тест 28.
+
+### 28. Бутонът «Пишете във Viber» отваря разговор
+expected: Натискането на бутона отваря разговор във Viber с магазина
+result: issue
+source: human
+reported: "there is a problem with the пишете във Viber button, when pressed on the android it says 'the requested page is unavailable. please update to the latest version.' pressing the update button takes me to the store only to see I am running the latest version of Viber"
+severity: blocker
+found_during: 26
+gap_ref: G-02-5
 why_human: "Review finding WR-11 is still UNMITIGATED and untriaged: `.callbar` is `position: fixed; bottom: 0; height: 56px` with no safe-area allowance, and `grep -rn 'env(' src/css/` returns zero hits. The code fact is established; the practical impact is device-specific and cannot be measured under viewport emulation. The fix is already written out at 02-REVIEW.md:479."
 how: "Отвори https://torin.bg/new/index.html на iPhone X или по-нов и опитай да натиснеш долната половина на двата бутона в лепкавата лента."
 
@@ -269,10 +288,10 @@ how: "Реши дали «Чести проблеми» (problem-stari.html) д�
 
 ## Summary
 
-total: 27
-passed: 24
-issues: 0
-pending: 2
+total: 28
+passed: 25
+issues: 1
+pending: 1
 skipped: 1
 blocked: 0
 
@@ -283,7 +302,8 @@ blocked: 0
 ## Current Round
 
 round: 2
-pending_tests: [26, 27]
+pending_tests: [27]
+issues_open: [28]
 source: 02-VERIFICATION.md (status: human_needed, 4/4 success criteria verified)
 
 ## Gaps
@@ -373,6 +393,43 @@ source: 02-VERIFICATION.md (status: human_needed, 4/4 success criteria verified)
   missing:
     - "Cache-busting on CSS links (e.g. ?v=<filemtime>, which needs no build step since the pages are PHP)"
     - "Or a short CSS max-age while /new/ is an actively-reviewed staging preview"
+
+- gap_id: G-02-5
+  truth: "The «Пишете във Viber» button opens a Viber conversation with the shop"
+  status: failed
+  reason: "User reported on Android: 'the requested page is unavailable. please update to the latest version.' The Viber update prompt leads to the store, which shows the latest version is already installed — i.e. Viber cannot resolve the deep link, not a stale client."
+  severity: blocker
+  test: 28
+  found_during: 26
+  affects: "16 deployed pages — index.html (hero + mid-page + callbar), footer.php (every page), category-page.php"
+  root_cause_candidates:
+    - candidate: "The linked number has no Viber account"
+      confidence: high
+      evidence: |
+        site-config.php:66 sets 'viber' => '+35929549710'. That is 02 954 9710 —
+        a SOFIA LANDLINE (area code 02). Viber accounts are provisioned against
+        mobile numbers, so a landline will not resolve to a Viber user.
+        The shop's other two numbers, 088 9458404 and 087 9128244, are mobiles.
+        This was never a discovered defect — it was a KNOWN open assumption:
+        site-config.php:65 marks it [ASSUMED] against OWNER-QUESTIONS #21, and
+        index.html:22-26 repeats the flag. OWNER-QUESTIONS.md:101 predicted this
+        exact outcome verbatim: "A chat link to a number that has no Viber
+        account is a dead end on the site's single most important conversion
+        action."
+    - candidate: "viber://chat is the wrong deep-link path for a non-contact"
+      confidence: medium
+      evidence: |
+        The emitted href is viber://chat?number=%2B35929549710. Viber also
+        documents viber://add?number=... and the generic error text the user saw
+        is Viber's fallback for ANY deep link it cannot resolve — so the scheme
+        cannot be exonerated by this report alone. Must be retested with a number
+        that definitely HAS Viber before concluding the path is correct;
+        otherwise a number fix could be credited with a scheme fix or vice versa.
+  blocked_on: "OWNER-QUESTIONS #21 — which of the three numbers is reachable on Viber"
+  missing:
+    - "The owner's answer to OWNER-QUESTIONS #21"
+    - "Retest the viber:// scheme with a number known to have a Viber account, so the number fix and the scheme fix are not confounded"
+    - "A fallback for visitors with no Viber installed (currently the button is a dead end for them too)"
 
 - gap_id: G-02-1b
   truth: "The six category icons are recognisable as the services they represent, without reading the label beneath"
