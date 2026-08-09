@@ -61,35 +61,33 @@ $site = array(
 	// BOTH when the owner answers.
 	'hours' => 'Понеделник – Петък, 8:00 – 16:00',
 
-	// ############################################################
-	// ## DEV PLACEHOLDER — MUST NOT REACH PRODUCTION (Phase 4)  ##
-	// ############################################################
+	// The Viber deep-link target. UAT gap G-02-5 (test 28) is the whole story
+	// behind this value, and it is worth keeping because the same trap is easy
+	// to walk back into.
 	//
-	// [ASSUMED] OWNER-QUESTIONS #21 (and 02-UI-SPEC C-9). Which of the three
-	// shop numbers is reachable on Viber is STILL unanswered.
+	// This was +35929549710 — the main line — as an [ASSUMED] placeholder
+	// against OWNER-QUESTIONS #21. It was a dead end: 02 954 9710 is a Sofia
+	// LANDLINE and Viber accounts are provisioned against mobile numbers, so on
+	// Android the button returned Viber's "the requested page is unavailable,
+	// please update to the latest version" on all 16 deployed pages. The client
+	// was current; the deep link simply did not resolve.
 	//
-	// The previous value here was the main line, +35929549710. UAT test 28
-	// proved that is a dead end: 02 954 9710 is a Sofia LANDLINE, Viber accounts
-	// are provisioned against mobile numbers, and pressing the button on Android
-	// returns Viber's "the requested page is unavailable, please update to the
-	// latest version" — the client is current, the deep link simply does not
-	// resolve. OWNER-QUESTIONS.md:101 predicted exactly this.
+	// That failure had TWO candidate causes which could not be told apart while
+	// both were in play:
+	//   (a) the number has no Viber account
+	//   (b) viber://chat is the wrong deep-link path
+	// They were separated by deploying a number known to HAVE Viber: the button
+	// opened a conversation, so (b) is ELIMINATED — the viber://chat?number=
+	// scheme is correct and the fix is a value change, not a rewrite.
 	//
-	// This value is a DEVELOPER'S OWN number, supplied 2026-08-09 solely to
-	// disambiguate the two root-cause candidates for G-02-5, which cannot be
-	// separated otherwise:
-	//   (a) the number has no Viber account          <- proven for the landline
-	//   (b) viber://chat is the wrong deep-link path <- untestable until (a) is
-	//                                                   removed as a variable
-	// A number that definitely HAS Viber isolates (b). If the button works with
-	// this value, the scheme is correct and only the number was wrong; if it
-	// still fails, the scheme needs changing too (viber://add, or an https
-	// fallback for visitors with no Viber installed).
-	//
-	// It is NOT the shop's number and must be replaced by the owner's answer
-	// before the Phase 4 cutover. Shipping it would route customer enquiries to
-	// a private individual.
-	'viber' => '+359888216639',
+	// [ASSUMED — still] OWNER-QUESTIONS #21 remains OPEN. 087 9128244 is one of
+	// the shop's two mobiles and was chosen 2026-08-09 as the likeliest, NOT
+	// confirmed by the owner. A mobile is far more plausible than a landline,
+	// but "more plausible" is exactly the reasoning that shipped the landline.
+	// Verified only to the extent that pressing the deployed button opens a
+	// Viber conversation — see 02-UAT.md test 28. If the owner names a different
+	// number, change this one line.
+	'viber' => '+359879128244',
 
 	// [ASSUMED] OWNER-QUESTIONS #8 asks whether the legacy otpuska.js
 	// holiday/hours banner should survive at all. It carried genuine content
