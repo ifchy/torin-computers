@@ -1,14 +1,20 @@
 ---
-status: diagnosed
+status: testing
 phase: 02-design-system-information-architecture
-source: [02-01-SUMMARY.md, 02-02-SUMMARY.md, 02-03-SUMMARY.md, 02-04-SUMMARY.md, 02-05-SUMMARY.md, 02-06-SUMMARY.md, 02-07-SUMMARY.md]
+source: [02-01-SUMMARY.md, 02-02-SUMMARY.md, 02-03-SUMMARY.md, 02-04-SUMMARY.md, 02-05-SUMMARY.md, 02-06-SUMMARY.md, 02-07-SUMMARY.md, 02-08-SUMMARY.md, 02-09-SUMMARY.md, 02-VERIFICATION.md]
 started: 2026-08-07T00:00:00Z
-updated: 2026-08-07T00:00:00Z
+updated: 2026-08-09T14:58:25Z
+round: 2
 ---
 
 ## Current Test
 
-[testing complete]
+number: 24
+name: Български буквени форми в Sofia Sans
+expected: |
+  Кирилицата се изписва с българските буквени форми (локализирани д, л, п, ц, ш),
+  а не с руските подразбиращи се очертания.
+awaiting: user response
 
 ## Tests
 
@@ -177,21 +183,82 @@ reported: "проблема с иконите не е в размера а аб�
 reason: "Deferred follow-up: нека ги оставим за фаза 3, дотогава ще използвам времето да търся още идеи защото засега не съм удовлетворен, но и не искам да губя прекалено много време за тях сега при положения че замяната на иконките може да стане лесно във всеки един момент"
 gap_ref: G-02-1b (deferred, not blocking)
 
+<!-- Round 2 — added 2026-08-09 from 02-VERIFICATION.md (status: human_needed,
+     4/4 success criteria verified) after plans 02-08 and 02-09 closed G-02-1
+     and G-02-4. These four are the only items no probe can settle. -->
+
+### 24. Български буквени форми в Sofia Sans
+expected: Кирилицата се изписва с българските буквени форми (локализирани д, л, п, ц, ш), а не с руските подразбиращи се очертания
+result: [pending]
+source: human
+why_human: "Judgment-tier prohibition from plan 02-01 and the whole reason Sofia Sans was chosen (D-06a). Substantially de-risked: CSS.getPlatformFontsForNode confirms the live h1 is painted by the self-hosted Sofia Sans (postScriptName SofiaSans-Regular_Bold, isCustomFont true), and D-06a's premise is that Bulgarian forms are that family's DEFAULT outlines. What remains is eyes on the glyph shapes, which no probe can judge."
+how: "Отвори https://torin.bg/new/index.html и една категорийна страница; прочети заглавията и текста на десктоп и на телефон."
+
+### 25. Потвърждение на десктоп рендирането след поправката на кеша
+expected: Навигацията е на един ред, шестте категории са с картов вид, иконките са с нормален размер — и остава така без hard reload
+result: [pending]
+source: human
+why_human: "Test 1 is still recorded as `issue` / severity blocker and has not been re-confirmed by the owner since 02-08 shipped. The verifier reproduced the correct rendering headlessly at 1440x900 (nav on one row, sub-menu display:none, 3-column card grid, 143px icons) and confirmed the invalidation mechanism works, but the owner's acceptance is what closes the entry."
+how: "На същия десктоп, който съобщи проблема в тест 1: зареди страницата с НОРМАЛНО презареждане (не Cmd+Shift+R), после я презареди пак след няколко минути."
+closes: 1
+
+### 26. Sticky лентата за обаждане на iPhone с home indicator (WR-11)
+expected: И двата бутона се натискат изцяло; никоя част не се прихваща от системната жестова зона и долният колонтитул не е закрит
+result: [pending]
+source: human
+why_human: "Review finding WR-11 is still UNMITIGATED and untriaged: `.callbar` is `position: fixed; bottom: 0; height: 56px` with no safe-area allowance, and `grep -rn 'env(' src/css/` returns zero hits. The code fact is established; the practical impact is device-specific and cannot be measured under viewport emulation. The fix is already written out at 02-REVIEW.md:479."
+how: "Отвори https://torin.bg/new/index.html на iPhone X или по-нов и опитай да натиснеш долната половина на двата бутона в лепкавата лента."
+
+### 27. Съдба на problem-stari.html
+expected: Записано решение на собственика — да се линкне, да се слее с друго съдържание, или да се пенсионира
+result: [pending]
+source: human
+why_human: "A content/product decision, not a code fact. The code fact is established: zero inbound links across all sixteen deployed pages. If retired, Phase 4 must serve a 301 rather than a bare 404 (D-36)."
+how: "Реши дали «Чести проблеми» (problem-stari.html) да остане в новия сайт."
+
 ## Summary
 
-total: 23
+total: 27
 passed: 20
-issues: 2
-pending: 0
+issues: 0
+pending: 4
 skipped: 1
-skipped: 0
 blocked: 0
+resolved: 2
 
 ## Gaps
 
 - gap_id: G-02-1
   truth: "Every page renders with the new responsive design system and displays correctly on mobile and desktop viewports"
-  status: failed
+  status: resolved
+  resolved_by: 02-08-PLAN.md
+  resolved_at: 2026-08-09
+  resolution: |
+    Closed by plan 02-08. Every stylesheet and script URL emitted by the shared
+    head now carries ?v=<filemtime> via src/includes/asset-version.php, so a
+    deployed change alters the URL and a returning visitor fetches new bytes
+    instead of a cached copy. The staging text/css and JS cache lifetime dropped
+    from 604800s to 300s as a second, independent line of defence.
+
+    Verified twice, by two parties. The executor's own freeze detector: a
+    byte-identical redeploy of js/site.js MOVED the token (1785984699 →
+    1786283329) with sha256 unchanged — which is what proves the stamp is live,
+    since the token/Last-Modified equality proves only path resolution.
+    The verifier independently ran scripts/asset-version-check.sh (exit 0) and
+    added a second freeze argument: five distinct token values, each equal to its
+    own asset's origin Last-Modified, cannot come from a constant.
+
+    The method_defect below is closed durably rather than for one run:
+    scripts/asset-version-check.sh fetches all sixteen pages on BARE URLs with no
+    cache-buster, so the blind spot that let this class of defect through is now
+    a committed gate.
+
+    Note on impact_at_cutover: the recorded cutover reasoning was already
+    retracted in severity_correction (zero filename overlap between legacy and
+    new CSS means no returning visitor holds a new file cached at cutover). What
+    this fix actually buys is the OTHER half — every future CSS edit after launch
+    now invalidates immediately instead of stranding returning customers on a
+    stale copy.
   reason: "User reported the desktop rendering is broken: nav stacked in a column with the Услуги sub-list permanently expanded and consuming ~half the viewport, no card treatment on the six categories, icons rendering at full-viewport size with the text pushed below them. Phone renders correctly."
   severity: major
   test: 1
@@ -285,7 +352,40 @@ blocked: 0
 
 - gap_id: G-02-4
   truth: "The web-font swap does not visibly displace the two hero CTA buttons on a throttled first visit"
-  status: failed
+  status: resolved
+  resolved_by: 02-09-PLAN.md
+  resolved_at: 2026-08-09
+  resolution: |
+    Closed by plan 02-09. Displacement measured at 0px, down from 27.1px
+    (threshold 8px), at 360x640, 390x844 and 1440x900 — identical h1 heights and
+    heroHeightDeltaPx: 0 in every pass.
+
+    Mechanism is the metric-adjusted fallback the implementation_note prescribed,
+    NOT a min-height: a 'Sofia Sans Fallback' @font-face at size-adjust: 97%,
+    inserted into --font-sans immediately after 'Sofia Sans'. Every number was
+    measured by the committed probe scripts/probes/font-fallback-metrics.js, not
+    estimated; the two-line range measured 70-106%, so the shipped 97% carries
+    9 points of margin on the safe (narrow) side.
+
+    Two deviations from the plan as written, both forced and both measured:
+    ONE face at weight 400 rather than two, because in Chromium local() resolves
+    only by family name — every bold form (Arial Bold, Arial-BoldMT,
+    HelveticaNeue-Bold, ...) rejects outright, and sourcing a 700 face from a
+    regular file suppresses synthetic bolding and renders the heading light.
+
+    The maxAbsDeltaPx: 0 was verified rather than trusted, since that is also
+    exactly what a blinded gate reports. The verifier falsified the blinding
+    hypothesis with CSS.getPlatformFontsForNode: in the blocked pass the h1 is
+    painted by Arial (isCustomFont false) with both Sofia faces in status error;
+    in the allowed pass by Sofia Sans (isCustomFont true). Genuinely different
+    faces, same block height. The woff2 preload is still unstamped, so
+    font-swap.js's *.woff2 block glob still bites.
+
+    D-30 re-measured unchanged: 233.4px content stack under a 268.8px min-height.
+
+    NOT verified on Segoe UI (Windows) or Roboto (Android) — neither is installed
+    on the measuring machine. Both are narrower than Arial so the calibration errs
+    safe on them, but that is a reasoned expectation, not a measurement.
   reason: "Measured FAIL: hero CTAs move 27.1px upward across the font swap (threshold 8px). At 360x640 the h1 renders 110.4px tall in the fallback stack (three lines) and 73.6px with Sofia Sans (two lines); the 36.8px collapse pulls both CTAs up. Owner chose the reserve-space option over font-display:optional, so first-paint Cyrillic readability (the stated reason swap was chosen) is preserved."
   severity: major
   test: 4
