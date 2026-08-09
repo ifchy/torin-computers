@@ -17,6 +17,11 @@ require_once(dirname(__FILE__) . '/icons.php');
 // than relying on the page: fifteen of the sixteen pages include only this
 // file. require_once makes index.html's own earlier require a no-op.
 require_once(dirname(__FILE__) . '/categories.php');
+// Version-stamps every static asset URL this head emits (gap G-02-1: a bare
+// href cannot be invalidated, and the origin caches these files for days).
+// Required HERE, before the dev-only theme switcher partial is included below,
+// because that partial calls torin_asset_url() too and relies on this scope.
+require_once(dirname(__FILE__) . '/asset-version.php');
 
 // Current-page detection for aria-current. SCRIPT_NAME is the ONLY acceptable
 // source here: the other self-referencing server variable appends
@@ -67,10 +72,15 @@ if (!isset($torin_desc)) {
       // is required even same-origin or the file downloads twice. ?>
 <link rel="preload" href="fonts/sofia-sans-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
 
-<?php // Cascade order IS link order — no @layer, no nesting. ?>
-<link rel="stylesheet" href="css/base.css">
-<link rel="stylesheet" href="css/layout.css">
-<link rel="stylesheet" href="css/components.css">
+<?php // Cascade order IS link order — no @layer, no nesting. Three separate
+      // elements on purpose: plan 02-06 built the no-script override's
+      // correctness on source position, so a loop or an element-emitting
+      // helper would hide the very ordering the argument rests on. The
+      // ?v=<filemtime> query string (G-02-1) changes the URL, never the
+      // source position — cascade order is unaffected by it. ?>
+<link rel="stylesheet" href="<?php echo htmlspecialchars(torin_asset_url('css/base.css'), ENT_QUOTES, 'UTF-8'); ?>">
+<link rel="stylesheet" href="<?php echo htmlspecialchars(torin_asset_url('css/layout.css'), ENT_QUOTES, 'UTF-8'); ?>">
+<link rel="stylesheet" href="<?php echo htmlspecialchars(torin_asset_url('css/components.css'), ENT_QUOTES, 'UTF-8'); ?>">
 <?php // The conditional override (plan 02-06), requested ONLY by a user agent
       // with scripting disabled — a scripting-capable one never parses this
       // element's contents as markup and never fetches the file, so there is no
