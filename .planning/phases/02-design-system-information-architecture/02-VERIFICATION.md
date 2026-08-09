@@ -1,10 +1,68 @@
 ---
 phase: 02-design-system-information-architecture
 verified: 2026-08-09T14:58:25Z
-status: human_needed
+status: gaps_found
 score: 4/4 success criteria verified
 behavior_unverified: 0
 overrides_applied: 0
+uat_outcome:
+  completed: 2026-08-09
+  session: 02-UAT.md (round 2)
+  note: |
+    All four human_verification items below were answered. Status moved
+    human_needed -> gaps_found NOT because a success criterion failed — all four
+    still verify — but because UAT surfaced a NEW blocker that no automated
+    check could have caught, and the phase must not read as complete while it is
+    open.
+  human_items_resolved:
+    - item: "Bulgarian letterforms"
+      result: pass
+      how: |
+        Converted from judgment to measurement during testing. Same string, same
+        font and size, only lang="bg" vs lang="ru" changed: advance widths
+        IDENTICAL (1288.75px — locl substitutes glyph shapes, not widths) while
+        the rendered PIXELS DIFFER. Visibly т->m, и->u, п->n, л->rounded ʌ,
+        д->g-like, г->r. Had the two been byte-identical, no Bulgarian
+        substitution would be happening — the distinction the eye cannot make
+        without a reference.
+    - item: "Desktop reload after the cache fix (closes UAT test 1)"
+      result: pass
+      how: |
+        Owner confirmed on the same machine that reported it, with a NORMAL
+        reload. This is what the headless reproduction could not establish: a
+        headless browser always starts cold, so it cannot prove the invalidation
+        mechanism works for a real visitor holding a warm cache.
+    - item: "WR-11 call bar on an iPhone with a home indicator"
+      result: pass
+      how: |
+        Both buttons fully tappable on a real device. The code fact stands —
+        .callbar is position:fixed; bottom:0 with no safe-area allowance and
+        `grep -rn 'env(' src/css/` returns zero hits — but the predicted
+        practical consequence does not reproduce. Retained as a known risk, not
+        a defect; worth re-checking if the bar's height or padding changes.
+    - item: "problem-stari.html disposition"
+      result: decided — RETIRE with a 301
+      how: |
+        Owner decision. Phase 4 must add
+        `Redirect 301 /problem-stari.html /zalivane-technosti.html`.
+        Target chosen on content, not convenience: despite its battery-themed
+        title the page is about the motherboard's power section (Charger and
+        StandBy processors, ACPI, fan and keyboard control), and kat-4 already
+        carries the symptom "не зарежда". Topical proximity is load-bearing — a
+        301 to an unrelated page can be treated as a soft 404 and not honoured.
+        mod_rewrite confirmed active in src/.htaccess.
+  new_gap_found:
+    id: G-02-5
+    severity: blocker
+    summary: "The «Пишете във Viber» button is a dead link on all 16 pages — no shop number has a Viber account"
+    status: open, parked by owner ("we leave it for later", 2026-08-09)
+    why_no_check_caught_it: |
+      Every automated check in this phase verified that the href was PRESENT,
+      well-formed and single-sourced — which it is. Whether the number behind it
+      has a Viber account is not a property of the markup and is unreachable
+      from the origin; it needs a real handset with Viber installed. This is a
+      genuine limit of the probe harness, not an oversight in it.
+    escalated_to: "OWNER-QUESTIONS #21, reframed from 'which number' to a D-16 design decision"
 re_verification:
   previous_status: gaps_found
   previous_score: 2/4
