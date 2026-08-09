@@ -14,8 +14,8 @@ Requirements for the redesign launch. Each maps to roadmap phases.
 
 ### Information Architecture
 
-- [ ] **IA-01**: User sees services organized into the six owner-priority categories as clear, distinct sections — not one undifferentiated scroll of ~18 icon-boxes
-- [ ] **IA-02**: User can navigate via a flat, shallow nav structured around the six categories (not a dense mega-menu)
+- [x] **IA-01**: User sees services organized into the six owner-priority categories as clear, distinct sections — not one undifferentiated scroll of ~18 icon-boxes
+- [x] **IA-02**: User can navigate via a flat, shallow nav structured around the six categories (not a dense mega-menu)
 
 ### Trust Signals
 
@@ -44,7 +44,7 @@ Requirements for the redesign launch. Each maps to roadmap phases.
 ### SEO & Technical Hygiene
 
 - [ ] **SEO-01**: Every page has a unique `<title>` and `<meta name="description">` (currently identical/empty across all 16 pages)
-- [ ] **SEO-02**: Every page declares `lang="bg"` instead of the current `lang="en"`
+- [x] **SEO-02**: Every page declares `lang="bg"` instead of the current `lang="en"`
 - [ ] **SEO-03**: Site has a `robots.txt` and `sitemap.xml`, submitted to Search Console
 - [x] **SEO-04**: All existing page URLs are preserved unchanged through the redesign (no slug/filename changes)
 
@@ -88,8 +88,8 @@ Which phases cover which requirements. Populated during roadmap creation.
 |-------------|-------|--------|
 | DESIGN-01 | Phase 2 | Complete |
 | DESIGN-02 | Phase 4 | Pending |
-| IA-01 | Phase 2 | Gaps Found |
-| IA-02 | Phase 2 | Gaps Found |
+| IA-01 | Phase 2 | Complete |
+| IA-02 | Phase 2 | Complete |
 | TRUST-01 | Phase 3 | Pending |
 | TRUST-02 | Phase 3 | Pending |
 | TRUST-03 | Phase 3 | Pending |
@@ -103,7 +103,7 @@ Which phases cover which requirements. Populated during roadmap creation.
 | CONTACT-03 | Phase 4 | Pending |
 | CONTACT-04 | Phase 4 | Pending |
 | SEO-01 | Phase 3 | Pending |
-| SEO-02 | Phase 2 | Gaps Found |
+| SEO-02 | Phase 2 | Complete |
 | SEO-03 | Phase 4 | Pending |
 | SEO-04 | Phase 1 | Complete |
 | MIGR-01 | Phase 1 | Complete |
