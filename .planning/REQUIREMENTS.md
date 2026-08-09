@@ -9,7 +9,7 @@ Requirements for the redesign launch. Each maps to roadmap phases.
 
 ### Design & Performance
 
-- [ ] **DESIGN-01**: User sees a modern, mobile-responsive layout across all pages, replacing the current heavy jQuery/parallax "Liquid" theme
+- [x] **DESIGN-01**: User sees a modern, mobile-responsive layout across all pages, replacing the current heavy jQuery/parallax "Liquid" theme
 - [ ] **DESIGN-02**: User experiences fast page loads on mobile (images optimized/compressed, ScrollMagic/pagePiling/jQuery UI removed)
 
 ### Information Architecture
@@ -86,7 +86,7 @@ Which phases cover which requirements. Populated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DESIGN-01 | Phase 2 | Gaps Found |
+| DESIGN-01 | Phase 2 | Complete |
 | DESIGN-02 | Phase 4 | Pending |
 | IA-01 | Phase 2 | Gaps Found |
 | IA-02 | Phase 2 | Gaps Found |

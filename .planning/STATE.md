@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 02
 current_phase_name: design-system-information-architecture
 status: executing
-stopped_at: Completed 02-08-PLAN.md
-last_updated: "2026-08-09T13:51:37.471Z"
+stopped_at: Completed 02-09-PLAN.md
+last_updated: "2026-08-09T14:16:28.320Z"
 last_activity: 2026-08-09
 last_activity_desc: Phase 02 execution started
 progress:
   total_phases: 2
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 14
-  completed_plans: 13
+  completed_plans: 14
 ---
 
 # Project State
@@ -32,7 +32,7 @@ Plan: 9 of 9
 Status: Executing (02-01..02-08 complete; 02-09 remains — same wave as 02-08)
 Last activity: 2026-08-09 — Phase 02 execution started
 
-Progress: [█████████░] 93%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -70,6 +70,7 @@ Progress: [█████████░] 93%
 | Phase 02 P05 | 20 min | 2 tasks | 2 files |
 | Phase 02 P06 | 12 min | 2 tasks | 2 files |
 | Phase 02 P08 | 50m | 3 tasks | 5 files |
+| Phase 02 P09 | 40min | 3 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -108,6 +109,10 @@ Recent decisions affecting current work:
 - [Phase ?]: G-02-1 closed with ?v=<filemtime> query-string stamping in PHP, not per-version file renames — rename is manual and every manual step is eventually skipped
 - [Phase ?]: Sofia Sans woff2 preload deliberately NOT version-stamped: it must byte-match the @font-face src in base.css, and a query string defeats font-swap.js's *.woff2 block glob, which would blind plan 02-09's G-02-4 gate rather than fail it
 - [Phase ?]: Staging text/css and both JavaScript media types bounded to max-age=300 as a second line of defence behind the stamp; Phase 4 raises this once proven in production (DESIGN-02)
+- [Phase ?]: 02-09: no bold local() name form resolves in Chromium (Arial Bold, Arial-BoldMT, Helvetica Neue Bold, HelveticaNeue-Bold all reject despite the files being on disk) — only the FAMILY name resolves, so a metric-adjusted fallback can only be sourced from a regular face
+- [Phase ?]: 02-09: the fallback ships as ONE font-weight:400 face, not two — declaring a 700 face from a regular local file suppresses synthetic bolding and renders the heading light (canvas ink 32694 vs 40347 synthesised, against Sofia 700's 40762)
+- [Phase ?]: 02-09: size-adjust 97% shipped, 9 points below the measured 106% two-line cliff — margin deliberately on the narrow side, since one percent too wide costs a whole 36.8px line while too narrow costs nothing
+- [Phase ?]: 02-09: an unresolved @font-face falls to the last-resort font, which is NARROWER than Sofia Sans and sets the hero h1 at exactly 73.6px — the target height, so a fully broken measurement reads as a perfect match; every scan iteration now carries a resolution guard
 
 ### Pending Todos
 
@@ -139,6 +144,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-09T13:51:37.233Z
-Stopped at: Completed 02-08-PLAN.md
+Last session: 2026-08-09T14:16:13.281Z
+Stopped at: Completed 02-09-PLAN.md
 Resume file: None
