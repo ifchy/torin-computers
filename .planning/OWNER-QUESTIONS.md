@@ -9,7 +9,7 @@
 **Note on numbering:** Item numbers are stable IDs referenced from phase CONTEXT.md files — they are grouped by category, not sequential. Never renumber existing items; new questions take the next unused number.
 
 *Created: 2026-08-05 (during Phase 2 discussion)*
-*Last updated: 2026-08-05*
+*Last updated: 2026-08-11 (Phase 3 discussion — #5 and #9 resolved, #7 narrowed, #22–#24 added)*
 
 ---
 
@@ -58,11 +58,26 @@
 ---
 
 ### 5. `problem-stari.html` — retire, merge, or keep?
-**Status:** OPEN
+**Status:** RESOLVED 2026-08-11 (Phase 3 discussion, D3-05) — kept, repurposed
 **Question:** No current requirement covers this page. Content may overlap with `mehanichni-problemi.html` but this is unconfirmed. Keep it, merge it into another page, or retire it with a redirect?
 **Why it matters:** It's a currently-indexed URL. Retiring it without review risks losing existing traffic.
-**Blocks:** Phase 3 IA finalisation
+**Blocks:** ~~Phase 3 IA finalisation~~ — resolved
 **Raised:** Phase 1
+
+**RESOLVED — the page is kept and becomes the category 6 page («Нестандартна техника»).**
+Its slug reads as «стари», and category 6's own symptom line in `categories.php` is «нестандартна
+или стара техника, която другаде не приемат» — the semantics fit. This puts category 6 on an
+existing indexed URL rather than a new slug, inheriting whatever authority it holds, and needs no
+new file. Nothing is retired, so no redirect and no ranking risk.
+
+**The overlap suspicion was half right, against the wrong page.** A grep during the Phase 3
+discussion found `problem-stari.html:181` duplicates the battery-regeneration paragraph from
+`za-bateriite.html:158` **verbatim** — not `mehanichni-problemi.html` as this entry assumed. That
+paragraph does not survive the repurpose (it also references the dead SmartBattery.eu domain — see
+new item #22 context and D3-12).
+
+**Still worth one sentence at owner review:** confirm the page's current traffic isn't coming from
+something the repurpose would break.
 **Answer:**
 
 ---
@@ -137,11 +152,21 @@ That turns the remaining work into a **cutover gate rather than a code change**:
 ## Sign-off needed — decisions made on the owner's behalf
 
 ### 7. Google Business Profile — is it active, with reviews?
-**Status:** OPEN
+**Status:** OPEN — narrowed 2026-08-11, now a number-confirmation rather than an existence question
 **Question:** Does the shop have a live Google Business Profile? Roughly how many reviews and what rating?
 **Why it matters:** TRUST-02 calls for a Google rating badge linking to the profile. A badge pointing at an empty or non-existent profile is worse than none.
 **Blocks:** TRUST-02 in Phase 3
 **Raised:** Phase 1
+
+**Largely answered by the developer's task list (2026-08-11):** aggregators report review counts in
+the **128–146** range across different crawl dates. So the profile exists and is healthy — the
+"is a badge worth having" half of this question is settled, and TRUST-02 proceeds.
+
+**What is still needed:** the **live rating and review count pulled from GBP itself**, not from an
+aggregator. Phase 3 ships these as hardcoded values in `site-config.php` (D3-07), so a wrong number
+is a wrong number on every page until someone edits it. Use only the figure GBP shows.
+
+**Also needed:** the profile URL the badge links to.
 **Answer:**
 
 ---
@@ -157,11 +182,22 @@ That turns the remaining work into a **cutover gate rather than a code change**:
 ---
 
 ### 9. DIFF-02 downgrade — battery regeneration placement
-**Status:** OPEN
+**Status:** RESOLVED 2026-08-11 (Phase 3 discussion, D3-11) — downgrade reversed, no sign-off needed
 **Question:** The requirement says the battery-regeneration story (Panasonic-cell regeneration vs. simply reselling new batteries) should be "surfaced as a distinct differentiator." The current plan puts it in the folded «Не откривате проблема си?» section instead, to keep the six categories undiluted. Is that acceptable, or should it get its own prominent block?
 **Why it matters:** It's a genuine competitive advantage no competitor offers. Folding it is a deliberate trade-off, recorded so it doesn't fail verification silently.
-**Blocks:** Phase 3 (DIFF-02 verification)
+**Blocks:** ~~Phase 3 (DIFF-02 verification)~~ — resolved
 **Raised:** Phase 2 discussion
+
+**RESOLVED — DIFF-02 gets the prominent treatment the requirement actually asks for.** D-13's
+folded placement is superseded. `za-bateriite.html` (a locked, indexed URL) becomes its depth page.
+This question asked the owner to sign off on a downgrade; the downgrade no longer exists, so the
+sign-off is moot and DIFF-02 moves from "knowingly unmet" to met.
+
+**What forced it:** the developer confirmed on 2026-08-11 that **SmartBattery.eu no longer exists.**
+The current site sends battery customers to that "специализиран сайт" from three places and lists
+`office@smartbattery.eu` as a contact address in a fourth. With nowhere left to link out to,
+`za-bateriite.html` has to carry the regeneration story itself — which is exactly what DIFF-02
+wanted in the first place.
 **Answer:**
 
 ---
@@ -278,6 +314,56 @@ Which should ship?
 **Raised:** Requirements definition (2026-08-04)
 
 ---
+
+---
+
+### 22. Which brands does Torin actually service — and which six to eight should the row name?
+**Status:** OPEN
+**Question:** TRUST-01 puts a «Обслужваме всички марки» row on the site. Which brands does the shop
+genuinely work on, and which six to eight should be named in the row?
+**Why it matters:** The list currently in the roadmap — Lenovo, HP, Dell, Asus, Acer, Apple, MSI —
+came from requirements drafting, **not from the owner**. Naming a brand the shop doesn't actually
+service is a promise it can't keep; omitting one it specialises in loses searches. Apple/MacBook in
+particular is worth confirming explicitly, since it often needs different parts and tooling than
+the PC brands.
+**Context from competitor research (2026-08-11):** eight competitor sites were examined; **none uses
+brand logo images** and none claims authorized-service status. Several position explicitly as
+«извънгаранционен сервиз». Torin's row ships as styled text wordmarks for the same reasons (D3-09).
+**Blocks:** TRUST-01 content in Phase 3 (a drafted list ships marked `[ASSUMED]` until answered)
+**Raised:** Phase 3 discussion
+**Answer:**
+
+---
+
+### 23. Do warranty terms vary by type of repair?
+**Status:** OPEN
+**Question:** TRUST-03 puts a warranty summary on every category page. Is it **one set of terms for
+all repairs**, or do they differ — e.g. board-level work vs. a keyboard swap vs. software
+optimisation? If they differ, what are the actual terms per type?
+**Why it matters:** Phase 3 ships a single shared summary from `site-config.php` (D3-10), reused on
+every category page. If terms really do vary, that shared block is wrong on some pages — and
+warranty text is the kind of thing customers hold you to.
+**Also worth confirming:** the existing warranty page requires the customer to **use the laptop 5–6
+hours a day** during the warranty period, to build up 150–200 hours of test time. Is that still a
+real condition? The redesign reframes it as a statement of confidence in the repair rather than a
+condition that could void a claim — worth checking that reading is right.
+**Blocks:** TRUST-03 accuracy in Phase 3
+**Raised:** Phase 3 discussion
+**Answer:**
+
+---
+
+### 24. Free diagnostics — what happens if the customer declines the repair?
+**Status:** OPEN
+**Question:** «Безплатна диагностика» appears across the site as a trust signal. If a customer has
+the diagnosis done and then declines the repair, is it still free, or is there a fee?
+**Why it matters:** Competitors commonly charge a declined-repair fee. If Torin genuinely doesn't,
+that is a bullet worth stating plainly next to every «безплатна диагностика» mention — it's a real
+differentiator. If Torin does charge, the site must say so, or it sets up a dispute at the counter.
+**Blocks:** Nothing structurally — but the claim ships on many pages, so getting it wrong is
+expensive to correct
+**Raised:** Phase 3 discussion
+**Answer:**
 
 ---
 
