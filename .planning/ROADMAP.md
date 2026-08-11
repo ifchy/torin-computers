@@ -113,15 +113,33 @@ Plans:
 **Plans**: 9 plans
 
 Plans:
+**Wave 1**
+
 - [ ] 03-01-PLAN.md — Generalize the category template into a service-page renderer (h1 override, structured blocks, keyed warranty, breadcrumbs) and prove it end-to-end on category 4
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 03-02-PLAN.md — Brand row, Google rating badge, and the battery and chip-level differentiator surfaces, single-sourced across the homepage and every service page
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 03-03-PLAN.md — Split category 2 into a routing hub plus five children; ship the hub and the first two
 - [ ] 03-04-PLAN.md — The three differentiator depth pages: battery regeneration, self-diagnostic routing, chip-level repair evidence
 - [ ] 03-05-PLAN.md — Category 6 on its existing indexed URL, the surge-damage page, and About with the EU disclosure relocated off the homepage
 - [ ] 03-06-PLAN.md — Port the six legal and utility pages, fixing what is visibly wrong and leaving the compliance text alone
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
 - [ ] 03-07-PLAN.md — The remaining three category-2 child pages; open the publish gate on all five
 - [ ] 03-08-PLAN.md — The last three category pages to the Definition of Done; publish category 5
+
+**Wave 5** *(blocked on Wave 4 completion)*
+
 - [ ] 03-09-PLAN.md — Site-wide SEO-01 closure: the uniqueness/ordering/non-empty gate over every served page, the homepage's metadata, and the shortened brand-suffix pass
+
+**Cross-cutting constraints:**
+
+- Each of the three pages shows the shared warranty summary on the page itself (TRUST-03)
 
 **UI hint**: yes
 
