@@ -188,7 +188,7 @@ is the entire reason the badge is a navy pill rather than a bare inline row.
 | `--c-focus` `#0b4a9c` (badge focus ring, drawn on the page) | `--c-page` `#ffffff` | **8.49** | UI ✓ |
 | `--c-ink` `#1f2a3c` (block prose) | `--c-surface-2` `#f4f6fa` | **13.34** | AAA |
 | `--c-danger-ink` `#8c1d18` (urgent block heading + body) | `--c-danger-surface` `#fdecea` | **7.97** | AAA |
-| `--c-danger` `#b3261e` (urgent block 3px edge) | `--c-danger-surface` `#fdecea` | **6.16** | UI ✓ (1.4.11) |
+| `--c-danger` `#b3261e` (urgent block 3px edge) | `--c-danger-surface` `#fdecea` | **5.72** | UI ✓ (1.4.11) |
 | `--c-link` `#0b4a9c` (breadcrumb links, block links) | `--c-page` `#ffffff` | **8.49** | AAA |
 | `--c-ink-muted` `#55637a` (evidence caption) | `--c-page` `#ffffff` | **6.08** | AA |
 
@@ -407,7 +407,7 @@ Entry shape: `kind` · `heading` · `items` (list of strings) · optional `tone`
 
 | Modifier | Renders | Visual contract |
 |---|---|---|
-| **`tone: 'urgent'`** | applies to `callout` and `steps` | `background: var(--c-danger-surface)` `#fdecea`; `border-inline-start-color: var(--c-danger)` `#b3261e` (6.16:1, clears 1.4.11); heading **and** body in `--c-danger-ink` `#8c1d18` (7.97:1) |
+| **`tone: 'urgent'`** | applies to `callout` and `steps` | `background: var(--c-danger-surface)` `#fdecea`; `border-inline-start-color: var(--c-danger)` `#b3261e` (5.72:1, clears 1.4.11); heading **and** body in `--c-danger-ink` `#8c1d18` (7.97:1) |
 
 **Rules that bind every variant:**
 
@@ -583,26 +583,109 @@ the six category names. **Do not restate or re-translate them.**
 
 ## UI Considerations
 
-Applicable state considerations resolved: **9 covered, 2 backstop, 1 unresolved**
+Probe-derived state coverage. **48 applicable considerations** across the seven new surfaces
+(`ui-consideration-probe.cjs`, element kinds confirmed — see note below).
+**Resolved: 40 covered · 9 dismissed (reason given) · 1 backstop · 1 unresolved.**
 
-> Probe axes (`empty` / `loading` / `error` / `populated` / `partial` / `overflow` / `zero-one-many` /
-> `long-text`) applied manually across the seven new surfaces. Every axis is represented. Rows that
-> reference copy point at §Copywriting rather than restating it.
+> **Kind confirmation (propose-then-confirm).** The prose classifier is heuristic and lossy, so the
+> detected kinds were reviewed before resolution. Two were **added**: `interactive-control` on the
+> rating badge (it is a link with hover/focus/44px contracts) and `list-collection` on the warranty
+> block (it is a keyed set with per-key lookup and a fallback). Both only *raise* coverage. Two cues
+> fired **falsely** on the brand row — `media` and `interactive-control` — because the prose mentions
+> the forward-compat `<img>` rule and the words "links/buttons" in a sentence that *forbids* them; the
+> rows they generated are dismissed with reason rather than silently dropped. The `<h1>` empty-guard is
+> a real consideration the taxonomy cannot express for a `static-content` kind — it is recorded below
+> as an off-taxonomy covered row rather than distorting the classification to raise it.
+>
+> Rows that concern copy point at §Copywriting Contract rather than restating it.
+> **Four resolutions below are new decisions taken at probe time, not restatements** — they are marked **[NEW]**.
 
-| Category | Element(s) | Status | Resolution / Reason |
-|----------|------------|--------|---------------------|
-| empty | rating badge, `gbp_url` unset | ✅ covered | Component emits nothing; it owns its own `margin-block-start`, and no parent rule names it positionally, so removal is a subtraction not a redesign. Verified by asserting the served HTML contains no `rating-badge` substring **and** `.cta-block` rhythm is unchanged. No empty-state copy exists by design (§2a) |
-| zero-one-many | brand wordmark row | ✅ covered | `flex-wrap` list read from `$site['brands']`; 1 or 12 entries render identically well because the row wraps rather than laying out to a column count. The «и др.» closer is always last and is emitted by the template |
-| partial | warranty key missing or unknown | ✅ covered | Falls back to the `default` entry. `torin_has_content()` means a present-but-empty value omits the whole «Гаранция» section rather than shipping an empty heading |
-| long-text | per-page `<h1>` at 360px | ✅ covered | 48-char cap → ≤3 lines at 32px/1.15 = 110px, measured against a 328px content box at ~17.9px/char. `text-wrap: balance` prevents a one-word last line. No truncation |
-| long-text | brand-row disclaimer (150 ch) | ✅ covered | `--fs-body` at `--measure: 66ch`, wraps freely, no clamp, no ellipsis. Renders at body size — not a smaller one — because Phase 2 declares no fifth type size |
-| overflow | breadcrumbs at 320–360px | ✅ covered | `flex-wrap: wrap` on the `<ol>`; three long Bulgarian names wrap to two lines. `scrollWidth <= innerWidth` holds; truncation forbidden |
-| populated | evidence strip with 1, 2 or 3 photos | ✅ covered | Explicit `repeat(2, 100px)` → `repeat(3, 100px)` at 35rem. Columns are **content-sized, not fractional**, so 1 or 2 photos leave no stretched orphan cell. Hard cap of 3 |
-| loading | evidence photographs | ✅ covered | True intrinsic `width`/`height` per file reserve the box before load; `object-fit: cover` on a fixed `1/1` box; `loading="lazy"` + `decoding="async"` are unconditionally safe because an evidence strip may never be the first contentful element |
-| zero-one-many | `blocks` slot, 0…N entries | ✅ covered | Absent or empty → no section at all. N blocks stack inside **one** `.section` at `--sp-xl`, so the section count does not vary with content and the tint toggle stays deterministic |
-| partial | tint alternation across optional slots | 🧪 backstop | The running toggle (§5) makes alternation correct for every slot combination **by construction** — but the defect it replaces is a *visual* one (two adjacent tinted bands), and correctness must be seen at least once across a page that fills few slots and a page that fills all of them |
-| error | an evidence photograph 404s | 🧪 backstop | Meaning survives via `<figcaption>` (or `alt` when uncaptioned), and the 100px box collapses to caption-only rather than to a broken-image sprawl. Needs one rendered check — no probe can judge whether the collapsed strip still reads |
-| populated | ~200px JPEGs at 100 CSS px on a 3× display | ⚠ unresolved | RESEARCH assumption A7. 2× effective density is comfortable; **3× is not covered by the source files and cannot be**. Planner should treat as an explicit assumption. Mitigation is structural, not visual: the slot pattern lets larger files replace these with zero layout change if the owner ever supplies them (OWNER-QUESTIONS #12/#13) |
+### 1. Brand wordmark row (E1)
+
+| Category | Status | Resolution / Reason |
+|---|---|---|
+| empty | ✅ covered | **[NEW]** `torin_has_content($site['brands'])` guards the **whole section** — an empty list emits no section at all, not a heading and disclaimer with no brands. Identical discipline to every other template slot and to the rating badge's absent state. A 1–2 entry list still renders: a short honest list beats a fabricated one |
+| loading | ⛔ dismissed | No loading state exists. The list is a local PHP array in `site-config.php` rendered server-side in one pass — there is no async fetch, no progressive reveal, nothing in flight. (Cue fired on the false-positive `media` classification) |
+| error | ⛔ dismissed | No failure mode exists. Local array, not a request. Nothing can 404, time out, or reject. (Cue fired on the false-positive `media`/`interactive-control` classification) |
+| populated | ✅ covered | 6–8 fixed-height chips (`min-height: 40px`, variable width) in a wrapping flex row, closed by the template-emitted «и др.» item, followed by the mandatory disclaimer paragraph |
+| partial | ✅ covered | The brand list is `[ASSUMED]` pending OWNER-QUESTIONS #22. An incomplete list renders honestly — the «и др.» closer exists precisely so the row never claims to be exhaustive. The empty case is handled by the section guard above |
+| overflow | ✅ covered | `display: flex; flex-wrap: wrap` — a wrapping row, not a grid. At 360px it reflows to 2–3 chips per line with no orphan rule needed. No horizontal scroll at any width ≥ 320px |
+| zero-one-many | ✅ covered | Zero → section suppressed by the guard. One or twelve render identically well, because the row wraps rather than laying out to a fixed column count. The «и др.» closer is always last |
+| long-text | ✅ covered | **[NEW]** An unusually long brand name **wraps inside its chip and is never truncated** — the chip is sized by `min-height`, so a two-line label grows the box rather than clipping. No `text-overflow`, no ellipsis, consistent with the `<h1>` and breadcrumb stance |
+
+### 2. Google rating badge (E2)
+
+| Category | Status | Resolution / Reason |
+|---|---|---|
+| empty | ✅ covered | The **ABSENT state is normative and primary** (§2a). Empty `gbp_url`, rating, or count → the component emits **nothing at all**: no skeleton, no placeholder, no «Очаквайте», no greyed pill. It owns its own `margin-block-start` and no parent rule names it positionally, so removal is a subtraction, not a redesign. There is no empty-state copy by design. Verified by asserting the served HTML contains no `rating-badge` substring **and** `.cta-block` rhythm is unchanged |
+| loading | ⛔ dismissed | No loading state exists. It is a styled static anchor rendered server-side — no embed, no iframe, no third-party script, no API call, no key (D3-07 + RESEARCH DH-1/DH-2) |
+| error | ⛔ dismissed | No runtime request exists to fail. The only failure mode is *stale data*, which is a content-freshness concern (OWNER-QUESTIONS #7), not a UI state |
+| populated | ✅ covered | Navy `--c-ink-deep` pill, `min-height: 44px`, star icon + score `4,8` (comma, Bulgarian convention) + label «от 128 отзива в Google». Accessible name is the full concatenation, satisfying WCAG 2.4.4 — the score must never be the link's only text |
+| overflow | ✅ covered | **[NEW]** The pill is `inline-flex` with `gap`; at 320px the label **wraps to a second line inside the pill**, growing its height, rather than overflowing its container or forcing horizontal scroll. `min-height: 44px` is a floor, not a fixed height |
+| long-text | ✅ covered | **[NEW]** A longer review-count label wraps and is never truncated. No ellipsis |
+
+### 3. Warranty summary, per-service (E3)
+
+| Category | Status | Resolution / Reason |
+|---|---|---|
+| empty | ✅ covered | An unknown or missing `warranty_key` falls back to the `default` entry. A present-but-empty value behaves exactly like absent via `torin_has_content()` — the whole «Гаранция» section is omitted rather than shipping an empty heading (RESEARCH P-4) |
+| loading | ⛔ dismissed | No loading state exists. Keyed PHP array resolved at render, server-side, in one pass |
+| error | ⛔ dismissed | No failure mode exists — local array lookup with a total fallback. An unresolvable key cannot error, it falls back |
+| populated | ✅ covered | Bold scannable term line (`--fs-title`, `--fw-bold`, `--c-ink-deep`) making the *duration* readable without reading the paragraph, then a detail `<p>` at `--measure`, then an optional trailing `<p><a>` to the full terms page. Reuses the existing `.svc__warranty` section, `<h2>` and eyebrow — no new section, no new heading level |
+| partial | ✅ covered | A page supplies a **key**, never a literal, so it cannot author a half-formed term. A missing leaf inside an entry falls back to `default`. D3-10's single-source rule is preserved exactly |
+| overflow | ✅ covered | **[NEW]** Term line and detail both wrap within `max-width: var(--measure)`. Neither is a fixed-height box, so a long term grows its line box |
+| zero-one-many | ✅ covered | **Exactly two entries** (`default`, `battery`), both tracing to verbatim live-site claims. **Do not invent a third** — further variance is OWNER-QUESTIONS #23 and every entry carries `[ASSUMED]` until answered |
+| long-text | ✅ covered | **[NEW]** A long term string wraps rather than truncating. No ellipsis anywhere in the block |
+
+### 4. Differentiator blocks + evidence photo strip (E4)
+
+| Category | Status | Resolution / Reason |
+|---|---|---|
+| empty | ✅ covered | **[NEW]** If every photo is dropped by the existence check below, the strip emits **nothing** and the feature section renders prose-only — it still reads as a complete section, because the strip is evidence *supporting* the copy, never the copy itself |
+| loading | ✅ covered | True intrinsic `width`/`height` per file reserve the box before load — this is the entire CLS defence. `object-fit: cover` on a fixed `1/1` box; `loading="lazy"` + `decoding="async"` unconditionally, which is safe **by contract** because an evidence strip may never be the first contentful element on a page |
+| error | ✅ covered | **[NEW]** A **build-time `file_exists()` check drops any figure whose file is not on disk**, so a bad path degrades to fewer photos rather than a broken-image icon on a trust-signal surface. Cost is one stat call per photo at a hard cap of 3/page — negligible, and it makes the porting step self-correcting. (Supersedes the earlier "grey box absorbs it" backstop: a silently missing photo was invisible to whoever ports them) |
+| populated | ✅ covered | Explicit `repeat(2, 100px)` → `repeat(3, 100px)` at `35rem`. Columns are **content-sized, not fractional**, so 1 or 2 photos leave no stretched orphan cell. Captions at `--fs-body`/`--c-ink-muted` describe what the photograph shows *as evidence*, never decoratively |
+| partial | ✅ covered | Fewer than three photos is a normal state, not a degraded one — content-sized columns mean a 1-photo strip is simply a 1-photo strip. `alt` convention branches correctly either way: `alt=""` when a descriptive `<figcaption>` is present, description moved into `alt` when uncaptioned |
+| overflow | ✅ covered | Hard cap of **3 photos per page** (D3-14 names "2–3"). 2-up at mobile is measured, not guessed: content box 328px at 360px, and 3 × 100 + 2 × 16 = **332 > 328**, so 3-up genuinely does not fit |
+| zero-one-many | ✅ covered | Zero → no strip (see `empty`). One through three → content-sized columns, no orphan stretch. Never more than three |
+| long-text | ✅ covered | **[NEW]** A long `<figcaption>` wraps beneath its 100px image and is never truncated. The caption is not constrained to the image's width — it may run wider within the grid cell's text flow |
+| populated *(3× displays)* | ⚠ **unresolved — planner must treat as assumption** | RESEARCH assumption **A7**. The ~200px source files give a comfortable **2× effective density** at 100 CSS px, but **3× is not covered by these files and cannot be**. Mitigation is structural rather than visual: the slot pattern lets larger files replace these with zero layout change if the owner ever supplies them (OWNER-QUESTIONS #12/#13) |
+
+### 5. The structured `blocks` slot (E5)
+
+| Category | Status | Resolution / Reason |
+|---|---|---|
+| empty | ✅ covered | `torin_has_content($page['blocks'])` — an empty list emits **nothing at all**, no section wrapper |
+| loading | ⛔ dismissed | No loading state exists. The slot is a hand-authored PHP data structure rendered server-side |
+| error | ✅ covered | **[NEW]** An unknown `kind` is **skipped silently** — and `kind` is validated against a literal whitelist (`prose`, `steps`, `callout`) exactly the way `tone` already is, so both structural keys get identical treatment. A malformed block never renders half-formed markup on a live page, and never falls back to a variant with the wrong visual weight |
+| populated | ✅ covered | Three variants: `prose` (`<h2>` + N `<p>` at `--measure`), `steps` (`<h2>` + `<ol>` reusing `.svc__process ol` verbatim), `callout` (`<h2>` + `<p>`s in a panel with a 3px left keyline). One modifier, `tone: 'urgent'`, recolours background, keyline and text — and **colour is not the sole carrier**, the heading copy itself states the urgency |
+| partial | ✅ covered | **[NEW]** An entry missing its `heading` or its `items` is skipped silently by the same guard — same rationale as an unknown `kind` |
+| overflow | ✅ covered | All blocks stack inside **one** `.section` at `--sp-xl` spacing. Prose wraps at `max-width: var(--measure)` |
+| zero-one-many | ✅ covered | Zero → no section. N blocks stack inside **one** section, so the emitted section count does not vary with content — which is what keeps the running tint toggle deterministic |
+| long-text | ✅ covered | **[NEW]** Long prose wraps within `--measure`; long list items wrap within the `<ol>` grid. Never truncated |
+| partial *(tint alternation)* | 🧪 backstop | `{ statement: "Tint alternation is visually correct on a page that fills few optional slots and on a page that fills all of them, with no two adjacent tinted bands", verification: backstop }` — the running toggle makes alternation correct **by construction**, but the defect it replaces (C3-5) is a *visual* one, and correctness must be seen at least once across both extremes |
+
+### 6. Per-page `<h1>` (E6)
+
+| Category | Status | Resolution / Reason |
+|---|---|---|
+| overflow | ✅ covered | **48-character cap**, measured: 328px content box at 360px, Sofia Sans Cyrillic ~0.56em ≈ 17.9px/char at 32px → ~18 chars/line → 48 chars = **3 lines = 110px**. That is the ceiling at which a category `<h1>` does not push its intro off a 640px screen. Category pages have no hero, so a longer `<h1>` can only push the intro down, which the cap bounds |
+| long-text | ✅ covered | Wraps to at most 3 lines with `text-wrap: balance` preventing a one-word last line. **Never truncated, never `text-overflow: ellipsis`, never a smaller size at mobile** — the `clamp()` handles size and a fifth type size is forbidden |
+| empty *(off-taxonomy)* | ✅ covered | Recorded manually: the taxonomy raises no `empty` category for a `static-content` kind, but the guard is real and specified — an override that is **present but empty falls back to `$cat['name']`**, and an empty `<h1>` must never render. Also load-bearing: exactly one `<h1>` per page, now genuinely at risk as blocks are added, since every `blocks` variant emits `<h2>` |
+
+### 7. Breadcrumbs (E7)
+
+| Category | Status | Resolution / Reason |
+|---|---|---|
+| empty | ✅ covered | **Never rendered on the homepage**, and omitted entirely on any page without a parent hub. There is no empty breadcrumb state — the component is absent or complete |
+| loading | ⛔ dismissed | No loading state exists. Ancestor chain is resolved server-side from the page's own record |
+| error | ⛔ dismissed | No failure mode exists — no request. A missing parent resolves to the `partial` case below, not an error |
+| populated | ✅ covered | Ancestor links at `--c-link` (8.49:1) ending in a non-link `<span aria-current="page">` at `--c-ink`. CSS `::before` separators stay out of the accessible name. Touch targets padded to exactly 44px |
+| partial | ✅ covered | A page whose parent hub is missing simply omits the breadcrumb rather than rendering a broken chain. Max depth **3** |
+| overflow | ✅ covered | `display: flex; flex-wrap: wrap` on the `<ol>` — long Bulgarian names wrap to a second line. **No horizontal scroll at any width ≥ 320px; truncation and ellipsis are forbidden** |
+| zero-one-many | ✅ covered | Depth is bounded at 3 by the hub/child structure itself. One ancestor and three read identically because the row wraps |
+| long-text | ✅ covered | Long names wrap to a second line rather than truncating — the explicit reason the `<ol>` is `flex-wrap` rather than a single-line scroller |
+
 
 **Carried forward from Phase 2, unresolved and explicitly not to be lost here:**
 `02-VERIFICATION.md` warns that **WR-11 must not be carried into Phase 3 unnoticed** — `.callbar` is
