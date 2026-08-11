@@ -110,7 +110,19 @@ Plans:
   5. A visitor sees dedicated content for the non-standard-electrical-equipment category as one of the six headline services, and no longer sees EU-project/COVID content competing for attention on the homepage.
   6. Every page has a unique `<title>` and `<meta name="description">` that accurately reflects its own content, replacing the current identical/empty values across all 16 pages.
 
-**Plans**: TBD
+**Plans**: 9 plans
+
+Plans:
+- [ ] 03-01-PLAN.md — Generalize the category template into a service-page renderer (h1 override, structured blocks, keyed warranty, breadcrumbs) and prove it end-to-end on category 4
+- [ ] 03-02-PLAN.md — Brand row, Google rating badge, and the battery and chip-level differentiator surfaces, single-sourced across the homepage and every service page
+- [ ] 03-03-PLAN.md — Split category 2 into a routing hub plus five children; ship the hub and the first two
+- [ ] 03-04-PLAN.md — The three differentiator depth pages: battery regeneration, self-diagnostic routing, chip-level repair evidence
+- [ ] 03-05-PLAN.md — Category 6 on its existing indexed URL, the surge-damage page, and About with the EU disclosure relocated off the homepage
+- [ ] 03-06-PLAN.md — Port the six legal and utility pages, fixing what is visibly wrong and leaving the compliance text alone
+- [ ] 03-07-PLAN.md — The remaining three category-2 child pages; open the publish gate on all five
+- [ ] 03-08-PLAN.md — The last three category pages to the Definition of Done; publish category 5
+- [ ] 03-09-PLAN.md — Site-wide SEO-01 closure: the uniqueness/ordering/non-empty gate over every served page, the homepage's metadata, and the shortened brand-suffix pass
+
 **UI hint**: yes
 
 ### Phase 4: Hardening & Cutover
