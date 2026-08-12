@@ -769,6 +769,104 @@ body:not(:has(.callbar)) {
 	margin-block-start: var(--sp-md);
 }
 
+/* The warranty TERM on its own line, so the duration is scannable without
+   reading the paragraph under it. No new size — --fs-title is the third of the
+   four inherited sizes.                                                      */
+.svc__warranty__term {
+	font-size: var(--fs-title);
+	font-weight: var(--fw-bold);
+	color: var(--c-ink-deep);
+}
+
+/* --- Structured content blocks (CONTENT-01) ------------------------------
+   All blocks on a page stack inside ONE section, so the gap between them is
+   the larger --sp-xl step: it has to read as a break between two subjects,
+   not as another paragraph. The first block takes no top margin — the section
+   padding already supplies it.                                              */
+.svc__block + .svc__block {
+	margin-block-start: var(--sp-xl);
+}
+
+.svc__block p {
+	margin-block-start: var(--sp-md);
+	max-width: var(--measure);
+}
+
+/* The `steps` variant deliberately adds NO rule: it reuses .svc__process ol
+   verbatim, so an ordered list looks identical wherever it appears.         */
+.svc__block--steps ol,
+.svc__block--callout p:first-of-type,
+.svc__block--prose p:first-of-type {
+	margin-block-start: var(--sp-md);
+}
+
+.svc__block--steps ol {
+	display: grid;
+	gap: var(--sp-sm);
+	padding-inline-start: var(--sp-lg);   /* base.css zeroes list padding */
+}
+
+/* A panel, not a coloured heading: the 3px inline-start keyline is the same
+   weight as every other keyline in the system (nav, footer, callbar).       */
+.svc__block--callout,
+.svc__block--urgent {
+	background: var(--c-surface-2);
+	border-radius: var(--r-lg);
+	padding: var(--sp-lg);
+	border-inline-start: 3px solid var(--c-ink-deep);
+}
+
+/* The urgent tone (UI-SPEC C3-4). Colour is NOT the sole carrier of the
+   urgency — the block's own heading copy states it — so this is emphasis on
+   top of language, not a substitute for it. No role="alert": it is static page
+   content, and a live region would make a screen reader interrupt on load.  */
+.svc__block--urgent {
+	background: var(--c-danger-surface);
+	border-inline-start-color: var(--c-danger);
+	color: var(--c-danger-ink);
+}
+
+.svc__block--urgent h2 {
+	color: var(--c-danger-ink);
+}
+
+/* --- Breadcrumbs (D3-03) -------------------------------------------------
+   A wrapping flex row, never a single-line scroller: Bulgarian category names
+   are long and the answer to a long name is a second line, not a horizontal
+   scrollbar or an ellipsis that hides where you are.                        */
+.breadcrumbs {
+	margin-block-end: var(--sp-md);
+	font-size: var(--fs-body);
+	color: var(--c-ink-muted);
+}
+
+.breadcrumbs ol {
+	display: flex;
+	flex-wrap: wrap;
+	list-style: none;
+	align-items: center;
+}
+
+/* Generated content, so the separator stays out of the accessible name. */
+.breadcrumbs li + li::before {
+	content: "/";
+	color: var(--c-ink-muted);
+	padding-inline: var(--sp-sm);
+}
+
+/* 28px line box + 2 x --sp-sm = 44px exactly, the touch-target floor. */
+.breadcrumbs a {
+	display: inline-block;
+	padding-block: var(--sp-sm);
+	color: var(--c-link);
+}
+
+.breadcrumbs [aria-current] {
+	display: inline-block;
+	padding-block: var(--sp-sm);
+	color: var(--c-ink);
+}
+
 /* --- Breakpoint 1 — 35rem / 560px ---------------------------------------
    min-width only, never max-width, so no two adjacent breakpoints can both
    match or both miss. At >=560px the content box is >=528px, so both CTA

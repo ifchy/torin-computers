@@ -113,6 +113,63 @@ $site = array(
 	// installed. Hence the human cutover gate rather than a script.
 	'viber' => '+359889458404',
 
+	// TRUST-03 (D3-10). ONE warranty summary, written here once and read by
+	// every service page through $page['warranty_key'] — never retyped on a
+	// page. Nested keyed set rather than a scalar because the site states two
+	// genuinely different terms and a single string would be WRONG on the
+	// battery page: site-current/warrently.html:125 says the service term is
+	// one month, site-current/za-bateriite.html:129 claims a year on
+	// regenerated batteries. A page selects a KEY; it never authors a literal.
+	//
+	// [ASSUMED] OWNER-QUESTIONS #23 — BOTH entries. The pair is very likely a
+	// SERVICE warranty and a PRODUCT warranty on a regenerated battery, but the
+	// site has never said so, and reconciling them by invention would publish a
+	// term the shop may not honour. They are stated as two distinct facts until
+	// #23 is answered. Do not quote either back as confirmed shop language, and
+	// do not add a third entry — further variance is exactly what #23 asks.
+	//
+	// Source: site-current/warrently.html:113-129.
+	//
+	// D3-10 reframing, recorded because the omission would look like sloppiness
+	// and the reproduction would look like a trap: the live warranty page
+	// additionally REQUIRES the customer to run the laptop 5-6 hours a day to
+	// accumulate 150-200 hours of test time. Read as the shop means it, that is
+	// a statement of confidence that the repair holds under real use; read as a
+	// customer would, it is a way to void a claim. The detail below carries the
+	// first reading and deliberately states no hour threshold. The term is NOT
+	// silently dropped — it is a condition the shop operates under and it is
+	// still stated in full on warrently.html, which every entry links to.
+	'warranty' => array(
+		'default' => array(
+			'term'   => '1 месец гаранция на всеки ремонт',
+			'detail' => 'Гаранционното обслужване е безплатно, в сервиза. Съветваме ви да ползвате лаптопа активно през този месец — така и вие, и ние сме сигурни, че ремонтът държи при реална употреба.',
+			'href'   => 'warrently.html',
+		),
+		'battery' => array(
+			'term'   => '1 година гаранция на регенерирана батерия',
+			'detail' => 'Регенерираните батерии са с японски елементи Panasonic и заварени, не запоени връзки. Затова гаранцията им е по-дълга от гаранцията на самия ремонт.',
+			'href'   => 'warrently.html',
+		),
+	),
+
+	// [ASSUMED] The absolute base every BreadcrumbList item URL is built from
+	// (jsonld.php), because schema.org item URLs must be absolute while every
+	// href in the markup stays relative.
+	//
+	// ###########################################################
+	// ## CUTOVER GATE — this is the ONLY place the /new/       ##
+	// ## staging path segment appears anywhere in src/.        ##
+	// ## At Phase 4 cutover it becomes https://torin.bg/ and   ##
+	// ## that one edit is the whole change.                    ##
+	// ###########################################################
+	//
+	// The staging path MUST NEVER be hardcoded into a page file. Written into
+	// 23 pages it becomes 23 edits at cutover, of which one will be missed and
+	// will publish a structured-data URL pointing at a staging tree that no
+	// longer exists. This is also why rel=canonical was NOT taken this phase
+	// (RESEARCH OQ-5): it is a Phase 4 decision for the same reason.
+	'base_url' => 'https://torin.bg/new/',
+
 	// [ASSUMED] OWNER-QUESTIONS #8 asks whether the legacy otpuska.js
 	// holiday/hours banner should survive at all. It carried genuine content
 	// rather than decoration, so the safe default preserves an equivalent as
