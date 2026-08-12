@@ -84,11 +84,43 @@ $torin_categories = array(
 		'name'      => 'Нестандартна техника',
 		// [ASSUMED] Placeholder customer phrasing pending OWNER-QUESTIONS #16.
 		'symptoms'  => 'нестандартна или стара техника, която другаде не приемат',
-		'page'      => 'nestandartna-technika.html',
+		// D3-05: category 6 lands on problem-stari.html, an EXISTING indexed URL
+		// whose slug reads as «стари» and whose semantics match this symptom
+		// line, rather than on a new slug. It inherits whatever authority that
+		// URL holds and needs no new file.
+		//
+		// This value previously named a file that D3-05 guarantees will never
+		// exist. Worth fixing now rather than when the page is written, because
+		// the wrong value is INVISIBLE until the moment it matters: the category
+		// is unpublished, so torin_category_href() routes every card and nav
+		// entry to index.html#kat-6 and never reads this key. It would have
+		// started 404-ing on exactly the day someone flipped the boolean — the
+		// one day nobody would be looking for a routing bug.
+		'page'      => 'problem-stari.html',
 		'icon'      => 'cat-6',
 		'published' => false,
 	),
 );
+
+// Record lookup by id. A plain named function, never a closure — closures do
+// not exist on PHP 5.2. Returns null rather than a fabricated record, so a
+// typo'd id renders nothing instead of a page of blanks.
+//
+// This lives HERE, beside the data and beside the publish gate, rather than in
+// category-page.php where it was originally written. It is a record accessor,
+// not a rendering concern, and services.php needs it to resolve a child page
+// parent — routing a child through its parent hub must go through the same gate
+// every other consumer uses. Leaving it in the template would have forced a
+// data file to depend on the renderer to do a lookup.
+function torin_category_by_id($id) {
+	global $torin_categories;
+	foreach ($torin_categories as $torin_cat_rec) {
+		if ($torin_cat_rec["id"] === $id) {
+			return $torin_cat_rec;
+		}
+	}
+	return null;
+}
 
 // The D-23 publish gate, in one place. A plain named function, never a closure —
 // closures do not exist on PHP 5.2. Every consumer calls this instead of reading

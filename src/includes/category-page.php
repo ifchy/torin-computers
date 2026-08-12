@@ -65,18 +65,12 @@ require_once(dirname(__FILE__) . '/categories.php');
 require_once(dirname(__FILE__) . '/site-config.php');
 require_once(dirname(__FILE__) . '/icons.php');
 
-// Record lookup by id. A plain named function, never a closure — closures do
-// not exist on PHP 5.2. Returns null rather than a fabricated record, so a
-// typo'd id renders nothing instead of a page of blanks.
-function torin_category_by_id($id) {
-	global $torin_categories;
-	foreach ($torin_categories as $torin_cat_rec) {
-		if ($torin_cat_rec['id'] === $id) {
-			return $torin_cat_rec;
-		}
-	}
-	return null;
-}
+// torin_category_by_id() used to be defined here. It MOVED to categories.php,
+// beside the data it looks up and beside torin_category_href(), because
+// services.php needs the same lookup to resolve a child page parent and a data
+// file must not have to include the renderer to do it. Every caller is
+// unchanged: categories.php is required above, so the name resolves exactly as
+// before. This note exists so the next reader does not conclude it was lost.
 
 // True only when a key carries something worth rendering. Both halves matter:
 // a present-but-empty value must omit its block exactly like an absent key, or
