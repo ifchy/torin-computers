@@ -74,3 +74,43 @@ $torin_ld = array(
 <script type="application/ld+json">
 <?php echo json_encode($torin_ld); ?>
 </script>
+<?php
+// BreadcrumbList (D3-03). Emitted only when the page assigned $torin_crumbs
+// before including footer.php — the homepage and every page without a parent
+// hub assign nothing and get no block, rather than a one-item chain.
+//
+// This is driven by the SAME array the markup renders from, so the visible
+// breadcrumb and the structured one cannot drift into disagreeing about the
+// site's own hierarchy.
+//
+// The encoding rules above govern this block identically and are deliberately
+// not restated: the JSON is ENCODED, never hand-written. That is what makes a
+// literal closing script tag inside a crumb name harmless here.
+//
+// item URLs must be ABSOLUTE while every href in the markup is relative, so
+// they are built from $site['base_url'] — the single place the staging path
+// segment lives, and a one-line Phase 4 cutover edit.
+if (isset($torin_crumbs) && is_array($torin_crumbs) && count($torin_crumbs) > 0) {
+	$torin_crumb_items = array();
+	$torin_crumb_pos = 0;
+	foreach ($torin_crumbs as $torin_crumb_rec) {
+		$torin_crumb_pos = $torin_crumb_pos + 1;
+		$torin_crumb_items[] = array(
+			'@type'    => 'ListItem',
+			'position' => $torin_crumb_pos,
+			'name'     => $torin_crumb_rec['text'],
+			'item'     => $site['base_url'] . $torin_crumb_rec['href']
+		);
+	}
+	$torin_ld_crumbs = array(
+		'@context'        => 'https://schema.org',
+		'@type'           => 'BreadcrumbList',
+		'itemListElement' => $torin_crumb_items
+	);
+?>
+<script type="application/ld+json">
+<?php echo json_encode($torin_ld_crumbs); ?>
+</script>
+<?php
+}
+?>

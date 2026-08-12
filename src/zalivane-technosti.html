@@ -1,39 +1,163 @@
 <?php
-// Category 4 rendered through the D-24 template (includes/category-page.php).
-// The display name and the symptom line are read from the category record,
-// never retyped here.
+// Category 4 rendered through the D-24 template (includes/category-page.php),
+// authored to the D3-14 Definition of Done. The display name and the symptom
+// line are read from the category record, never retyped here.
 //
 // This is the DEEP case — four sub-services against category 1's two — and it
 // is where the BGA and chip-level expertise lives naturally (D-14/DIFF-03)
-// rather than needing its own homepage treatment. The same template must
-// render both shapes correctly; that is why both are instantiated in this
-// phase. Sub-service names come from D-26's mapping table and nowhere else.
-// Depth (intro, гаранция, process, FAQ, related, prices) is Phase 3 per D-25.
+// rather than needing its own homepage treatment.
+//
+// This page is also the DESTINATION decided for the board-level power-circuit
+// copy that D3-05 displaces from problem-stari.html (RESEARCH P-8). That page
+// becomes the Нестандартна техника category; its subject was never
+// "non-standard equipment" but the Charger and StandBy circuits, which belong
+// here. The «Захранващи вериги» block below is that copy, condensed. Deciding
+// this in the same phase that repurposes the URL is the whole point — the
+// alternative was ~1,700 good words destroyed as a side effect of a routing
+// decision nobody would connect to them later.
+//
+// Every string below is PORTED, not invented: the first-aid steps come from
+// site-current/zalivane-technosti.html:116, :118 and :148 and the power-circuit
+// prose from site-current/problem-stari.html:109-155. The legacy MARKUP is
+// deliberately left behind (P-9) — no Bootstrap class, no icon font, no inline
+// style enters this tree. Working hours and phone numbers are NOT restated
+// here; site-config.php owns those facts (P-11).
 require_once(dirname(__FILE__) . '/includes/category-page.php');
 
 $torin_cat = torin_category_by_id('kat-4');
 
-// Per-page metadata (02-RESEARCH N-5). The title is built from the shared
-// record for the same reason the h1 is; SEO-01 in Phase 3 owns the final copy.
-$torin_title = $torin_cat['name'] . ' · ТОРИН КОМПЮТЪРС';
-$torin_desc  = 'Ремонт след заливане с течност и сервиз на дънни платки — BGA чипове, чипсет и захранващи вериги.';
+// Per-page metadata. The title is a LITERAL and is deliberately no longer
+// derived from the category record: a category name is a navigation label,
+// while a title is a search result's first line. Decoupling them is the
+// prerequisite for a keyword-first title (D3-14), and it is why the h1 below
+// is also an explicit override rather than the record name.
+$torin_title = 'Ремонт на залят лаптоп и дънна платка · Торин';
+$torin_desc  = 'Ремонт на залят лаптоп и дънни платки в София. Не включвайте лаптопа — обадете се веднага за безплатна диагностика още днес.';
+
+// The breadcrumb chain, assigned ONCE and read twice: torin_render_service_page()
+// renders the visible nav from it, and jsonld.php emits the matching
+// BreadcrumbList from the same array after footer.php includes it. One array,
+// so the two cannot disagree about the site's own hierarchy.
+$torin_crumbs = array(
+	array('text' => 'Начало', 'href' => 'index.html'),
+	array('text' => $torin_cat['name'], 'href' => $torin_cat['page']),
+);
 
 $torin_cat_key  = $torin_cat['id'];
 $torin_cat_page = array(
 	'cat_id' => $torin_cat_key,
+
+	// 44 characters, inside the 48-character cap: at 360px that is three lines
+	// and it does not push the intro off the screen.
+	'h1'     => 'Ремонт на залят лаптоп и дънни платки в София',
+
+	'crumbs' => $torin_crumbs,
+
+	'intro'  => 'Заливането с течност е една от най-честите причини лаптоп да спре да дава признаци на живот. Работим по дънни платки на ниво чип: почистваме следите от корозия, възстановяваме разядени пътечки и ремонтираме захранващите вериги. Приемаме и машини, за които другаде са ви казали, че не подлежат на ремонт — диагностиката е безплатна и ви казваме честно какво може да се направи.',
+
 	'fixes'  => array(
 		array('text' => 'Дозапояване на отпоени BGA чипове'),
 		array('text' => 'Ребоулинг на BGA чипове'),
 		array('text' => 'Подмяна на чипсет'),
 		array('text' => 'Сервиз на захранващи вериги'),
 	),
+
+	'blocks' => array(
+
+		// Ported from site-current/zalivane-technosti.html:116, :118 and the
+		// hairdryer/oven warning at :148, condensed to one imperative sentence
+		// each. It sits high on the page by contract: someone reading this has
+		// a wet laptop in front of them right now.
+		array(
+			'kind'    => 'steps',
+			'tone'    => 'urgent',
+			'heading' => 'Ако сте залели лаптопа — направете това веднага',
+			'items'   => array(
+				'Изключете адаптера от лаптопа веднага.',
+				'Извадете батерията и не я връщайте обратно, след като лаптопът угасне.',
+				'Не включвайте лаптопа, за да проверите дали още работи — докато има захранване, течността продължава да прави къси съединения.',
+				'Не сушете лаптопа със сешоар и не го поставяйте във фурна: топлината не спира окисляването, а ускорява разяждането на пътечките.',
+				'Обърнете се към сервиз възможно най-бързо — при заливане решаващи са часовете, не дните.',
+			),
+			'link'    => array(
+				'text' => 'Обадете се сега',
+				'href' => 'index.html#contact-us',
+			),
+		),
+
+		// The P-8 destination: the StandBy/Charger explainer from
+		// site-current/problem-stari.html:109-155, condensed.
+		array(
+			'kind'    => 'prose',
+			'heading' => 'Захранващи вериги и вътрешни повреди от захранването',
+			'items'   => array(
+				'Дънната платка условно се дели на две части: едната включва лаптопа и осигурява захранващите напрежения за всички компоненти, а другата отговаря за самата му работа. Ако захранващата част не работи, втората няма как да тръгне. В нея стоят два основни процесора — Charger и StandBy. Charger следи входното захранване: включен ли е адаптерът, има ли батерия, нуждае ли се тя от заряд и с какъв ток. StandBy управлява запускането на платката, режимите на заспиване и събуждане, охладителната система и клавиатурата.',
+				'Затова повредите тук рядко изглеждат като повреди в захранването. Лаптоп, който не дава признаци на живот, лаптоп, който не заспива или не се събужда, и лаптоп, чийто вентилатор се държи странно, много често са един и същ дефект в тези вериги.',
+				'Най-честите причини са три. Универсалните адаптери с превключвател за различни изходни напрежения — превключвателят се измества дори в чантата, а по-високото напрежение обикновено е фатално за платката. Лаптоп, който е стоял месеци с изтощена батерия вътре — при повторно включване батерията може да поеме по-висок от нормалния заряден ток и да повреди Charger веригите. И евтините батерии с нискокачествени клетки и електроника, при които високият ток стига до стопяване на корпуса. Ако лаптопът ви е спрял да работи скоро след смяна на батерия или адаптер, това е първото място, което проверяваме.',
+			),
+		),
+
+		array(
+			'kind'    => 'prose',
+			'heading' => 'Кога ремонтът не си струва',
+			'items'   => array(
+				'Не всяка залята платка може да бъде спасена и предпочитаме да ви кажем това преди ремонта, а не след него. Когато течността е стояла дни наред, корозията разяжда цели слоеве от платката, а не само повърхността. Когато е попаднала под чипсетите, ремонтът е възможен, но е сред най-тежките. И когато машината е на осем или повече години, цената на ремонта често надхвърля стойността на самия лаптоп.',
+				'В такива случаи ви казваме какво друго може да се направи: изваждане на данните от диска, прехвърлянето им на нова машина, или използване на лаптопа за части, ако друг същия модел е ремонтируем. Диагностиката остава безплатна и когато отговорът е, че не си струва. Предпочитаме да загубим един ремонт, отколкото да ви вземем пари за платка, която няма да издържи.',
+			),
+		),
+	),
+
+	// A KEY, never a literal: the term itself lives once, in site-config.php,
+	// and every page that renders a warranty renders the same fact (D3-10).
+	'warranty_key' => 'default',
+
+	'process' => array(
+		'Приемаме лаптопа и записваме какво точно се е случило — каква течност, кога и включван ли е след това. Тези три отговора променят подхода.',
+		'Разглобяваме машината и оценяваме щетите по платката под увеличение, включително под чипсетите, където следите не се виждат отвън.',
+		'Промиваме и почистваме платката ултразвуково, за да спрем окисляването, преди то да продължи.',
+		'Ремонтираме: възстановяваме разядени пътечки, подменяме дефектирали компоненти и работим по захранващите вериги.',
+		'Обаждаме се с диагнозата и цената, преди да продължим. Не започваме платен ремонт, без да сте се съгласили.',
+		'Тестваме машината в реален работен режим и я връщаме с гаранционна карта.',
+	),
+
+	'faq' => array(
+		array(
+			'q' => 'Лаптопът работи след заливането. Трябва ли изобщо да идвам?',
+			'a' => 'Да. Отвън всичко може да изглежда наред, докато вътре окисляването вече е започнало. След няколко дни пътечките започват да се разяждат и платка, която днес е ремонтируема, след седмица може вече да не е. Диагностиката е безплатна и отнема по-малко време от това да чакате да се появи проблем.',
+		),
+		array(
+			'q' => 'Заляха ме с вода, а не с нещо сладко. Това по-безобидно ли е?',
+			'a' => 'По-малко агресивно, но не безобидно. Чистата вода се изпарява по-бързо, но оставя минерали, които провеждат ток. Сладките и киселите течности — кафе, сок, безалкохолно — са значително по-разрушителни, защото захарта задържа влага, а киселината разяжда пътечките активно.',
+		),
+		array(
+			'q' => 'Колко време отнема ремонтът?',
+			'a' => 'Зависи от щетата. Почистване и промивка при бърза реакция обикновено е въпрос на дни. Ремонт на захранващи вериги или работа по чипсет отнема повече, защото включва тестване. Казваме ви срока заедно с цената, след диагностиката, а не преди нея.',
+		),
+		array(
+			'q' => 'Ще запазя ли данните си?',
+			'a' => 'В повечето случаи да — дискът обикновено остава незасегнат дори когато платката не подлежи на ремонт. Ако данните са важни за вас, кажете го при приемането и ги изваждаме първо, преди каквато и да е друга работа.',
+		),
+		array(
+			'q' => 'Други сервизи ми отказаха. Има ли смисъл да опитвам пак?',
+			'a' => 'Има. Ремонтът на ниво чип изисква оборудване, което не всеки сервиз има — инфрачервена станция с компютърно управление за работа по BGA чипове и възможност за възстановяване на пътечки под увеличение. Отказът другаде често означава, че там не се извършва този вид работа, а не че платката е негодна.',
+		),
+	),
+
+	'related' => array(
+		array('text' => 'Повреди от токов удар', 'href' => 'tokov-udar.html'),
+		array('text' => 'Профилактика на лаптоп', 'href' => 'profilaktika-laptop.html'),
+		array('text' => 'Тествайте сам лаптопа си', 'href' => 'test-laptop.html'),
+	),
+
+	// 'prices' is deliberately NOT set. The slot stays unused this phase by
+	// design (D3-06, PRICE-01 is v2) and accepts numbers later with no redesign.
 );
 
 require_once(dirname(__FILE__) . '/includes/header.php');
 ?>
 
 <main>
-<?php torin_render_category_page($torin_cat_page); ?>
+<?php torin_render_service_page($torin_cat_page); ?>
 </main>
 
 <?php require_once(dirname(__FILE__) . '/includes/footer.php'); ?>

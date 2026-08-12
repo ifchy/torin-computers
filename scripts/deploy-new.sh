@@ -25,7 +25,17 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
-CRED_FILE="${REPO_ROOT}/filezilla-server-data.xml"
+# The credentials file is gitignored, so it exists ONLY in the primary checkout
+# — a git worktree (used for parallel plan execution) has its own root and no
+# copy of it. Rather than duplicating secret material into every worktree, or
+# symlinking it in, the path is overridable:
+#
+#   TORIN_CRED_FILE=/path/to/primary/filezilla-server-data.xml scripts/deploy-new.sh ...
+#
+# The default is unchanged, so an ordinary run from the primary checkout needs
+# no environment at all. The variable carries a PATH, never a password — the
+# password still never leaves the short-lived Python process below.
+CRED_FILE="${TORIN_CRED_FILE:-${REPO_ROOT}/filezilla-server-data.xml}"
 SERVER_NAME="TORIN"
 SRC_ROOT="${REPO_ROOT}/src"
 REMOTE_ROOT="public_html/new"
