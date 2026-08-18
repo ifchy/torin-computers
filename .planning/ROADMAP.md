@@ -110,12 +110,12 @@ Plans:
   5. A visitor sees dedicated content for the non-standard-electrical-equipment category as one of the six headline services, and no longer sees EU-project/COVID content competing for attention on the homepage.
   6. Every page has a unique `<title>` and `<meta name="description">` that accurately reflects its own content, replacing the current identical/empty values across all 16 pages.
 
-**Plans**: 9 plans
+**Plans**: 1/9 plans executed
 
 Plans:
 **Wave 1**
 
-- [ ] 03-01-PLAN.md — Generalize the category template into a service-page renderer (h1 override, structured blocks, keyed warranty, breadcrumbs) and prove it end-to-end on category 4
+- [x] 03-01-PLAN.md — Generalize the category template into a service-page renderer (h1 override, structured blocks, keyed warranty, breadcrumbs) and prove it end-to-end on category 4
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -167,5 +167,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 |-------|----------------|--------|-----------|
 | 1. Migration Safety Net & Foundation | 5/5 | Complete    | 2026-08-05 |
 | 2. Design System & Information Architecture | 9/9 | Complete    | 2026-08-09 |
-| 3. Content & Trust-Signal Build-Out | 0/TBD | Not started | - |
+| 3. Content & Trust-Signal Build-Out | 1/9 | In Progress|  |
 | 4. Hardening & Cutover | 0/TBD | Not started | - |

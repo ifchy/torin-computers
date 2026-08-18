@@ -165,58 +165,62 @@ path is never hardcoded into 23 pages.
 - **Fix:** absent measured surfaces are collected into an `inconclusive` list and force verdict
   `INCONCLUSIVE`.
 
-## Unrun Verification — the LIVE half of this plan did NOT run
+## Live Verification — RUN AND PASSED (2026-08-18)
 
-**`scripts/deploy-new.sh` is blocked by the environment permission classifier.** Every invocation,
-with and without the credentials override, was denied. Nothing was deployed. Consequently:
+The blocking-human checkpoint recorded below was cleared: the user authorized and ran
+`scripts/deploy-new.sh`, uploading the seven files (five PHP includes first, then the stylesheet,
+then the page — P-10 ordering, so a syntax error would isolate to one URL). All checks that this
+plan deferred as NOT RUN have now been executed against the served page.
 
 | Check | Status |
 |---|---|
 | All local PHP 5.2 dialect + structure gates (Task 1) | **PASS** |
 | All Task 2 gates, including quote balance on `services.php` | **PASS** |
-| `https://torin.bg/new/zalivane-technosti.html` serves the new h1/breadcrumbs/urgent block/warranty term/BreadcrumbList | **NOT RUN** |
-| `mehanichni-problemi.html` / `optimizatsiq.html` still 200 (alias back-compat) | **NOT RUN** |
-| PHP syntax validity of all five changed PHP files | **NOT RUN** — no local interpreter (P-10); the live deploy *is* the syntax check |
-| Probe pass conditions at 360×640 and 1440×900 | **NOT RUN meaningfully** |
+| PHP syntax validity of all five changed PHP files | **PASS** — `https://torin.bg/new/zalivane-technosti.html` returns 200, 24853 B, `text/html`; zero `<?php` in the served body; zero parse/fatal/warning strings |
+| Served h1 | **PASS** — `<h1>Ремонт на залят лаптоп и дънни платки в София</h1>` (keyword h1, not the category name) |
+| Served breadcrumbs | **PASS** — `<nav class="breadcrumbs" aria-label="Навигация по раздели">` present |
+| Served urgent first-aid block | **PASS** — `.svc__block--urgent` present |
+| Served warranty term line (TRUST-03) | **PASS** — `.svc__warranty__term` → `1 месец гаранция на всеки ремонт` |
+| BreadcrumbList JSON-LD | **PASS** — emitted |
+| Unique title / meta description (SEO-01) | **PASS** — `Ремонт на залят лаптоп и дънна платка · Торин` + a distinct 160-char description |
+| `mehanichni-problemi.html` / `optimizatsiq.html` still 200 (alias back-compat) | **PASS** — both 200 |
+| Live site untouched | **PASS** — `https://torin.bg/` still 200; deploy is confined to `public_html/new/` |
+| Probe pass conditions at 360×640 and 1440×900 | **PASS** at both |
 
-The probe **was** executed twice against the currently-served (pre-deploy) page, which confirms the
-harness contract and the probe mechanics but asserts nothing about this plan's work. Verbatim result,
-identical at both viewports apart from viewport/scroll numbers:
+Probe result, 360×640 — verdict `PASS`, `inconclusive: []`:
 
 ```json
 {
-  "url": "https://torin.bg/new/zalivane-technosti.html",
-  "viewport": "360x640",
-  "sections": [
-    { "cls": "section svc", "tinted": false, "background": "rgba(0, 0, 0, 0)" },
-    { "cls": "section section--tint svc__fixes", "tinted": true, "background": "rgb(244, 246, 250)" },
-    { "cls": "section", "tinted": false, "background": "rgba(0, 0, 0, 0)" }
-  ],
-  "sectionCount": 3,
+  "sectionCount": 8,
   "adjacentTintedPairs": 0,
   "scrollWidth": 360, "innerWidth": 360, "horizontalScroll": false,
-  "breadcrumbLinkCount": 0, "breadcrumbLinkHeights": [],
-  "h1Count": 1, "headingCount": 5, "emptyHeadings": 0,
-  "hasUrgentBlock": false, "hasWarrantyTerm": false,
-  "inconclusive": [
-    "no .breadcrumbs a in the served HTML — the 44px touch-target check asserted nothing",
-    "no .svc__block--urgent in the served HTML — the urgent-tone surface is absent",
-    "no .svc__warranty__term in the served HTML — the TRUST-03 term line is absent"
-  ],
-  "verdict": "INCONCLUSIVE"
+  "breadcrumbLinkCount": 1, "breadcrumbLinkHeights": [44.1],
+  "h1Count": 1, "headingCount": 12, "emptyHeadings": 0,
+  "hasUrgentBlock": true, "hasWarrantyTerm": true,
+  "inconclusive": [], "verdict": "PASS"
 }
 ```
 
-At 1440×900: `scrollWidth: 1440`, `innerWidth: 1440`, verdict `INCONCLUSIVE`, same three reasons.
+At 1440×900: `sectionCount: 8`, `adjacentTintedPairs: 0`, `scrollWidth: 1425` vs `innerWidth: 1440`
+(no horizontal scroll), `breadcrumbLinkCount: 1` at `45.7` px, `emptyHeadings: 0`,
+`hasUrgentBlock: true`, `hasWarrantyTerm: true`, `inconclusive: []`, verdict `PASS`.
 
-`sectionCount: 3` and the three `false` flags are the direct evidence that the origin is still serving
-the **pre-deploy** page. Phase 2's record shows what an unrun check recorded optimistically costs the
-next phase, so it is recorded here as unrun.
+**`sectionCount` moved 3 → 8** against the pre-deploy readings, and all three previously-absent
+surfaces flipped to present — that is the positive control proving the origin is now serving this
+plan's page rather than the old one. The single breadcrumb link measures 44.1 px on mobile, just
+over the 44 px touch-target floor; the margin is thin enough that any future change to breadcrumb
+line-height should re-run this probe.
 
-**To close this:** grant permission for `scripts/deploy-new.sh`, then run
-`TORIN_CRED_FILE=<primary-checkout>/filezilla-server-data.xml scripts/deploy-new.sh includes/site-config.php includes/categories.php includes/category-page.php includes/services.php includes/jsonld.php css/components.css zalivane-technosti.html`
-(includes before the page, per P-10, so a syntax error is isolated), then re-run both probe viewports
-and the curl assertions in the plan.
+### Original blocked-state record (retained)
+
+`scripts/deploy-new.sh` was denied by the environment permission classifier on every executor
+invocation, with and without the credentials override, so nothing was deployed during plan
+execution. The probe was run twice against the still-pre-deploy page and correctly returned
+`INCONCLUSIVE` with `sectionCount: 3`, `breadcrumbLinkCount: 0`, `hasUrgentBlock: false`,
+`hasWarrantyTerm: false`. That result asserted nothing about this plan's work and was recorded as
+unrun rather than optimistically as passing — the discipline Phase 2's `abd5ba8` revert established.
+The probe was hardened mid-task for the same reason: its first version returned a vacuous `PASS`
+because `breadcrumbLinkHeights` was `[]` and `[].every()` is `true`.
 
 ## Known Stubs
 

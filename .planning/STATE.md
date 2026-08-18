@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 03
 current_phase_name: content-trust-signal-build-out
 status: executing
-stopped_at: Phase 3 UI-SPEC approved
-last_updated: "2026-08-11T22:22:12.126Z"
-last_activity: 2026-08-12
-last_activity_desc: Phase 03 execution started
+stopped_at: Phase 03 Wave 1 verified; resuming at Wave 2
+last_updated: "2026-08-18T00:00:00.000Z"
+last_activity: 2026-08-18
+last_activity_desc: 03-01 merged and live-verified (Wave 1 complete)
 progress:
   total_phases: 3
   completed_phases: 2
   total_plans: 23
-  completed_plans: 14
+  completed_plans: 15
 ---
 
 # Project State
@@ -28,11 +28,11 @@ See: .planning/PROJECT.md (updated 2026-08-04)
 ## Current Position
 
 Phase: 03 (content-trust-signal-build-out) — EXECUTING
-Plan: 1 of 9
+Plan: 1 of 9 complete (03-01 merged + live-verified); next is 03-02 (Wave 2)
 Status: Executing Phase 03
-Last activity: 2026-08-12 — Phase 03 execution started
+Last activity: 2026-08-18 — 03-01 deployed to staging and verified PASS at both viewports
 
-Progress: [██████████] 100%
+Progress: [██████░░░░] 65%
 
 ## Performance Metrics
 
@@ -115,6 +115,10 @@ Recent decisions affecting current work:
 - [Phase ?]: 02-09: size-adjust 97% shipped, 9 points below the measured 106% two-line cliff — margin deliberately on the narrow side, since one percent too wide costs a whole 36.8px line while too narrow costs nothing
 - [Phase ?]: 02-09: an unresolved @font-face falls to the last-resort font, which is NARROWER than Sofia Sans and sets the hero h1 at exactly 73.6px — the target height, so a fully broken measurement reads as a perfect match; every scan iteration now carries a resolution guard
 
+- [Phase 3]: 03-01: the plan's PHP-5.2 short-array gate regex `(=>[^;]*\]|\[\s*[^]]*=>)` is broken — it matches any array read to the right of `=>`, returning 5 hits on untouched jsonld.php, so it could never pass. Plans 03-02…03-09 inherit it; use `(=>|=)[[:space:]]*\[|return[[:space:]]+\[` instead.
+- [Phase 3]: 03-01: `deploy-new.sh` is denied to subagents by the permission classifier — the user must run it via `!`. It is staging-only (`public_html/new/`, hardcoded), and since no local PHP interpreter exists the deploy IS the only PHP 5.2 syntax check available.
+- [Phase 3]: 03-01 live-verified: served page returns 200 with keyword h1, breadcrumbs, urgent block, warranty term line and BreadcrumbList; svc-page probe PASS at 360x640 and 1440x900 (sectionCount 3 -> 8 is the positive control).
+
 ### Pending Todos
 
 None yet.
@@ -145,6 +149,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-11T12:29:53.169Z
-Stopped at: Phase 3 UI-SPEC approved
-Resume file: .planning/phases/03-content-trust-signal-build-out/03-UI-SPEC.md
+Last session: 2026-08-18
+Stopped at: Phase 03 Wave 1 complete and verified (03-01 merged at 53b421e; deploy authorized and run, live verification PASSED at both viewports). Resuming at Wave 2 (03-02).
+Resume file: .planning/phases/03-content-trust-signal-build-out/03-02-PLAN.md
