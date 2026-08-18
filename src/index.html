@@ -8,6 +8,13 @@ require_once(dirname(__FILE__) . '/includes/categories.php');
 // required explicitly for the same reason categories.php is, and require_once
 // makes the second call a no-op. Every contact destination below reads from it.
 require_once(dirname(__FILE__) . '/includes/site-config.php');
+// TRUST-01 and TRUST-02. ONE partial each, shared with every service page
+// through includes/category-page.php — this page includes them, it does not
+// restate their markup. Both transitively pull in category-page.php for
+// torin_has_content()/torin_esc(); that is function definitions only, no
+// output, and it is the price of the two helpers having exactly one writer.
+require_once(dirname(__FILE__) . '/includes/brand-row.php');
+require_once(dirname(__FILE__) . '/includes/rating-badge.php');
 require_once(dirname(__FILE__) . '/includes/header.php');
 ?>
 
@@ -66,6 +73,13 @@ require_once(dirname(__FILE__) . '/includes/header.php');
 			</div>
 		</div>
 	</section>
+
+	<?php // TRUST-01. Section 3 of the UI-SPEC order table, on the PLAIN surface
+	      // between the tinted category grid and the tinted catch-all. No tint
+	      // argument is passed: the homepage's order is fixed and contracted, so
+	      // its surfaces are literal here, while the service-page spine hands
+	      // this same partial its running toggle instead. ?>
+	<?php torin_render_brand_row(); ?>
 
 	<?php
 	// The symptom-organised catch-all (D-11). This exists for the visitor whose
@@ -186,6 +200,13 @@ require_once(dirname(__FILE__) . '/includes/header.php');
 				      // parent's layout — so deleting this node is a subtraction, not a
 				      // redesign (D-17). Phase 4 / CONTACT-03 fills or removes it. ?>
 				<div class="cta-block__form"></div>
+				<?php // TRUST-02, the LAST CHILD of .cta-block. Same partial the
+				      // service-page CTA calls, so the two surfaces cannot drift.
+				      // It emits nothing at all today — the badge is switched off in
+				      // site-config.php until the live Google Business Profile figures
+				      // are read (OWNER-QUESTIONS #7). That absence is the specified
+				      // state; see includes/rating-badge.php. ?>
+				<?php torin_render_rating_badge(); ?>
 			</div>
 		</div>
 	</section>

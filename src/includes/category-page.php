@@ -64,6 +64,16 @@
 require_once(dirname(__FILE__) . '/categories.php');
 require_once(dirname(__FILE__) . '/site-config.php');
 require_once(dirname(__FILE__) . '/icons.php');
+// TRUST-01 and TRUST-02 are ONE partial each, included in two places — here for
+// every service page and from index.html for the homepage — never duplicated
+// markup. Two copies of the brand row is how the homepage and a service page
+// end up disagreeing about which manufacturers the shop accepts.
+//
+// These two files require_once THIS file back, for torin_has_content() and
+// torin_esc(). That mutual include is safe in both directions and the
+// mechanism is written out in full in brand-row.php's head comment.
+require_once(dirname(__FILE__) . '/brand-row.php');
+require_once(dirname(__FILE__) . '/rating-badge.php');
 
 // torin_category_by_id() used to be defined here. It MOVED to categories.php,
 // beside the data it looks up and beside torin_category_href(), because
@@ -433,6 +443,14 @@ function torin_render_service_page($page) {
 	</section>
 <?php	}
 
+	// TRUST-01. The brand row sits immediately above the CTA on every service
+	// page — the last thing read before the visitor is asked to call, which is
+	// where "yes, they take my machine" is worth the most. It is handed the
+	// RUNNING TINT rather than choosing its own surface, so inserting it here
+	// cannot produce two adjacent tinted bands on a page whichever optional
+	// slots that page happens to fill (C3-5).
+	torin_render_brand_row(torin_next_tint($torin_tint));
+
 	// The CTA closes the spine on every category page. Same component as the
 	// homepage CTA block (D-16), not a category-only variant, and both values
 	// come from the site config rather than being retyped — the chat number is
@@ -453,6 +471,11 @@ function torin_render_service_page($page) {
 					<a class="btn btn--primary" href="viber://chat?number=<?php echo rawurlencode($site['viber']); ?>"><?php echo torin_icon('chat'); ?>Пишете във Viber</a>
 				</div>
 				<p class="cta-block__note">Безплатна диагностика · Отговаряме в работно време</p>
+<?php			// TRUST-02, as the LAST CHILD of .cta-block — the rating sits where
+				// the visitor is being asked to call. It renders nothing today
+				// (OWNER-QUESTIONS #7) and that absence is the specified state, not
+				// an omission; see rating-badge.php.
+				torin_render_rating_badge(); ?>
 			</div>
 		</div>
 	</section>

@@ -867,6 +867,115 @@ body:not(:has(.callbar)) {
 	color: var(--c-ink);
 }
 
+/* --- Brand wordmark row (TRUST-01, D3-09) --------------------------------
+   Text wordmarks, never logo images. Wrapping flex row, not a grid: entries
+   are variable-width words and a grid would make «HP» a mostly-empty cell.
+   Full rationale lives in includes/brand-row.php.                          */
+.brand-row {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--sp-sm) var(--sp-md);
+	margin-block-start: var(--sp-lg);
+	list-style: none;
+}
+
+/* LOAD-BEARING: min-height, not padding-block. The fixed-height/variable-width
+   chip is what makes «HP» and «Lenovo» read as peers. #0e305d on #f4f6fa =
+   12.17:1. Casing renders as stored — no text-transform in this group. Not
+   links, not hoverable: the 44px floor does not apply, add no cursor rule. */
+.brand-row__item {
+	display: inline-flex;
+	align-items: center;
+	min-height: 40px;
+	padding-inline: var(--sp-md);
+	border-radius: var(--r-md);
+	background: var(--c-surface-2);
+	color: var(--c-ink-deep);
+	font-size: var(--fs-body);
+	font-weight: var(--fw-bold);
+}
+
+/* «и др.» reads as a continuation, not an eighth brand. #55637a = 6.03:1 on
+   white, 5.57:1 on tint.                                                   */
+.brand-row__item--more {
+	background: none;
+	color: var(--c-ink-muted);
+	font-weight: var(--fw-regular);
+}
+
+/* D-38 slot discipline: swapping the text node for an <img> later changes no
+   row height and no wrap point, because the box is sized by min-height. Keep
+   while no <img> exists — it is the guarantee, and it costs 3 lines.       */
+.brand-row__item > img {
+	display: block;
+	max-height: 24px;
+	width: auto;
+}
+
+/* FULL body size, deliberately. Not fine print: this is the sentence that
+   makes naming the marks referential use, not implied authorisation (P-7). */
+.brand-row__note {
+	margin-block-start: var(--sp-md);
+	max-width: var(--measure);
+	color: var(--c-ink-muted);
+	font-size: var(--fs-body);
+}
+
+/* --- Google rating badge (TRUST-02, D3-07) -------------------------------
+   A styled static anchor: no embed, no iframe, no script, no key.
+   LOAD-BEARING: the badge owns its top margin and nothing here names it from a
+   parent's layout rule — no gap on .cta-block, no :last-child reset, no grid
+   area. That is what makes its absence (the state shipping today, see
+   includes/rating-badge.php) a subtraction rather than a hole.
+   min-height, NOT height: at 320px the label wraps and the pill grows.     */
+.rating-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--sp-sm);
+	margin-block-start: var(--sp-lg);
+	min-height: 44px;
+	padding-inline: var(--sp-md);
+	border-radius: var(--r-md);
+	background: var(--c-ink-deep);
+	color: var(--c-on-dark);
+	text-decoration: none;
+}
+
+.rating-badge:hover {
+	background: var(--c-ink-deep-2);
+}
+
+/* --c-focus, NOT --c-focus-on-dark: the 2px offset paints the ring on the
+   white page outside the pill, where the amber ring is near-invisible.     */
+.rating-badge:focus-visible {
+	outline: 3px solid var(--c-focus);
+	outline-offset: 2px;
+}
+
+/* 7th and last reserved amber element (C3-3). #ffc70a on #0e305d = 8.39:1.
+   Amber ONLY on the navy pill — on page or tint it is 1.56:1.             */
+.rating-badge__star {
+	display: inline-flex;
+	color: var(--c-brand);
+}
+
+.rating-badge__star > svg {
+	width: 1.15em;
+	height: 1.15em;
+}
+
+.rating-badge__score {
+	font-size: var(--fs-title);
+	font-weight: var(--fw-bold);
+}
+
+/* Not optional: it is what makes the accessible name carry both the value and
+   the destination. A link announced as "4,8" alone fails WCAG 2.4.4.       */
+.rating-badge__label {
+	font-size: var(--fs-body);
+	font-weight: var(--fw-regular);
+}
+
 /* --- Breakpoint 1 — 35rem / 560px ---------------------------------------
    min-width only, never max-width, so no two adjacent breakpoints can both
    match or both miss. At >=560px the content box is >=528px, so both CTA

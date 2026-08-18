@@ -152,6 +152,72 @@ $site = array(
 		),
 	),
 
+	// TRUST-01 (D3-09). The brand wordmark row, rendered by
+	// includes/brand-row.php on the homepage and every service page. A flat
+	// list of NAMES — never logo images: zero of the eight competitors
+	// surveyed use logo files, and text wordmarks make the trademark position
+	// below defensible without introducing a single figurative mark.
+	//
+	// [ASSUMED] OWNER-QUESTIONS #22. This list came from requirements
+	// drafting, NOT from the owner. Naming a manufacturer the shop does not
+	// actually service is a promise it cannot keep, and the visitor who
+	// arrives because they read «Apple» here and is turned away at the counter
+	// is a worse outcome than a shorter list. Apple is the riskiest entry: it
+	// needs different parts and different tooling from the rest, and it is the
+	// first one to remove if #22 comes back narrower than this.
+	//
+	// The «и др.» closer is NOT an entry here. It is emitted by the partial,
+	// because it is a UI affordance meaning "this list is not exhaustive", not
+	// a brand the shop services — the same discipline that forbids any
+	// consumer joining the phone list back into one display string. Order is
+	// the STORED order: the partial does not sort, so this line is the single
+	// place the row's sequence is decided.
+	'brands' => array('Lenovo', 'HP', 'Dell', 'Asus', 'Acer', 'Apple', 'MSI'),
+
+	// TRUST-02 (D3-07). The Google rating badge — a styled STATIC anchor, no
+	// embed, no iframe, no third-party script, no Places API call and no key.
+	//
+	// ###########################################################
+	// ## The badge is BUILT AND OFF. Rendering is gated on the ##
+	// ## boolean below, which ships false on purpose.          ##
+	// ###########################################################
+	//
+	// [ASSUMED] OWNER-QUESTIONS #7 — all four values. Aggregator crawls report
+	// the shop's Google Business Profile is healthy, but NOBODY HAS READ THE
+	// LIVE FIGURES off the profile itself. A plausible-looking «4,8 от 128
+	// отзива» on sixteen pages is materially worse than no badge at all: it is
+	// a fabricated trust claim on every page of the site, and it is the kind
+	// of thing a competitor or a customer can disprove in one click.
+	//
+	// TO TURN THE BADGE ON, in this file and nowhere else:
+	//   1. flip 'gbp_badge_enabled' below from false to true;
+	//   2. fill 'gbp_rating' and 'gbp_reviews' with the two figures READ OFF
+	//      THE LIVE PROFILE — not from an aggregator, not from memory;
+	//   3. fill 'gbp_url' with the profile's own share link.
+	// Step 3 is only still open because the profile URL has never been
+	// captured anywhere in this repository. Paste it here once and enabling
+	// the badge afterwards really is one boolean and two numbers.
+	//
+	// The flag and the three values are BOTH checked by the partial. The flag
+	// is the deliberate switch; the emptiness checks are the safety net, so
+	// flipping the flag with the figures still blank renders nothing rather
+	// than «от отзива в Google». Neither alone would be enough.
+	//
+	// No rating or review STRUCTURED DATA accompanies this badge under any
+	// schema type, ever — a business marking up reviews of itself is
+	// categorically ineligible (RESEARCH P-1). The one permitted profile
+	// signal is jsonld.php's sameAs, which reads 'gbp_url' below and omits the
+	// property entirely while it is empty.
+	'gbp_badge_enabled' => false,
+
+	// The rating is stored as a DISPLAY STRING with a comma decimal separator
+	// (Bulgarian convention: '4,8', never '4.8' and never 4.8). It is never
+	// computed with, so formatting a float at render time on PHP 5.2 for one
+	// string would be the wrong trade.
+	'gbp_rating'  => '',
+	'gbp_reviews' => '',
+	'gbp_url'     => '',
+
 	// [ASSUMED] The absolute base every BreadcrumbList item URL is built from
 	// (jsonld.php), because schema.org item URLs must be absolute while every
 	// href in the markup stays relative.
