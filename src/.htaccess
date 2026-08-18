@@ -20,9 +20,23 @@ RewriteRule ^(.*)$ https://torin.bg/new/$1 [R=301,L]
 AddHandler application/x-httpd-php52 .html .htm
 
 # ── Phase 2 (plan 02-01): compression + caching spike (DESIGN-02, RESEARCH N-6) ──
-# Verified live 2026-08-05: this host returns NO Content-Encoding and NO
-# Cache-Control/Expires on any asset, so every CSS/font byte is raw wire cost and
-# the 20 KB CSS budget is currently a hard limit rather than a target.
+#
+# CORRECTED 2026-08-18 (plan 03-02, UI-SPEC C3-2). This comment used to assert
+# that the host returns no Content-Encoding on any asset. That was true when it
+# was written on 2026-08-05 and was made FALSE later the same phase by the
+# mod_deflate block below, which plan 02-01 added underneath it. The stale text
+# survived and is exactly how a later phase re-derives a wrong budget, so it is
+# replaced by the measured figure rather than deleted.
+#
+# MEASURED, live origin: `content-encoding: gzip` is returned on CSS
+# (02-VERIFICATION.md:287). The shipped stylesheet set is 51,917 B raw and
+# 18,302 B gzipped. Phase 3 therefore budgets TRANSFER, not raw bytes:
+# <= 20 KB gzipped for base + layout + components + no-js together.
+#
+# Caching: assets DO now carry Expires/Cache-Control via the mod_expires block
+# below. HTML is deliberately held at zero seconds while /new/ is a staging
+# preview.
+#
 # mod_deflate and mod_expires availability on bell.host.bg is UNVERIFIED. Each
 # block below is therefore individually module-guarded: an unguarded directive for
 # an absent module returns 500 for the entire /new/ subtree (T-02-02), which would
@@ -68,5 +82,12 @@ AddHandler application/x-httpd-php52 .html .htm
 	ExpiresByType text/javascript "access plus 5 minutes"
 	ExpiresByType font/woff2 "access plus 1 year"
 	ExpiresByType image/png "access plus 30 days"
+	# Added with the ~40 first-party repair photographs in src/img/repairs/
+	# (plan 03-02). Without this line every one of them matches NO expiry rule
+	# and falls to undeclared heuristic caching derived from Last-Modified —
+	# the same defect js/site.js had before Phase 2 named it. The photographs
+	# are content, not code: they change when the shop reshoots them, which is
+	# to say almost never, so they take the same 30 days as the PNGs.
+	ExpiresByType image/jpeg "access plus 30 days"
 	ExpiresByType image/svg+xml "access plus 30 days"
 </IfModule>

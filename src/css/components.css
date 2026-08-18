@@ -869,8 +869,7 @@ body:not(:has(.callbar)) {
 
 /* --- Brand wordmark row (TRUST-01, D3-09) --------------------------------
    Text wordmarks, never logo images. Wrapping flex row, not a grid: entries
-   are variable-width words and a grid would make «HP» a mostly-empty cell.
-   Full rationale lives in includes/brand-row.php.                          */
+   are variable-width words. Rationale: includes/brand-row.php.            */
 .brand-row {
 	display: flex;
 	flex-wrap: wrap;
@@ -879,10 +878,9 @@ body:not(:has(.callbar)) {
 	list-style: none;
 }
 
-/* LOAD-BEARING: min-height, not padding-block. The fixed-height/variable-width
-   chip is what makes «HP» and «Lenovo» read as peers. #0e305d on #f4f6fa =
-   12.17:1. Casing renders as stored — no text-transform in this group. Not
-   links, not hoverable: the 44px floor does not apply, add no cursor rule. */
+/* LOAD-BEARING: min-height, not padding-block — the fixed-height chip is what
+   makes «HP» and «Lenovo» read as peers. 12.17:1. Casing as stored, no
+   text-transform. Not links: no 44px floor, add no cursor rule.           */
 .brand-row__item {
 	display: inline-flex;
 	align-items: center;
@@ -895,25 +893,23 @@ body:not(:has(.callbar)) {
 	font-weight: var(--fw-bold);
 }
 
-/* «и др.» reads as a continuation, not an eighth brand. #55637a = 6.03:1 on
-   white, 5.57:1 on tint.                                                   */
+/* «и др.» reads as a continuation, not an eighth brand. 6.03:1 / 5.57:1. */
 .brand-row__item--more {
 	background: none;
 	color: var(--c-ink-muted);
 	font-weight: var(--fw-regular);
 }
 
-/* D-38 slot discipline: swapping the text node for an <img> later changes no
-   row height and no wrap point, because the box is sized by min-height. Keep
-   while no <img> exists — it is the guarantee, and it costs 3 lines.       */
+/* D-38: swapping the text node for an <img> later changes no row height and
+   no wrap point. Keep while no <img> exists — it IS the guarantee.        */
 .brand-row__item > img {
 	display: block;
 	max-height: 24px;
 	width: auto;
 }
 
-/* FULL body size, deliberately. Not fine print: this is the sentence that
-   makes naming the marks referential use, not implied authorisation (P-7). */
+/* FULL body size, deliberately — not fine print. This sentence is what makes
+   naming the marks referential use, not implied authorisation (P-7).      */
 .brand-row__note {
 	margin-block-start: var(--sp-md);
 	max-width: var(--measure);
@@ -927,7 +923,7 @@ body:not(:has(.callbar)) {
    parent's layout rule — no gap on .cta-block, no :last-child reset, no grid
    area. That is what makes its absence (the state shipping today, see
    includes/rating-badge.php) a subtraction rather than a hole.
-   min-height, NOT height: at 320px the label wraps and the pill grows.     */
+   min-height, NOT height: at 320px the label wraps and the pill grows.    */
 .rating-badge {
 	display: inline-flex;
 	align-items: center;
@@ -952,8 +948,8 @@ body:not(:has(.callbar)) {
 	outline-offset: 2px;
 }
 
-/* 7th and last reserved amber element (C3-3). #ffc70a on #0e305d = 8.39:1.
-   Amber ONLY on the navy pill — on page or tint it is 1.56:1.             */
+/* 7th and last reserved amber element (C3-3). 8.39:1 on the navy pill, and
+   ONLY there — on page or tint amber is 1.56:1.                           */
 .rating-badge__star {
 	display: inline-flex;
 	color: var(--c-brand);
@@ -969,11 +965,43 @@ body:not(:has(.callbar)) {
 	font-weight: var(--fw-bold);
 }
 
-/* Not optional: it is what makes the accessible name carry both the value and
-   the destination. A link announced as "4,8" alone fails WCAG 2.4.4.       */
+/* Not optional: a link announced as "4,8" alone fails WCAG 2.4.4.        */
 .rating-badge__label {
 	font-size: var(--fs-body);
 	font-weight: var(--fw-regular);
+}
+
+/* --- Evidence photo strip (DIFF-02/DIFF-03, UI-SPEC §4) ------------------
+   EXPLICIT column counts only — no auto-sizing track function here, and a gate
+   asserts so: a fractional track would stretch a one-photo strip into an
+   orphan cell. At 360px the box is 328px and 3*100 + 2*16 = 332, so 2-up is
+   measured. Not interactive: no hover, no cursor, no click target.        */
+.evidence {
+	display: grid;
+	grid-template-columns: repeat(2, 100px);
+	gap: var(--sp-md);
+	margin-block-start: var(--sp-lg);
+	list-style: none;
+}
+
+/* Same mechanism as .cat-card__media: aspect-ratio sizes the box, object-fit
+   crops rather than distorts, so any source ratio is safe. The width/height
+   ATTRIBUTES carry true intrinsic pixels and reserve the box before load;
+   THIS rule sets display size and they never do.                          */
+.evidence img {
+	display: block;
+	width: 100px;
+	aspect-ratio: 1/1;
+	object-fit: cover;
+	border-radius: var(--r-md);
+	background: var(--c-surface-3);
+}
+
+/* Never truncated: an ellipsis would eat the evidence.                    */
+.evidence figcaption {
+	margin-block-start: var(--sp-sm);
+	color: var(--c-ink-muted);
+	font-size: var(--fs-body);
 }
 
 /* --- Breakpoint 1 — 35rem / 560px ---------------------------------------
@@ -989,6 +1017,9 @@ body:not(:has(.callbar)) {
 		margin-block-start: var(--sp-xl);
 	}
 	.trust-badge { margin-block-start: var(--sp-lg); }
+
+	/* >=560px gives >=528px of content box, so 332px of 3-up strip fits. */
+	.evidence { grid-template-columns: repeat(3, 100px); }
 
 	/* Card flips vertical: media on top, edge to edge. The aspect-ratio box
 	   is what changes shape — the DOM and the class names do not.          */

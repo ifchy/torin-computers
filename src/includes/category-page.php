@@ -47,6 +47,10 @@
 //   intro        string  one paragraph
 //   fixes        list    entries carrying a 'text' key and an optional 'href' key
 //   blocks       list    structured content entries — see torin_render_block()
+//   evidence     list    up to 3 repair photographs — see torin_render_evidence().
+//                        Entries carry 'file' (basename under img/repairs/),
+//                        'w' and 'h' (the file's TRUE intrinsic pixels) and
+//                        'caption'.
 //   warranty_key string  selects an entry from $site['warranty'] (TRUST-03)
 //   warranty     string  LEGACY scalar summary; still renders as one <p>
 //   process      list    ordered steps, each entry a string
@@ -220,6 +224,78 @@ function torin_render_block($block) {
 <?php
 }
 
+// The evidence photo strip (DIFF-02/DIFF-03, UI-SPEC §4). These are the shop's
+// OWN photographs, already in the repository — no third-party asset and no
+// licence question. They are ~200px files displayed at 100 CSS px, which is 2x
+// effective and sharp on every phone; that is why the strip exists at this size
+// and why these files may never be used as a hero, a full-width figure or a
+// category-card medium, where they would be visibly soft.
+//
+// Callable from a page (index.html) as well as from the spine, which is why it
+// is a standalone function taking its items as an argument rather than reading
+// $page.
+//
+// THE EXISTENCE CHECK IS THE POINT. A figure whose file is not on disk is
+// DROPPED, not rendered — a broken-image icon on the one surface whose entire
+// job is to look like proof is worse than one fewer photograph. It also makes
+// the porting step self-correcting: a typo'd basename degrades to a shorter
+// strip instead of shipping a broken page. One stat call per photo against a
+// hard cap of three is not a performance question worth having.
+//
+// Emits NOTHING when no item survives, so a feature section renders prose-only
+// and still reads as complete rather than as a section with an empty rail.
+function torin_render_evidence($items) {
+	if (!is_array($items) || count($items) === 0) {
+		return;
+	}
+	// Hard cap of three. D3-14 itself says "2-3 real repair photos": three
+	// keeps page weight and visual noise bounded, and it is also what makes the
+	// 2-up/3-up column arithmetic in components.css a closed question rather
+	// than a guess about an unbounded list.
+	$torin_ev_list = array_slice($items, 0, 3);
+
+	// dirname(__FILE__) is the 5.2-safe idiom; the 5.3+ magic directory
+	// constant must never appear in this tree.
+	$torin_ev_dir = dirname(__FILE__) . '/../img/repairs/';
+	$torin_ev_ok = array();
+	foreach ($torin_ev_list as $torin_ev) {
+		if (!isset($torin_ev['file']) || trim($torin_ev['file']) === '') {
+			continue;
+		}
+		if (!file_exists($torin_ev_dir . $torin_ev['file'])) {
+			continue;
+		}
+		$torin_ev_ok[] = $torin_ev;
+	}
+	if (count($torin_ev_ok) === 0) {
+		return;
+	}
+?>
+			<ul class="evidence">
+<?php	foreach ($torin_ev_ok as $torin_ev) {
+			// alt="" when a descriptive caption is present: the caption is
+			// already in the accessible tree, and describing the image in both
+			// places makes a screen reader announce it twice. An item shipped
+			// WITHOUT a caption carries its description in alt instead. Never a
+			// generic word, never a filename.
+			$torin_ev_cap = isset($torin_ev['caption']) ? $torin_ev['caption'] : '';
+			$torin_ev_alt = torin_has_content($torin_ev_cap) ? '' : $torin_ev_cap;
+			// width/height carry the FILE'S TRUE INTRINSIC PIXELS and vary per
+			// file. They are what reserves the box before the bytes arrive and
+			// they are the whole CLS defence; CSS sets the DISPLAY size, and
+			// these attributes never do. loading/decoding are unconditional,
+			// which is safe by construction because an evidence strip may never
+			// be the first contentful element on a page. ?>
+				<li><figure><img src="img/repairs/<?php echo torin_esc($torin_ev['file']); ?>" width="<?php echo torin_esc($torin_ev['w']); ?>" height="<?php echo torin_esc($torin_ev['h']); ?>" alt="<?php echo torin_esc($torin_ev_alt); ?>" loading="lazy" decoding="async">
+<?php		if (torin_has_content($torin_ev_cap)) { ?>
+					<figcaption><?php echo torin_esc($torin_ev_cap); ?></figcaption>
+<?php		} ?>
+				</figure></li>
+<?php	} ?>
+			</ul>
+<?php
+}
+
 // Back-compat alias, kept so that no already-published page breaks mid-phase.
 // mehanichni-problemi.html and optimizatsiq.html call this name and are not
 // touched by this plan; they must keep rendering byte-for-byte the same spine.
@@ -274,6 +350,7 @@ function torin_render_service_page($page) {
 	$torin_has_intro    = isset($page['intro'])    && torin_has_content($page['intro']);
 	$torin_has_fixes    = isset($page['fixes'])    && torin_has_content($page['fixes']);
 	$torin_has_blocks   = isset($page['blocks'])   && torin_has_content($page['blocks']);
+	$torin_has_evidence = isset($page['evidence']) && torin_has_content($page['evidence']);
 	$torin_has_process  = isset($page['process'])  && torin_has_content($page['process']);
 	$torin_has_faq      = isset($page['faq'])      && torin_has_content($page['faq']);
 	$torin_has_related  = isset($page['related'])  && torin_has_content($page['related']);
@@ -313,7 +390,13 @@ function torin_render_service_page($page) {
 			<h1><?php echo torin_esc($torin_h1); ?></h1>
 <?php	if ($torin_has_intro) { ?>
 			<p class="svc__intro"><?php echo torin_esc($page['intro']); ?></p>
-<?php	} ?>
+<?php	}
+		// The strip sits beneath the intro, inside the FIRST section rather than
+		// in one of its own, so it adds no section to the spine and therefore
+		// cannot shift the tint alternation. It is never the first contentful
+		// element on the page — the h1 above it always is — which is what makes
+		// lazy loading unconditionally safe on every image it renders.
+		if ($torin_has_evidence) { torin_render_evidence($page['evidence']); } ?>
 		</div>
 	</section>
 <?php

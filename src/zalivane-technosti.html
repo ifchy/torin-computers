@@ -55,6 +55,21 @@ $torin_cat_page = array(
 
 	'intro'  => 'Заливането с течност е една от най-честите причини лаптоп да спре да дава признаци на живот. Работим по дънни платки на ниво чип: почистваме следите от корозия, възстановяваме разядени пътечки и ремонтираме захранващите вериги. Приемаме и машини, за които другаде са ви казали, че не подлежат на ремонт — диагностиката е безплатна и ви казваме честно какво може да се направи.',
 
+	// Three of the shop's own photographs of liquid damage, ported from
+	// site-current/assets1/img/ into src/img/repairs/ (UI-SPEC §4). The w/h
+	// values are each FILE'S TRUE INTRINSIC PIXELS, read off the files
+	// themselves — they are not the display size, which CSS sets at 100x100,
+	// and they are what reserves the box before the bytes arrive.
+	//
+	// The captions say what each photograph PROVES, which is the whole reason
+	// the strip is on a page about liquid damage rather than a decorative rail.
+	// No caption is a label, a filename or the word «снимка».
+	'evidence' => array(
+		array('file' => 'zalivane1.jpg', 'w' => '257', 'h' => '257', 'caption' => 'Корозия по пътечките на дънна платка след заливане'),
+		array('file' => 'zalivane2.jpg', 'w' => '200', 'h' => '200', 'caption' => 'Разядена от течност зона около компонент на платката'),
+		array('file' => 'zalivane3.jpg', 'w' => '200', 'h' => '200', 'caption' => 'Свален чипсет и падовете под него при работа на ниво чип'),
+	),
+
 	'fixes'  => array(
 		array('text' => 'Дозапояване на отпоени BGA чипове'),
 		array('text' => 'Ребоулинг на BGA чипове'),
