@@ -3,9 +3,12 @@
 // include; torin_icon($name) RETURNS markup so no path is ever pasted twice.
 // Replaces the Font Awesome / liquid-icon webfonts (~75 KB uncompressed to draw
 // a handful of glyphs) that the legacy header referenced without ever loading.
-// All 15 are hand-authored original geometry on a 24x24 grid, decorative, and
+// All 16 are hand-authored original geometry on a 24x24 grid, decorative, and
 // inherit colour via currentColor. An unknown name returns an empty string
 // rather than emitting broken markup.
+//
+// 15 of the 16 are stroke-only (`fill="none" stroke="currentColor"`). 'star' is
+// the single deliberate exception and says why at its own case.
 function torin_icon($name) {
 	switch ($name) {
 	// --- The six owner-priority categories (D-09/D-40, subjects per UI-SPEC C-1)
@@ -40,6 +43,15 @@ function torin_icon($name) {
 		return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m6 6 12 12M18 6 6 18"/></svg>';
 	case 'check':
 		return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m4.5 12.5 5 5 10-11"/></svg>';
+	case 'star':   // filled five-point star for the Google rating badge (TRUST-02)
+		// The ONE deliberate exception to this file's stroke-only house style.
+		// Every other glyph is `fill="none" stroke="currentColor"`; a stroked
+		// star is an outline of ten thin segments and at 1em it reads as a
+		// snowflake or a smudge, not as a star — the shape carries its meaning
+		// through its SOLID silhouette. So this one is `fill="currentColor"`
+		// with no stroke at all. It is not an oversight and it must not be
+		// "normalised" back into the house style.
+		return '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="m12 3 2.7 5.85 6.3.72-4.7 4.3 1.28 6.23L12 16.98 6.42 20.1 7.7 13.87 3 9.57l6.3-.72Z"/></svg>';
 	}
 	return '';
 }

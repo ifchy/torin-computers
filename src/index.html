@@ -8,6 +8,13 @@ require_once(dirname(__FILE__) . '/includes/categories.php');
 // required explicitly for the same reason categories.php is, and require_once
 // makes the second call a no-op. Every contact destination below reads from it.
 require_once(dirname(__FILE__) . '/includes/site-config.php');
+// TRUST-01 and TRUST-02. ONE partial each, shared with every service page
+// through includes/category-page.php — this page includes them, it does not
+// restate their markup. Both transitively pull in category-page.php for
+// the two shared escaping/guard helpers; that is function definitions only, no
+// output, and it is the price of the two helpers having exactly one writer.
+require_once(dirname(__FILE__) . '/includes/brand-row.php');
+require_once(dirname(__FILE__) . '/includes/rating-badge.php');
 require_once(dirname(__FILE__) . '/includes/header.php');
 ?>
 
@@ -67,6 +74,13 @@ require_once(dirname(__FILE__) . '/includes/header.php');
 		</div>
 	</section>
 
+	<?php // TRUST-01. Section 3 of the UI-SPEC order table, on the PLAIN surface
+	      // between the tinted category grid and the tinted catch-all. No tint
+	      // argument is passed: the homepage's order is fixed and contracted, so
+	      // its surfaces are literal here, while the service-page spine hands
+	      // this same partial its running toggle instead. ?>
+	<?php torin_render_brand_row(); ?>
+
 	<?php
 	// The symptom-organised catch-all (D-11). This exists for the visitor whose
 	// problem does not match one of the six cards — above all for symptoms like
@@ -92,7 +106,7 @@ require_once(dirname(__FILE__) . '/includes/header.php');
 		$torin_cat_by_id[$cat['id']] = $cat;
 	}
 	?>
-	<section class="section catch-all" aria-labelledby="ne-otkrivate-h">
+	<section class="section section--tint catch-all" aria-labelledby="ne-otkrivate-h">
 		<div class="container">
 			<span class="eyebrow" aria-hidden="true"></span>
 			<h2 id="ne-otkrivate-h">Не откривате проблема си?</h2>
@@ -147,11 +161,76 @@ require_once(dirname(__FILE__) . '/includes/header.php');
 		</div>
 	</section>
 
+	<?php
+	// DIFF-03 — the board-level / BGA capability, promoted to its own homepage
+	// surface. This is the differentiator that answers «казаха ми, че не
+	// подлежи на ремонт», and it was previously reachable only by opening the
+	// category-4 page.
+	//
+	// Every claim below is the shop's OWN, condensed from
+	// site-current/index.html:593-640 (the three tiers) and
+	// site-current/profilaktika-laptop.html:398 and :411 (the German infrared
+	// machine, the AMTECH flux, the up-to-10-degree figure and the 90% rate).
+	// Nothing is amplified: the source's ceiling is this block's ceiling.
+	//
+	// It is a CONDENSED SUMMARY that hands off to the depth page — it
+	// deliberately restates no paragraph zalivane-technosti.html already
+	// carries, or the two pages compete for the same query.
+	//
+	// PLAIN surface, section 5 of the UI-SPEC order table.
+	?>
+	<section class="section diff">
+		<div class="container">
+			<span class="eyebrow" aria-hidden="true"></span>
+			<h2>Какво можем, което другите отказват</h2>
+			<p>Ремонтът на ниво чип е това, което най-често чувате другаде като «не подлежи на ремонт». Работим в три степени според състоянието на платката: дозапояване на отпоени BGA чипове, ребоулинг с нови топченца и подмяна на чипсет — северен мост, южен мост или видеочип — когато самият чип е дефектирал.</p>
+			<p>Запояването се извършва с професионална машина от последно поколение, чийто източник на топлина е инфрачервен, в невидимата за окото област — германска know-how технология, управлявана софтуерно по профили според платката. Използваме флюс на американската фирма AMTECH, а след залепянето на чипсета подсилваме охладителната система и постигаме до 10 градуса по-ниски работни температури. При тези ремонти достигаме 90% успеваемост и устойчивост на ремонта във времето.</p>
+			<?php // Three photographs the shop took itself. Captions describe what each
+			      // one PROVES — the machine, the stage of the work, and the damage the
+			      // amateur method does — never what it depicts decoratively. ?>
+			<?php torin_render_evidence(array(
+				array('file' => 'profilaktika17.jpg', 'w' => '200', 'h' => '200', 'caption' => 'Инфрачервена станция за реболинг на BGA чипове'),
+				array('file' => 'profilaktika7.jpg',  'w' => '200', 'h' => '200', 'caption' => 'Падовете на платката, почистени преди поставяне на нови топченца'),
+				array('file' => 'profilaktika15.jpg', 'w' => '200', 'h' => '200', 'caption' => 'Повреда от нагряване с пистолет за горещ въздух'),
+			)); ?>
+			<p><a href="zalivane-technosti.html">Ремонт на дънни платки</a></p>
+		</div>
+	</section>
+
+	<?php
+	// DIFF-02 — battery regeneration, moved OUT of the folded catch-all that
+	// Phase 2 left it in (D3-11). The catch-all entry stays, because it serves
+	// a visitor searching by symptom («батерията не държи»), but a
+	// differentiator no competitor offers cannot have a collapsed <details> as
+	// its only home: folded content is indexed but weighted lower, and 02-RESEARCH
+	// §3c is where that cost was first recorded against this exact section.
+	//
+	// Copy condensed from site-current/index.html:650-660 and
+	// site-current/za-bateriite.html:111. The source misspells the noun for
+	// regeneration and the adjective for Japanese in that passage; both ship
+	// CORRECTLY SPELLED here, and a gate asserts the two typo forms appear
+	// nowhere in this file — which is why they are described, not quoted.
+	//
+	// TINT surface, section 6 of the UI-SPEC order table.
+	?>
+	<section class="section section--tint diff">
+		<div class="container">
+			<span class="eyebrow" aria-hidden="true"></span>
+			<h2>Регенерация на батерии за лаптоп</h2>
+			<p>От години не внасяме нови батерии — заради нискокачествените клетки, които производителите влагат напоследък. Вместо това предлагаме пълна регенерация на стария пакет: подменяме елементите с нови и препрограмираме електрониката, за да работи батерията като напълно нова.</p>
+			<p>Клетките се свързват с машина за точково заваряване и специална лента HILUMIN, а не със запояване — всяка температурна интервенция нарушава химията на елемента и намалява работоспособността му. В последно време влагаме японски елементи Panasonic.</p>
+			<?php torin_render_evidence(array(
+				array('file' => 'baterii.jpg', 'w' => '370', 'h' => '250', 'caption' => 'Батериен пакет, отворен за подмяна на елементите'),
+			)); ?>
+			<p><a href="za-bateriite.html">Как работи регенерацията</a></p>
+		</div>
+	</section>
+
 	<?php // The self-diagnostic tool gets its own homepage block rather than
 	      // being reachable only from the navigation (D-12, DIFF-01). This is
 	      // the one place the informal ти-form survives, because «Тествай сам»
 	      // is the established, locked nav label (D-18). ?>
-	<section class="section section--tint selftest">
+	<section class="section selftest">
 		<div class="container">
 			<span class="eyebrow" aria-hidden="true"></span>
 			<h2>Тествай сам своя лаптоп</h2>
@@ -163,7 +242,7 @@ require_once(dirname(__FILE__) . '/includes/header.php');
 	<?php // Repeated call-and-chat CTA (D-16): two equal-weight primary actions,
 	      // reachable without scrolling back to the hero. The id is the target
 	      // the nav's Контакти item points at in plan 02-03. ?>
-	<section class="section" id="contact-us">
+	<section class="section section--tint" id="contact-us">
 		<div class="container">
 			<span class="eyebrow" aria-hidden="true"></span>
 			<h2>Свържете се с нас</h2>
@@ -186,6 +265,13 @@ require_once(dirname(__FILE__) . '/includes/header.php');
 				      // parent's layout — so deleting this node is a subtraction, not a
 				      // redesign (D-17). Phase 4 / CONTACT-03 fills or removes it. ?>
 				<div class="cta-block__form"></div>
+				<?php // TRUST-02, the LAST CHILD of .cta-block. Same partial the
+				      // service-page CTA calls, so the two surfaces cannot drift.
+				      // It emits nothing at all today — the badge is switched off in
+				      // site-config.php until the live Google Business Profile figures
+				      // are read (OWNER-QUESTIONS #7). That absence is the specified
+				      // state; see includes/rating-badge.php. ?>
+				<?php torin_render_rating_badge(); ?>
 			</div>
 		</div>
 	</section>

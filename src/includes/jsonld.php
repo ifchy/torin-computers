@@ -70,6 +70,29 @@ $torin_ld = array(
 		)
 	)
 );
+
+// TRUST-02, structured half. sameAs points at the shop's own Google Business
+// Profile and is the ONLY profile signal permitted here.
+//
+// What must NEVER be added beside it: any aggregate-rating property, any
+// rating value, any count of customer feedback, or an array of such entries —
+// under LocalBusiness, ComputerStore, Organization or any other type. A
+// business marking up ITS OWN customer feedback is categorically ineligible
+// (RESEARCH P-1); it is not a grey area, it is a documented manual-action
+// trigger. A plan-level gate asserts the property names themselves do not
+// appear anywhere in this file, which is why this paragraph describes them
+// instead of spelling them. If a future phase wants stars in the search
+// result, the route is the Google Business Profile itself, not this file.
+//
+// The key is READ, never a literal, so the profile URL lives once in
+// site-config.php beside the badge that uses it. An empty value omits the
+// PROPERTY ENTIRELY rather than emitting sameAs: [""] — an empty string in a
+// sameAs array is a claim that the business is identified by nothing, which is
+// worse-formed than saying nothing at all. Today it is empty
+// (OWNER-QUESTIONS #7), so no sameAs is emitted anywhere on the site.
+if (isset($site['gbp_url']) && trim($site['gbp_url']) !== '') {
+	$torin_ld['sameAs'] = array($site['gbp_url']);
+}
 ?>
 <script type="application/ld+json">
 <?php echo json_encode($torin_ld); ?>
