@@ -52,8 +52,12 @@ fi
 
 NETRC_FILE=$(mktemp "${TMPDIR:-/tmp}/deploy-new-netrc.XXXXXX")
 chmod 600 "$NETRC_FILE"
+# Scratch space for deploy-time transforms (see strip_css below). Removed by the
+# same trap as the credentials file, including on error.
+STRIP_DIR=$(mktemp -d "${TMPDIR:-/tmp}/deploy-new-strip.XXXXXX")
 cleanup() {
   rm -f "$NETRC_FILE"
+  rm -rf "$STRIP_DIR"
 }
 trap cleanup EXIT
 
@@ -117,6 +121,36 @@ urlencode_path() {
   python3 -c 'import sys, urllib.parse; print(urllib.parse.quote(sys.argv[1], safe="/"))' "$1"
 }
 
+# Deploy-time transform: stylesheets ship without their comments.
+#
+# This project has no build step, so source bytes are wire bytes. components.css
+# is ~60% comments by raw size, costing ~9.2 KB gzipped -- 45% of the 20 KB CSS
+# transfer budget in the Phase 3 UI-SPEC, which the tree had already exceeded by
+# 2,234 B before this was added. The comments earn their keep in source (they are
+# what caught the CR-01/CR-02 specificity bugs in Phase 2), so they are stripped
+# here rather than deleted: source keeps the rationale, the wire does not pay.
+#
+# Stripping is string-aware, not a regex -- see scripts/lib/strip-css-comments.py
+# for why that distinction is load-bearing. Prints the path to upload: either a
+# stripped temp copy, or the original when the file is not CSS.
+resolve_upload_path() {
+  local rel="$1" src="$2"
+  case "$rel" in
+    *.css)
+      local out="${STRIP_DIR}/$(echo "$rel" | tr '/' '_')"
+      if python3 "${SCRIPT_DIR}/lib/strip-css-comments.py" < "$src" > "$out" 2>/dev/null \
+         && [ -s "$out" ]; then
+        printf '%s' "$out"
+        return 0
+      fi
+      # Fail open: a stripper problem must not block a deploy. Ship the source.
+      echo "WARNING: could not strip comments from ${rel}; uploading it unchanged" >&2
+      printf '%s' "$src"
+      ;;
+    *) printf '%s' "$src" ;;
+  esac
+}
+
 # Build the file list: explicit arguments, or every file under src/.
 FILES=()
 if [ "$#" -gt 0 ]; then
@@ -153,8 +187,14 @@ for rel in "${FILES[@]}"; do
   fi
 
   remote_url_path=$(urlencode_path "$rel")
-  printf '  uploading %s\n' "$rel"
-  if ! "${CURL_BASE[@]}" -T "$local_path" \
+  upload_path=$(resolve_upload_path "$rel" "$local_path")
+  if [ "$upload_path" != "$local_path" ]; then
+    printf '  uploading %s (comments stripped: %s -> %s B)\n' \
+      "$rel" "$(wc -c < "$local_path" | tr -d ' ')" "$(wc -c < "$upload_path" | tr -d ' ')"
+  else
+    printf '  uploading %s\n' "$rel"
+  fi
+  if ! "${CURL_BASE[@]}" -T "$upload_path" \
        "ftp://${FTP_HOST}/${REMOTE_ROOT}/${remote_url_path}"; then
     echo "ERROR: failed to upload ${rel}" >&2
     UPLOAD_FAILED=1
