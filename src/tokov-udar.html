@@ -1,17 +1,148 @@
 <?php
-// Per-page metadata (02-RESEARCH N-5). WORKING title and description carrying
-// the mechanism, derived from this page's existing subject; SEO-01 in Phase 3
-// owns the search-tuned copy, and CONTENT-01 owns the body below.
-$torin_title = 'Токов удар и захранване · ТОРИН КОМПЮТЪРС';
-$torin_desc  = 'Проблеми от токови удари и фазови разлики — ремонт на захранващи вериги и адаптори.';
+// Surge, phase-difference and power-supply damage, rendered through the
+// generalized service-page renderer (D3-14 depth bar).
+//
+// This page carries NO cat_id: it is not one of the six categories, it is a
+// standalone problem page that category 4 cross-links into. The renderer
+// therefore takes its display name and symptom line from this file rather
+// than from a record.
+//
+// Every string below is PORTED from site-current/tokov-udar.html:108-145 and
+// lightly modernised, not invented. That source is the shop speaking about
+// mechanisms it has actually seen on the bench — phase differences over HDMI
+// and VGA, ungrounded sockets, unearthed cable television, surges arriving on
+// the LAN cable, faulty USB peripherals — and it names which bridge dies in
+// each case. Rewriting it from scratch would have thrown away the one thing
+// that makes it credible.
+//
+// The legacy MARKUP is deliberately left behind (P-9): no Bootstrap class, no
+// icon font, no inline style enters this tree. Phones, working hours and the
+// address are NOT restated here; site-config.php owns those facts (P-11), and
+// a gate on this file asserts none of them reappeared.
+require_once(dirname(__FILE__) . '/includes/category-page.php');
+
+// Per-page metadata. Keyword-first title, decoupled from the page name.
+$torin_title = 'Ремонт след токов удар и повреден адаптер · Торин';
+$torin_desc  = 'Ремонт след токов удар, фазова разлика или повреден адаптер — работа по дънни платки на ниво чип в София. Обадете се за безплатна оценка.';
+
+// Assigned ONCE and read twice: the renderer draws the visible chain and
+// jsonld.php emits the matching BreadcrumbList from the same array.
+$torin_crumbs = array(
+	array('text' => 'Начало', 'href' => 'index.html'),
+	array('text' => 'Токов удар и захранване', 'href' => 'tokov-udar.html'),
+);
+
+$torin_page = array(
+	'name'     => 'Токов удар и захранване',
+
+	// [ASSUMED] customer phrasing pending OWNER-QUESTIONS #16, following the
+	// convention already established in categories.php. Written by the
+	// developer, not by the shop; do not quote it back as confirmed language.
+	'symptoms' => 'лаптопът угасна, докато беше свързан с телевизор, колони или мрежов кабел',
+
+	// 35 characters, inside the 48-character cap. The longer variant that
+	// names проблеми със захранването measures 50 and was shortened here
+	// rather than left to be truncated at render time.
+	'h1'       => 'Ремонт след токов удар и захранване',
+
+	'crumbs'   => $torin_crumbs,
+
+	'intro'    => 'Повечето повреди от този тип не идват от драматична гръмотевица, а от малка разлика в потенциала между два уреда, включени едновременно. Лаптоп и телевизор в различни контакти, колони с усилвател, мрежов кабел от незаземена инсталация — достатъчно е интерфейсният кабел да се включи, докато двете устройства работят. Токът, който протича в този момент, е кратък и висок, а следата от него остава по дънната платка. Ремонтираме точно такива повреди на ниво чип и диагностиката е безплатна.',
+
+	'fixes'    => array(
+		array('text' => 'Ремонт на захранващи вериги след пренапрежение'),
+		array('text' => 'Ремонт на дънна платка след фазова разлика'),
+		array('text' => 'Ремонт след токов удар през мрежовия (LAN) вход'),
+		array('text' => 'Ремонт на портове, повредени от дефектна периферия'),
+		array('text' => 'Подмяна на кабел и конектор на захранващия адаптор'),
+	),
+
+	'blocks'   => array(
+
+		// PORTED from site-current/tokov-udar.html:108-145, condensed. The
+		// bridge-level consequences are kept because they are the part a
+		// reader cannot get from any competitor page.
+		array(
+			'kind'    => 'prose',
+			'heading' => 'Откъде идва повредата',
+			'items'   => array(
+				'Най-честият случай е свързване на лаптоп към телевизор през HDMI или VGA. Голяма част от контактите, в които са включени двата уреда, не са заземени, освен ако някой не ги е измерил и заземил лично. Наземните кабелни телевизии също не са занулени и няма как да бъдат. Така между лаптопа и телевизора се получава разлика в потенциала. Ако интерфейсният кабел се включи, докато и двата уреда работят, през него протича ток, който в тежките случаи буквално възпламенява чипове и участъци от платката. При такава повреда почти винаги дефектира поне северният мост, а при машините с отделен видеочип — и той.',
+				'Външните тонколони с усилвател работят по същия механизъм. Причината обикновено е, че колоните и лаптопът са включени в различни или в незанулени контакти, а повредата се проявява в момента, в който интерфейсният кабел се свърже между два работещи уреда. Тук най-често дефектира южният мост.',
+				'Токовите и гръмотевичните удари са другата група и над тях имаме най-малко влияние. При кабелен интернет пренапрежението стига до машината през мрежовата платка; при безжичен този път просто не съществува. Дефектната периферия по USB е третият вход — устройство с късо съединение по захранващата шина поврежда контролера, който я управлява. И в двата случая южният мост е първото, което проверяваме.',
+			),
+		),
+
+		// PORTED from the prevention advice the source page gives inline, one
+		// imperative sentence each. This is the only part of the page a
+		// reader can act on before anything has broken.
+		array(
+			'kind'    => 'steps',
+			'heading' => 'Как да намалите риска',
+			'items'   => array(
+				'Включвайте интерфейсния кабел между два уреда само когато и двата са изключени — желателно и от контакта.',
+				'Свързвайте лаптопа и външното устройство в един и същ занулен контакт, а не в два различни.',
+				'Сложете галваничен разделител между телевизора и кабелната телевизия, ако свързвате към него лаптоп.',
+				'Използвайте разклонител с вграден защитен модул срещу пренапрежение.',
+				'При кабелен интернет добавете LAN протектор преди мрежовия вход на машината.',
+				'Не използвайте универсален адаптор с превключвател за различни изходни напрежения.',
+			),
+			'link'    => array(
+				'text' => 'Стара и нестандартна техника',
+				'href' => 'problem-stari.html',
+			),
+		),
+	),
+
+	// A KEY, never a literal — the term lives once, in site-config.php.
+	'warranty_key' => 'default',
+
+	'process'  => array(
+		'Приемаме машината и записваме какво е било включено към нея в момента на повредата. Този отговор насочва проверката още преди разглобяването.',
+		'Разглобяваме и оглеждаме платката под увеличение. При пренапрежение следата често е локална и се вижда около входа, през който токът е влязъл.',
+		'Измерваме захранващите вериги и проверяваме мостовете и контролерите, които съответстват на входа — видео, мрежов или USB.',
+		'Обаждаме се с диагнозата и цената, преди да продължим. Не започваме платен ремонт, без да сте се съгласили.',
+		'Ремонтираме на ниво чип, тестваме машината в реален работен режим и я връщаме с гаранционна карта.',
+	),
+
+	'faq'      => array(
+		array(
+			'q' => 'Струва ли си да се ремонтира повреден адаптор?',
+			'a' => 'Зависи какво е повредено. Прекъснат кабел или разбит конектор са ремонт, който често има смисъл, особено при по-редки модели. Ако е дефектирала самата електроника вътре, обикновено е по-разумно да се смени с качествен нов. Внимавайте какво купувате: върху нискокачествените адаптори написаната мощност често не отговаря на истината, а гаранционният срок е добър ориентир за качеството.',
+		),
+		array(
+			'q' => 'Винаги ли повредата се вижда?',
+			'a' => 'Не. Понякога има видима следа около входа, но много често платката изглежда напълно наред и проблемът се открива едва при измерване. Затова прегледът не се прави на око — машината се разглобява и веригите се измерват.',
+		),
+		array(
+			'q' => 'Лаптопът се държи странно, откакто го свързах с телевизора. Спешно ли е?',
+			'a' => 'Да, донесете го възможно най-скоро и не го свързвайте отново към същия уред. Частично повредена верига натоварва останалите и повреда, която днес е локална, след време може да засегне повече от платката.',
+		),
+		array(
+			'q' => 'Може ли да се предпази машината напълно?',
+			'a' => 'Напълно — не. Разклонител със защита срещу пренапрежение, LAN протектор и навикът да се свързват кабели само при изключени уреди покриват почти всички случаи, които виждаме. Останалото е случайност, срещу която никой не е застрахован.',
+		),
+	),
+
+	'related'  => array(
+		array('text' => 'Заливане и ремонт на дънни платки', 'href' => 'zalivane-technosti.html'),
+		array('text' => 'Стара и нестандартна техника', 'href' => 'problem-stari.html'),
+		array('text' => 'Батерии и регенериране', 'href' => 'za-bateriite.html'),
+	),
+
+	// 'prices' is deliberately NOT set (D3-06, PRICE-01 is v2).
+	// 'evidence' is deliberately NOT set: src/img/repairs/ carries tok1-tok6,
+	// which are genuine photographs of this exact damage, but they have not
+	// been uploaded to the staging origin and torin_render_evidence() skips
+	// any file it cannot find on the server. Adding the strip here would put
+	// a claim on the page whose rendering could not be verified in this plan.
+	// Recorded as a follow-up in 03-05-SUMMARY.md.
+);
+
 require_once(dirname(__FILE__) . '/includes/header.php');
 ?>
 
-<main class="section">
-	<div class="container">
-		<h1>Токов удар и захранване</h1>
-		<p>Строим новия сайт на ТОРИН КОМПЮТЪРС тук. Тази страница е временен скелет, използван за да докаже, че PHP-include основата работи на живия хостинг.</p>
-	</div>
+<main>
+<?php torin_render_service_page($torin_page); ?>
 </main>
 
 <?php require_once(dirname(__FILE__) . '/includes/footer.php'); ?>
