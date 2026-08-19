@@ -43,6 +43,46 @@
 async function run(session, cdp, opts) {
 	await cdp.open(session, opts.url, opts);
 
+	// Force the lazy evidence images to load BEFORE measuring.
+	//
+	// Check 3 above measures the rendered box of each evidence image against
+	// the 100x100 CSS contract. Those images carry loading="lazy" and sit far
+	// below the fold, so on a freshly opened page they are never fetched and
+	// every one reports naturalWidth 0 / complete false. A box measured from an
+	// unloaded image is not evidence about the CSS contract -- a broken image
+	// can size differently from a decoded one -- so the probe correctly refuses
+	// to score it and degrades to INCONCLUSIVE. That is the right verdict for
+	// the wrong reason: it says nothing about the page, only about the probe
+	// never having scrolled.
+	//
+	// So scroll each strip into view, wait for the fetches to settle, then
+	// return to the top before measuring. Returning to the top matters because
+	// the layout assertions below are read from the same document state.
+	//
+	// The wait is bounded: a 5 s cap, and decode failures resolve rather than
+	// reject, so an image that genuinely 404s still reaches the measurement
+	// step and is reported as not-loaded instead of hanging the probe.
+	await cdp.evaluate(session, `(async () => {
+		const strips = [...document.querySelectorAll('.evidence')];
+		for (const el of strips) {
+			el.scrollIntoView({ block: 'center' });
+			await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+		}
+		const imgs = [...document.querySelectorAll('.evidence img')];
+		await Promise.race([
+			Promise.all(imgs.map(img => img.complete
+				? Promise.resolve()
+				: new Promise(r => {
+					img.addEventListener('load', r, { once: true });
+					img.addEventListener('error', r, { once: true });
+				}))),
+			new Promise(r => setTimeout(r, 5000))
+		]);
+		window.scrollTo(0, 0);
+		await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+		return true;
+	})()`);
+
 	return await cdp.evaluate(session, `(() => {
 		const main = document.querySelector('main');
 		if (!main) return { error: 'no <main> found' };

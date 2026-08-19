@@ -243,83 +243,67 @@ service-page spine that would put an untinted band next to whichever slot preced
 the exact C3-5 defect 03-01 fixed. The partial now takes the running tint class as an argument — the
 homepage passes nothing (its order is contracted), the spine passes `torin_next_tint()`.
 
-## Live and rendered verification — NOT RUN
+## Live and rendered verification — RUN AND PASSED (2026-08-19)
 
-`scripts/deploy-new.sh` is denied to this executor by the environment permission classifier, exactly
-as in plan 03-01. **Nothing in this plan has been served, and no live or rendered check asserts
-anything about it.** All such checks are recorded as NOT RUN, never as passing.
+The user authorized and ran both deploys. All checks this plan deferred are now executed.
+Probe verdict **PASS at 360×640 and 1440×900**, `inconclusive: []` at both.
 
-| Check | Status |
+| Check | Result |
 |---|---|
-| All Task 1 local gates (keys, icon count, partial contents, dialect, wiring) | **PASS** |
-| All Task 2 local gates (41 files, ASCII names, all-JPEG payloads, htaccess, renderer, CSS budget) | **PASS** |
-| All Task 3 local gates (headings, links, spellings, no smartbattery, no inline handlers, dialect) | **PASS** |
-| Structural PHP sanity (tag/brace/quote balance, no `__DIR__`, no short tags) on all 8 changed files | **PASS** |
-| PHP **syntax validity** on the host's 5.2.17 | **NOT RUN** — no local interpreter; only a deploy can prove it |
-| LIVE brand row: 8 `brand-row__item`, one disclaimer, on index + every service page | **NOT RUN** |
-| LIVE brand row absent on the six legal/utility pages | **NOT RUN** |
-| LIVE zero `rating-badge` and zero `sameAs` occurrences | **NOT RUN** |
-| LIVE two `class="evidence"` strips on index, three on zalivane-technosti | **NOT RUN** |
-| LIVE `img/repairs/*.jpg` 200 + explicit caching header | **NOT RUN** |
-| Rendered probe pass conditions at 360x640 and 1440x900 | **NOT RUN** |
+| PHP 5.2 syntax, all six changed includes | **PASS** — `index.html` 200 / 24,375 B, `zalivane-technosti.html` 200 / 25,801 B; zero `<?php` leak, zero parse/fatal strings |
+| Section order + tint alternation | **PASS** — `sectionCount: 8` (was 5 pre-deploy), `adjacentTintedPairs: 0` |
+| Brand row wrapping @360px | **PASS** — 8 items over 2 rows, `minAdjacentGap: 16`, no duplicates, «и др.» last |
+| Rating badge absent | **PASS** — `ratingBadgePresent: false`, as gated |
+| Evidence strips | **PASS** — 2 strips, all boxes 100×100 |
+| Evidence attrs honest (CLS defence) | **PASS** — `attr 200×200 = natural 200×200`, `attr 370×250 = natural 370×250`, CSS displays 100×100 |
+| Mobile overflow | **PASS** — `scrollWidth 360 = innerWidth 360` |
+| Empty headings | **PASS** — 0 of 16 |
+| 03-01 regression under stripped CSS | **PASS** — `svc-page.js` still PASS, breadcrumb still 44.1 px |
 
-### Probe results — pre-deploy negative control
+### Two findings from the verification run
 
-The probe was run twice against the still-pre-deploy page. It correctly returned `INCONCLUSIVE` and
-**asserted nothing about this plan**. Recorded here as the negative control that proves the
-absent-surface guard works, not as verification.
+**1. The evidence strip suppresses itself when photos are missing — by design.**
+The first probe run after deploying code but not photographs returned
+`evidenceStrips: 0` → INCONCLUSIVE. Cause is `category-page.php:265`: `torin_render_evidence()`
+skips any item whose file is absent on the server and returns without emitting if none survive.
+That is correct defensive behaviour (no broken-image icons), and the probe correctly refused to
+call it a pass. Deploying the seven photographs populated both strips.
 
-360x640:
+**2. The probe could not measure its own strongest assertion, and was fixed.**
+Evidence images carry `loading="lazy"` and sit far below the fold, so on a freshly opened page
+none were ever fetched: every one reported `naturalW: 0`, `complete: false`. A box measured from
+an unloaded image says nothing about the 100×100 CSS contract, so the probe degraded to
+INCONCLUSIVE — the right verdict for the wrong reason, since it reflected the probe never having
+scrolled rather than anything about the page. `run()` now scrolls each strip into view, awaits the
+fetches under a bounded 5 s cap (decode failures resolve rather than reject, so a genuine 404 is
+reported as not-loaded instead of hanging the probe), and returns to the top before measuring.
+Only after that fix did `evidenceAttrsHonest` become a real measurement.
 
-```json
-{
-  "viewport": "360x640",
-  "sectionCount": 5,
-  "adjacentTintedPairs": 0,
-  "scrollWidth": 360,
-  "innerWidth": 360,
-  "horizontalScroll": false,
-  "brandItemCount": 0,
-  "brandRowRows": 0,
-  "minAdjacentGap": null,
-  "ratingBadgePresent": false,
-  "evidenceStrips": 0,
-  "evidenceBoxes": [],
-  "h1Count": 1,
-  "headingCount": 13,
-  "emptyHeadings": 0,
-  "inconclusive": [
-    "no .brand-row__item in the served HTML — the wrap, adjacency and ordering checks asserted nothing",
-    "no .brand-row__note in the served HTML — the mandatory trademark disclaimer is absent",
-    "no .evidence in the served HTML — the 100x100 box check asserted nothing"
-  ],
-  "verdict": "INCONCLUSIVE"
-}
+### CSS budget — resolved, superseding the section above
+
+The budget section above records the tree as 27 B under a 20,480 B ceiling. Direct measurement put
+it **2,234 B over** — the figure omitted `no-js.css` (2,425 B gzipped, ~90% comments). Resolved by
+stripping CSS comments at **deploy** time rather than deleting them from source
+(`scripts/lib/strip-css-comments.py`, wired into `deploy-new.sh`; commit `b9a12f4`):
+
+```
+production CSS gzipped:  22,714 B  ->  5,309 B     (measured live: 5,285 B on the wire)
+budget headroom:         -2,234 B  ->  +15,171 B
 ```
 
-1440x900: `sectionCount: 5`, `adjacentTintedPairs: 0`, `scrollWidth: 1425` vs `innerWidth: 1440`,
-`brandItemCount: 0`, `ratingBadgePresent: false`, `evidenceStrips: 0`, `h1Count: 1`,
-`emptyHeadings: 0`, 3 inconclusive entries, verdict `INCONCLUSIVE`.
+Source keeps every comment; the wire does not pay for them. The stripper is a string-aware scanner,
+not a regex — `components.css:853` is `content: "/"`, and one further character in that string would
+let a regex stripper silently truncate the file. Brace balance verified identical across all four
+stylesheets, and it fails open: a stripper error uploads the source unchanged rather than blocking
+a deploy. Plans 03-03 … 03-09 no longer need to trim comments to fit.
 
-`sectionCount: 5` is the positive control on the control: the origin is serving hero / grid /
-catch-all / self-diagnostic / CTA — the pre-03-02 page. After deploy it must read **8**.
+### Original blocked-state record (retained)
 
-### To run these checks
-
-```bash
-scripts/deploy-new.sh includes/site-config.php includes/icons.php includes/brand-row.php \
-  includes/rating-badge.php includes/category-page.php includes/jsonld.php \
-  css/components.css .htaccess index.html zalivane-technosti.html
-scripts/deploy-new.sh img/repairs/zalivane1.jpg img/repairs/zalivane2.jpg img/repairs/zalivane3.jpg \
-  img/repairs/profilaktika17.jpg img/repairs/profilaktika7.jpg img/repairs/profilaktika15.jpg \
-  img/repairs/baterii.jpg
-scripts/render-check.sh scripts/probes/trust-signals.js https://torin.bg/new/index.html 360 640
-scripts/render-check.sh scripts/probes/trust-signals.js https://torin.bg/new/index.html 1440 900
-```
-
-Includes first, then the stylesheet, then the pages (P-10 ordering, so a syntax error isolates to one
-URL). Expected after deploy: `sectionCount: 8`, `brandItemCount: 8`, `brandRowRows >= 2` at 360px,
-`ratingBadgePresent: false`, `evidenceStrips: 2`, every `evidenceBoxes` entry 100x100, `verdict: PASS`.
+`scripts/deploy-new.sh` is denied to executor agents by the environment permission classifier, so
+nothing was served at plan-execution time and every live check was recorded NOT RUN rather than
+optimistically as passing. The probe was run twice against the pre-deploy page and correctly
+returned INCONCLUSIVE with `sectionCount: 5` — the negative control proving the absent-surface
+guard works.
 
 ## Known Stubs
 
@@ -373,4 +357,3 @@ mitigated as planned.
 - `scripts/probes/trust-signals.js` — FOUND
 - `src/img/repairs/` — FOUND (41 .jpg)
 - `src/img/ouroffice.jpg` — FOUND
-- `9a8dbab` `23a4b10` `7fb4c5e` — all FOUND in git log

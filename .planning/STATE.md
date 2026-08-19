@@ -5,10 +5,10 @@ milestone_name: milestone
 current_phase: 03
 current_phase_name: content-trust-signal-build-out
 status: executing
-stopped_at: Phase 03 Wave 2 merged (03-02); live verification pending deploy
+stopped_at: Phase 03 Waves 1-2 complete and live-verified; next is Wave 3
 last_updated: "2026-08-18T00:00:00.000Z"
-last_activity: 2026-08-18
-last_activity_desc: 03-02 merged (Wave 2 complete); CSS budget exhausted
+last_activity: 2026-08-19
+last_activity_desc: 03-02 live-verified PASS both viewports; CSS budget resolved
 progress:
   total_phases: 3
   completed_phases: 2
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-08-04)
 ## Current Position
 
 Phase: 03 (content-trust-signal-build-out) — EXECUTING
-Plan: 2 of 9 complete (03-01 verified, 03-02 merged); next is Wave 3 (03-03/04/05/06)
+Plan: 2 of 9 complete and live-verified; next is Wave 3 (03-03/04/05/06)
 Status: Executing Phase 03
 Last activity: 2026-08-18 — 03-01 deployed to staging and verified PASS at both viewports
 
@@ -120,6 +120,7 @@ Recent decisions affecting current work:
 - [Phase 3]: 03-01 live-verified: served page returns 200 with keyword h1, breadcrumbs, urgent block, warranty term line and BreadcrumbList; svc-page probe PASS at 360x640 and 1440x900 (sectionCount 3 -> 8 is the positive control).
 
 - [Phase 3]: CSS budget resolved by stripping comments at DEPLOY time (scripts/lib/strip-css-comments.py, wired into deploy-new.sh), not by deleting them. Source keeps every comment; the wire does not pay. Production CSS 22,714 -> 5,309 B gzipped; headroom went from -2,234 B (already over) to +15,171 B. Stripper is string-aware, not a regex: components.css:853 has content:"/" and one more character would let a regex truncate the file. Brace balance verified identical in all four stylesheets.
+- [Phase 3]: 03-02 live-verified PASS at 360x640 and 1440x900. Two findings: (a) torin_render_evidence() at category-page.php:265 suppresses the whole strip when photo files are absent on the server — correct defensive design, but it means photos must be deployed alongside code or the strip silently vanishes; (b) the probe could not measure its own strongest assertion because evidence images are loading="lazy" below the fold and were never fetched — run() now scrolls them in and awaits load under a bounded 5s cap before measuring.
 - [Phase 3]: 03-02: CSS transfer budget is EXHAUSTED — 20,453 of 20,480 B gzipped, 27 B left for seven remaining plans. Root cause measured: components.css is 60% comments by raw bytes; stripping them drops its gzip from 12,015 to 2,849 B. The comments ship because there is no build step.
 - [Phase 3]: 03-02: Google rating badge is built and gated OFF (`gbp_badge_enabled => false` in site-config.php) plus an emptiness safety net. Enabling needs a boolean flip plus THREE values, not two — the Google Business Profile URL has never been captured in this repo.
 - [Phase 3]: 03-02: plan-named DIFF photos were wrong — profilaktika3 is a dust-clogged heatsink not the infrared station, and baterry.jpg/baterry2.jpg are schematic diagrams unreadable at a 100x100 crop. profilaktika6.jpg is a GIF wearing a .jpg extension.
