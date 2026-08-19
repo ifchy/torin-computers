@@ -778,6 +778,46 @@ differentiator — but only if the answer is accurate, since it becomes a public
 
 ---
 
+### 28. The EU project disclosure names a different company in its results paragraph
+**Status:** OPEN — **new, raised 2026-08-19**
+**Question:** The results paragraph on the funding disclosure page names **«Венера-АКС ООД»**, which
+is not the beneficiary. Is the same wording in the project documentation you submitted, or is it only
+on the website?
+
+**Where exactly.** `site-current/covid.html:140`. The paragraph opens correctly — *«Постигане на
+положителен ефект по отношение на ТОРИН КЪМПАНИ ООД…»* — and then, in the very next sentence, states
+that *«Венера-АКС ООД»* is expected to continue operating for at least 3 months after the project
+closes. Everything else on the page names ТОРИН КЪМПАНИ ООД. It reads exactly like a copy-paste from
+another company's application form, which is a common way these paragraphs are produced.
+
+**Why this is a question and not a fix.** It has deliberately **not** been corrected. A funding
+disclosure is a compliance artefact, not marketing copy: if the same sentence appears in the
+documentation submitted to the managing authority, then the website and the file must continue to
+match, and quietly editing the website makes a future audit harder to explain rather than easier.
+Correcting a published disclosure is the beneficiary's decision, not the developer's.
+
+**What is needed from you:**
+- Does the **submitted project documentation** contain the same company name in this sentence?
+- If **yes** — do you want the website left exactly as it is, or corrected with a note, or corrected
+  only after you have raised it with the managing authority?
+- If **no**, and the error exists only on the website — may it be corrected to ТОРИН КЪМПАНИ ООД?
+- Related, and worth answering together: **#25** asks which legal entity operates the shop. If
+  ТОРИН КЪМПАНИ ООД is not the entity trading today, that changes what the disclosure page should say
+  about itself as well.
+
+**Note for whoever ports this page.** `src/covid.html` is still a stub; the disclosure text above
+lives only in `site-current/covid.html`. When the real text is ported, this paragraph must be carried
+across **verbatim, including the wrong name**, until this question is answered. Do not "clean it up"
+during the port — the error is evidence of what was published, and losing it loses the ability to
+answer the question above.
+
+**Blocks:** Nothing in Phase 3 — the disclosure page stays live and unedited either way. Blocks a
+final answer on `covid.html` content before cutover.
+**Raised:** Phase 3 execution, 2026-08-19, filed during plan 03-05
+**Answer:**
+
+---
+
 ## Answered
 
 *(none yet — move items here as they're resolved, keeping the answer inline)*

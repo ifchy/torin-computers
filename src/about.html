@@ -1,17 +1,141 @@
 <?php
-// Per-page metadata (02-RESEARCH N-5). WORKING title and description carrying
-// the mechanism, derived from this page's existing subject; SEO-01 in Phase 3
-// owns the search-tuned copy, and CONTENT-01 owns the body below.
-$torin_title = 'За нас · ТОРИН КОМПЮТЪРС';
-$torin_desc  = 'Кои сме ние: ТОРИН КОМПЮТЪРС — сервиз за лаптопи и компютри в София, ул. Свети Иван Рилски 46.';
+// The About page, rendered through the generalized service-page renderer.
+// It is NOT a service page: it carries no cat_id, no symptom line, no fixes
+// list and no warranty summary, because none of those nouns apply to a
+// company page. The renderer guards every optional slot, so leaving them
+// unset renders a clean page rather than empty headings.
+//
+// The history below is PORTED from site-current/about.html:283-284, which is
+// the shop speaking about itself. Nothing is added to it. In particular there
+// is deliberately NO repairs-completed counter: no such figure exists in any
+// source, and the page whose entire job is to establish credibility is the
+// worst possible place to invent one.
+//
+// CONTENT-02 lands here. RESEARCH C-1 found that the EU publicity obligation
+// was scoped to the implementation period, that homepage placement was never
+// required, and that the footer link to the disclosure page already exceeds
+// the compliant minimum. So the homepage half of CONTENT-02 was already
+// satisfied structurally; what remained was to make the disclosure reachable
+// from a CONTENT page as well as from a legal footer line. That is the third
+// block below: one short paragraph and a link, chosen over prose folded into
+// the history so the disclosure is findable without competing for attention.
+// covid.html itself stays live, stays linked from the footer, and is not
+// edited by this plan.
+//
+// The street address is NOT retyped anywhere on this page. footer.php renders
+// it once, as a link to the map destination site-config.php owns (P-11), and
+// a gate on this file asserts it did not reappear here.
+require_once(dirname(__FILE__) . '/includes/category-page.php');
+
+// Per-page metadata. 54 characters including the brand suffix, inside the
+// 55-character budget, so the suffix is kept on this page.
+$torin_title = 'За ТОРИН КОМПЮТЪРС — сервиз в София от 1993 г. · Торин';
+$torin_desc  = 'ТОРИН КОМПЮТЪРС е софийска фирма от 1993 г. — сервиз за лаптопи, компютри и монитори на ниво чип. Обадете се за безплатна диагностика.';
+
+// Assigned ONCE and read twice: the renderer draws the visible chain and
+// jsonld.php emits the matching BreadcrumbList from the same array.
+$torin_crumbs = array(
+	array('text' => 'Начало', 'href' => 'index.html'),
+	array('text' => 'За нас', 'href' => 'about.html'),
+);
+
+$torin_page = array(
+	'name'   => 'За нас',
+
+	// 18 characters.
+	'h1'     => 'За ТОРИН КОМПЮТЪРС',
+
+	'crumbs' => $torin_crumbs,
+
+	'intro'  => 'ТОРИН КОМПЮТЪРС работи от 1993 г. и днес е сервиз за преносими и настолни компютри в София. Ремонтираме на ниво чип — там, където повечето сервизи спират и препращат клиента към нов лаптоп. Диагностиката е безплатна и ви казваме честно какво виждаме, включително когато отговорът е, че ремонтът не си струва.',
+
+	'blocks' => array(
+
+		// PORTED from site-current/about.html:283-284. The distributed brand
+		// names the legacy copy lists (a motherboard and laptop manufacturer,
+		// plus video cards, tuners, monitors, cases, networking and audio) are
+		// deliberately NOT reproduced: those were commercial representations
+		// in the 1990s and 2000s and nothing in any source says which, if any,
+		// still hold. Stating a lapsed distributorship on the page that
+		// establishes credibility is exactly the wrong trade. The claim below
+		// is the one the source supports without a currency question — that
+		// the representation existed, in the past tense.
+		array(
+			'kind'    => 'prose',
+			'heading' => 'От 1993 г. до днес',
+			'items'   => array(
+				'Фирмата е създадена през 1993 г. с предмет на дейност асемблиране на компютърни конфигурации. За кратко време става предпочитан доставчик на компютърна техника за домашни потребители, за фирми и за държавни организации — работа, която ни научи да гледаме машината като съвкупност от компоненти, а не като модел с каталожен номер. Точно този навик стои в основата на сервизната работа днес.',
+				'През 1996 г. дейността се разширява с внос на компютърни компоненти и разпространението им в търговската мрежа. Изградена е дистрибуторска мрежа в цялата страна, а фирмата става представител за България на един от водещите световни производители на дънни платки и лаптопи. Дългите години работа с дънни платки на едро са причината по-късно ремонтът им на ниво чип да е естествено продължение, а не нова посока.',
+				'От 2006 г. предлагаме резервни батерии за лаптопи, камери и фотоапарати, както и цялостно регенериране на батерии за преносими компютри. По същото време, на фона на стагнацията на търговските пазари и световната икономическа криза, започваме да развиваме и сервизната дейност — ремонт на преносими компютри от всички марки, на LCD монитори и на настолни компютри. Оттогава сервизът е основната ни работа.',
+			),
+		),
+
+		array(
+			'kind'    => 'prose',
+			'heading' => 'Хора и оборудване',
+			'items'   => array(
+				'Ремонтът на ниво чип не е въпрос само на желание — той изисква и хора, които го правят всеки ден, и техника, която не всеки сервиз има. Нашите сервизни специалисти работят с дънни платки от години и това е причината да приемаме машини, за които другаде вече е казано, че не подлежат на ремонт.',
+				'В сервиза работим с инфрачервена станция с компютърно управление за реболинг и подмяна на BGA чипове, с ултразвуково почистване на платки и с увеличение, което позволява възстановяване на прекъснати пътечки. Описали сме оборудването и какво точно се прави с него на отделна страница.',
+			),
+			'link'    => array(
+				'text' => 'Вижте оборудването и как протича профилактиката',
+				'href' => 'profilaktika-laptop.html',
+			),
+		),
+
+		// CONTENT-02, the relocation half. ONE short paragraph and a link.
+		// It must not grow into a retelling of the project: covid.html carries
+		// the detail, stays live and stays linked from the footer. The link
+		// label is the project number, which is the same string the
+		// disclosure page uses as its own title.
+		array(
+			'kind'    => 'prose',
+			'heading' => 'Европейски проекти',
+			'items'   => array(
+				'ТОРИН КЪМПАНИ ООД е бенефициент по проект BG16RFOP002-2.073 по Оперативна програма «Иновации и конкурентоспособност», съфинансирана от Европейския съюз чрез Европейския фонд за регионално развитие. Подробностите по проекта са публикувани на отделна страница.',
+			),
+			'link'    => array(
+				'text' => 'Проект BG16RFOP002-2.073',
+				'href' => 'covid.html',
+			),
+		),
+	),
+
+	// The warranty slot is deliberately left unset — this is not a service
+	// page and TRUST-03 belongs on the pages that describe a repair. The
+	// evidence slot is left unset for the same reason: src/img/ouroffice.jpg
+	// is a photograph of the premises, not proof of a repair, and it lives
+	// outside the evidence namespace precisely so it cannot be used as one.
+
+	'faq'     => array(
+		array(
+			'q' => 'Каква техника приемате?',
+			'a' => 'Преносими компютри от всички марки, LCD монитори и настолни компютри. Работим и по машини, които други сервизи са отказали — отказът другаде най-често означава, че там не се прави ремонт на ниво чип, а не че платката е негодна.',
+		),
+		array(
+			'q' => 'Диагностиката наистина ли е безплатна?',
+			'a' => 'Да. Преглеждаме машината и ви казваме какво е повредено и колко ще струва ремонтът, преди да започнем каквото и да било. Ако решите да не продължите, не дължите нищо за прегледа. Не започваме платен ремонт без вашето съгласие.',
+		),
+		array(
+			'q' => 'Къде се намирате?',
+			'a' => 'В София. Адресът стои в долната част на всяка страница на сайта и е връзка към картата — натиснете го и ще ви отвори точното местоположение. Там са и телефоните, и работното време.',
+		),
+	),
+
+	'related' => array(
+		array('text' => 'Гаранция на ремонта', 'href' => 'warrently.html'),
+		array('text' => 'Общи условия', 'href' => 'uslovia.html'),
+		array('text' => 'Тествайте сам лаптопа си', 'href' => 'test-laptop.html'),
+	),
+
+	// 'prices' is deliberately NOT set (D3-06, PRICE-01 is v2).
+);
+
 require_once(dirname(__FILE__) . '/includes/header.php');
 ?>
 
-<main class="section">
-	<div class="container">
-		<h1>За нас</h1>
-		<p>Строим новия сайт на ТОРИН КОМПЮТЪРС тук. Тази страница е временен скелет, използван за да докаже, че PHP-include основата работи на живия хостинг.</p>
-	</div>
+<main>
+<?php torin_render_service_page($torin_page); ?>
 </main>
 
 <?php require_once(dirname(__FILE__) . '/includes/footer.php'); ?>
