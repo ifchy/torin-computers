@@ -1,20 +1,175 @@
 <?php
-// Per-page metadata (02-RESEARCH N-5). WORKING title and description carrying
-// the mechanism, derived from this page's existing subject; SEO-01 in Phase 3
-// owns the search-tuned copy, and CONTENT-01 owns the body below.
+// DIFF-01 — the self-diagnostic, rendered through the generalized service-page
+// template (includes/category-page.php).
 //
-// D-18: «Тествай сам» is the locked nav label, so the informal ти-form is
-// deliberate here and on the homepage self-diagnostic block (D-12/DIFF-01).
-$torin_title = 'Тествай сам своя лаптоп · ТОРИН КОМПЮТЪРС';
-$torin_desc  = 'Кратък тест, който помага да опишете проблема с лаптопа по-точно, преди да се обадите.';
+// This is NOT a service page and it carries no cat_id and no warranty_key: a
+// warranty block under a page of diagnostic steps is noise, and the renderer
+// omits the whole section when neither key is set.
+//
+// What Phase 3 owed DIFF-01 was never a new tool — the homepage feature block
+// shipped in Phase 2 (D-12) and the copy below already existed on the live
+// site at real length. What was missing is that the page DEAD-ENDED: it named
+// the likely fault and then left the visitor with nowhere to go. Every symptom
+// group below therefore closes with a link into the service that fixes that
+// class of fault.
+//
+// NO PAGE FILENAME IS HAND-TYPED for a category. Every category route resolves
+// through torin_category_href(), which is the D-23 publish gate: an
+// unpublished category routes to its own homepage anchor instead of to a file
+// that does not exist yet, and publishing it later is one boolean flip in
+// categories.php with zero edits here. A hand-typed filename would 404 on
+// exactly the day someone published the category — the one day nobody would
+// be looking for a routing bug.
+//
+// Ported from site-current/test-laptop.html, whose four symptom sections are
+// kept intact. ONE instruction is modernised rather than ported: the source
+// tells the visitor to burn a bootable optical disc, which stopped being
+// reasonable advice a decade ago and reads as a dated site to anyone who
+// notices. The live environment now boots from a USB stick. Everything else —
+// the memory test, the temperature monitor and the 75-80 degree rule — is the
+// shop own copy and is carried over unchanged in substance.
+//
+// LANGUAGE: formal вие throughout the body. The title and the h1 keep the
+// informal ти-form because «Тествай сам» is the locked nav label (D-18) and
+// this page plus the homepage block are the only two places it survives;
+// changing it here would break the continuity between the label a visitor
+// clicks and the heading they land on.
+//
+// Working hours and phone numbers are NOT restated here — site-config.php owns
+// those facts and the footer renders them once (P-11).
+require_once(dirname(__FILE__) . '/includes/category-page.php');
+
+$torin_title = 'Тествай сам лаптопа си — диагностика · Торин';
+$torin_desc  = 'Тествай сам лаптопа си: кратки стъпки, с които да опишете проблема точно. Обадете се — диагностиката е безплатна. Заповядайте.';
+
+$torin_crumbs = array(
+	array('text' => 'Начало', 'href' => 'index.html'),
+	array('text' => 'Тествай сам своя лаптоп', 'href' => 'test-laptop.html'),
+);
+
+// The four routing destinations, each resolved through the publish gate rather
+// than named. torin_category_by_id() returns the record; torin_category_href()
+// decides whether that record is reachable as a page yet.
+$torin_test_kat2 = torin_category_href(torin_category_by_id('kat-2'));
+$torin_test_kat3 = torin_category_href(torin_category_by_id('kat-3'));
+$torin_test_kat4 = torin_category_href(torin_category_by_id('kat-4'));
+
+// «Свързани услуги» lists all six categories, built by ITERATING the records
+// rather than by listing them. Both the display name and the href come from
+// the data file, so a D-40 rename cannot strand a stale label here and
+// publishing a category needs no edit on this page at all.
+$torin_test_related = array();
+foreach ($torin_categories as $torin_test_cat) {
+	$torin_test_related[] = array(
+		'text' => $torin_test_cat['name'],
+		'href' => torin_category_href($torin_test_cat),
+	);
+}
+
+$torin_test_page = array(
+	'name'   => 'Тествай сам своя лаптоп',
+
+	// The h1 is the LOCKED label, deliberately not a keyword heading. See the
+	// language note in the head comment.
+	'h1'     => 'Тествай сам своя лаптоп',
+
+	'crumbs' => $torin_crumbs,
+
+	'intro'  => 'Това е кратка проверка, която можете да направите сами за няколко минути. Тя не заменя диагностиката, но ви дава думите, с които да опишете точно какво прави лаптопът — а колкото по-точно го опишете, толкова по-бързо ще ви кажем какво е и колко струва. Диагностиката при нас е безплатна във всички случаи, включително когато накрая ви кажем, че ремонтът не си струва.',
+
+	'blocks' => array(
+
+		array(
+			'kind'    => 'steps',
+			'heading' => 'Не се включва или не дава признаци на живот',
+			'items'   => array(
+				'Натиснете бутона за включване и вижте светват ли изобщо индикаторните лампички. Ако не светва нищо, причината обикновено е в захранващата част на дънната платка или в адаптера, кабела и буксата.',
+				'Ако лампичките светнат за миг и веднага изгаснат, запишете си това — обикновено означава късо съединение в захранващите вериги около основните чипсети.',
+				'Ако лампичките светят, но екранът остава черен, включете външен монитор. Ако на него има образ, повредата е в матрицата или в кабела към нея, а не в частта за визуализация на платката.',
+				'Ако има образ, но е много блед, погледнете екрана под ъгъл и на силна светлина — това обикновено е лампата или инверторът на матрицата.',
+				'Ако по екрана има артефакти, снимайте ги с телефона си и ни ги покажете. Ако виждате отвесни, обикновено едноцветни линии или пукнатини, матрицата е била ударена или натисната и подлежи на подмяна.',
+			),
+			'link'    => array(
+				'text' => 'Заливане и ремонт на дънни платки',
+				'href' => $torin_test_kat4,
+			),
+		),
+
+		array(
+			'kind'    => 'steps',
+			'heading' => 'Включва се, но не стига до Windows',
+			'items'   => array(
+				'Стартирайте лаптопа от USB флашка с живата версия на Ubuntu. Така проверявате самия хардуер, без да зависите от инсталираната операционна система.',
+				'Проверете паметта с MEMTEST и я оставете да завърши поне един пълен цикъл.',
+				'Проверете работните температури с HardWare Monitor, докато лаптопът е натоварен.',
+				'Спрете теста веднага, ако видите дори една температура над 75-80 градуса — на процесора, на видеокартата или на диска — и ни се обадете. Тези стойности означават, че лаптопът вече е прегрявал, без да сте забелязали.',
+				'Ако Ubuntu тръгва и паметта и температурите са наред, проблемът най-вероятно е в инсталираната операционна система или в диска, който се нуждае от подмяна.',
+				'Ако Ubuntu не тръгва, не приемайте това за окончателна диагноза. Точният тест изисква нова система на нов диск и чак след него може да се каже има ли повреда в основните чипсети.',
+				'Ако сте ползвали лаптопа в леглото, на дивана или на скута си и не сте му правили профилактика, кажете ни го — това е честа причина за трайна повреда в дънната платка.',
+			),
+			'link'    => array(
+				'text' => 'Оптимизация на лаптоп',
+				'href' => $torin_test_kat3,
+			),
+		),
+
+		array(
+			'kind'    => 'steps',
+			'heading' => 'Звук, WiFi или USB не работят',
+			'items'   => array(
+				'Стартирайте отново от USB флашката с Ubuntu и проверете работят ли звукът, безжичната мрежа и USB портовете там.',
+				'Ако не работят и под Ubuntu, повредата почти сигурно е в южния мост на дънната платка, а не в драйверите.',
+				'Ако работят под Ubuntu, а не работят под Windows, проблемът е софтуерен и се решава без разглобяване на машината.',
+				'Проверете и механично: разклатена букса за слушалки или микрофон и разхлабен USB порт се усещат с пръст и се виждат с просто око.',
+			),
+			'link'    => array(
+				'text' => 'Екран, клавиатура и портове',
+				'href' => $torin_test_kat2,
+			),
+		),
+
+		array(
+			'kind'    => 'steps',
+			'heading' => 'Батерията или зарядното',
+			'items'   => array(
+				'Ако лаптопът работи само на батерия, проверете адаптера, кабела му и буксата на захранването — това са трите най-чести причини.',
+				'Ако лаптопът работи само на адаптер и не зарежда батерията, запишете си модела. При част от моделите на DELL и HP с трипинова букса причината е самата букса или кабелът на адаптера.',
+				'Ако лаптопът работи само няколко минути на батерия, клетките са износени и пакетът подлежи на регенерация или на подмяна.',
+				'Не оставяйте изтощена батерия месеци наред в изключен лаптоп. При повторно включване тя може да поеме по-висок от нормалния заряден ток и да повреди зарядните вериги на платката.',
+				'Ако ползвате универсален адаптер с превключвател за различни напрежения, проверете на кое положение стои — превключвателят се измества дори в чантата, а по-високото напрежение обикновено е фатално за платката.',
+			),
+			'link'    => array(
+				'text' => 'Регенерация на батерии за лаптоп',
+				'href' => 'za-bateriite.html',
+			),
+		),
+	),
+
+	// No warranty_key by design — see the head comment.
+
+	'faq' => array(
+		array(
+			'q' => 'Диагностиката плаща ли се?',
+			'a' => 'Не. Диагностиката е безплатна, включително когато накрая ви кажем, че ремонтът не си струва и е по-разумно да вземете друга машина. Предпочитаме да загубим един ремонт, отколкото да ви вземем пари за платка, която няма да издържи.',
+		),
+		array(
+			'q' => 'Може ли този тест да влоши състоянието на лаптопа?',
+			'a' => 'Стъпките по-горе са проверки, а не намеси — нищо от тях не разглобява машината и не пише по диска ви. Едно правило обаче е важно: ако видите температура над 75-80 градуса, спрете теста веднага. Продължаването при такива температури е единственият начин тази проверка да навреди. Ако лаптопът е бил залят, не го включвайте изобщо и се обадете.',
+		),
+		array(
+			'q' => 'Какво да си запиша, преди да се обадя?',
+			'a' => 'Марката и модела, светват ли индикаторните лампички и колко дълго, има ли образ на екрана и какъв, тръгва ли машината от USB флашка, каква е най-високата температура, която сте видели, и какво се е случило непосредствено преди проблемът да се появи — падане, заливане, буря или смяна на батерия или адаптер. Тези няколко изречения често стигат, за да ви кажем какво да очаквате още по телефона.',
+		),
+	),
+
+	'related' => $torin_test_related,
+);
+
 require_once(dirname(__FILE__) . '/includes/header.php');
 ?>
 
-<main class="section">
-	<div class="container">
-		<h1>Тествай сам своя лаптоп</h1>
-		<p>Строим новия сайт на ТОРИН КОМПЮТЪРС тук. Тази страница е временен скелет, използван за да докаже, че PHP-include основата работи на живия хостинг.</p>
-	</div>
+<main>
+<?php torin_render_service_page($torin_test_page); ?>
 </main>
 
 <?php require_once(dirname(__FILE__) . '/includes/footer.php'); ?>
