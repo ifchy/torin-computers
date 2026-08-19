@@ -331,8 +331,9 @@
 	font-weight: var(--fw-bold);
 }
 
-/* --- Self-diagnostic feature block (D-12, DIFF-01) */
-.selftest p {
+/* --- Feature blocks: DIFF-01 self-diagnostic + DIFF-02/03. Shared rhythm. */
+.selftest p,
+.diff p {
 	margin-block-start: var(--sp-md);
 	color: var(--c-ink-muted);
 }
@@ -900,8 +901,8 @@ body:not(:has(.callbar)) {
 	font-weight: var(--fw-regular);
 }
 
-/* D-38: swapping the text node for an <img> later changes no row height and
-   no wrap point. Keep while no <img> exists — it IS the guarantee.        */
+/* D-38: an <img> here later changes no row height and no wrap point. Keep
+   while none exists — it IS the guarantee.                                */
 .brand-row__item > img {
 	display: block;
 	max-height: 24px;
@@ -965,7 +966,6 @@ body:not(:has(.callbar)) {
 	font-weight: var(--fw-bold);
 }
 
-/* Not optional: a link announced as "4,8" alone fails WCAG 2.4.4.        */
 .rating-badge__label {
 	font-size: var(--fs-body);
 	font-weight: var(--fw-regular);
