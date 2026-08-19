@@ -1,20 +1,182 @@
 <?php
-// Per-page metadata (02-RESEARCH N-5). WORKING title and description carrying
-// the mechanism, derived from this page's existing subject; SEO-01 in Phase 3
-// owns the search-tuned copy, and CONTENT-01 owns the body below.
+// Профилактика — the ONE page for this service (D-28), rendered through the
+// generalized service-page template (includes/category-page.php) and authored
+// to the D3-14 Definition of Done.
 //
-// D-28: this is the ONE профилактика page. Categories 3 and 5 cross-list it as
-// a link, never as duplicated content — one URL, one canonical.
-$torin_title = 'Профилактика на лаптоп · ТОРИН КОМПЮТЪРС';
-$torin_desc  = 'Профилактика на лаптоп — почистване от прах и смяна на термопаста срещу прегряване.';
+// It carries no cat_id: профилактика is not one of the six owner-priority
+// categories, it is the service that categories 3 and 5 cross-list into as a
+// LINK. One URL, one canonical, no duplicated body copy — cross-listing by
+// link is the whole point of D-28, and the internal link from a second topical
+// context is the benefit.
+//
+// This page has a SECOND job: it is DIFF-03 depth. The strongest evidence the
+// shop has — its own reflow equipment, its flux, and photographs of what the
+// amateur method does to a board — has always been buried on a page about
+// cleaning. The homepage now carries a condensed DIFF-03 summary block and
+// hands off HERE. That block is deliberately NOT restated below: an automated
+// check asserts that no sentence over 90 characters is shared verbatim between
+// the two files, because two differently-worded copies of the same claim is
+// how a shop ends up contradicting itself, and two identical ones is how two
+// pages compete for the same query.
+//
+// Ported from site-current/profilaktika-laptop.html:361 (the three soldering
+// methods, uneven heating, damaged contact pads, short-lived results), :380
+// (melted plastic components), :398 (the German machine whose infrared heat
+// source is outside the visible spectrum, and the know-how caveat), :411 (the
+// AMTECH flux, the software profiles, the cooling-system reinforcement, the
+// up-to-10-degree figure and the 90 percent rate), plus
+// site-current/index.html:563-576 (the profilaktika service list) and
+// site-current/warrently.html:120 (the soft contact pads replaced with
+// aluminium or copper plates). Every figure is quoted at the strength the
+// source states it and NOTHING is amplified: no certification is claimed, no
+// exclusivity is claimed, and the durability rate is attributed as the shop
+// own measured experience rather than as a guarantee.
+//
+// THE WORKING-HOURS SENTENCE IS DELIBERATELY NOT PORTED (RESEARCH P-11). The
+// source page states hours that DISAGREE with the value the rest of this tree
+// renders. Hours are a footer fact with exactly one writer: the hours key in
+// includes/site-config.php, which the footer and jsonld.php both read. A
+// second copy here would be a second writer, and a second writer is precisely
+// the drift that produced the disagreement in the first place. Phone numbers
+// are omitted for the same reason.
+require_once(dirname(__FILE__) . '/includes/category-page.php');
+
+$torin_title = 'Профилактика на лаптоп и реболинг на чипове · Торин';
+$torin_desc  = 'Профилактика на лаптоп в София — обадете се за безплатна диагностика. Почистваме охлаждането и сменяме термопастата. Заповядайте.';
+
+$torin_crumbs = array(
+	array('text' => 'Начало', 'href' => 'index.html'),
+	array('text' => 'Профилактика на лаптоп', 'href' => 'profilaktika-laptop.html'),
+);
+
+// Both category routes resolve through the D-23 publish gate. Category 5 is
+// still unpublished, so its link lands on its own homepage anchor rather than
+// on a file that does not exist yet; flipping the boolean in categories.php
+// later needs no edit here.
+// The display NAMES come from the same records, never retyped here, so a D-40
+// rename cannot leave a stale label behind on this page.
+$torin_prof_kat3 = torin_category_by_id('kat-3');
+$torin_prof_kat5 = torin_category_by_id('kat-5');
+
+$torin_prof_page = array(
+	'name'   => 'Профилактика на лаптоп',
+
+	// 30 characters — comfortably inside the 48-character cap.
+	'h1'     => 'Профилактика на лаптоп в София',
+
+	'crumbs' => $torin_crumbs,
+
+	'intro'  => 'Профилактиката е почистване и измиване на охладителната система, смяна на термопастата и проверка на топлоотвеждащите тръби. Звучи дребно, но е единствената работа по един лаптоп, която предотвратява останалите: прахът в радиатора вдига работните температури, високите температури отлепят чипсетите от дънната платка, а отлепеният чипсет е вече ремонт на ниво чип. Най-евтиният ремонт е този, който не се е наложил.',
+
+	// Three of the shop own photographs, ported into src/img/repairs/. The w/h
+	// values are each FILE true intrinsic pixels, read off the files
+	// themselves — they are not the display size, which CSS fixes at 100x100,
+	// and they are what reserves the box before the bytes arrive.
+	//
+	// Each caption says what the photograph PROVES. The middle one is an
+	// extreme magnification of four contact pads, two of them visibly torn —
+	// it is the single clearest piece of evidence on this page and the reason
+	// the callout below is not just an opinion about a tool.
+	'evidence' => array(
+		array('file' => 'profilaktika17.jpg', 'w' => '200', 'h' => '200', 'caption' => 'Инфрачервена станция за реболинг на BGA чипове'),
+		array('file' => 'profilaktika14.jpg', 'w' => '200', 'h' => '200', 'caption' => 'Контактни падове на чип, увредени при неравномерно нагряване'),
+		array('file' => 'profilaktika15.jpg', 'w' => '200', 'h' => '200', 'caption' => 'Повреда от нагряване с пистолет за горещ въздух'),
+	),
+
+	'fixes'  => array(
+		array('text' => 'Почистване и измиване на охладителната система'),
+		array('text' => 'Смяна на термопастата на процесора и основните чипсети'),
+		array('text' => 'Подмяна на меките контактни гуми с алуминиеви или медни пластини'),
+		array('text' => 'Смяна на вентилатор и на смазката на въртящите елементи'),
+		array('text' => 'Подсилване на охлаждането след ремонт на ниво чип'),
+	),
+
+	'blocks' => array(
+
+		array(
+			'kind'    => 'prose',
+			'heading' => 'С какво работим',
+			'items'   => array(
+				'Машината, с която запояваме чипсети, е с инфрачервен източник на топлина в невидимата за окото област. Това има две последици: платката се загрява равномерно и без светлинен удар, а човекът, който работи с нея, не е изложен на видимо излъчване. Попитахме производителя как точно работи този източник и получихме кратък отговор — това е know-how на германската фирма производител. Не твърдим повече от това, защото и на нас не ни е казано повече.',
+				'Машината се управлява от компютърен софтуер с предварително зададени профили според производителя и качеството на платката, така че всяка платка получава температурния режим, за който е проектирана. Другото, което определя резултата, са консумативите. Най-важният от тях е флюсът — той обуславя средата, в която се извършва запояването — и ние използваме флюс на американската фирма AMTECH.',
+			),
+		),
+
+		array(
+			'kind'    => 'callout',
+			'heading' => 'Защо пистолетът за горещ въздух е проблем',
+			'items'   => array(
+				'Най-разпространеният у нас начин за сваляне и поставяне на чип е пистолетът за горещ въздух. Той е достъпен и всеки може да си купи такъв, но не създава равномерна температура. Резултатът е локално прегряване: или самият чип се поврежда вътрешно, или се разрушават контактните падове под него — вижте втората снимка по-горе, тя е реално увеличение на четири пада, два от които вече са увредени. Платка с разрушени падове се нуждае от нов чип, който често струва повече от целия ремонт.',
+				'Второто, което горещият въздух прави, е да стопява пластмасовите детайли около зоната на работа — конектори, гнезда, водачи. Това не се случва с инфрачервен източник, който щади пластмасата. И третото: дори когато ремонтът тръгне, той обикновено е краткотраен, защото топченцата под чипа не са се стопили равномерно. Ако някой ви е ремонтирал платка по този начин и тя е издържала няколко седмици, сега знаете защо.',
+			),
+			'link'    => array(
+				'text' => 'Ремонт на дънни платки',
+				'href' => 'zalivane-technosti.html',
+			),
+		),
+
+		array(
+			'kind'    => 'prose',
+			'heading' => 'Какво постигаме',
+			'items'   => array(
+				'След като залепим чипсета, подсилваме охладителната система, вместо да я върнем както си е била — иначе същата температура ще доведе до същата повреда. Измерено на машините, които минават през нас, това дава до 10 градуса по-ниски работни температури.',
+				'При тези ремонти достигаме 90 процента успеваемост и устойчивост на ремонта във времето. Това е нашият собствен резултат, натрупан от машините, по които сме работили, а не гаранция — и точно затова гаранционният срок по-долу е срок, а не процент. Има и случаи, в които процедурата не може да се извърши: при нискокачествени многослойни платки вътрешните напрежения между слоевете надуват платката при нагряване, а трайно прегрелите чипсети имат микропукнатини и подлежат само на подмяна.',
+			),
+		),
+	),
+
+	// A KEY, never a literal: the term lives once, in site-config.php, and this
+	// page renders the same service warranty every other repair page renders.
+	// The longer battery term is a different entry in the same set, selected by
+	// za-bateriite.html — the set is what stops the two contradicting.
+	'warranty_key' => 'default',
+
+	'process' => array(
+		'Приемаме лаптопа и ви питаме как се държи под натоварване — рестартира ли, забива ли, шуми ли вентилаторът повече от преди.',
+		'Разглобяваме машината и оценяваме състоянието на охладителната система, преди да пипнем каквото и да е.',
+		'Почистваме и измиваме радиатора и вентилатора и сменяме смазката на въртящите елементи, ако се налага.',
+		'Проверяваме ефективността на топлоотвеждащите тръби — задръстеният радиатор е честият проблем, но не е единственият.',
+		'Сменяме термопастата на процесора и на основните чипсети, а меките контактни гуми подменяме с алуминиеви или медни пластини, които не стареят.',
+		'Тестваме машината под натоварване и ви показваме работните температури след профилактиката.',
+	),
+
+	'faq' => array(
+		array(
+			'q' => 'През колко време се прави профилактика?',
+			'a' => 'Веднъж годишно е разумното правило, а при част от машините — на всеки шест месеца. Лаптопът акумулира прах като магнит дори в чиста стая. Има и втора причина да не се чака: охладителната система остарява. Производителят я оразмерява с известен запас, така че нова тя охлажда добре дори когато е задръстена на 30-40 процента, но този запас намалява с всяка година. Затова една и съща машина след пет години се нуждае от по-често почистване, отколкото е било нужно в началото.',
+		),
+		array(
+			'q' => 'Лаптопът вече се изключва сам под натоварване. Ще помогне ли профилактика?',
+			'a' => 'Понякога да, понякога вече не. Изключването под натоварване е защитна реакция срещу висока температура и ако причината е само задръстено охлаждане, профилактиката го решава. Ако обаче прегряването е продължило дълго, чипсетът може вече да се е отлепил от платката, а това е ремонт на ниво чип, не почистване. Разликата се вижда на диагностиката, която е безплатна — не я гадаем по телефона.',
+		),
+		array(
+			'q' => 'Ползвам лаптопа в леглото или на скута си. Има ли значение?',
+			'a' => 'Има, и е една от най-честите причини да ни донесат машина. Меката повърхност затваря отворите, през които влиза студен въздух, и охладителната система работи срещу самата себе си. Ако ползвате лаптопа така, кажете ни го при приемането — това променя какво очакваме да намерим вътре.',
+		),
+		array(
+			'q' => 'Колко време отнема профилактиката?',
+			'a' => 'Обикновено е въпрос на часове, а не на дни, ако не се наложи допълнителна работа. Точният срок ви казваме след като разглобим машината и видим състоянието на охладителната система, а не преди това.',
+		),
+		array(
+			'q' => 'Пуша в стаята, в която работя. Това променя ли нещо?',
+			'a' => 'Да. При потребители пушачи радиаторът се запълва не само с прах, а с лепкав налеп, който не се издухва и изисква измиване на цялата охладителна система. Ако това важи за вас, го кажете — предпочитаме да го знаем предварително.',
+		),
+	),
+
+	'related' => array(
+		array('text' => $torin_prof_kat3['name'], 'href' => torin_category_href($torin_prof_kat3)),
+		array('text' => $torin_prof_kat5['name'], 'href' => torin_category_href($torin_prof_kat5)),
+		array('text' => 'Ремонт на залят лаптоп и дънни платки', 'href' => 'zalivane-technosti.html'),
+	),
+
+	// 'prices' is deliberately NOT set (D3-06, PRICE-01 is v2).
+);
+
 require_once(dirname(__FILE__) . '/includes/header.php');
 ?>
 
-<main class="section">
-	<div class="container">
-		<h1>Профилактика на лаптоп</h1>
-		<p>Строим новия сайт на ТОРИН КОМПЮТЪРС тук. Тази страница е временен скелет, използван за да докаже, че PHP-include основата работи на живия хостинг.</p>
-	</div>
+<main>
+<?php torin_render_service_page($torin_prof_page); ?>
 </main>
 
 <?php require_once(dirname(__FILE__) . '/includes/footer.php'); ?>
