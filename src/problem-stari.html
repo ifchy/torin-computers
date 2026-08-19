@@ -1,22 +1,192 @@
 <?php
-// Per-page metadata (02-RESEARCH N-5). WORKING title and description carrying
-// the mechanism, derived from this page's existing subject; SEO-01 in Phase 3
-// owns the search-tuned copy, and CONTENT-01 owns the body below.
+// Category 6 («категория 6» in the record set) rendered through the
+// generalized service-page renderer, authored to D3-14.
 //
-// This page stays LIVE pending explicit owner sign-off on its disposition.
-// SEO-04 locks the filename; an unreviewed retirement during a design pass
-// forfeits ranking that took years to accumulate and is invisible in every
-// design review. Any later retirement must be a 301, never a bare 404 (D-36).
-$torin_title = 'Чести проблеми · ТОРИН КОМПЮТЪРС';
-$torin_desc  = 'Проблеми с нискокачествени и стари батерии или адаптори за лаптоп.';
+// WHY THIS FILE CARRIES REAL CONTENT WHILE THE CATEGORY STAYS UNPUBLISHED.
+// D3-05 assigns category 6 to this URL because the slug reads as «стари» and
+// the record symptom line matches. The URL is ALREADY INDEXED and will serve
+// whatever is in this tree at cutover, so leaving a stub here is the damaging
+// option rather than the cautious one. The category PROMOTION is what stays
+// gated: `published` is still false in categories.php, so the six-card grid
+// and the navigation route to the homepage anchor and nobody is sold a
+// headline service whose scope nobody has confirmed. Publishing later is ONE
+// boolean flip in categories.php — no edit is needed in this file.
+//
+// SCOPE HONESTY — read this before adding a sentence here.
+// OWNER-QUESTIONS #3 is launch-blocking and OPEN. There is not one sentence
+// about non-standard equipment anywhere on the current site, so nothing about
+// what this category actually covers can be inferred. Every claim below is
+// therefore restricted to what is PROVABLE from existing site content: the
+// board-level and power-circuit capability the shop already advertises, the
+// free assessment it already promises, and the old-battery/adapter material
+// this URL itself already carried. Nothing about equipment types, example
+// jobs, out-of-scope limits, pricing or turnaround is written here, because
+// none of it exists in any source — see 03-05-SUMMARY.md, which lists each
+// gap against #3a-#3f so the copy can be dropped in without re-deriving what
+// was missing. Do not fill a gap with something that merely reads plausibly:
+// a fabricated repair claim is acted on by a customer.
+//
+// WHAT HAPPENED TO THE PREVIOUS CONTENT OF THIS FILE (RESEARCH P-8).
+// site-current/problem-stari.html carried a long, genuinely expert article on
+// the Charger and StandBy board sections and how low-quality batteries and
+// adapters damage them. The board-theory half now lives on the category-4
+// depth page, placed there by plan 03-01. The OLD-EQUIPMENT half — deep
+// discharge, aged cells, aftermarket packs, universal adapters with a voltage
+// switch — stays here, below. Nothing is destroyed; the legacy file itself is
+// untouched in site-current/. The jack-side share is a named carryover
+// obligation on plan 03-07.
+//
+// The legacy article closed with a pointer to a specialist battery site that
+// no longer resolves. Per D3-12 that pointer is dropped rather than ported;
+// the domain is deliberately not spelled anywhere in this tree, because a
+// grep gate over src/ is what enforces the rule and a comment naming it would
+// trip its own gate.
+//
+// Every string below is either PORTED from site-current/problem-stari.html
+// lines 148-155 or derived from capability the site already states. Legacy
+// MARKUP is left behind (P-9). Working hours, phones and the address are NOT
+// restated here; site-config.php owns those facts (P-11).
+require_once(dirname(__FILE__) . '/includes/category-page.php');
+
+$torin_cat = torin_category_by_id('kat-6');
+
+// Per-page metadata. The title is a LITERAL, decoupled from the record name:
+// a category name is a navigation label, a title is the first line of a
+// search result (D3-14). The h1 below is an explicit override for the same
+// reason.
+$torin_title = 'Ремонт на стара и нестандартна техника · Торин';
+$torin_desc  = 'Ремонт на стара и нестандартна техника в София — работа по дънни платки и захранващи вериги на ниво чип. Обадете се за безплатна оценка.';
+
+// Assigned ONCE and read twice: the renderer draws the visible chain and
+// jsonld.php emits the matching BreadcrumbList from the same array.
+$torin_crumbs = array(
+	array('text' => 'Начало', 'href' => 'index.html'),
+	array('text' => $torin_cat['name'], 'href' => $torin_cat['page']),
+);
+
+$torin_cat_page = array(
+	// The display name and the symptom line come from the record, never
+	// retyped here, so a D-40 rename cannot strand a stale name on the page.
+	'cat_id' => 'kat-6',
+
+	// 38 characters, inside the 48-character cap.
+	'h1'     => 'Ремонт на стара и нестандартна техника',
+
+	'crumbs' => $torin_crumbs,
+
+	// Provable content only: the board-level capability and the free
+	// assessment are both already stated elsewhere on the site. The intro
+	// deliberately does NOT name device classes — see the scope note above.
+	'intro'  => 'Техника, която е на години, вече не се произвежда или просто не е масова, често се връща от сервиз с отговора, че за нея няма части. Ние работим по самата платка, а не по каталожния номер на модела: ремонтираме захранващи вериги и подменяме отделни дефектирали компоненти на ниво чип. Затова в част от случаите има какво да се направи и след като другаде са отказали. Оценката е безплатна и ви казваме честно какво виждаме.',
+
+	// [ASSUMED] — OWNER-QUESTIONS #3b. Each capability below is PROVABLE for
+	// the equipment the site already describes; what is ASSUMED is that the
+	// same work is offered on the equipment class this category names, since
+	// the shop has not yet described that class at all. This list is DRAFTED,
+	// not confirmed, and must not be quoted back to anyone as a description
+	// the shop itself gave of its services. It is deliberately short: the
+	// longer draft in the plan named capabilities no source supports, and
+	// those were omitted rather than guessed.
+	'fixes'  => array(
+		array('text' => 'Ремонт на захранващи вериги'),
+		array('text' => 'Подмяна на дефектирали компоненти по платката'),
+		array('text' => 'Ремонт на ниво чип по дънни платки'),
+		array('text' => 'Безплатна оценка на техника, за която другаде са отказали'),
+	),
+
+	'blocks' => array(
+
+		// PORTED from site-current/problem-stari.html:148 and :150 — the
+		// old-equipment consequences. The Charger/StandBy board explainer
+		// itself is NOT repeated here; it belongs to the category-4 page.
+		array(
+			'kind'    => 'prose',
+			'heading' => 'Защо старите захранващи вериги отказват',
+			'items'   => array(
+				'Батерия, която е престояла дълго в изключена машина, е основният виновник. Ако техниката не е ползвана месеци наред, а батерията е останала вътре и вече е поизносена, напрежението на елементите ѝ пада до критичните нива или под тях. При повторно захранване тя може да поеме заряден ток, по-висок от нормалния, и точно този ток поврежда зарядната верига. Производителят на платката би трябвало да е предвидил случая още при проектирането, но на практика това се случва, а при някои модели значително по-често.',
+				'Евтините заместващи батерии носят същия риск по същата причина. Пакетите, произведени отдавна или с нискокачествени клетки и електроника, обикновено се разпознават по ниската цена, а клетките им често стоят около или под критичното напрежение още преди да бъдат поставени. При дефект в собствената им електроника токът може да стигне до стопяване на корпуса. Ако техниката е спряла да работи скоро след смяна на батерия или адаптер, това е първото място, което проверяваме.',
+			),
+		),
+
+		// PORTED from site-current/problem-stari.html:155, kept as a callout
+		// because it is the one item on this page a reader can act on before
+		// anything breaks. Links to the surge page, which covers the rest.
+		array(
+			'kind'    => 'callout',
+			'heading' => 'Универсалните адаптори с превключвател',
+			'items'   => array(
+				'Адаптор с ръчен превключвател за различни изходни напрежения е най-опасната вещ, която може да се включи в стара техника. Превключвателят се измества сам — в чантата, при разместване на кабела, а с любопитно дете вкъщи това се случва редовно. По-високото напрежение обикновено е фатално и има реален шанс платката да не подлежи повече на ремонт.',
+				'При техника, на която изискваното напрежение вече не е отпечатано никъде и не се намира в документация, рискът е двоен: няма как да проверите дали превключвателят стои където трябва. Ако сте купували адаптор по надписа върху него, имайте предвид, че върху нискокачествените изделия написаната мощност често не отговаря на истината.',
+			),
+			'link'    => array(
+				'text' => 'Повреди от токов удар и захранване',
+				'href' => 'tokov-udar.html',
+			),
+		),
+	),
+
+	// A KEY, never a literal — the term lives once, in site-config.php.
+	// [ASSUMED] that the shared term applies to this category on the same
+	// conditions: OWNER-QUESTIONS #23 explicitly asks whether warranty terms
+	// vary by type of work, and #3e asks the same question for this category
+	// specifically. Both are open.
+	'warranty_key' => 'default',
+
+	// Only steps the site already promises are described here. Nothing about
+	// sourcing obsolete parts or turnaround appears, because those are #3b
+	// and #3e and neither has an answer.
+	'process' => array(
+		'Донасяте техниката и ни описвате какво прави и какво се е случило преди това. Ако някой вече я е гледал, кажете и това — спестява повторна работа.',
+		'Оценяваме я безплатно. Разглобяваме и гледаме платката под увеличение, включително захранващата ѝ част, където повредите не се виждат отвън.',
+		'Обаждаме се с това, което сме намерили, и с цената, преди да продължим. Не започваме платен ремонт, без да сте се съгласили.',
+		'Ако прегледът покаже, че ремонтът не си струва, ви го казваме направо и обясняваме защо. Оценката остава безплатна и в този случай.',
+		'Ремонтираме, тестваме в реален работен режим и ви връщаме техниката.',
+	),
+
+	'faq' => array(
+		array(
+			// [ASSUMED] — OWNER-QUESTIONS #3a. The answer deliberately does
+			// NOT claim which device classes are accepted, because no source
+			// states any. It routes the visitor to the one place where a real
+			// answer exists today, which is a phone call.
+			'q' => 'Приемате ли техника, която не е лаптоп или компютър?',
+			'a' => 'Обадете се и опишете накратко устройството — какво е, на колко години е и какво прави. Казваме ви веднага дали има смисъл да го носите, вместо да пътувате напразно. Този разговор не ви ангажира с нищо.',
+		),
+		array(
+			'q' => 'Може ли да се ремонтира техника, за която вече не се произвеждат части?',
+			'a' => 'Понякога да. Работата на ниво чип най-често означава да бъде възстановен съществуващият възел, а не да бъде подменен с нов — а точно подмяната е тази, която опира до наличност на части. Когато все пак е нужен конкретен компонент и той не се намира, ви го казваме след прегледа, а не след като сме започнали.',
+		),
+		array(
+			'q' => 'Какво става, ако техниката не подлежи на ремонт?',
+			'a' => 'Казваме ви го и обясняваме какво точно е повредено. Не плащате за преглед, който е завършил с отказ — предпочитаме да загубим един ремонт, отколкото да вземем пари за нещо, което няма да издържи.',
+		),
+		array(
+			'q' => 'Как определяте цената?',
+			'a' => 'След прегледа, не преди него. Обаждаме се с диагнозата и с цената и продължаваме само ако се съгласите. При по-стара техника това е особено важно, защото цената на ремонта понякога надхвърля стойността на самото устройство и това е решение, което вземате вие.',
+		),
+	),
+
+	'related' => array(
+		array('text' => 'Заливане и ремонт на дънни платки', 'href' => 'zalivane-technosti.html'),
+		array('text' => 'Повреди от токов удар', 'href' => 'tokov-udar.html'),
+		array('text' => 'Батерии и регенериране', 'href' => 'za-bateriite.html'),
+	),
+
+	// 'evidence' is deliberately NOT set. src/img/repairs/ carries stari1-3,
+	// but those photographs illustrate battery and adapter defects, which is
+	// the ported material on this page rather than proof of work on the
+	// equipment class the category names. Using them here would let a reader read them
+	// as evidence of category-6 jobs. OWNER-QUESTIONS #3d asks for real
+	// photographs of such jobs; until they exist the strip stays off.
+	//
+	// 'prices' is deliberately NOT set (D3-06, PRICE-01 is v2).
+);
+
 require_once(dirname(__FILE__) . '/includes/header.php');
 ?>
 
-<main class="section">
-	<div class="container">
-		<h1>Чести проблеми</h1>
-		<p>Строим новия сайт на ТОРИН КОМПЮТЪРС тук. Тази страница е временен скелет, използван за да докаже, че PHP-include основата работи на живия хостинг.</p>
-	</div>
+<main>
+<?php torin_render_service_page($torin_cat_page); ?>
 </main>
 
 <?php require_once(dirname(__FILE__) . '/includes/footer.php'); ?>
