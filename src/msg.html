@@ -1,17 +1,46 @@
 <?php
-// Per-page metadata (02-RESEARCH N-5). WORKING title and description carrying
-// the mechanism, derived from this page's existing subject; SEO-01 in Phase 3
-// owns the search-tuned copy, and CONTENT-01 owns the body below.
-$torin_title = 'Съобщение · ТОРИН КОМПЮТЪРС';
-$torin_desc  = 'Съобщението до ТОРИН КОМПЮТЪРС е изпратено успешно.';
+// msg.html — the destination the contact form posts through to. A confirmation
+// page, not a content page: it exists to tell someone that the thing they just
+// did worked, and to give them the faster route if they cannot wait.
+//
+// Ported from site-current/msg.html:106-110. The one substantive sentence there
+// — that a missing reply within one working day means the address or phone was
+// mistyped, and to call again — is genuinely useful and is kept. Its
+// exclamation mark is dropped per the phase copy rules.
+//
+// WORKING HOURS AND PHONE NUMBERS ARE NOT RESTATED HERE. site-config.php owns
+// both and footer.php renders them at the bottom of this very page; a second
+// copy in the body is exactly the duplication the shared config exists to
+// prevent, and it is the copy that would be forgotten when the hours change.
+// The sentence below points at that value instead of repeating it.
+//
+// Phase 4 (CONTACT-01…04) owns the form itself. If that work changes what
+// actually happens on submit — a queue, a delay, an autoresponder — this page
+// is the sentence that has to change with it, and uslovia.html carries the
+// retention commitment it must not contradict.
+$torin_title = 'Съобщението е изпратено · Торин';
+$torin_desc  = 'Съобщението ви до Торин Компютърс е изпратено. Отговаряме в работното време на сервиза.';
 require_once(dirname(__FILE__) . '/includes/header.php');
 ?>
 
-<main class="section">
-	<div class="container">
-		<h1>Съобщение</h1>
-		<p>Строим новия сайт на ТОРИН КОМПЮТЪРС тук. Тази страница е временен скелет, използван за да докаже, че PHP-include основата работи на живия хостинг.</p>
-	</div>
+<main>
+	<section class="section">
+		<div class="container">
+			<h1>Съобщението е изпратено</h1>
+			<p class="svc__intro">Получихме съобщението ви и ще се свържем с вас в работното време на сервиза — телефоните и часовете са в долната част на страницата.</p>
+		</div>
+	</section>
+
+	<section class="section section--tint svc__blocks">
+		<div class="container">
+			<div class="svc__block svc__block--prose">
+				<h2>Ако въпросът не търпи отлагане</h2>
+				<p>Обаждането е най-бързият начин да получите отговор — по телефона ще ви кажем веднага какво предполагаме и какво да направите междувременно.</p>
+				<p>Ако не получите съобщение или обаждане до един работен ден, най-вероятно имейлът или телефонът са въведени сгрешени. Тогава ни потърсете отново.</p>
+				<p><a class="btn btn--secondary" href="index.html">Към началната страница</a></p>
+			</div>
+		</div>
+	</section>
 </main>
 
 <?php require_once(dirname(__FILE__) . '/includes/footer.php'); ?>
