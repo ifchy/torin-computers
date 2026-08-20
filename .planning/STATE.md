@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 03
 current_phase_name: content-trust-signal-build-out
 status: executing
-stopped_at: Phase 03 Waves 1-2 complete and live-verified; next is Wave 3
+stopped_at: Phase 03 Wave 3 interrupted by session quota; 03-05 merged, 03-04/03-06 partial, 03-03 awaiting slug amendment
 last_updated: "2026-08-18T00:00:00.000Z"
-last_activity: 2026-08-19
-last_activity_desc: 03-02 live-verified PASS both viewports; CSS budget resolved
+last_activity: 2026-08-20
+last_activity_desc: Wave 3: 03-05 merged; 03-04/03-06 hit session quota mid-plan
 progress:
   total_phases: 3
   completed_phases: 2
   total_plans: 23
-  completed_plans: 16
+  completed_plans: 17
 ---
 
 # Project State
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-08-04)
 ## Current Position
 
 Phase: 03 (content-trust-signal-build-out) — EXECUTING
-Plan: 2 of 9 complete and live-verified; next is Wave 3 (03-03/04/05/06)
+Plan: 3 of 9 complete (03-01, 03-02 live-verified; 03-05 merged, unverified). Wave 3 interrupted by quota.
 Status: Executing Phase 03
 Last activity: 2026-08-18 — 03-01 deployed to staging and verified PASS at both viewports
 
@@ -125,6 +125,12 @@ Recent decisions affecting current work:
 - [Phase 3]: 03-02: Google rating badge is built and gated OFF (`gbp_badge_enabled => false` in site-config.php) plus an emptiness safety net. Enabling needs a boolean flip plus THREE values, not two — the Google Business Profile URL has never been captured in this repo.
 - [Phase 3]: 03-02: plan-named DIFF photos were wrong — profilaktika3 is a dust-clogged heatsink not the infrared station, and baterry.jpg/baterry2.jpg are schematic diagrams unreadable at a 100x100 crop. profilaktika6.jpg is a GIF wearing a .jpg extension.
 - [Phase 3]: 03-02: photo port used `jpegtran -copy none -optimize`, not the plan's `sips -q80` which would have INFLATED the set by 147 KB and added a second lossy generation.
+
+- [Phase 3]: OWNER DECISION 2026-08-20 — the site prefers «екран» over «матрица» in customer-facing text. Child slug becomes `smyana-na-ekran.html`, NOT `smyana-na-matrica.html`. Rule for executors: customer-facing titles, h1s, nav labels, meta descriptions and body prose use «екран»; «матрица» is retained ONLY where it is the more precise term — the bare LCD panel as a part (distinct from the whole lid/screen assembly), part specifications, and where a customer arrives repeating another shop's wording. Best practice is to introduce «матрица» once on the screen page as a synonym so BOTH terms are present for search, while «екран» carries the headings. Note the live site currently uses матриц- 14x vs екран 5x, so this reverses existing usage deliberately.
+- [Phase 3]: 03-05: category 6 shipped with ZERO invented claims and its promotion gated on a boolean. The out-of-scope section was deliberately OMITTED rather than guessed — that is the gap with the highest operational cost, since the page generates enquiries with nothing steering the wrong ones away. Six gaps tabulated in 03-05-SUMMARY keyed to OWNER-QUESTIONS #3a-#3f, plus four [ASSUMED] service strings for item-by-item confirmation.
+- [Phase 3]: 03-05: the battery/adapter article was never at risk — src/problem-stari.html was a Phase-2 stub; the real article lives in site-current/problem-stari.html, untouched. Its content is now split across four locations by design.
+- [Phase 3]: 03-05 found Task 3's live gates self-contradictory: it demanded the footer covid.html link survive AND the live homepage return zero BG16RFOP matches, but footer.php renders on the homepage and its link text is literally «Проект BG16RFOP002-2.073». Regated on stated intent (no EU content outside the footer legal line).
+- [Phase 3]: 03-05 raised the «Венера-АКС ООД» copy-paste error as OWNER-QUESTIONS #28 — note a numbering collision is possible, the orchestrator already filed #25-#27 concurrently. Reconcile at merge.
 
 ### Pending Todos
 

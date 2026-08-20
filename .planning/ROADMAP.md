@@ -110,7 +110,7 @@ Plans:
   5. A visitor sees dedicated content for the non-standard-electrical-equipment category as one of the six headline services, and no longer sees EU-project/COVID content competing for attention on the homepage.
   6. Every page has a unique `<title>` and `<meta name="description">` that accurately reflects its own content, replacing the current identical/empty values across all 16 pages.
 
-**Plans**: 2/9 plans executed
+**Plans**: 3/9 plans executed
 
 Plans:
 **Wave 1**
@@ -125,7 +125,7 @@ Plans:
 
 - [ ] 03-03-PLAN.md — Split category 2 into a routing hub plus five children; ship the hub and the first two
 - [ ] 03-04-PLAN.md — The three differentiator depth pages: battery regeneration, self-diagnostic routing, chip-level repair evidence
-- [ ] 03-05-PLAN.md — Category 6 on its existing indexed URL, the surge-damage page, and About with the EU disclosure relocated off the homepage
+- [x] 03-05-PLAN.md — Category 6 on its existing indexed URL, the surge-damage page, and About with the EU disclosure relocated off the homepage
 - [ ] 03-06-PLAN.md — Port the six legal and utility pages, fixing what is visibly wrong and leaving the compliance text alone
 
 **Wave 4** *(blocked on Wave 3 completion)*
@@ -167,5 +167,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 |-------|----------------|--------|-----------|
 | 1. Migration Safety Net & Foundation | 5/5 | Complete    | 2026-08-05 |
 | 2. Design System & Information Architecture | 9/9 | Complete    | 2026-08-09 |
-| 3. Content & Trust-Signal Build-Out | 2/9 | In Progress|  |
+| 3. Content & Trust-Signal Build-Out | 3/9 | In Progress|  |
 | 4. Hardening & Cutover | 0/TBD | Not started | - |
