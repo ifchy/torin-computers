@@ -1,17 +1,53 @@
 <?php
-// Per-page metadata (02-RESEARCH N-5). WORKING title and description carrying
-// the mechanism, derived from this page's existing subject; SEO-01 in Phase 3
-// owns the search-tuned copy, and CONTENT-01 owns the body below.
-$torin_title = 'Употребявани лаптопи · ТОРИН КОМПЮТЪРС';
-$torin_desc  = 'Употребявани лаптопи от ТОРИН КОМПЮТЪРС — обадете се за актуални наличности.';
+// laptopi.html — the used-laptop sales page, ported thin and honest.
+//
+// [ASSUMED] — THE WHOLE PAGE. OWNER-QUESTIONS #15 asks whether the sales line
+// is still active at all, whether any stock shown is current, whether prices
+// should appear, and whether the line deserves navigation prominence. It is
+// OPEN. Nothing below claims stock, a price, a delivery time or a warranty
+// term, because a page that implies a stocked catalogue for a business line
+// nobody has confirmed is running turns a visitor into someone who arrives and
+// is told no. The honest form of an unconfirmed availability is an invitation
+// to call and confirm, and that is what this page is.
+//
+// If #15 comes back saying the sales line is dormant, this page becomes a
+// RETIREMENT CANDIDATE — but retiring it is an owner decision and a Phase 4
+// cutover question, not something to act on here. The URL is indexed and D3-01
+// keeps every one of the sixteen locked URLs, so the page is ported rather than
+// deleted. A retirement, if it ever happens, is a 301 and never a 404 (D-36).
+//
+// The page is deliberately NOT padded to the 600-word service-page bar. That
+// bar is D3-14 and it applies to service pages; inflating this one would be
+// writing around the absence of an answer.
+//
+// The legacy source is a jQuery carousel of machines behind a heading that
+// already said «обадете се за наличности» — the framing below is the legacy
+// page itself, minus the carousel and minus the retyped phone numbers and
+// address it carried in its hero. site-config.php owns those and footer.php
+// renders them at the bottom of this page.
+$torin_title = 'Употребявани лаптопи · Торин';
+$torin_desc  = 'Употребявани лаптопи в Торин Компютърс — какво има в момента се променя, затова се обадете и ще проверим заедно какво ви върши работа.';
 require_once(dirname(__FILE__) . '/includes/header.php');
 ?>
 
-<main class="section">
-	<div class="container">
-		<h1>Употребявани лаптопи</h1>
-		<p>Строим новия сайт на ТОРИН КОМПЮТЪРС тук. Тази страница е временен скелет, използван за да докаже, че PHP-include основата работи на живия хостинг.</p>
-	</div>
+<main>
+	<section class="section">
+		<div class="container">
+			<h1>Употребявани лаптопи</h1>
+			<p class="svc__intro">През сервиза минават и употребявани машини. Какво има в момента се променя от седмица на седмица, затова тук няма списък — има телефон.</p>
+		</div>
+	</section>
+
+	<section class="section section--tint svc__blocks">
+		<div class="container">
+			<div class="svc__block svc__block--prose">
+				<h2>Как да проверите какво имаме</h2>
+				<p>Не поддържаме каталог на сайта, защото машините се сменят и остарял списък е по-лош от никакъв — праща хора да питат за лаптоп, който отдавна го няма.</p>
+				<p>Обадете се и ни кажете за каква работа ви трябва машината. Ще ви кажем какво имаме в момента, в какво състояние е и какво може да се очаква от него.</p>
+				<p><a class="btn btn--secondary" href="index.html#contact-us">Свържете се с нас</a></p>
+			</div>
+		</div>
+	</section>
 </main>
 
 <?php require_once(dirname(__FILE__) . '/includes/footer.php'); ?>

@@ -1,17 +1,57 @@
 <?php
-// Per-page metadata (02-RESEARCH N-5). WORKING title and description carrying
-// the mechanism, derived from this page's existing subject; SEO-01 in Phase 3
-// owns the search-tuned copy, and CONTENT-01 owns the body below.
-$torin_title = 'Резервни части · ТОРИН КОМПЮТЪРС';
-$torin_desc  = 'Резервни части за лаптопи — обадете се за наличност и цена.';
+// rezervni-chasti.html — the spare-parts page, ported thin and honest.
+//
+// [ASSUMED] — THE WHOLE PAGE, on the same footing as laptopi.html.
+// OWNER-QUESTIONS #15 asks whether the sales line is still active, and
+// specifically whether spare parts are retail to walk-in customers or mainly
+// parts used in the shop own repairs — which decides whether this is a sales
+// page or a credibility page. It is OPEN. Until it is answered nothing here
+// states a price, a delivery time, a stock quantity or a warranty term, and the
+// page is framed the way the second reading would have it: parts are sourced
+// per repair, and the way to ask is a phone call.
+//
+// If #15 comes back saying the sales line is dormant, this page becomes a
+// RETIREMENT CANDIDATE — an owner decision and a Phase 4 cutover question, not
+// something to act on here. The URL is indexed and D3-01 keeps it; a retirement
+// would be a 301 and never a 404 (D-36).
+//
+// Deliberately NOT padded to the 600-word service-page bar (D3-14) — that bar
+// is for service pages, and there is not much here, which is the finding rather
+// than a gap to fill.
+//
+// The legacy source listed specific adapter part numbers and voltages under
+// photographs. Those are not carried across: a hardcoded parts list is exactly
+// the kind of content that silently goes stale, and #15 has not confirmed that
+// any of it is still stocked. The legacy page own closing line — that the parts
+// are too varied to list and a call is the way to ask — is the part that
+// survives, because it is still true.
+//
+// No phone number, address or opening hours is retyped here; site-config.php
+// owns those and footer.php renders them at the bottom of this page.
+$torin_title = 'Резервни части за лаптопи · Торин';
+$torin_desc  = 'Резервни части за лаптопи в Торин Компютърс — частите се набавят според конкретния ремонт, затова се обадете и кажете модела на машината.';
 require_once(dirname(__FILE__) . '/includes/header.php');
 ?>
 
-<main class="section">
-	<div class="container">
-		<h1>Резервни части</h1>
-		<p>Строим новия сайт на ТОРИН КОМПЮТЪРС тук. Тази страница е временен скелет, използван за да докаже, че PHP-include основата работи на живия хостинг.</p>
-	</div>
+<main>
+	<section class="section">
+		<div class="container">
+			<h1>Резервни части за лаптопи</h1>
+			<p class="svc__intro">Частите се набавят според конкретния ремонт, а не се продават от готов каталог. Затова тук няма списък — има разговор, в който се уточнява какво точно ви трябва.</p>
+		</div>
+	</section>
+
+	<section class="section section--tint svc__blocks">
+		<div class="container">
+			<div class="svc__block svc__block--prose">
+				<h2>Защо частта се определя от машината, а не от модела</h2>
+				<p>Един и същ модел лаптоп излиза в няколко варианта — с различни матрици, различни клавиатури и различни захранващи платки. Затова моделът сам по себе си рядко е достатъчен, за да се поръча правилната част.</p>
+				<p>Обадете се и ни кажете модела и какво прави машината. Ако се налага, ще я погледнем в сервиза, преди да се поръчва каквото и да било.</p>
+				<p>Ако не сте сигурни коя част е отказала, минете първо през <a href="test-laptop.html">самодиагностиката</a> — тя стеснява кръга за няколко минути.</p>
+				<p><a class="btn btn--secondary" href="index.html#contact-us">Свържете се с нас</a></p>
+			</div>
+		</div>
+	</section>
 </main>
 
 <?php require_once(dirname(__FILE__) . '/includes/footer.php'); ?>
