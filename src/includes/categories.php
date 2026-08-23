@@ -42,7 +42,7 @@ $torin_categories = array(
 		'symptoms'  => 'пукнат екран, не свети, липсващи клавиши, не се зарежда',
 		'page'      => 'ekran-klaviatura-portove.html',
 		'icon'      => 'cat-2',
-		'published' => false,
+		'published' => true, // published by plan 03-03 as a D3-03 routing hub
 	),
 	array(
 		'id'        => 'kat-3',

@@ -69,7 +69,7 @@ $torin_services = array(
 		'symptoms'  => 'счупен екран, пукнат дисплей, петна и линии по картината',
 		'page'      => 'smyana-na-ekran.html',
 		'parent'    => 'kat-2',
-		'published' => false,
+		'published' => true, // published by plan 03-03
 	),
 	array(
 		'id'        => 'svc-klaviatura',
@@ -78,7 +78,7 @@ $torin_services = array(
 		'symptoms'  => 'залепнали клавиши, липсващи бутони, не пише правилно',
 		'page'      => 'smyana-na-klaviatura.html',
 		'parent'    => 'kat-2',
-		'published' => false,
+		'published' => true, // published by plan 03-03
 	),
 	array(
 		'id'        => 'svc-panti',

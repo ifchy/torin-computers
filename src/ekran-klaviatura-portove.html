@@ -1,0 +1,121 @@
+<?php
+// Category 2 rendered through the D-24 template (includes/category-page.php)
+// as a ROUTING HUB, not as a depth page. The display name and the symptom line
+// are read from the category record, never retyped here.
+//
+// WHY THIS PAGE IS SHORT ON PURPOSE (D3-03). Панти, екран, клавиатура,
+// USB/HDMI портове and захранваща букса are five distinct searches with five
+// distinct intents. One page competing for all five loses all five, so this one
+// competes for none of them: it orients the visitor, hands authority down to
+// the five children, and stops. Roughly 350 words is the TARGET, not a budget
+// that ran out — a later pass that "improves" this page by growing it is
+// undoing the decision rather than helping.
+//
+// Every child href is resolved through torin_service_href(), so an unpublished
+// child routes back to THIS page rather than to a file that does not exist yet.
+// Three of the five are still gated when this ships (plan 03-07 creates them),
+// which is why three of the entries below point back here. No child filename is
+// hand-typed anywhere on this page — that is the whole point of the gate.
+//
+// TERMINOLOGY: «екран», not «матрица», on every customer-facing surface. The
+// rule is written out in full in includes/services.php and is a DELIBERATE
+// REVERSAL of live-site usage (матриц- outnumbers екран 14 to 5 there), so do
+// not "correct" it back. The single «матрица» below is the sanctioned
+// exception: it names the bare panel as a PART, distinct from the lid assembly.
+require_once(dirname(__FILE__) . '/includes/category-page.php');
+require_once(dirname(__FILE__) . '/includes/services.php');
+
+$torin_cat = torin_category_by_id('kat-2');
+
+// The title is DERIVED from the record rather than retyped as a literal. The
+// three existing category pages use literals because their titles are
+// keyword-first and deliberately differ from the navigation label. This hub is
+// the opposite case: it chases no competitive keyword of its own, so its title
+// simply IS the record name plus a qualifier — and deriving it means a D-40
+// rename cannot strand a stale title here. Measured in 03-RESEARCH at 442 px /
+// 45 characters, comfortably inside the ~600 px desktop truncation point.
+$torin_title = $torin_cat['name'] . ' на лаптоп · Торин';
+$torin_desc  = 'Ремонт и смяна на екран, клавиатура, панти, портове и букса на лаптоп в София. Изберете вашия проблем и се обадете за безплатна диагностика.';
+
+// Assigned ONCE and read twice — by torin_render_service_page() for the visible
+// nav and by jsonld.php for the BreadcrumbList, after footer.php includes it.
+// One array, so the two cannot disagree about the site’s own hierarchy.
+$torin_crumbs = array(
+	array('text' => 'Начало', 'href' => 'index.html'),
+	array('text' => $torin_cat['name'], 'href' => $torin_cat['page']),
+);
+
+$torin_cat_key = $torin_cat['id'];
+$torin_cat1    = torin_category_by_id('kat-1');
+
+// The routing list itself: one entry per child, BUILT from the records rather
+// than written out. Because each entry carries an href it renders as a LINK,
+// which is what makes this a hub rather than a list of things we happen to do.
+// Filtering on 'parent' means plan 03-07 publishing the remaining three costs
+// zero edits here — those links simply stop pointing back at this page.
+$torin_kat2_children = array();
+foreach ($torin_services as $torin_svc) {
+	if ($torin_svc['parent'] !== $torin_cat_key) {
+		continue;
+	}
+	$torin_kat2_children[] = array(
+		'text' => $torin_svc['name'],
+		'href' => torin_service_href($torin_svc),
+	);
+}
+
+$torin_cat_page = array(
+	'cat_id' => $torin_cat_key,
+
+	// 37 characters, inside the 48-character cap. No «София» here: this page is
+	// not competing for a local keyword, and adding one would put the hub in
+	// competition with its own children — exactly what D3-03 exists to avoid.
+	'h1'     => 'Ремонт на екран, клавиатура и портове',
+
+	'crumbs' => $torin_crumbs,
+
+	'intro'  => 'Петте ремонта в този раздел започват по телефона с почти едно и също изречение — «нещо стана с екрана» или «спря да се зарежда». Зад тези думи обаче стоят различни повреди, различни части и различна по обем работа. По-долу всеки проблем води към собствената си страница, където описваме как изглежда повредата, как я установяваме и какво следва. Изберете този, който най-много прилича на вашия случай.',
+
+	'fixes'  => $torin_kat2_children,
+
+	// A KEY, never a literal: the term lives once, in site-config.php (D3-10).
+	'warranty_key' => 'default',
+
+	// Three questions, and all three are ROUTING questions — they help a visitor
+	// work out WHICH child page they need. A hub whose FAQ answered repair
+	// questions in depth would be competing with its own children again.
+	'faq' => array(
+		array(
+			'q' => 'Как да разбера дали проблемът е в екрана или във видеочипа?',
+			'a' => 'Има бърза проверка, която можете да направите и вкъщи: включете лаптопа към външен монитор или телевизор. Ако външният екран показва нормална картина, повредата е в екрана на лаптопа — в самата матрица или в кабела към нея. Ако и на външния монитор виждате същите ивици, петна или изобщо няма образ, проблемът е по-скоро във видеочипа на дънната платка. Тестът не е доказателство, но в повечето случаи посочва вярната посока.',
+		),
+		array(
+			'q' => 'Оригинална част ли поставяте, или съвместима?',
+			'a' => 'Зависи от машината и от това какво се предлага за нея. За по-новите модели обикновено има оригинални части. За по-старите оригиналът често вече не се произвежда и се работи със съвместима част, която отговаря на същите технически параметри — размер, резолюция, тип на конектора и начин на закрепване. Казваме ви какво ще поставим, преди да го поставим, и не слагаме част с по-ниски характеристики, без да сте съгласни.',
+		),
+		array(
+			'q' => 'Трябва ли да донеса лаптопа в сервиза?',
+			'a' => 'Да. Всички ремонти в този раздел изискват разглобяване и оглед на място — по снимка не може да се каже дали е засегнат само екранът, или и кабелът към него. Диагностиката е безплатна. Ако предпочитате, обадете се предварително и опишете какво се е случило, за да знаете какво да очаквате при приемането.',
+		),
+	),
+
+	// Out to the neighbouring category and to the self-diagnostic. The category
+	// href goes through torin_category_href() for the same reason every child
+	// goes through torin_service_href(): the publish gate decides, not this page.
+	'related' => array(
+		array('text' => $torin_cat1['name'], 'href' => torin_category_href($torin_cat1)),
+		array('text' => 'Тествайте сам лаптопа си', 'href' => 'test-laptop.html'),
+	),
+
+	// 'prices' is deliberately NOT set. The slot stays unused this phase by
+	// design (D3-06, PRICE-01 is v2) and accepts numbers later with no redesign.
+);
+
+require_once(dirname(__FILE__) . '/includes/header.php');
+?>
+
+<main>
+<?php torin_render_service_page($torin_cat_page); ?>
+</main>
+
+<?php require_once(dirname(__FILE__) . '/includes/footer.php'); ?>
