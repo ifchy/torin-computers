@@ -1,0 +1,149 @@
+<?php
+// D3-03 CHILD page under category 2, rendered through the GENERALIZED
+// service-page renderer. Like its sibling, this page carries NO category
+// record: it sets its own display name and symptom line. RESEARCH P-5 records
+// what a child reaching for the category path instead would produce — a full
+// header, a full footer and nothing between them at HTTP 200 — which is why the
+// live gate counts h2 elements rather than only asserting the page responds.
+//
+// The name is READ FROM THE RECORD via torin_service_by_id() rather than
+// retyped, so the card label, the nav entry, the breadcrumb and this page
+// cannot disagree about what the service is called.
+//
+// The liquid-damage block below is an HONEST CROSS-SELL, and the distinction
+// matters enough to write down: it follows the real failure path (liquid that
+// reached the keyboard has usually reached further) rather than attaching a
+// larger job to a smaller one. It links to category 4 because that is where the
+// board-level work is described, not to inflate this page’s ticket.
+require_once(dirname(__FILE__) . '/includes/category-page.php');
+require_once(dirname(__FILE__) . '/includes/services.php');
+
+$torin_self_id = 'svc-klaviatura';
+$torin_svc_rec = torin_service_by_id($torin_self_id);
+$torin_cat2    = torin_category_by_id('kat-2');
+$torin_cat4    = torin_category_by_id('kat-4');
+
+// Measured in 03-RESEARCH at 442 px / 43 chars, inside the ~600 px desktop
+// truncation point. Keyword first, «София» second, short brand suffix last.
+$torin_title = 'Смяна на клавиатура на лаптоп София · Торин';
+$torin_desc  = 'Смяна и ремонт на клавиатура на лаптоп в София — цял модул или отделни клавиши, включително след заливане. Обадете се за безплатен оглед.';
+
+// Depth 3. Assigned ONCE and read twice — by the renderer for the visible nav
+// and by jsonld.php for the matching BreadcrumbList. The hub href comes from
+// torin_category_href(), never typed, so the publish gate still decides.
+$torin_crumbs = array(
+	array('text' => 'Начало', 'href' => 'index.html'),
+	array('text' => $torin_cat2['name'], 'href' => torin_category_href($torin_cat2)),
+	array('text' => $torin_svc_rec['name'], 'href' => $torin_svc_rec['page']),
+);
+
+// Siblings are BUILT, not listed, and only published ones are included — a
+// gated sibling would resolve back to the hub and render as a second entry with
+// a different label pointing at the same page. Plan 03-07 publishing the other
+// three makes them appear here with zero edits to this file.
+$torin_siblings = array();
+foreach ($torin_services as $torin_svc) {
+	if ($torin_svc['parent'] !== 'kat-2' || $torin_svc['id'] === $torin_self_id) {
+		continue;
+	}
+	if (!$torin_svc['published']) {
+		continue;
+	}
+	$torin_siblings[] = array(
+		'text' => $torin_svc['name'],
+		'href' => torin_service_href($torin_svc),
+	);
+}
+
+$torin_page = array(
+	// No category record: this page supplies its own name and symptom line.
+	'name'     => $torin_svc_rec['name'],
+
+	// 36 characters, inside the 48-character cap.
+	'h1'       => 'Смяна на клавиатура на лаптоп в София',
+
+	'crumbs'   => $torin_crumbs,
+
+	'intro'    => 'Клавиатурата понася най-много от целия лаптоп — прах, трохи, разлята течност и десетки хиляди натискания върху едни и същи няколко клавиша. Повредите ѝ рядко се появяват наведнъж: първо един бутон започва да засича, после спира да пише, а по-късно не реагира цял ред. Работим както по отделни клавиши и механизмите под тях, така и с подмяна на целия модул.',
+
+	// [ASSUMED] The customer-facing symptom line, pending the real phrasing the
+	// owner hears daily (OWNER-QUESTIONS #16). Written as a customer would
+	// describe it, not as a technician would name it. Not confirmed shop
+	// language — do not quote it back as such.
+	'symptoms' => 'липсващи или изкъртени клавиши, залепнали бутони, клавиш, който повтаря или изобщо не пише, клавиатура, спряла да работи след разливане',
+
+	'fixes'    => array(
+		array('text' => 'Смяна на цялата клавиатура'),
+		array('text' => 'Ремонт на отделни клавиши и механизмите под тях'),
+		array('text' => 'Смяна на клавиатура след заливане с течност'),
+		array('text' => 'Отстраняване на повреди в лентовия кабел към платката'),
+	),
+
+	'blocks'   => array(
+		array(
+			'kind'    => 'prose',
+			'heading' => 'След заливане клавиатурата рядко е единственият проблем',
+			'items'   => array(
+				'Клавиатурата е най-горният слой на лаптопа, така че когато върху нея се разлее течност, тя е първото, което спира да работи — но почти никога единственото засегнато. Точно под нея минават лентовият кабел и тъчпадът, а при повечето машини и самата дънна платка. Течността се процежда надолу за секунди.',
+				'Затова смяната само на клавиатурата след заливане е половин ремонт. Лаптопът може да проработи веднага и да изглежда напълно наред, докато отдолу окисляването продължава и се проявява по-късно като повреда, която вече не изглежда свързана с разлятото кафе. Когато приемаме залята машина, я разглобяваме и оглеждаме платката, преди изобщо да говорим за нова клавиатура. Ако течността е стигнала по-надолу, ви казваме и това.',
+			),
+			'link'    => array(
+				'text' => $torin_cat4['name'],
+				'href' => torin_category_href($torin_cat4),
+			),
+		),
+	),
+
+	// A KEY, never a literal: the term lives once, in site-config.php (D3-10).
+	'warranty_key' => 'default',
+
+	'process'  => array(
+		'Приемаме лаптопа и питаме какво точно се е случило — разливане, изкъртен клавиш или постепенно влошаване. Отговорът решава дали ще гледаме само клавиатурата.',
+		'Проверяваме кои клавиши не реагират и дали проблемът е в самите механизми, в лентовия кабел или в контролера на платката.',
+		'При заливане разглобяваме машината и оглеждаме какво има под клавиатурата, преди да предложим решение.',
+		'Съгласуваме с вас дали се ремонтират отделни клавиши, или се подменя целият модул, и чак тогава започваме работа.',
+		'Поставяме частта и тестваме всеки клавиш поотделно, включително функционалните и цифровия блок, преди да върнем машината с гаранционна карта.',
+	),
+
+	'faq'      => array(
+		array(
+			'q' => 'Счупи се само един клавиш. Трябва ли да се сменя цялата клавиатура?',
+			'a' => 'Не непременно. Ако механизмът под клавиша е здрав, често се поставя само нова капачка или нов механизъм. Целият модул се сменя, когато са засегнати много клавиши, когато липсват части от основата или когато повредата е в лентовия кабел. Казваме ви кой е вашият случай след огледа.',
+		),
+		array(
+			'q' => 'Мога ли просто да ползвам външна клавиатура вместо ремонт?',
+			'a' => 'Можете, и за работа на бюро това е напълно приемливо решение. Има два случая, в които не е: когато залепнал клавиш се повтаря непрекъснато и пречи на писането отвсякъде, включително от външната клавиатура, и когато повредата е дошла от течност. Във втория случай външната клавиатура крие симптома, но не спира процеса под нея.',
+		),
+		array(
+			'q' => 'Клавиатурата пише грешни букви. Това хардуерна повреда ли е?',
+			'a' => 'Не винаги. Понякога причината е сменена езикова подредба или включен цифров блок върху буквената част, което се оправя без никакъв ремонт. Ако обаче един и същ клавиш дава грешен знак независимо от настройките, повредата е в самата клавиатура. Проверяваме и двете, преди да предложим смяна.',
+		),
+		array(
+			'q' => 'Може ли клавиатурата просто да се почисти, вместо да се сменя?',
+			'a' => 'Понякога да. Ако под клавишите има само трохи и прах, а механизмите под тях са здрави, почистването наистина решава засичането. Когато обаче течност вече е изсъхнала между слоевете на самото фолио, почистването не помага трайно — фолиото е многослойно и запечатано, а следите от захар и киселина остават между слоевете и продължават да правят връзки там, където не трябва. Казваме ви откровено кога чистенето е достатъчно и кога само отлага смяната.',
+		),
+		array(
+			'q' => 'Има ли значение, че клавиатурата ми е с подсветка?',
+			'a' => 'Да, и е добре да го кажете още при приемането. Клавиатурите с подсветка и без подсветка не са взаимозаменяеми дори при един и същ модел лаптоп — различават се по конектор и по брой контакти. Отчитаме го при огледа, за да не се окаже накрая, че всичко работи, но подсветката я няма.',
+		),
+	),
+
+	// Up to the hub, across to the published siblings, out to the
+	// self-diagnostic. Every internal href resolves through a publish gate.
+	'related'  => array_merge(
+		array(array('text' => $torin_cat2['name'], 'href' => torin_category_href($torin_cat2))),
+		$torin_siblings,
+		array(array('text' => 'Тествайте сам лаптопа си', 'href' => 'test-laptop.html'))
+	),
+
+	// 'prices' is deliberately NOT set (D3-06, PRICE-01 is v2).
+);
+
+require_once(dirname(__FILE__) . '/includes/header.php');
+?>
+
+<main>
+<?php torin_render_service_page($torin_page); ?>
+</main>
+
+<?php require_once(dirname(__FILE__) . '/includes/footer.php'); ?>
