@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 03
 current_phase_name: content-trust-signal-build-out
 status: executing
-stopped_at: Phase 03 Wave 3: 03-04/03-05/03-06 merged; 03-03 running with amended slug; wave deploy pending
+stopped_at: Phase 03 Wave 3 fully merged (6/9 plans); wave deploy + verification pending, then Wave 4
 last_updated: "2026-08-18T00:00:00.000Z"
 last_activity: 2026-08-20
-last_activity_desc: Wave 3: 03-04, 03-05, 03-06 merged after quota reset; 03-03 in progress
+last_activity_desc: Wave 3 complete and merged; 6 of 9 plans done
 progress:
   total_phases: 3
   completed_phases: 2
   total_plans: 23
-  completed_plans: 19
+  completed_plans: 20
 ---
 
 # Project State
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-08-04)
 ## Current Position
 
 Phase: 03 (content-trust-signal-build-out) — EXECUTING
-Plan: 5 of 9 complete (03-01, 03-02 live-verified; 03-04/03-05/03-06 merged, unverified). 03-03 running.
+Plan: 6 of 9 complete (03-01, 03-02 live-verified; 03-03/04/05/06 merged, UNVERIFIED pending wave deploy). Next: Wave 4 (03-07, 03-08).
 Status: Executing Phase 03
 Last activity: 2026-08-18 — 03-01 deployed to staging and verified PASS at both viewports
 
@@ -138,6 +138,13 @@ Recent decisions affecting current work:
 - [Phase 3]: 03-06: plan's `sips` instruction on the EU logos GREW the three PNGs by 16,510 bytes and re-encoded them — a chunk inventory showed nothing to strip. Reverted to byte-identical copies. Verified as real PNGs by magic bytes, not extension; both Cyrillic-named files claim 496x379 and neither is.
 - [Phase 3]: 03-06: BSD grep has no -P. Any plan using `grep -cP` for non-ASCII checks must use `LC_ALL=C grep -c '[^ -~]'` instead.
 - [Phase 3]: warrently.html now reproduces the 5-6 h/day clause in the shop's published wording while the shared per-page summary carries the D3-10 reframing. A source comment FORBIDS harmonising the two in either direction until OWNER-QUESTIONS #23 is ruled on.
+
+- [Phase 3]: SLUG SET LOCKED by 03-03, 03-07 builds against it: smyana-na-ekran.html (published), smyana-na-klaviatura.html (published), smyana-na-panti.html, remont-na-portove.html, smyana-na-buksa.html (gated). The amendment landed BEFORE publication so nothing was indexed under the old slug and no redirect exists. Verified: `smyana-na-matrica` appears nowhere in src/ or scripts/.
+- [Phase 3]: 03-03: the plan's word-count gate COUNTS ENGLISH COMMENTS. smyana-na-klaviatura passed the mechanical gate at 918 while sitting at 595 Cyrillic words, under the real 600 bar. Fixed by adding a fifth FAQ, not padding (now 670 measured). Any later plan leaning on that gate must measure Cyrillic separately.
+- [Phase 3]: 03-03: the plan's hub self-link count is wrong — expect 4 not 3. header.php renders the Услуги dropdown through torin_category_href(), so publishing kat-2 adds an ekran-klaviatura-portove.html occurrence to the nav on every page including the hub itself.
+- [Phase 3]: 03-03 chose «Екран или видеочип?» over the plan-mandated «Матрица или видеочип?» — arguable, since the heading contrasts the panel AS A PART against a chip, which is the sanctioned матрица exception. Went with екран because the rule names headings explicitly. «матрица» still appears twice in the page copy as real part references, so the search term is not lost. One-string edit to reverse.
+- [Phase 3]: src/includes/categories.php has an ODD single-quote count (139) at HEAD from straight apostrophes in English comments («category's», «owner's»). Pre-existing, benign, but the quote-balance gate is USELESS on that file — do not trust it there.
+- [Phase 3]: zsh does not word-split unquoted variable expansions. A `for f in $FILES` loop over a space-separated string silently treats the whole string as ONE filename. Use an array. Same trap that once made three render-check runs measure the same viewport.
 
 ### Pending Todos
 
