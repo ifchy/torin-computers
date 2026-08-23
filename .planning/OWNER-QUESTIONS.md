@@ -818,6 +818,46 @@ final answer on `covid.html` content before cutover.
 
 ---
 
+### 29. The funding disclosure publishes an address that looks misspelled
+**Status:** OPEN — **new, raised 2026-08-23 during Phase 3 execution (plan 03-06)**
+**Question:** The EU project disclosure gives the beneficiary's administrative address as
+**«София, ул. Свсиленица 3А»**. «Свсиленица» is not a Sofia street name we can find — it looks like a
+typo for something like «Св. Силеница» or a similar saint-name street. Is the published address
+correct as written?
+**Why it matters — and why it was NOT silently fixed:** this string is a **registered grant-record
+field**, published in a compliance document. It has been ported byte-faithfully from
+`site-current/covid.html:149` for exactly that reason: if the grant record itself carries this
+spelling, the website should match the record rather than quietly diverge from it. Correcting it on
+the site alone could create a mismatch between the published disclosure and the filed paperwork.
+**So the real question is two-part:**
+1. What is the **correct street name**?
+2. Which spelling appears in the **grant paperwork itself**? If the paperwork carries the typo, the
+   site probably should too — and the correction belongs with the managing authority, not here.
+**Note it interacts with #4 and #28** — all three concern the same compliance document, so they are
+worth taking to the owner together.
+**Blocks:** Nothing — ported as-is is the safe state
+**Raised:** Phase 3 execution, plan 03-06
+**Answer:**
+
+---
+
+### 30. The consent line misspelling — depends on whether the contact form survives
+**Status:** OPEN — **new, raised 2026-08-23**
+**Question:** The legacy homepage carries a misspelling: `site-current/index.html:321` reads
+«съгласявате с <a href="uslovia.html">**усливията** за поверителност</a>» — «усливията» should be
+«**условията**». Decision D3-13 assigned this fix to the legal-pages port, but **the string does not
+exist in the rebuilt tree at all**: it sits in the contact form's consent line, and the rebuilt
+homepage has no contact form yet, because whether one should exist is still open as question **#2**.
+**Why it matters:** the fix cannot be "done" until there is somewhere to do it. If the contact form
+is kept, its consent line must read «условията» — this is the reminder that makes sure the
+misspelling is not faithfully reproduced into the new site. If the form is dropped, this item
+becomes obsolete along with it.
+**Blocks:** Nothing now — becomes live the moment #2 is answered "keep the form"
+**Raised:** Phase 3 execution, plan 03-06 (which correctly identified that the string was outside its files)
+**Answer:**
+
+---
+
 ## Answered
 
 *(none yet — move items here as they're resolved, keeping the answer inline)*

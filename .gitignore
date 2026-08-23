@@ -2,3 +2,6 @@ filezilla-server-data.xml
 .DS_Store
 **/.DS_Store
 backups/
+
+# GSD executor worktrees — transient, created and removed per wave
+.claude/worktrees/

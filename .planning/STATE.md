@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 03
 current_phase_name: content-trust-signal-build-out
 status: executing
-stopped_at: Phase 03 Wave 3 interrupted by session quota; 03-05 merged, 03-04/03-06 partial, 03-03 awaiting slug amendment
+stopped_at: Phase 03 Wave 3: 03-04/03-05/03-06 merged; 03-03 running with amended slug; wave deploy pending
 last_updated: "2026-08-18T00:00:00.000Z"
 last_activity: 2026-08-20
-last_activity_desc: Wave 3: 03-05 merged; 03-04/03-06 hit session quota mid-plan
+last_activity_desc: Wave 3: 03-04, 03-05, 03-06 merged after quota reset; 03-03 in progress
 progress:
   total_phases: 3
   completed_phases: 2
   total_plans: 23
-  completed_plans: 17
+  completed_plans: 19
 ---
 
 # Project State
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-08-04)
 ## Current Position
 
 Phase: 03 (content-trust-signal-build-out) — EXECUTING
-Plan: 3 of 9 complete (03-01, 03-02 live-verified; 03-05 merged, unverified). Wave 3 interrupted by quota.
+Plan: 5 of 9 complete (03-01, 03-02 live-verified; 03-04/03-05/03-06 merged, unverified). 03-03 running.
 Status: Executing Phase 03
 Last activity: 2026-08-18 — 03-01 deployed to staging and verified PASS at both viewports
 
@@ -131,6 +131,13 @@ Recent decisions affecting current work:
 - [Phase 3]: 03-05: the battery/adapter article was never at risk — src/problem-stari.html was a Phase-2 stub; the real article lives in site-current/problem-stari.html, untouched. Its content is now split across four locations by design.
 - [Phase 3]: 03-05 found Task 3's live gates self-contradictory: it demanded the footer covid.html link survive AND the live homepage return zero BG16RFOP matches, but footer.php renders on the homepage and its link text is literally «Проект BG16RFOP002-2.073». Regated on stated intent (no EU content outside the footer legal line).
 - [Phase 3]: 03-05 raised the «Венера-АКС ООД» copy-paste error as OWNER-QUESTIONS #28 — note a numbering collision is possible, the orchestrator already filed #25-#27 concurrently. Reconcile at merge.
+
+- [Phase 3]: 03-04: the plan-named battery photos baterry.jpg/baterry2.jpg are labelled SCHEMATIC DIAGRAMS, unreadable at the 100x100 evidence crop — 03-02 and 03-04 reached this independently. Used baterii.jpg instead; predicted "two and three photographs" is actually ONE and three. profilaktika16.jpg swapped for profilaktika14.jpg (the only file showing the torn contact pads the callout describes). profilaktika14.jpg was NOT uploaded by 03-02 and must be in the wave deploy.
+- [Phase 3]: 03-04: src/index.html mis-captions baterii.jpg as "opened for cell replacement" — the photo shows a MELTED CASE. Outside 03-04's declared files; belongs to whoever owns the homepage next.
+- [Phase 3]: 03-04: every ported claim on za-bateriite.html (10-degree delta, 90% success rate, Texas Instruments certification, Panasonic sourcing) is ~2019 shop copy, UNVERIFIED by this project. za-bateriite.html now also STATES a rationale for the longer battery warranty term (repair = service on hardware the shop did not build; regenerated pack = product it does build) — if that reasoning is wrong the site asserts something the shop does not stand behind. Ties to OWNER-QUESTIONS #23.
+- [Phase 3]: 03-06: plan's `sips` instruction on the EU logos GREW the three PNGs by 16,510 bytes and re-encoded them — a chunk inventory showed nothing to strip. Reverted to byte-identical copies. Verified as real PNGs by magic bytes, not extension; both Cyrillic-named files claim 496x379 and neither is.
+- [Phase 3]: 03-06: BSD grep has no -P. Any plan using `grep -cP` for non-ASCII checks must use `LC_ALL=C grep -c '[^ -~]'` instead.
+- [Phase 3]: warrently.html now reproduces the 5-6 h/day clause in the shop's published wording while the shared per-page summary carries the D3-10 reframing. A source comment FORBIDS harmonising the two in either direction until OWNER-QUESTIONS #23 is ruled on.
 
 ### Pending Todos
 
