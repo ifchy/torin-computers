@@ -3,11 +3,30 @@
 // no namespaces). Emits nothing on include; it is data plus two accessors.
 //
 // Single source of truth for the five D3-03 CHILD pages under category 2
-// («Екран, клавиатура и портове»). Панти, матрица, клавиатура, USB/HDMI портове
+// («Екран, клавиатура и портове»). Панти, екран, клавиатура, USB/HDMI портове
 // and захранваща букса are five distinct searches with their own price intent,
 // and one page competing for all five loses all five — that is the whole
 // reasoning behind D3-03. The parent stays as a deliberately short routing hub
 // that passes authority down rather than competing for a keyword of its own.
+//
+// TERMINOLOGY: «ЕКРАН», NOT «МАТРИЦА» — a locked project decision, and a
+// DELIBERATE REVERSAL of what the live site does today. Counted on the current
+// site, матриц- outnumbers екран 14 to 5; a later pass reading only the legacy
+// pages would therefore "correct" this back and undo it. Do not.
+//
+// The rule, in full, because it is not "replace one word with another":
+//   · Customer-facing surfaces — titles, h1s, nav and card labels, meta
+//     descriptions, body prose — say «екран». It is what people actually
+//     search for and what they say on the phone.
+//   · «матрица» is retained ONLY where it is genuinely the more precise term:
+//     the bare LCD panel AS A PART, as distinct from the whole lid assembly;
+//     part specifications; and where a customer is quoting another shop.
+//   · The screen page itself introduces «матрица» ONCE as a synonym, so both
+//     terms are present for search while «екран» carries the headings.
+// Sibling plan 03-04’s worked example is the shape to copy: «повредата е в
+// екрана — в самата матрица или в кабела към нея», followed later by a single
+// technical use («лампата или инверторът на матрицата»), because the lamp and
+// the inverter genuinely belong to the panel as a part.
 //
 // FOUR consumers read this file, which is why no href is ever hand-typed:
 //   1. the cat-2 routing hub          (plan 03-03)
@@ -37,15 +56,20 @@ require_once(dirname(__FILE__) . '/categories.php');
 
 $torin_services = array(
 	array(
-		'id'        => 'svc-matrica',
-		'name'      => 'Смяна на матрица на лаптоп',
+		// The slug and the display name are «екран», not «матрица», per the
+		// terminology rule above — the user’s explicit call, on the grounds
+		// that «смяна на екран» is the far more common phrasing. This was the
+		// amendment made at plan 03-03’s slug checkpoint, before publication
+		// and therefore before any of it could be indexed.
+		'id'        => 'svc-ekran',
+		'name'      => 'Смяна на екран на лаптоп',
 		// [ASSUMED] Placeholder standing in for the real customer phrasing the
 		// owner hears daily (OWNER-QUESTIONS #16). Plan 03-03 replaces it. Not
 		// confirmed shop language — do not quote it back as such.
 		'symptoms'  => 'счупен екран, пукнат дисплей, петна и линии по картината',
-		'page'      => 'smyana-na-matrica.html',
+		'page'      => 'smyana-na-ekran.html',
 		'parent'    => 'kat-2',
-		'published' => false,
+		'published' => true, // published by plan 03-03
 	),
 	array(
 		'id'        => 'svc-klaviatura',
@@ -54,7 +78,7 @@ $torin_services = array(
 		'symptoms'  => 'залепнали клавиши, липсващи бутони, не пише правилно',
 		'page'      => 'smyana-na-klaviatura.html',
 		'parent'    => 'kat-2',
-		'published' => false,
+		'published' => true, // published by plan 03-03
 	),
 	array(
 		'id'        => 'svc-panti',

@@ -1,0 +1,170 @@
+<?php
+// D3-03 CHILD page under category 2, rendered through the GENERALIZED
+// service-page renderer. This page carries NO category record: it sets its own
+// display name and symptom line, which is the variant 03-01 built the renderer
+// to support. RESEARCH P-5 records what a child reaching for the category path
+// instead would produce — a full header, a full footer, nothing between them,
+// at HTTP 200 — which is why the live gate on this page counts h2 elements
+// rather than only asserting that it responds.
+//
+// The name is READ FROM THE RECORD via torin_service_by_id() rather than
+// retyped, for exactly the reason a category page reads its name from the
+// category record: the card label, the nav entry, the breadcrumb and this page
+// must not be able to disagree about what the service is called.
+//
+// TERMINOLOGY: «екран», not «матрица» — the locked rule, written out in full in
+// includes/services.php, and a DELIBERATE REVERSAL of live-site usage. This
+// page is where the rule matters most, so to be explicit about what it does and
+// does not mean here: «екран» carries the title, the h1, the description, the
+// block heading and the body prose. In the PAGE COPY (not counting this
+// comment) «матрица» appears exactly TWICE, both times
+// naming the bare LCD panel AS A PART as distinct from the whole lid assembly —
+// once in the external-monitor test and once about the lamp and inverter of
+// older machines. Those two are the sanctioned exception AND they are what
+// keeps the older search term present on the page. Do not add a third, and do
+// not "correct" the other instances back.
+//
+// NO PRICE ON THIS PAGE, BY DESIGN. The strongest argument for a screen page is
+// normally a number, because competitors publish one. PRICE-01 is v2 (D3-06),
+// so this page leans on the «Екран или видеочип?» diagnostic instead: helping a
+// visitor identify the fault is worth more than quoting them blind. This is a
+// knowingly accepted gap recorded in CONTEXT, not an omission to be filled in
+// by inventing a figure.
+require_once(dirname(__FILE__) . '/includes/category-page.php');
+require_once(dirname(__FILE__) . '/includes/services.php');
+
+$torin_self_id = 'svc-ekran';
+$torin_svc_rec = torin_service_by_id($torin_self_id);
+$torin_cat2    = torin_category_by_id('kat-2');
+$torin_cat1    = torin_category_by_id('kat-1');
+
+// Measured in 03-RESEARCH at 415 px / 40 chars, inside the ~600 px desktop
+// truncation point. Keyword first, «София» second, short brand suffix last.
+$torin_title = 'Смяна на екран на лаптоп София · Торин';
+$torin_desc  = 'Смяна на счупен екран на лаптоп в София — матови, гланцови и тъч панели. Проверяваме дали е екранът, или видеочипът. Обадете се за оглед.';
+
+// Depth 3, the deepest the hub/child structure goes. Assigned ONCE and read
+// twice — by the renderer for the visible nav and by jsonld.php for the
+// matching BreadcrumbList — so the two cannot disagree. The hub href comes from
+// torin_category_href(), never typed, so the publish gate still decides.
+$torin_crumbs = array(
+	array('text' => 'Начало', 'href' => 'index.html'),
+	array('text' => $torin_cat2['name'], 'href' => torin_category_href($torin_cat2)),
+	array('text' => $torin_svc_rec['name'], 'href' => $torin_svc_rec['page']),
+);
+
+// Siblings are BUILT, not listed. Only published siblings are included: a gated
+// one would resolve back to the hub through torin_service_href() and render as
+// a second entry with a different label pointing at the same page, which reads
+// as a mistake. Plan 03-07 publishing the other three makes them appear here
+// with zero edits to this file.
+$torin_siblings = array();
+foreach ($torin_services as $torin_svc) {
+	if ($torin_svc['parent'] !== 'kat-2' || $torin_svc['id'] === $torin_self_id) {
+		continue;
+	}
+	if (!$torin_svc['published']) {
+		continue;
+	}
+	$torin_siblings[] = array(
+		'text' => $torin_svc['name'],
+		'href' => torin_service_href($torin_svc),
+	);
+}
+
+$torin_page = array(
+	// No category record: this page supplies its own name and symptom line.
+	'name'     => $torin_svc_rec['name'],
+
+	// 32 characters, inside the 48-character cap.
+	'h1'       => 'Смяна на екран на лаптоп в София',
+
+	'crumbs'   => $torin_crumbs,
+
+	'intro'    => 'Счупеният екран е най-честата причина клиент да потърси сервиз за лаптоп и почти винаги изглежда по-зле, отколкото е. В огромната част от случаите се подменя само екранът, а останалата част от машината — дъното, дискът, клавиатурата — остава непокътната и работи както преди. Работим с матови, гланцови и тъч панели, включително с по-редки размери и резолюции.',
+
+	// [ASSUMED] The customer-facing symptom line, pending the real phrasing the
+	// owner hears daily (OWNER-QUESTIONS #16). Written as a customer would
+	// describe what they see, not as a technician would name the fault. Not
+	// confirmed shop language — do not quote it back as such.
+	'symptoms' => 'пукнато или счупено стъкло, петно, което се разлива като мастило, вертикални ивици по картината, екран, който остава тъмен и не светва',
+
+	'fixes'    => array(
+		array('text' => 'Смяна на матови и гланцови панели'),
+		array('text' => 'Смяна на тъч екрани и модули със стъклен панел'),
+		array('text' => 'Смяна на панел с повреден лентов кабел към платката'),
+		array('text' => 'Отстраняване на повреди в подсветката'),
+	),
+
+	// The page’s actual argument, and the differentiator against competitors who
+	// answer a screen question with a number and nothing else.
+	'blocks'   => array(
+		array(
+			'kind'    => 'callout',
+			'heading' => 'Екран или видеочип?',
+			'items'   => array(
+				'Преди да се сменя каквото и да било, си струва да се провери къде точно е повредата. Счупеният екран почти винаги личи: има пукнатина, разливащо се петно или зона, в която картината липсва, докато останалата част е нормална. Такава повреда не се променя, когато наклоните или завъртите капака.',
+				'Повредата във видеочипа изглежда различно. Там картината е цяла, но по нея се появяват артефакти — цветни точки, повтарящи се шарки, разместени ленти — или образът изчезва напълно, макар лаптопът да работи. Най-бързата проверка е външен монитор. Ако на него картината е чиста, повредата е в екрана на лаптопа — в самата матрица или в кабела към нея. Ако същият дефект се вижда и на външния монитор, причината е в дънната платка.',
+				'Правим тази проверка при всяко приемане, преди да ви кажем какво предстои. Причината е проста: смяна на екран при повреден видеочип не решава нищо, а вие сте платили за част, която не е била дефектна. Ако не сте сигурни какво виждате, минете първо през кратката ни самодиагностика.',
+			),
+			'link'    => array(
+				'text' => 'Тествай сам лаптопа си',
+				'href' => 'test-laptop.html',
+			),
+		),
+	),
+
+	// A KEY, never a literal: the term lives once, in site-config.php (D3-10).
+	'warranty_key' => 'default',
+
+	'process'  => array(
+		'Приемаме лаптопа и записваме какво се е случило — падане, натиск върху капака, забравен предмет върху клавиатурата при затваряне. Отговорът често обяснява и повреди, които не се виждат отвън.',
+		'Проверяваме с външен монитор дали повредата е в екрана, или в графичната част на дънната платка.',
+		'Разглобяваме капака и отчитаме точния панел — размер, резолюция, тип на конектора и начин на закрепване. Два еднакви на вид лаптопа често носят различни екрани.',
+		'Съгласуваме с вас каква част ще поставим и какво включва работата, преди да я започнем.',
+		'Сменяме екрана и проверяваме кабела и конектора към него, защото при удар често страда и той.',
+		'Тестваме готовата машина — равномерност на подсветката, мъртви пиксели и работа на тъч слоя, ако има такъв — и я връщаме с гаранционна карта.',
+	),
+
+	'faq'      => array(
+		array(
+			'q' => 'Може ли да се смени само стъклото, а не целият екран?',
+			'a' => 'При повечето лаптопи не. За разлика от телефоните, тук стъклото и панелът обикновено са едно цяло и разделянето им е по-рисково, отколкото смяната на целия модул. Изключение правят част от тъч моделите, при които стъкленият панел е отделен. Казваме ви кой е вашият случай след огледа, а не по телефона.',
+		),
+		array(
+			'q' => 'Лаптопът работи нормално на външен монитор. Значи ли това, че екранът е за смяна?',
+			'a' => 'Най-често да — това е основният признак, че повредата е в екрана или в кабела към него, а не в дънната платка. Проверяваме и двете, защото понякога проблемът е само в разхлабен или прекъснат кабел, а панелът е напълно здрав. В такъв случай не сменяме част, която работи.',
+		),
+		array(
+			'q' => 'Има само една тънка линия по екрана. Ще се разшири ли?',
+			'a' => 'Обикновено да. Линиите и петната от натиск се разрастват с всяко отваряне и затваряне на капака, защото панелът се огъва минимално при всяко движение. Ако линията ви пречи днес, най-вероятно след време ще заема по-голяма част от картината. Опасност за останалата част от лаптопа няма, така че решението кога да се смени екранът е изцяло ваше.',
+		),
+		array(
+			'q' => 'Екранът светва, но е много тъмен. Това същата повреда ли е?',
+			'a' => 'Не. Това обикновено е повреда в подсветката, а не в самия панел — при по-старите машини в лампата или инвертора на матрицата, при по-новите в захранването на светодиодната лента. Част от тези случаи се решават без смяна на екрана, затова ги оглеждаме, преди да предложим по-голямата намеса.',
+		),
+		array(
+			'q' => 'Ще загубя ли данните си?',
+			'a' => 'Не. Смяната на екран не засяга диска и не изисква преинсталиране на системата. Машината се връща точно както сте я оставили, само с работеща картина.',
+		),
+	),
+
+	// Up to the hub, across to the published siblings, out to one related
+	// category. Every href resolves through a publish gate; none is typed.
+	'related'  => array_merge(
+		array(array('text' => $torin_cat2['name'], 'href' => torin_category_href($torin_cat2))),
+		$torin_siblings,
+		array(array('text' => $torin_cat1['name'], 'href' => torin_category_href($torin_cat1)))
+	),
+
+	// 'prices' is deliberately NOT set. See the head comment.
+);
+
+require_once(dirname(__FILE__) . '/includes/header.php');
+?>
+
+<main>
+<?php torin_render_service_page($torin_page); ?>
+</main>
+
+<?php require_once(dirname(__FILE__) . '/includes/footer.php'); ?>
