@@ -1,23 +1,128 @@
 <?php
-// Per-page metadata (02-RESEARCH N-5). WORKING title and description carrying
-// the mechanism, derived from this page's existing subject; SEO-01 in Phase 3
-// owns the search-tuned copy, and CONTENT-01 owns the body below.
+// covid.html — the EU funding disclosure, ported from
+// site-current/covid.html:107-155.
 //
-// D-35: this page stays LIVE and deliberately unlinked from the navigation.
-// The EU grant publicity obligation has very likely lapsed, but the downside of
-// being wrong is an audit finding, and CONTENT-02 only requires that the
-// content stop competing for attention on the homepage. Do not retire the
-// filename — SEO-04 locks it, and any later retirement must be a 301 (D-36).
-$torin_title = 'Проект BG16RFOP002-2.073 · ТОРИН КОМПЮТЪРС';
-$torin_desc  = 'Подробности относно проект BG16RFOP002-2.073, изпълняван от ТОРИН КОМПЮТЪРС.';
+// D-35 / D-36 / RESEARCH C-1: this page STAYS LIVE. The publicity obligation is
+// scoped to the implementation period and the project ended on 04.11.2020, but
+// the compliant minimum is "a description on the website, if there is a
+// website", and a live page reachable from the footer exceeds that. The cost of
+// keeping it is a page nobody visits; the cost of being wrong about retiring it
+// is an audit finding. Do not retire it, do not 404 it, do not gate it. If it
+// is ever retired it is a 301, never a delete. OWNER-QUESTIONS #4 is the open
+// item that would allow that decision to be made at all.
+//
+// THE RESULTS PARAGRAPH IS PORTED EXACTLY AS PUBLISHED, INCLUDING THE COMPANY
+// NAME THAT DOES NOT MATCH THE BENEFICIARY. The «Резултат» field below names a
+// different company than the beneficiary named four fields lower — evidently
+// copy-pasted from another beneficiary submission. It is NOT corrected here, it
+// is not paraphrased around, and it carries no bracketed editorial note in the
+// rendered page. This is a funding disclosure with a compliance dimension:
+// whether to correct it, leave it because it reproduces submitted grant text,
+// or leave it and annotate it, is recorded as an explicit three-way choice for
+// the owner in OWNER-QUESTIONS #28, the dedicated item plan 03-05 filed for
+// this exact sentence; OWNER-QUESTIONS #4 carries the same three-way choice as
+// a note under the wider question of whether this page may be retired at all.
+// See also OWNER-QUESTIONS #25, which asks which legal entity trades as this
+// shop in the first place. This is the one place in this phase where
+// "improving while porting" (D3-13) stops and asks.
+//
+// For the same reason the administrative address below is ported with the
+// spelling it was published under, even though it does not look right. It is a
+// field in a registered grant record, not site copy, and site-config.php is
+// deliberately NOT consulted for it: the beneficiary address of a 2020 contract
+// is a historical fact, not the current contact address, and rendering the
+// shared config value here would silently rewrite the record if the shop ever
+// moves.
+//
+// The three programme logos were RENAMED TO ASCII on port. Two of the three
+// source filenames carried Cyrillic characters and plus signs; a Cyrillic path
+// segment has to be percent-encoded to be requested and is a known FTP/Apache
+// hazard on shared hosting, which is a poor thing to depend on for the assets
+// of a compliance page. The mapping is recorded in the plan SUMMARY. Widths and
+// heights below are the TRUE intrinsic pixels measured from the files — note
+// they do not match the dimensions the source filenames claimed.
+//
+// The legacy MARKUP is left behind: no Bootstrap column, no <center>, no <br>
+// used as a paragraph break, and no alt="Blog Single" on a European Union
+// emblem. Every ported string is a PHP value escaped once at the point of
+// output; only the label/value structure around it is authored here.
+$torin_title = 'Проект BG16RFOP002-2.073 · Торин Компютърс';
+$torin_desc  = 'Информация за проект BG16RFOP002-2.073 по ОПИК 2014-2020 — цели, стойност, финансиране и срокове на изпълнение в Торин Къмпани ООД.';
 require_once(dirname(__FILE__) . '/includes/header.php');
+
+// The disclosure, as label/value pairs grouped into blocks. Every value is the
+// published text. Headings are new; the source ran the whole record as one
+// paragraph broken by <br> tags.
+$torin_blocks = array(
+	array(
+		'heading' => 'Процедурата',
+		'rows'    => array(
+			array('Наименование на програмата', 'Оперативна програма Иновации и конкурентоспособност 2014-2020'),
+			array('Наименование на приоритетната ос', 'Приоритетна ос 2 „Предприемачество и капацитет за растеж на МСП“, Инвестиционен приоритет 2.2. „Капацитет за растеж на МСП“'),
+			array('Наименование на процедурата', 'BG16RFOP002-2.073 „Подкрепа на микро и малки предприятия за преодоляване на икономическите последствия от пандемията COVID-19“'),
+			array('Цел на процедурата', 'Осигуряването на оперативен капитал за българските микро и малки предприятия за справяне с последиците от пандемията COVID-19.'),
+			array('Очакваните резултати', 'Постигане на положителен ефект по отношение на микро и малки предприятия за преодоляване на икономическите последствия от пандемията COVID-19 и стабилност на работни места.'),
+			array('Индикатори', 'Брой предприятия, които не са в ликвидация 3 месеца след изпълнение на проекта'),
+		),
+	),
+	array(
+		'heading' => 'Проектът',
+		'rows'    => array(
+			array('Проект', 'BG16RFOP002-2.073 „Подкрепа на микро и малки предприятия за преодоляване на икономическите последствия от пандемията COVID-19“'),
+			array('Главна цел', 'Осигуряването на оперативен капитал за дружеството за справяне с последиците от пандемията COVID-19.'),
+			// PORTED EXACTLY AS PUBLISHED — see the note at the top of this file.
+			array('Резултат', 'Постигане на положителен ефект по отношение на ТОРИН КЪМПАНИ ООД за преодоляване на икономическите последствия от пандемията COVID-19 и стабилност на работни места. В резултат от изпълнението на проекта се очаква Венера-АКС ООД да продължи дейността си поне 3 месеца след приключване на проекта.'),
+		),
+	),
+	array(
+		'heading' => 'Финансиране',
+		'rows'    => array(
+			array('Обща стойност', '10 000 лева, от които 8 500 лева европейско финансиране и 1 500 лева национално финансиране.'),
+			array('Процент на съфинансиране', '0 %'),
+			array('Максимален интензитет на безвъзмездната помощ', '100 %'),
+		),
+	),
+	array(
+		'heading' => 'Бенефициент и договор',
+		'rows'    => array(
+			array('Бенефициент', 'ТОРИН КЪМПАНИ ООД'),
+			array('Административен адрес', 'София, ул. Свсиленица 3А'),
+			array('Адрес на изпълнение на проекта', 'София, ул. Св. Иван Рилски 46'),
+			array('ЕИК', '831452399'),
+			array('Договор по процедурата', 'BG16RFOP002-2.073-6307-C01'),
+			array('Начало на проекта', '04 август 2020 г.'),
+			array('Край на проекта', '04 ноември 2020 г.'),
+		),
+	),
+);
 ?>
 
-<main class="section">
-	<div class="container">
-		<h1>Проект BG16RFOP002-2.073</h1>
-		<p>Строим новия сайт на ТОРИН КОМПЮТЪРС тук. Тази страница е временен скелет, използван за да докаже, че PHP-include основата работи на живия хостинг.</p>
-	</div>
+<main>
+	<section class="section">
+		<div class="container">
+			<h1>Проект BG16RFOP002-2.073</h1>
+			<p class="svc__intro">Проектът е „Подкрепа на микро и малки предприятия за преодоляване на икономическите последствия от пандемията COVID-19“, изпълняван с финансовата подкрепа на Оперативна програма Иновации и конкурентоспособност 2014-2020, съфинансирана от Европейския съюз чрез Европейския фонд за регионално развитие.</p>
+		</div>
+	</section>
+
+	<section class="section section--tint svc__blocks">
+		<div class="container">
+			<div class="svc__block svc__block--prose">
+				<h2>Подробности относно проекта</h2>
+				<p><img src="img/eu/logos.png" width="500" height="153" alt="Лого на Европейския съюз, Европейския фонд за регионално развитие и Оперативна програма Иновации и конкурентоспособност" decoding="async"></p>
+				<p><img src="img/eu/eu-erdf.png" width="348" height="266" alt="Лого на Европейския съюз и Европейския фонд за регионално развитие" loading="lazy" decoding="async"></p>
+				<p><img src="img/eu/opic.png" width="298" height="228" alt="Лого на Оперативна програма Иновации и конкурентоспособност 2014-2020" loading="lazy" decoding="async"></p>
+			</div>
+<?php	foreach ($torin_blocks as $torin_block) { ?>
+			<div class="svc__block svc__block--prose">
+				<h2><?php echo htmlspecialchars($torin_block['heading'], ENT_QUOTES, 'UTF-8'); ?></h2>
+<?php		foreach ($torin_block['rows'] as $torin_row) { ?>
+				<p><strong><?php echo htmlspecialchars($torin_row[0], ENT_QUOTES, 'UTF-8'); ?>:</strong> <?php echo htmlspecialchars($torin_row[1], ENT_QUOTES, 'UTF-8'); ?></p>
+<?php		} ?>
+			</div>
+<?php	} ?>
+		</div>
+	</section>
 </main>
 
 <?php require_once(dirname(__FILE__) . '/includes/footer.php'); ?>

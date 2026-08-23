@@ -1,22 +1,95 @@
 <?php
-// Per-page metadata (02-RESEARCH N-5). WORKING title and description carrying
-// the mechanism, derived from this page's existing subject; SEO-01 in Phase 3
-// owns the search-tuned copy, and CONTENT-01 owns the body below.
+// uslovia.html — the privacy declaration and the terms it states, ported from
+// site-current/uslovia.html:109 (D3-13: a port, not a copy — what is visibly
+// wrong is fixed on the way across, what is legally substantive is not).
 //
-// NOTE for SEO-01/CONTENT-01: the legacy page under this filename is headed
-// «ДЕКЛАРАЦИЯ ЗА ПОВЕРИТЕЛНОСТ» — a privacy statement, not general terms. The
-// working title below follows the footer's «условия» label; Phase 3 should
-// decide which of the two this page actually is before tuning the copy.
-$torin_title = 'Общи условия · ТОРИН КОМПЮТЪРС';
-$torin_desc  = 'Декларация за поверителност и общи условия на ТОРИН КОМПЮТЪРС.';
+// The legacy MARKUP is deliberately left behind: no Bootstrap column, no
+// blockquote-wrapped heading, no inline style. Every string below is a PHP
+// value escaped once at the point of output, which is what keeps ported prose
+// from carrying ported HTML into this tree.
+//
+// D3-12 — THE ONE SUBSTANTIVE EDIT ON THIS PAGE. The declaration as published
+// extended consent, collection and processing commitments to a SECOND site
+// alongside this one. That second site no longer exists, so the declaration was
+// making data-processing promises on behalf of something that is gone. The
+// minimal correct change for a live legal statement is to NARROW it, not to
+// delete it: the second domain and its conjunction are removed and the sentence
+// is scoped to this site alone. Nothing else in the declaration is reworded.
+// The removed domain is deliberately NOT spelled anywhere in this file — the
+// do-not-import rule is enforced by a grep over src/, and a comment naming the
+// string would trip its own gate.
+//
+// Spelling was corrected on port where the source was visibly wrong. The
+// misspelled forms are not reproduced here, for the same reason.
+//
+// RETENTION COMMITMENT — a note for Phase 4 (CONTACT-01…04). The declaration
+// below promises that data is deleted from the records of the shop once the
+// enquiry has been satisfied. Any contact-form work that stores, forwards or
+// retains submissions must not contradict that sentence; if the form behaves
+// differently in practice, this page changes FIRST and the form follows.
+//
+// OPEN, and deliberately not resolved here: OWNER-QUESTIONS #25 (the site uses
+// a trading name and a legal name and states no company registration number, so
+// a visitor cannot tell from this page who they are contracting with) and #27
+// (what the shop should promise about customer data on the devices it repairs).
+// Neither is a developer decision. The declaration is ported as published and
+// the gaps are on the list for the owner.
+$torin_title = 'Общи условия и поверителност · Торин';
+$torin_desc  = 'Декларация за поверителност на Торин Компютърс: какви лични данни събираме, за какво ги използваме и кога ги изтриваме от регистрите си.';
 require_once(dirname(__FILE__) . '/includes/header.php');
+
+// The declaration, in blocks. Each block is a heading plus its paragraphs; the
+// paragraphs are the published text, split at sentence boundaries for reading
+// rather than rewritten. Headings are new — the source ran the whole
+// declaration as one unbroken paragraph under a single title.
+$torin_blocks = array(
+	array(
+		'heading' => 'Декларация за поверителност',
+		'paras'   => array(
+			'Чрез използването на сайта www.torin.bg и формите му за въпроси, Вие се съгласявате със събирането, обработването, използването на Вашите лични данни в съответствие с тази Декларация за поверителност.',
+		),
+	),
+	array(
+		'heading' => 'Какви данни събираме',
+		'paras'   => array(
+			'Торин Къмпани ООД събира личните данни, които Вие ни предоставяте докато използвате този сайт. Тези лични данни могат да включват Вашето име, имейл адрес и/или телефонен номер.',
+		),
+	),
+	array(
+		'heading' => 'За какво ги използваме',
+		'paras'   => array(
+			'Торин Къмпани ООД използва предоставените от Вас лични данни, за да се свърже с Вас и да Ви предостави информацията, която сте изискали при използване на нашия сайт — използваме Вашия имейл адрес и/или телефон, за да отговорим на Ваши коментари и въпроси.',
+		),
+	),
+	array(
+		'heading' => 'Поверителност и срок на съхранение',
+		'paras'   => array(
+			'В съответствие с настоящата Декларация за поверителност Вашите данни ще бъдат третирани като строго поверителни и ще бъдат изтрити от нашите регистри след като удовлетворим Вашите изисквания.',
+		),
+	),
+);
 ?>
 
-<main class="section">
-	<div class="container">
-		<h1>Общи условия</h1>
-		<p>Строим новия сайт на ТОРИН КОМПЮТЪРС тук. Тази страница е временен скелет, използван за да докаже, че PHP-include основата работи на живия хостинг.</p>
-	</div>
+<main>
+	<section class="section">
+		<div class="container">
+			<h1>Общи условия и поверителност</h1>
+			<p class="svc__intro">Тази страница съдържа декларацията за поверителност на сайта и условията, при които обработваме личните данни, които ни предоставяте.</p>
+		</div>
+	</section>
+
+	<section class="section section--tint svc__blocks">
+		<div class="container">
+<?php	foreach ($torin_blocks as $torin_block) { ?>
+			<div class="svc__block svc__block--prose">
+				<h2><?php echo htmlspecialchars($torin_block['heading'], ENT_QUOTES, 'UTF-8'); ?></h2>
+<?php		foreach ($torin_block['paras'] as $torin_para) { ?>
+				<p><?php echo htmlspecialchars($torin_para, ENT_QUOTES, 'UTF-8'); ?></p>
+<?php		} ?>
+			</div>
+<?php	} ?>
+		</div>
+	</section>
 </main>
 
 <?php require_once(dirname(__FILE__) . '/includes/footer.php'); ?>
