@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 03
 current_phase_name: content-trust-signal-build-out
 status: executing
-stopped_at: Phase 03 Waves 1-4 deployed and verified (8/9 plans); only 03-09 (site-wide SEO-01) remains
+stopped_at: Phase 03 all 9 plans complete, deployed and live-verified; ready for phase verification
 last_updated: "2026-08-18T00:00:00.000Z"
 last_activity: 2026-08-20
-last_activity_desc: Wave 4 complete; all 23 pages live, 200, zero warnings
+last_activity_desc: Phase 03 execution complete; SEO-01 closed, 23/23 titles distinct
 progress:
   total_phases: 3
   completed_phases: 2
   total_plans: 23
-  completed_plans: 22
+  completed_plans: 23
 ---
 
 # Project State
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-08-04)
 ## Current Position
 
 Phase: 03 (content-trust-signal-build-out) — EXECUTING
-Plan: 8 of 9 complete and ALL live-verified. Next: Wave 5 (03-09, site-wide SEO-01 closure).
+Plan: 9 of 9 complete and ALL live-verified. Next: phase verification.
 Status: Executing Phase 03
 Last activity: 2026-08-18 — 03-01 deployed to staging and verified PASS at both viewports
 
@@ -155,6 +155,11 @@ Recent decisions affecting current work:
 - [Phase 3]: 03-08: the plan's homepage-anchor gate `grep -oc 'index.html#kat-' -eq 1` can NEVER pass — two consumers render every category (card grid + Услуги dropdown), so each unpublished category emits TWO anchors. Correct assertion is one distinct CATEGORY: `grep -o 'index.html#kat-[0-9]' | sort -u | wc -l` -> 1, survivor #kat-6.
 - [Phase 3]: VERIFIED — index.html does NOT need re-deploying when a category is published. It reads categories.php at request time, so publishing kat-5 flipped its card and dropdown from anchor to page link with no index.html upload. Only #kat-6 remains as an anchor, correctly gated pending OWNER-QUESTIONS #3.
 - [Phase 3]: 03-08 category depth in Cyrillic words: mehanichni 1028, optimizatsiq 1070, pregryavane 955 — all above the 600 bar, and 1 & 3 slightly over the stated 600-1000 band. Left rather than cutting good copy. The plan's `wc -w` gate would have read 1457/1373/1217, inflated by English comments.
+
+- [Phase 3]: SEO-01 CLOSED and independently verified live 2026-08-26: 23 pages, 23 distinct titles, 0 duplicates, 0 empty descriptions, description length 87-139 chars, X-Robots-Tag noindex present on 23/23 (staging, correct — stripping it is the Phase 4 cutover todo). scripts/seo-metadata-check.js runs on bare Node 20 with no dependencies; `--live` checks served output, no argument checks source.
+- [Phase 3]: 03-09 DELETED src/phptest.html with user approval. It was a local-only Phase 1 spike file, 404 on staging and production, whose full record survives in 01-01-SUMMARY.md. Reason: deploy-new.sh with NO ARGUMENTS uploads all of src/ (scripts/deploy-new.sh:161), so the file was one no-arg deploy from publishing phpversion() output. The GSD cleanup helper blocked the merge on branch_contains_deletions; merged manually after review.
+- [Phase 3]: 03-09 found THREE of its own plan's verify commands broken, none masking a real defect but two producing false failures: (a) `grep -c 'if (!isset($torin_title))'` returns 0 because BSD grep mishandles the `$` — use grep -cF; (b) a price/turnaround grep matches EUR inside the English word "amateur" in a comment; (c) the quote-parity check fails on the UNTOUCHED tree (169 quotes at HEAD, unpaired ones are English possessives in // comments) and can never pass.
+- [Phase 3]: 03-09 added a separate NO_CTA_EXPECTED list rather than widening LONG_SUFFIX_OK — uslovia.html is a privacy declaration with no call to action, and widening the suffix list would have changed its RENDERED suffix to satisfy an unrelated rule.
 
 ### Pending Todos
 

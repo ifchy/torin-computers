@@ -110,7 +110,7 @@ Plans:
   5. A visitor sees dedicated content for the non-standard-electrical-equipment category as one of the six headline services, and no longer sees EU-project/COVID content competing for attention on the homepage.
   6. Every page has a unique `<title>` and `<meta name="description">` that accurately reflects its own content, replacing the current identical/empty values across all 16 pages.
 
-**Plans**: 8/9 plans executed
+**Plans**: 9/9 plans executed
 
 Plans:
 **Wave 1**
@@ -135,7 +135,7 @@ Plans:
 
 **Wave 5** *(blocked on Wave 4 completion)*
 
-- [ ] 03-09-PLAN.md — Site-wide SEO-01 closure: the uniqueness/ordering/non-empty gate over every served page, the homepage's metadata, and the shortened brand-suffix pass
+- [x] 03-09-PLAN.md — Site-wide SEO-01 closure: the uniqueness/ordering/non-empty gate over every served page, the homepage's metadata, and the shortened brand-suffix pass
 
 **Cross-cutting constraints:**
 
@@ -167,5 +167,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 |-------|----------------|--------|-----------|
 | 1. Migration Safety Net & Foundation | 5/5 | Complete    | 2026-08-05 |
 | 2. Design System & Information Architecture | 9/9 | Complete    | 2026-08-09 |
-| 3. Content & Trust-Signal Build-Out | 8/9 | In Progress|  |
+| 3. Content & Trust-Signal Build-Out | 9/9 | In Progress|  |
 | 4. Hardening & Cutover | 0/TBD | Not started | - |
