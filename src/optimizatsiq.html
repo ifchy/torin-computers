@@ -1,38 +1,163 @@
 <?php
-// Category 3 rendered through the D-24 template (includes/category-page.php).
-// The display name and the symptom line are read from the category record,
-// never retyped here.
+// Category 3 rendered through the D-24 template (includes/category-page.php),
+// authored to the D3-14 Definition of Done by plan 03-08.
+//
+// The display name and the symptom line are read from the category record via
+// cat_id, never retyped here.
 //
 // D-28: профилактика is cross-listed under this category as a LINK to the one
 // existing page, never as duplicated body copy. One URL, one canonical, no
 // duplicate-content exposure — the internal link from a second topical context
-// is the entire benefit. Do not paste that page's content here.
+// is the entire benefit. Do not paste that page content here; the gate for this
+// task compares every sentence over 90 characters against it.
 //
-// Sub-service names come from D-26's mapping table. Depth (intro, гаранция,
-// process, FAQ, related, prices) is Phase 3 per D-25.
+// This was the WEAKEST of the six categories in the content inventory, so more
+// of this page is newly written than ported. The spine is still the shop own
+// copy: site-current/optimizatsiq.html:115 (an operating system carrying years
+// of accumulated software), :117 (hardware never specified for what is now
+// asked of it), :119 (a failing drive, bad sectors, and the irreplaceable
+// photographs) and :121 (a board fault, unlikely, and only diagnosable after
+// the other three are excluded). Nothing here claims a capability the shop has
+// not claimed. Legacy MARKUP is left behind (P-9); working hours and phone
+// numbers are NOT restated here, site-config.php owns those facts (P-11).
+//
+// TERMINOLOGY (locked user decision, deliberately REVERSING existing site
+// usage — do not «correct» it back): customer-facing copy says «екран», not
+// «матрица». Neither word has a natural place on this page and neither appears.
 require_once(dirname(__FILE__) . '/includes/category-page.php');
 
-$torin_cat = torin_category_by_id('kat-3');
+$torin_opt_cat  = torin_category_by_id('kat-3');
+// Category 5 resolved through the record, so this link follows the D-23 publish
+// gate rather than assuming the page is live. Plan 03-08 publishes kat-5 in its
+// third task; until that flip lands, this same line routes to the homepage
+// anchor instead of to a 404, with no edit here.
+$torin_opt_kat5 = torin_category_by_id('kat-5');
 
-// Per-page metadata (02-RESEARCH N-5). The title is built from the shared
-// record for the same reason the h1 is; SEO-01 in Phase 3 owns the final copy.
-$torin_title = $torin_cat['name'] . ' · ТОРИН КОМПЮТЪРС';
-$torin_desc  = 'Ускоряване и ъпгрейд на лаптоп — безплатни съвети за бързодействие и профилактика.';
+// Per-page metadata. The title is a LITERAL and is deliberately no longer
+// derived from the category record: a category name is a navigation label,
+// while a title is a search result first line. Decoupling them is the
+// prerequisite for a keyword-first title (D3-14/SEO-01), and it is why the h1
+// below is also an explicit override rather than the record name — the record
+// name here is the single word «Оптимизация», which nobody searches for alone.
+$torin_title = 'Оптимизация и ускоряване на лаптоп · Торин';
+$torin_desc  = 'Бавен лаптоп в София — преинсталация, SSD, повече памет или отказващ диск. Обадете се за безплатна диагностика още днес.';
 
-$torin_cat_key  = $torin_cat['id'];
-$torin_cat_page = array(
-	'cat_id' => $torin_cat_key,
+// The breadcrumb chain, assigned ONCE and read twice: torin_render_service_page()
+// renders the visible nav from it, and jsonld.php emits the matching
+// BreadcrumbList from the same array after footer.php includes it.
+$torin_crumbs = array(
+	array('text' => 'Начало', 'href' => 'index.html'),
+	array('text' => $torin_opt_cat['name'], 'href' => $torin_opt_cat['page']),
+);
+
+$torin_opt_page = array(
+	// The SAME literal the lookup above uses, written out rather than passed
+	// through a variable so a record-integrity grep can see which category this
+	// page is. The name and the symptom line still come from the record.
+	'cat_id' => 'kat-3',
+
+	// 42 characters, inside the 48-character cap.
+	'h1'     => 'Оптимизация и ускоряване на лаптоп в София',
+
+	'crumbs' => $torin_crumbs,
+
+	'intro'  => 'Когато лаптопът стане забележимо по-бавен, започне да се бави при задачи, които преди е изпълнявал веднага, или от време на време блокира, причината почти винаги е една от четири. Те изискват различна работа и струват различно, а една от тях изобщо не търпи отлагане. Затова първата стъпка не е препоръка, а диагностика: кажем ли ви коя от четирите е вашата, решението обикновено става очевидно. Диагностиката е безплатна.',
+
 	'fixes'  => array(
-		array('text' => 'Безплатни съвети за бързодействие'),
-		array('text' => 'Профилактика на лаптоп', 'href' => 'profilaktika-laptop.html'),
+		array('text' => 'Чиста преинсталация на операционната система със запазване на данните'),
+		array('text' => 'Смяна на диска с SSD и прехвърляне на съдържанието'),
+		array('text' => 'Разширяване на оперативната памет'),
+		array('text' => 'Премахване на натрупания софтуер, който стартира с машината'),
+		array('text' => 'Профилактика, когато машината се забавя от прегряване', 'href' => 'profilaktika-laptop.html'),
+		array('text' => 'Диагностика на дънната платка, когато причината не е в предните четири'),
 	),
+
+	'blocks' => array(
+
+		array(
+			'kind'    => 'prose',
+			'heading' => 'Четирите причини лаптопът да е бавен',
+			'items'   => array(
+				'Първата и най-честа е самата операционна система. Ако с годините сте инсталирали и махали много програми, машината носи следите от всички тях: почти нищо не се деинсталира докрай, а част от остатъците се стартират заедно с Windows и остават да работят във фонов режим. Деинсталирането на програмите след това не връща предишната скорост, защото това, което забавя машината, вече не е в тях. Работата тук е или почистване и настройка на системата, или чиста преинсталация — а коя от двете зависи от това колко дълбоко е стигнало натрупването.',
+				'Втората е самата машина. Изискванията на програмите растат всяка година, а вашият лаптоп е бил купен за изискванията на своята. Ако процесорът е от по-слабата гама за времето си или оперативната памет е на предела при отворени няколко раздела в браузъра, никаква настройка на системата няма да го промени — тя оправя софтуер, а тук ограничението е физическо. Работата е ъпгрейд: повече памет, а много по-често смяна на механичния диск със SSD, което е единствената промяна, която се усеща от първото стартиране.',
+				'Третата е дискът и тя е различна от другите три, защото не е въпрос на удобство. При продължителна работа или след сътресение в диска се появяват лоши сектори; той започва да греши при четене и запис и всяко такова забавяне е опит да прочете нещо, което вече не се чете чисто. Отвън това изглежда точно като бавна машина. Работата е подмяна на диска и прехвърляне на съдържанието, а старият диск обикновено се монтира във външна кутия, за да остане достъпен.',
+				'Четвъртата е дефект в дънната платка. Тя е най-рядката и затова се проверява последна: установява се чак след като първите три са изключени, защото иначе се плаща диагностика за нещо, което щеше да се реши с диск за една сутрин. Ако все пак причината е там, това е работа на ниво платка и я вършим — но не започваме от нея.',
+			),
+		),
+
+		array(
+			'kind'    => 'callout',
+			// The urgent tone, used here for the second and last time in the
+			// phase. It is earned: this is the one of the four causes where
+			// waiting costs the visitor something irreversible. Note the
+			// heading itself states the urgency, so colour is not the sole
+			// carrier of the message (UI-SPEC §5).
+			'tone'    => 'urgent',
+			'heading' => 'Ако дискът отказва, данните са първи',
+			'items'   => array(
+				'Диск, който вече греши, не се влошава плавно — работи, работи и в един момент спира да се чете. Затова редът е обратен на очаквания: първо се прави копие на съдържанието, докато то още се чете, и чак след това се мисли за ускоряване на машината. Всеки ден нормална работа с отказващ диск отнема от това, което по-късно може да бъде извадено, защото машината продължава да пише върху сектори, които вече не са надеждни.',
+				'Струва си да го кажем направо, защото хората рядко идват заради това: почти никой не съжалява за загубените програми. Съжалява за снимките и за документите, които са били само на този диск и никъде другаде. Ако лаптопът ви се бави, забива за секунди и се връща, или издава щракащ звук, спрете да работите с него и ни се обадете, преди да сте го стартирали още веднъж.',
+			),
+			'link'    => array(
+				'text' => 'Тествайте сам лаптопа си',
+				'href' => 'test-laptop.html',
+			),
+		),
+	),
+
+	// A KEY, never a literal: the term itself lives once, in site-config.php,
+	// and every page that renders a warranty renders the same fact (D3-10).
+	'warranty_key' => 'default',
+
+	'process' => array(
+		'Питаме ви кога машината е станала бавна, стана ли го изведнъж или постепенно, и има ли данни на нея, които не са копирани другаде.',
+		'Проверяваме състоянието на диска преди всичко останало — това е единствената от четирите причини, при която редът има значение.',
+		'Измерваме какво реално ограничава машината под натоварване, вместо да гадаем по възрастта и по спецификацията.',
+		'Изключваме прегряването като причина: машина, която намалява собствената си скорост от температура, не се лекува с преинсталация.',
+		'Обаждаме се и ви казваме коя е причината, какво предлагаме и колко струва. Не започваме платена работа, без да сте се съгласили.',
+		'Изпълняваме работата, прехвърляме данните, ако се налага, и връщаме машината с гаранционна карта.',
+	),
+
+	'faq' => array(
+		array(
+			'q' => 'Ще загубя ли данните си при преинсталация?',
+			'a' => 'Не, освен ако изрично не поискате друго. Стандартно правим копие на съдържанието, преди да пипнем системата, и го връщаме след това. Кажете ни при приемането кое е важното — потребителският профил, снимките, пощата, работни файлове на определено място — и ще потвърдим, че точно то е копирано, преди да започнем. Единственото, което не се пренася, са самите инсталирани програми; те се инсталират наново.',
+		),
+		array(
+			'q' => 'Струва ли си SSD на по-стара машина?',
+			'a' => 'В повечето случаи това е единствената промяна с най-осезаем ефект и на осемгодишна машина. Механичният диск е най-бавната част в почти всеки лаптоп и подмяната му се усеща веднага при стартиране, при отваряне на програми и при работа с няколко неща едновременно. Изключенията са две: когато оперативната памет е толкова малко, че машината и без това постоянно ползва диска, и когато има дефект в платката. И двете се виждат на диагностиката.',
+		),
+		array(
+			'q' => 'Ще помогне ли повече оперативна памет?',
+			'a' => 'Помага, когато машината се задъхва при много отворени неща едновременно — десетки раздела в браузъра, тежък документ и още нещо отстрани. Не помага, когато проблемът е бавен диск или натрупан софтуер, а точно това е най-честият случай. Затова не препоръчваме памет по телефона: проверяваме дали паметта наистина е ограничението, преди да ви предложим да платите за нея.',
+		),
+		array(
+			'q' => 'Струва ли си изобщо да поправям тази машина?',
+			'a' => 'Понякога не и ви го казваме. Ако лаптопът е на осем или повече години, ако корпусът и пантите вече се разпадат и ако единственото, което ще го направи използваем, е и нов диск, и нова памет, сборът често надхвърля разумното за машина, която и след това ще е на осем години. В такъв случай казваме кое от двете си струва — обикновено само дискът, за да извадите данните — и ви оставяме да решите. Диагностиката остава безплатна и когато отговорът е, че не си струва.',
+		),
+		array(
+			'q' => 'Лаптопът се бави и вентилаторът шуми постоянно. Това същият проблем ли е?',
+			'a' => 'Вероятно не. Машина, която прегрява, сама намалява скоростта си, за да се защити, и отвън това изглежда като бавна машина. Разликата е, че при нея забавянето идва след няколко минути работа, а не веднага, и обикновено се придружава от шум. Ако това описва вашия случай, работата не е оптимизация, а охлаждане.',
+		),
+	),
+
+	'related' => array(
+		// Профилактика is cross-listed as a LINK (D-28). The page exists, it is
+		// canonical, and nothing from it is repeated here.
+		array('text' => 'Профилактика на лаптоп', 'href' => 'profilaktika-laptop.html'),
+		array('text' => $torin_opt_kat5['name'], 'href' => torin_category_href($torin_opt_kat5)),
+		array('text' => 'Тествайте сам лаптопа си', 'href' => 'test-laptop.html'),
+	),
+
+	// 'prices' is deliberately NOT set. The slot stays unused this phase by
+	// design (D3-06, PRICE-01 is v2) and accepts numbers later with no redesign.
 );
 
 require_once(dirname(__FILE__) . '/includes/header.php');
 ?>
 
 <main>
-<?php torin_render_category_page($torin_cat_page); ?>
+<?php torin_render_service_page($torin_opt_page); ?>
 </main>
 
 <?php require_once(dirname(__FILE__) . '/includes/footer.php'); ?>
