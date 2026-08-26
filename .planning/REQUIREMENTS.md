@@ -19,20 +19,20 @@ Requirements for the redesign launch. Each maps to roadmap phases.
 
 ### Trust Signals
 
-- [ ] **TRUST-01**: User sees an "all brands serviced" row (Lenovo, HP, Dell, Asus, Acer, Apple, MSI, etc.)
+- [x] **TRUST-01**: User sees an "all brands serviced" row (Lenovo, HP, Dell, Asus, Acer, Apple, MSI, etc.)
 - [ ] **TRUST-02**: User sees a Google rating badge linking to the shop's Google Business Profile reviews
-- [ ] **TRUST-03**: User sees warranty terms summarized directly on relevant service pages, not only buried in a separate warranty page
+- [x] **TRUST-03**: User sees warranty terms summarized directly on relevant service pages, not only buried in a separate warranty page
 
 ### Differentiators
 
-- [ ] **DIFF-01**: User sees the self-diagnostic tool ("Тествай сам своя лаптоп") surfaced as a homepage-level feature, not buried in nav
-- [ ] **DIFF-02**: User sees the battery-regeneration story (Panasonic-cell regeneration vs. new-battery resale) surfaced as a distinct differentiator
-- [ ] **DIFF-03**: User sees the shop's BGA/chip-level repair expertise presented with clear visual hierarchy alongside liquid/motherboard-damage content
+- [x] **DIFF-01**: User sees the self-diagnostic tool ("Тествай сам своя лаптоп") surfaced as a homepage-level feature, not buried in nav
+- [x] **DIFF-02**: User sees the battery-regeneration story (Panasonic-cell regeneration vs. new-battery resale) surfaced as a distinct differentiator
+- [x] **DIFF-03**: User sees the shop's BGA/chip-level repair expertise presented with clear visual hierarchy alongside liquid/motherboard-damage content
 
 ### Content
 
 - [ ] **CONTENT-01**: User sees dedicated content for "нестандартно ел. оборудване" (non-standard electrical equipment) servicing as one of the six headline categories (scope to be confirmed with owner during phase work)
-- [ ] **CONTENT-02**: User no longer sees EU-project/COVID content competing for attention on the homepage (moved to About page)
+- [x] **CONTENT-02**: User no longer sees EU-project/COVID content competing for attention on the homepage (moved to About page)
 
 ### Contact & Conversion
 
@@ -43,7 +43,7 @@ Requirements for the redesign launch. Each maps to roadmap phases.
 
 ### SEO & Technical Hygiene
 
-- [ ] **SEO-01**: Every page has a unique `<title>` and `<meta name="description">` (currently identical/empty across all 16 pages)
+- [x] **SEO-01**: Every page has a unique `<title>` and `<meta name="description">` (currently identical/empty across all 16 pages)
 - [x] **SEO-02**: Every page declares `lang="bg"` instead of the current `lang="en"`
 - [ ] **SEO-03**: Site has a `robots.txt` and `sitemap.xml`, submitted to Search Console
 - [x] **SEO-04**: All existing page URLs are preserved unchanged through the redesign (no slug/filename changes)
@@ -90,19 +90,19 @@ Which phases cover which requirements. Populated during roadmap creation.
 | DESIGN-02 | Phase 4 | Pending |
 | IA-01 | Phase 2 | Complete |
 | IA-02 | Phase 2 | Complete |
-| TRUST-01 | Phase 3 | Pending |
-| TRUST-02 | Phase 3 | Pending |
-| TRUST-03 | Phase 3 | Pending |
-| DIFF-01 | Phase 3 | Pending |
-| DIFF-02 | Phase 3 | Pending |
-| DIFF-03 | Phase 3 | Pending |
-| CONTENT-01 | Phase 3 | Pending |
-| CONTENT-02 | Phase 3 | Pending |
+| TRUST-01 | Phase 3 | Complete |
+| TRUST-02 | Phase 3 | Pending — gated: badge built and wired, OFF by default pending OWNER-QUESTIONS #7 (rating, review count, profile URL) |
+| TRUST-03 | Phase 3 | Complete |
+| DIFF-01 | Phase 3 | Complete |
+| DIFF-02 | Phase 3 | Complete |
+| DIFF-03 | Phase 3 | Complete |
+| CONTENT-01 | Phase 3 | Pending — partial: page authored with zero invented claims, kat-6 unpublished pending OWNER-QUESTIONS #3a-#3f |
+| CONTENT-02 | Phase 3 | Complete |
 | CONTACT-01 | Phase 4 | Pending |
 | CONTACT-02 | Phase 4 | Pending |
 | CONTACT-03 | Phase 4 | Pending |
 | CONTACT-04 | Phase 4 | Pending |
-| SEO-01 | Phase 3 | Pending |
+| SEO-01 | Phase 3 | Complete |
 | SEO-02 | Phase 2 | Complete |
 | SEO-03 | Phase 4 | Pending |
 | SEO-04 | Phase 1 | Complete |

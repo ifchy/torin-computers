@@ -4,11 +4,11 @@ milestone: v1.0
 milestone_name: milestone
 current_phase: 03
 current_phase_name: content-trust-signal-build-out
-status: executing
-stopped_at: Phase 03 all 9 plans complete, deployed and live-verified; ready for phase verification
+status: verifying
+stopped_at: Phase 03 verified (human_needed) — 7/9 requirements Complete, TRUST-02 and CONTENT-01 gated on owner input; 8 UAT items open
 last_updated: "2026-08-26T12:22:08.156Z"
 last_activity: 2026-08-26
-last_activity_desc: Phase 03 executed (9/9, deployed, live-verified); awaiting 03-VERIFICATION.md to mark complete
+last_activity_desc: Phase 03 verification complete — status human_needed, 03-UAT.md written
 progress:
   total_phases: 3
   completed_phases: 2
@@ -160,6 +160,11 @@ Recent decisions affecting current work:
 - [Phase 3]: 03-09 DELETED src/phptest.html with user approval. It was a local-only Phase 1 spike file, 404 on staging and production, whose full record survives in 01-01-SUMMARY.md. Reason: deploy-new.sh with NO ARGUMENTS uploads all of src/ (scripts/deploy-new.sh:161), so the file was one no-arg deploy from publishing phpversion() output. The GSD cleanup helper blocked the merge on branch_contains_deletions; merged manually after review.
 - [Phase 3]: 03-09 found THREE of its own plan's verify commands broken, none masking a real defect but two producing false failures: (a) `grep -c 'if (!isset($torin_title))'` returns 0 because BSD grep mishandles the `$` — use grep -cF; (b) a price/turnaround grep matches EUR inside the English word "amateur" in a comment; (c) the quote-parity check fails on the UNTOUCHED tree (169 quotes at HEAD, unpaired ones are English possessives in // comments) and can never pass.
 - [Phase 3]: 03-09 added a separate NO_CTA_EXPECTED list rather than widening LONG_SUFFIX_OK — uslovia.html is a privacy declaration with no call to action, and widening the suffix list would have changed its RENDERED suffix to satisfy an unrelated rule.
+
+- [Phase 3]: VERIFIED 2026-08-26, status human_needed. 7 requirements Complete (TRUST-01, TRUST-03, DIFF-01/02/03, CONTENT-02, SEO-01); TRUST-02 and CONTENT-01 stay Pending by explicit decision, not defect. Verifier re-derived the headline assertions with its OWN parser rather than trusting the project's gates: 23/23 non-empty and distinct titles and descriptions, zero script-mixed words, exactly one h1 per page, all 45 distinct relative link targets return 200, zero PHP warnings, main-content Cyrillic counts 767-1165, 7 probe runs all PASS.
+- [Phase 3]: W-1 SUBSTANTIVE — za-bateriite.html advertises a 1-YEAR battery warranty whose «Пълни гаранционни условия» link lands on warrently.html, which states «за всички сервизни дейности и услуги е 1 месец» and never mentions batteries. Inherited from the legacy site and correctly left unharmonised per OWNER-QUESTIONS #23, but Phase 3 RAISED the exposure by giving batteries their own page. Must become a named rider on #23 — never fixed by guessing which term the shop honours.
+- [Phase 3]: W-3 the dev theme switcher renders on all 23 staging pages — documented Phase-2 artefact with a Phase-4 removal step, not a leak. W-4 google1718743335455f1c.html (Search Console token) has no counterpart in src/ — MIGR-02/Phase 4, easy to lose at cutover.
+- [Phase 3]: TRUST-02's ENABLED render path has never executed anywhere — no local PHP runtime and staging serves the disabled branch. Presence and wiring at both call sites (index.html:285, category-page.php:561) are proven; rendering is NOT. Recorded as behavior_unverified, not as passing.
 
 ### Pending Todos
 
