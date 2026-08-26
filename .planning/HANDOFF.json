@@ -1,0 +1,77 @@
+{
+  "version": "1.0",
+  "timestamp": "2026-08-26T12:22:08.156Z",
+  "phase": "03",
+  "phase_name": "content-trust-signal-build-out",
+  "phase_dir": ".planning/phases/03-content-trust-signal-build-out",
+  "plan": 9,
+  "task": null,
+  "total_tasks": 9,
+  "status": "paused",
+  "completed_tasks": [
+    {"id": 1, "name": "03-01 service-page renderer + content machine", "status": "done", "commit": "53b421e"},
+    {"id": 2, "name": "03-02 trust signals + differentiator surfaces", "status": "done", "commit": "360eff2"},
+    {"id": 3, "name": "03-03 category-2 hub + first two children", "status": "done", "commit": "4d75010"},
+    {"id": 4, "name": "03-04 three differentiator depth pages", "status": "done", "commit": "5c1ee5c"},
+    {"id": 5, "name": "03-05 category 6, surge page, About + EU relocation", "status": "done", "commit": "73431d4"},
+    {"id": 6, "name": "03-06 six legal and utility pages", "status": "done", "commit": "9363a13"},
+    {"id": 7, "name": "03-07 remaining three category-2 children", "status": "done", "commit": "b1b03b1"},
+    {"id": 8, "name": "03-08 last three category pages to DoD", "status": "done", "commit": "feb41fb"},
+    {"id": 9, "name": "03-09 site-wide SEO-01 closure", "status": "done", "commit": "10d0844"}
+  ],
+  "remaining_tasks": [
+    {"id": 10, "name": "Phase verification — run gsd-verifier to produce 03-VERIFICATION.md", "status": "not_started"},
+    {"id": 11, "name": "Human UAT — /gsd-verify-work 3 (blocked on 03-VERIFICATION.md existing)", "status": "not_started"}
+  ],
+  "blockers": [
+    {
+      "description": "03-VERIFICATION.md does not exist. Confirmed by direct `find` (not just the verification.status query, which is known to misreport). init.verify-work returns verification_status:'missing' and uat_blockers:['policy: verification required but no passing *-VERIFICATION.md found'].",
+      "type": "technical",
+      "workaround": "Run the gsd-verifier agent to produce it. UAT can be conducted without it, but the phase cannot auto-transition to complete until it exists and passes."
+    },
+    {
+      "description": "scripts/deploy-new.sh is denied to subagents by the environment permission classifier. The main orchestrator CAN run it directly; subagents cannot.",
+      "type": "human_action",
+      "workaround": "Orchestrator runs the deploy, or the user runs it with a leading '!'. Never let a subagent record a live check as passing when it could not deploy."
+    }
+  ],
+  "async_jobs": [],
+  "human_actions_pending": [
+    {
+      "action": "Answer OWNER-QUESTIONS #3 (Category 6 scope: 3a equipment, 3b work, 3c out-of-scope, 3d proof, 3e commercial, 3f naming)",
+      "context": "Category 6 shipped with real structure but ZERO invented claims, promotion gated on a boolean in categories.php. Its out-of-scope section was deliberately omitted rather than guessed. Phase 3 success criterion 5 is not fully met until this is answered. This is the single largest content gap in the project.",
+      "blocking": true
+    },
+    {
+      "action": "Answer OWNER-QUESTIONS #7 — live Google rating, review count, profile URL",
+      "context": "The rating badge is fully built but gated OFF (gbp_badge_enabled => false in site-config.php). Enabling needs a boolean flip plus THREE values, not two — the profile URL has never been captured in this repo.",
+      "blocking": false
+    },
+    {
+      "action": "Answer OWNER-QUESTIONS #16 — the words customers actually use per category",
+      "context": "Every [ASSUMED] symptom line across the site is waiting on this. Highest-value single answer in the document.",
+      "blocking": false
+    },
+    {
+      "action": "Answer OWNER-QUESTIONS #23 — warranty terms, and specifically a ruling on the 5-6 hours/day clause",
+      "context": "warrently.html reproduces the clause in the shop's published wording while the shared per-page summary carries the D3-10 reframing. A source comment FORBIDS harmonising the two until this is ruled on.",
+      "blocking": false
+    },
+    {
+      "action": "Provision a Viber account on 088 9458404 (OWNER-QUESTIONS #21)",
+      "context": "Decided already; all three published numbers tested and none has Viber. This is a Phase 4 cutover gate tracked in .planning/todos/pending/verify-viber-button-before-launch.md.",
+      "blocking": false
+    }
+  ],
+  "decisions": [
+    {"decision": "«екран» is preferred over «матрица» in customer-facing text site-wide; child slug is smyana-na-ekran.html", "rationale": "User decision 2026-08-20. Customer-facing titles/h1s/nav/meta/body use «екран»; «матрица» retained only as a precise part reference (bare LCD panel, part specs, or a customer quoting another shop). Deliberately reverses existing usage — live site ran матриц- 14x vs екран 5x.", "phase": "03"},
+    {"decision": "CSS comments are stripped at DEPLOY time, not deleted from source", "rationale": "components.css was ~60% comments by raw bytes; the tree was 2,234 B OVER the 20,480 B transfer budget, not 27 B under. scripts/lib/strip-css-comments.py (string-aware, not regex) wired into deploy-new.sh took production CSS 22,714 -> 5,309 B gzipped. Source keeps the rationale that prevented the CR-01/CR-02 defects in Phase 2.", "phase": "03"},
+    {"decision": "src/phptest.html deleted (user-approved)", "rationale": "Local-only Phase 1 spike file, 404 on staging and production, full record preserved in 01-01-SUMMARY.md. deploy-new.sh with NO arguments uploads all of src/, so it was one no-arg deploy from publishing phpversion() output. GSD cleanup blocked on branch_contains_deletions; merged manually after review.", "phase": "03"},
+    {"decision": "Category 6 ships structure with zero invented claims, promotion gated on a boolean", "rationale": "User decision. No source material exists anywhere for this category. Fabricated service claims on a repair shop's site are a real-world harm — customers act on them.", "phase": "03"},
+    {"decision": "Google rating badge built but gated OFF by default with an emptiness safety net", "rationale": "User decision. GBP review status was never verified; a badge pointing at an empty or non-existent profile is worse than none.", "phase": "03"},
+    {"decision": "origin/main must be pushed level with HEAD before every wave dispatch", "rationale": "Claude Code's isolation='worktree' forks from origin/HEAD, and the worktree.baseRef:'head' setting is not honoured mid-session (the harness also strips the key when it rewrites settings.local.json). Wave 1 halted on a base mismatch until origin was realigned. `git remote set-head origin -a` fixed origin/HEAD resolution permanently.", "phase": "03"}
+  ],
+  "uncommitted_files": [],
+  "next_action": "Run the gsd-verifier agent for phase 03 to produce 03-VERIFICATION.md, then run /gsd-verify-work 3 for human UAT. The verifier should be told CONTENT-01 is knowingly incomplete (Category 6 gated pending OWNER-QUESTIONS #3) so it does not report that as a surprise.",
+  "context_notes": "Phase 3 execution is fully done: 9/9 plans merged, deployed to https://torin.bg/new/, and independently live-verified. 23 pages all return 200 with zero PHP warnings and zero source leak; every svc-page/trust-signals probe PASSES at 360x640 and 1440x900; SEO-01 verified independently of the plan's own gate (23 distinct titles, 0 duplicates, 0 empty descriptions, descriptions 87-139 chars, X-Robots-Tag noindex on 23/23 which is correct for staging). The live site at torin.bg/ is untouched throughout — all work is confined to the public_html/new/ staging subtree. What remains is process, not code: no VERIFICATION.md was ever produced because the user invoked /gsd-verify-work directly rather than letting execute-phase reach its verify_phase_goal step. The single most important lesson of this phase is that local gates cannot validate PHP on this project — the $torin_page global collision passed every local gate and shipped HTTP 200 while rendering the single letter 's' where the prose belonged. Only the live deploy caught it."
+}
