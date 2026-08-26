@@ -1,38 +1,178 @@
 <?php
-// Category 1 rendered through the D-24 template (includes/category-page.php).
-// The display name and the symptom line are NOT typed here — they are read
-// from the category record, so this page cannot drift from the card grid or
-// the Услуги dropdown.
+// Category 1 rendered through the D-24 template (includes/category-page.php),
+// authored to the D3-14 Definition of Done by plan 03-08.
 //
-// This is deliberately the THIN case. Six optional blocks are left unset and
-// must leave no trace at all in the served HTML — that is what this page
-// exists to prove. Sub-service names come from D-26's mapping table and
-// nowhere else; счупени панти moved here from category 2 under D-41's
-// physical-damage split. Depth (intro, гаранция, process, FAQ, related,
-// prices) is Phase 3 per D-25.
+// The display name and the symptom line are read from the category record via
+// cat_id, never retyped here, so a D-40 rename cannot strand a stale name on
+// this page.
+//
+// This page WAS the deliberate thin case in Phase 2 — two sub-service lines and
+// nothing else, proving the six optional blocks left no trace in the served
+// HTML. That job is done and D-25 assigns the depth to Phase 3, which is what
+// this file now carries.
+//
+// Every claim below is PORTED from site-current/mehanichni-problemi.html, not
+// invented: the head-crash passage from :110, the LCD fragility passage
+// from :113, the lid-mechanism argument from :115 (breakage comes as often
+// from a loosening hinge and poor design as from the fall itself), the keyboard
+// passage from :117 and the gradual-damage argument for jacks and connectors
+// from :157-159. The legacy MARKUP is deliberately left behind (P-9): no
+// Bootstrap class, no icon font, no inline style enters this tree. Working
+// hours and phone numbers are NOT restated here; site-config.php owns those
+// facts (P-11).
+//
+// TERMINOLOGY (locked user decision, deliberately REVERSING existing site
+// usage — do not «correct» it back): customer-facing copy says «екран», not
+// «матрица». The legacy page at :121 calls them «LCD матрици»; that word is
+// kept only where it means the bare panel as a PART, and this page has no such
+// use, so it does not appear here at all.
 require_once(dirname(__FILE__) . '/includes/category-page.php');
+require_once(dirname(__FILE__) . '/includes/services.php');
 
-$torin_cat = torin_category_by_id('kat-1');
+$torin_meh_cat = torin_category_by_id('kat-1');
 
-// Per-page metadata (02-RESEARCH N-5). The title is built from the shared
-// record for the same reason the h1 is; SEO-01 in Phase 3 owns the final copy.
-$torin_title = $torin_cat['name'] . ' · ТОРИН КОМПЮТЪРС';
-$torin_desc  = 'Ремонт след изпускане или механичен удар — счупен корпус, шаси и разхлабени панти.';
+// The five D3-03 child records, resolved through torin_service_href() rather
+// than by typing a filename. An unpublished child routes to its parent hub, so
+// this page cannot link to a 404 no matter which children are live on the day
+// it is read — which is the whole reason no href below is hand-typed.
+$torin_meh_panti      = torin_service_by_id('svc-panti');
+$torin_meh_ekran      = torin_service_by_id('svc-ekran');
+$torin_meh_klaviatura = torin_service_by_id('svc-klaviatura');
+$torin_meh_buksa      = torin_service_by_id('svc-buksa');
+$torin_meh_kat2       = torin_category_by_id('kat-2');
 
-$torin_cat_key  = $torin_cat['id'];
-$torin_cat_page = array(
-	'cat_id' => $torin_cat_key,
-	'fixes'  => array(
-		array('text' => 'Счупени панти'),
-		array('text' => 'Повреди по корпуса и шасито'),
+// Per-page metadata. The title is a LITERAL and is deliberately no longer
+// derived from the category record: a category name is a navigation label,
+// while a title is a search result first line. Decoupling them is the
+// prerequisite for a keyword-first title (D3-14/SEO-01), and it is why the h1
+// below is also an explicit override rather than the record name.
+$torin_title = 'Ремонт на счупен лаптоп София · Торин';
+$torin_desc  = 'Ремонт на счупен лаптоп в София — корпус, панти, екран, клавиатура и букса. Обадете се за безплатна диагностика още днес.';
+
+// The breadcrumb chain, assigned ONCE and read twice: torin_render_service_page()
+// renders the visible nav from it, and jsonld.php emits the matching
+// BreadcrumbList from the same array after footer.php includes it. One array,
+// so the two cannot disagree about the site hierarchy.
+$torin_crumbs = array(
+	array('text' => 'Начало', 'href' => 'index.html'),
+	array('text' => $torin_meh_cat['name'], 'href' => $torin_meh_cat['page']),
+);
+
+$torin_meh_page = array(
+	// The SAME literal the lookup above uses, written out rather than passed
+	// through a variable so a record-integrity grep can see which category this
+	// page is. The name and the symptom line still come from the record.
+	'cat_id' => 'kat-1',
+
+	// 31 characters, inside the 48-character cap: three lines at 360px, and it
+	// does not push the intro below the fold.
+	'h1'     => 'Ремонт на счупен лаптоп в София',
+
+	'crumbs' => $torin_crumbs,
+
+	'intro'  => 'Изпускането рядко чупи само това, което се вижда. Ударът се разпределя през целия корпус и стига до неща, които отвън изглеждат непокътнати: диска, който в този момент е работил, механизма на капака, панела на екрана и буксата, в която е бил включен адаптерът. Затова оглеждаме цялата машина, а не само видимата повреда. Диагностиката е безплатна и ви казваме какво сме намерили, преди да започне каквато и да е работа.',
+
+	// Three of the shop own photographs of impact damage, ported from
+	// site-current/assets1/img/ into src/img/repairs/ (UI-SPEC §4). Each was
+	// OPENED and looked at before it was captioned: meh-prob2 is a keyboard
+	// with keycaps torn off and the scissor mechanisms exposed, meh-prob3 is a
+	// panel cracked from the lower right corner outwards, meh-prob5 is a hinge
+	// bracket torn out of the lid with the mounting posts stripped. The w/h
+	// values are each FILE TRUE INTRINSIC PIXELS, read off the files
+	// themselves — not the display size, which CSS sets at 100x100 — and they
+	// are what reserves the box before the bytes arrive.
+	//
+	// The captions say what each photograph PROVES. No caption is a label, a
+	// filename or the word «снимка».
+	'evidence' => array(
+		array('file' => 'meh-prob2.jpg', 'w' => '200', 'h' => '200', 'caption' => 'Изкъртени клавиши и оголени механизми под тях след удар по клавиатурата'),
+		array('file' => 'meh-prob3.jpg', 'w' => '200', 'h' => '200', 'caption' => 'Счупен панел на екран — пукнатината тръгва от ъгъла и се разлива по картината'),
+		array('file' => 'meh-prob5.jpg', 'w' => '300', 'h' => '300', 'caption' => 'Панта, откъртена от капака заедно с гнездата, в които е била затегната'),
 	),
+
+	'fixes'  => array(
+		array('text' => 'Ремонт на корпус и шаси след изпускане'),
+		array('text' => 'Смяна на панти и ремонт на механизма на капака', 'href' => torin_service_href($torin_meh_panti)),
+		array('text' => 'Смяна на счупен екран', 'href' => torin_service_href($torin_meh_ekran)),
+		array('text' => 'Смяна на клавиатура и възстановяване на бутони', 'href' => torin_service_href($torin_meh_klaviatura)),
+		array('text' => 'Ремонт на разклатена захранваща букса и портове', 'href' => torin_service_href($torin_meh_buksa)),
+		array('text' => 'Изваждане на данни от диск, повреден при удар'),
+	),
+
+	'blocks' => array(
+
+		array(
+			'kind'    => 'prose',
+			'heading' => 'Какво се случва при падане',
+			'items'   => array(
+				'Ако лаптопът пада, докато работи, първото засегнато нещо обикновено е хард дискът. По време на работа главите му стоят на косъм от въртящата се плоча и не я докосват. При сътресение те задират в повърхността, а всяка драскотина по плочата е информация, която вече я няма. Точно затова машина, паднала в работен режим, се проверява преди да бъде включена отново — а не след като е включена и е станало по-лошо.',
+				'Екранът е следващият по ред. Панелът е крехък и при новите тънки и леки машини е крехък още повече. Той обаче не се чупи само при падане: чупи се и когато сочим нещо по картината с химикалка, и когато затворим капака върху забравена на клавиатурата вещ. При втория случай счупването е почти сигурно.',
+				'Механизмът на капака е третото място и е този, при който вината рядко е само на удара. Пантите се разхлабват от само себе си — при част от моделите заради изработката и дизайна, при всички останали заради рязкото отваряне и затваряне. Разхлабената панта започва да къса гнездата, в които е затегната, и оттам нататък при всяко отваряне се чупи още малко корпус. Затова се сменя, преди да е откъртила капака, а не след това. По същия начин действат и ударите по клавиатурата: понякога възстановяваме механизмите и бутоните с части от друга клавиатура, друг път се налага подмяна с нова.',
+				'Има и повреди, които не идват от едно рязко събитие, а се натрупват. Те се отразяват най-вече на жаковете и куплунзите, към които включвате нещо всеки ден — захранващия адаптер, слушалките, флашките, HDMI кабела. Разклащането по време на работа бавно ги отпоява от дънната платка. Захранващата букса е най-опасната от всички: тя минава през всички слоеве на платката и при механичен проблем започва да искри, а искренето може да подаде напрежение на слоеве, до които то не бива да стига. При USB портовете пиновете при много модели влизат директно в южния мост. Затова разклатена букса или порт не е козметичен проблем и не е за отлагане.',
+			),
+		),
+
+		array(
+			'kind'    => 'callout',
+			'heading' => 'Данните са отделен въпрос от ремонта',
+			'items'   => array(
+				'Ремонтът на машината и спасяването на информацията в нея са две различни задачи и понякога се изключват взаимно. Диск, който е поел удар, се оценява преди машината да бъде пусната отново — всяко следващо завъртане при задиращи глави отнема от това, което още може да се извади. Ако снимките и документите на този диск са важни за вас, кажете го при приемането и започваме от тях, преди каквато и да е друга работа.',
+				'Ако не сте сигурни дали дискът е засегнат, не гадайте по телефона и не разчитайте на това, че машината още се стартира. Има прости проверки, които можете да направите сами, преди да ни донесете лаптопа.',
+			),
+			'link'    => array(
+				'text' => 'Тествайте сам лаптопа си',
+				'href' => 'test-laptop.html',
+			),
+		),
+	),
+
+	// A KEY, never a literal: the term itself lives once, in site-config.php,
+	// and every page that renders a warranty renders the same fact (D3-10).
+	'warranty_key' => 'default',
+
+	'process' => array(
+		'Питаме ви как точно е паднал лаптопът, от каква височина и дали е бил включен в този момент. Тези три отговора променят реда, по който работим.',
+		'Разглобяваме машината и оглеждаме шасито отвътре — деформация в носещата рамка обяснява повреди, които отвън изглеждат несвързани.',
+		'Проверяваме диска отделно и първи, ако машината е паднала в работен режим или ако сте казали, че информацията е важна.',
+		'Оценяваме кои части подлежат на ремонт и кои на подмяна, и проверяваме наличността им, преди да ви се обадим.',
+		'Обаждаме се с диагнозата и цената и чакаме вашето съгласие. Не започваме платен ремонт, без да сте го одобрили.',
+		'Сглобяваме, тестваме механично капака, клавиатурата и всички портове и връщаме машината с гаранционна карта.',
+	),
+
+	'faq' => array(
+		array(
+			'q' => 'Корпусът е счупен, но лаптопът работи. Струва ли си ремонтът?',
+			'a' => 'Зависи къде е счупването, а не колко зле изглежда. Пукнатина в козметичен панел може да остане така без последствия. Счупване около пантите или в носещата рамка обаче не стои на едно място: капакът започва да опира там, където не трябва, и следващото нещо, което се чупи, е екранът или самата платка. На диагностиката ви казваме в коя от двете групи попада вашият случай и когато отговорът е, че не си струва, го казваме също.',
+		),
+		array(
+			'q' => 'Мога ли да ползвам лаптопа, докато чакам частта?',
+			'a' => 'При част от повредите да, при други категорично не. Ако проблемът е в разхлабена панта или в разклатена захранваща букса, всяко отваряне и всяко включване на зарядното нанася още щета, а буксата може да повреди дънната платка. Ако е счупен само външен панел, обикновено няма пречка. Питайте ни, когато оставяте машината — отговорът е различен за всеки случай и не е един и същ за всички.',
+		),
+		array(
+			'q' => 'Дискът пострада при падането. Може ли информацията да се извади?',
+			'a' => 'Често може, но шансът намалява с всяко включване. Ако главите вече задират в плочата, всяко следващо завъртане отнема от четимото. Затова носете машината изключена и ни кажете още при приемането, че данните са приоритет — тогава ги изваждаме първо, дори когато самият лаптоп ще бъде ремонтиран след това. Обратното също е вярно: диск, който е спрял да се чете, не се поправя с още опити за стартиране.',
+		),
+		array(
+			'q' => 'Затворих капака върху нещо и екранът се счупи. Това счита ли се за същия ремонт?',
+			'a' => 'Да, това е една от най-честите механични повреди и е точно същата работа като при изпускане — панелът се подменя. Разликата е само в това, че при затворен капак върху предмет останалата част от машината почти винаги е незасегната, така че ремонтът е по-ограничен. Гаранцията върху подменената част е същата, която важи за всеки друг ремонт при нас.',
+		),
+	),
+
+	'related' => array(
+		array('text' => $torin_meh_kat2['name'], 'href' => torin_category_href($torin_meh_kat2)),
+		array('text' => $torin_meh_ekran['name'], 'href' => torin_service_href($torin_meh_ekran)),
+		array('text' => 'Тествайте сам лаптопа си', 'href' => 'test-laptop.html'),
+	),
+
+	// 'prices' is deliberately NOT set. The slot stays unused this phase by
+	// design (D3-06, PRICE-01 is v2) and accepts numbers later with no redesign.
 );
 
 require_once(dirname(__FILE__) . '/includes/header.php');
 ?>
 
 <main>
-<?php torin_render_category_page($torin_cat_page); ?>
+<?php torin_render_service_page($torin_meh_page); ?>
 </main>
 
 <?php require_once(dirname(__FILE__) . '/includes/footer.php'); ?>
