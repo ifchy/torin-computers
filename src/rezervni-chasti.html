@@ -29,7 +29,10 @@
 // No phone number, address or opening hours is retyped here; site-config.php
 // owns those and footer.php renders them at the bottom of this page.
 $torin_title = 'Резервни части за лаптопи · Торин';
-$torin_desc  = 'Резервни части за лаптопи в Торин Компютърс — частите се набавят според конкретния ремонт, затова се обадете и кажете модела на машината.';
+// Reordered by plan 03-09: the call was at code point 101, past the 95-point
+// mobile truncation budget. The "parts are sourced per repair" caveat stays —
+// it is the honest part of this page — it just no longer precedes the call.
+$torin_desc  = 'Резервни части за лаптопи в Торин Компютърс. Обадете се и кажете модела на машината — частите се набавят според конкретния ремонт.';
 require_once(dirname(__FILE__) . '/includes/header.php');
 ?>
 

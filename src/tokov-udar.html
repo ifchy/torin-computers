@@ -23,7 +23,9 @@ require_once(dirname(__FILE__) . '/includes/category-page.php');
 
 // Per-page metadata. Keyword-first title, decoupled from the page name.
 $torin_title = 'Ремонт след токов удар и повреден адаптер · Торин';
-$torin_desc  = 'Ремонт след токов удар, фазова разлика или повреден адаптер — работа по дънни платки на ниво чип в София. Обадете се за безплатна оценка.';
+// Reordered by plan 03-09: the call was at code point 106, past the 95-point
+// mobile truncation budget.
+$torin_desc  = 'Ремонт след токов удар, фазова разлика или повреден адаптер в София. Обадете се за безплатна оценка — работа по дънни платки на ниво чип.';
 
 // Assigned ONCE and read twice: the renderer draws the visible chain and
 // jsonld.php emits the matching BreadcrumbList from the same array.

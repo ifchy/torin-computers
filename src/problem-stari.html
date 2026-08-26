@@ -55,7 +55,9 @@ $torin_cat = torin_category_by_id('kat-6');
 // search result (D3-14). The h1 below is an explicit override for the same
 // reason.
 $torin_title = 'Ремонт на стара и нестандартна техника · Торин';
-$torin_desc  = 'Ремонт на стара и нестандартна техника в София — работа по дънни платки и захранващи вериги на ниво чип. Обадете се за безплатна оценка.';
+// Reordered by plan 03-09: the call was at code point 105, past the 95-point
+// mobile truncation budget.
+$torin_desc  = 'Ремонт на стара и нестандартна техника в София. Обадете се за безплатна оценка — работа по дънни платки и захранващи вериги на ниво чип.';
 
 // Assigned ONCE and read twice: the renderer draws the visible chain and
 // jsonld.php emits the matching BreadcrumbList from the same array.

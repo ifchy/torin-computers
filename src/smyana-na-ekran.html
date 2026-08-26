@@ -41,7 +41,10 @@ $torin_cat1    = torin_category_by_id('kat-1');
 // Measured in 03-RESEARCH at 415 px / 40 chars, inside the ~600 px desktop
 // truncation point. Keyword first, «София» second, short brand suffix last.
 $torin_title = 'Смяна на екран на лаптоп София · Торин';
-$torin_desc  = 'Смяна на счупен екран на лаптоп в София — матови, гланцови и тъч панели. Проверяваме дали е екранът, или видеочипът. Обадете се за оглед.';
+// Reordered by plan 03-09: the call was at code point 117, well past the
+// 95-point mobile truncation budget. The screen-vs-video-chip distinction is
+// kept — it is what separates this page from a parts swap.
+$torin_desc  = 'Смяна на счупен екран на лаптоп в София. Обадете се за оглед — матови, гланцови и тъч панели. Проверяваме дали е екранът, или видеочипът.';
 
 // Depth 3, the deepest the hub/child structure goes. Assigned ONCE and read
 // twice — by the renderer for the visible nav and by jsonld.php for the
