@@ -75,7 +75,8 @@ $torin_categories = array(
 		'symptoms'  => 'прегрява, шуми силно, изключва се сам',
 		'page'      => 'pregryavane-ohlazhdane.html',
 		'icon'      => 'cat-5',
-		'published' => false,
+		// Published by plan 03-08, in the SAME change that lands the page file.
+		'published' => true,
 	),
 	array(
 		// Scope is still an open owner question (OWNER-QUESTIONS #3); the broad

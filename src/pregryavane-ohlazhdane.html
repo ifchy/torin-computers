@@ -1,0 +1,164 @@
+<?php
+// Category 5 rendered through the D-24 template (includes/category-page.php),
+// authored to the D3-14 Definition of Done by plan 03-08. This is the file the
+// D-23 publish gate was waiting for: the kat-5 record flips to published in the
+// SAME change that lands this page, never before it.
+//
+// The filename is LOCKED in the kat-5 record and must not be changed — a new
+// slug after publication needs a 301 and forfeits accumulated signal (D-42).
+//
+// The display name and the symptom line are read from the category record via
+// cat_id, never retyped here. D-40 named this category for the SYMPTOM rather
+// than for the fix, because a customer whose laptop is overheating would not
+// recognise a fan swap as their problem (D-29). Do not reopen that wording.
+//
+// D-28: профилактика is cross-listed under this category as a LINK to the one
+// existing page, never as duplicated body copy — that cross-listing is what
+// resolved this category thinness in the first place, and it only works as one
+// URL with one canonical page. This page therefore covers the SYMPTOM, why
+// cooling decays, and what to do while waiting; the PROCEDURE lives on
+// profilaktika-laptop.html and stays there. The gate for this task compares
+// every sentence over 90 characters between the two.
+//
+// The cooling reasoning is PORTED from site-current/warrently.html:118-124 in
+// the shop own words: every successfully repaired machine gets a cooling
+// correction, the whole system is cleaned and washed, soft thermal pads are
+// replaced with aluminium or copper plates that do not age, and cooling
+// capacity declines year on year as the margin the manufacturer designed in is
+// consumed. Legacy MARKUP is left behind (P-9); working hours and phone
+// numbers are NOT restated here, site-config.php owns those facts (P-11).
+//
+// NO urgent-tone block. The phase spends that treatment exactly twice and both
+// uses are earned elsewhere — the liquid-damage first aid and the failing-drive
+// callout on optimizatsiq.html. An overheating laptop is a repairable
+// condition, not an emergency, and colouring it like one would devalue the two
+// places where the colour means something.
+//
+// TERMINOLOGY (locked user decision, deliberately REVERSING existing site
+// usage — do not «correct» it back): customer-facing copy says «екран», not
+// «матрица». Neither word has a natural place on this page and neither appears.
+require_once(dirname(__FILE__) . '/includes/category-page.php');
+
+$torin_ohl_cat  = torin_category_by_id('kat-5');
+$torin_ohl_kat3 = torin_category_by_id('kat-3');
+
+// Per-page metadata. The title is a LITERAL and is deliberately not derived
+// from the category record: a category name is a navigation label, while a
+// title is a search result first line. Decoupling them is the prerequisite for
+// a keyword-first title (D3-14/SEO-01), and it is why the h1 below is also an
+// explicit override rather than the record name.
+$torin_title = 'Прегряване на лаптоп и профилактика · Торин';
+$torin_desc  = 'Лаптопът прегрява, шуми или се изключва сам? Ремонт на охладителната система в София. Обадете се за безплатна диагностика.';
+
+// The breadcrumb chain, assigned ONCE and read twice: torin_render_service_page()
+// renders the visible nav from it, and jsonld.php emits the matching
+// BreadcrumbList from the same array after footer.php includes it.
+$torin_crumbs = array(
+	array('text' => 'Начало', 'href' => 'index.html'),
+	array('text' => $torin_ohl_cat['name'], 'href' => $torin_ohl_cat['page']),
+);
+
+$torin_ohl_page = array(
+	// The SAME literal the lookup above uses, written out rather than passed
+	// through a variable so a record-integrity grep can see which category this
+	// page is. The name and the symptom line still come from the record.
+	'cat_id' => 'kat-5',
+
+	// 40 characters, inside the 48-character cap.
+	'h1'     => 'Прегряване на лаптоп и охлаждане в София',
+
+	'crumbs' => $torin_crumbs,
+
+	'intro'  => 'Машина, която се нагрява силно, шуми непрекъснато или се изключва сама по средата на работа, ви казва едно и също нещо: охладителната система вече не смогва. Това е състояние, което се поправя, а не възраст, с която трябва да се примирите. В повечето случаи причината е механична и видима, щом машината се отвори — задръстен радиатор, изсъхнала термопаста, износен вентилатор. Диагностиката е безплатна и ви показваме какво сме намерили вътре.',
+
+	'fixes'  => array(
+		array('text' => 'Смяна на вентилатор и на смазката на въртящите елементи'),
+		array('text' => 'Почистване и измиване на цялата охладителна система'),
+		array('text' => 'Смяна на термопастата на процесора и основните чипсети'),
+		array('text' => 'Подмяна на меките контактни гуми с алуминиеви или медни пластини'),
+		array('text' => 'Проверка на топлоотвеждащите тръби и на ефективността им'),
+		// D-28 in one line: the cross-listing that resolved this category
+		// thinness. A LINK to the existing page, never a copy of it.
+		array('text' => 'Профилактика на лаптоп', 'href' => 'profilaktika-laptop.html'),
+	),
+
+	'blocks' => array(
+
+		array(
+			'kind'    => 'prose',
+			'heading' => 'Защо охлаждането отслабва с годините',
+			'items'   => array(
+				'Никой производител не слага в лаптоп точно толкова охлаждане, колкото машината иска в идеалния случай. Слага повече, с определен процент над минимално необходимото, и точно този излишък е причината новите машини да търпят учудващо много занемаряване, без да се оплачат. Нова машина може да работи нормално дори когато част от радиатора вече е запушена — запасът поема разликата и вие не забелязвате нищо.',
+				'Този запас обаче не е вечен. С всяка изминала година той се стопява: пастата между чипа и радиатора изсъхва и провежда по-лошо, лагерът на вентилатора се износва и той върти по-бавно при същия шум, меките контактни гуми се втвърдяват. Нищо от това не се случва в един ден, затова и няма момент, в който машината да ви уведоми. Просто идва година, в която същото количество прах, което преди е било без значение, вече не е.',
+				'Оттам нататък поведението е предвидимо. Машината първо намалява собствената си скорост, за да се защити — това е бавенето, което много хора приемат за софтуерен проблем и се опитват да решат с преинсталация. Ако температурата продължи да расте, тя се изключва сама. И ако това състояние се проточи месеци, топлината започва да работи срещу самата платка: чипсетът може да се отлепи от нея, а това вече не е почистване, а ремонт на ниво чип. Затова един и същ лаптоп след пет години има нужда от по-често внимание, отколкото е имал в началото.',
+			),
+		),
+
+		array(
+			'kind'    => 'steps',
+			'heading' => 'Какво да направите, докато чакате ремонт',
+			'items'   => array(
+				'Не работете с лаптопа върху легло, върху скут или върху диван — меката повърхност затваря отворите, през които влиза студеният въздух, и машината започва да диша собствения си горещ въздух.',
+				'Спрете тежката работа, когато вентилаторът тръгне и не спира: това е машината, която вече е на границата, а не която просто се старае.',
+				'Не издухвайте охладителната система с прахосмукачка или с компресор — така прахът се набива по-навътре в радиатора, а перките на вентилатора се въртят с обороти, за които не са направени.',
+				'Обадете ни се, ако машината се изключва сама под натоварване. Това е границата, отвъд която чакането започва да струва повече от ремонта.',
+			),
+		),
+	),
+
+	// A KEY, never a literal: the term itself lives once, in site-config.php,
+	// and every page that renders a warranty renders the same fact (D3-10).
+	'warranty_key' => 'default',
+
+	'process' => array(
+		'Питаме ви кога се проявява прегряването — веднага след стартиране, след половин час работа, или само при определени програми. Отговорът стеснява търсенето още преди да отворим машината.',
+		'Разглобяваме и оглеждаме състоянието на радиатора, вентилатора и топлоотвеждащите тръби, преди да пипнем каквото и да било.',
+		'Измерваме работните температури под натоварване, за да имаме с какво да сравним резултата след това — иначе ремонтът е въпрос на усещане.',
+		'Обаждаме се с намереното и с цената и чакаме съгласието ви. Не започваме платена работа, преди да сте я одобрили.',
+		'Изпълняваме работата и правим корекция на охлаждането. Всяка машина, минала успешен ремонт при нас, получава такава корекция дори когато не е дошла заради температури — иначе същата топлина води до същата повреда.',
+		'Тестваме под натоварване, показваме ви температурите след ремонта и връщаме машината с гаранционна карта.',
+	),
+
+	'faq' => array(
+		array(
+			'q' => 'През колко време трябва да се чисти лаптоп?',
+			'a' => 'Веднъж годишно е разумното правило за повечето машини, а при някои — два пъти. Кое от двете важи за вас зависи по-малко от модела и повече от средата: прах в стаята, домашен любимец, пушене, работа върху текстил. Ако не сте сигурни, най-простият ориентир е самата машина — щом вентиляторът е станал забележимо по-шумен от миналата година при същата работа, времето е дошло.',
+		),
+		array(
+			'q' => 'Помага ли поставка с вентилатори под лаптопа?',
+			'a' => 'Помага малко и само в един случай: когато основният проблем е, че отворите отдолу са затворени от повърхността, върху която стои машината. Тогава дори обикновена твърда подложка върши почти същата работа. Поставката обаче не сваля прах от радиатора и не подменя изсъхнала паста, така че при задръстена система тя само отлага. Ако машината вече се изключва сама, поставката няма да реши нищо.',
+		),
+		array(
+			'q' => 'Лаптопът се изключва сам. Това означава ли, че платката е дефектирала?',
+			'a' => 'Не непременно, и това е добрата новина. Самоизключването е защитна реакция срещу температура и при значителна част от машините изчезва след почистване и нова паста. Има и случаи, в които прегряването е продължило достатъчно дълго, за да отлепи чипсет от платката, и тогава работата е друга и по-тежка. Кое от двете е вашето, се вижда при отваряне на машината, а не по телефона — затова и не го гадаем по телефона.',
+		),
+		array(
+			'q' => 'Вентилаторът шуми. Може ли да се оправи, без да го сменяте?',
+			'a' => 'Често може. Шумът има три различни причини и само едната изисква нов вентилатор. Ако перките са затлачени, шумът идва от дисбаланс и изчезва след измиване. Ако лагерът е сух, помага смяна на смазката. Ако лагерът вече е износен или перка е нащърбена, смяната е единственото трайно решение. Проверяваме в този ред и ви казваме кое от трите е, преди да предложим част.',
+		),
+		array(
+			'q' => 'Как точно чистите охладителната система?',
+			'a' => 'Машината се разглобява, охладителната система се сваля и се измива, а не се издухва на място; сменя се термопастата и меките контактни гуми се заменят с пластини, които не стареят. Цялата процедура, включително с какво оборудване работим при по-тежките случаи, е описана на отделната страница за профилактика.',
+		),
+	),
+
+	'related' => array(
+		// The cross-listing again, this time as a related service: one URL, one
+		// canonical page, an internal link from a second topical context (D-28).
+		array('text' => 'Профилактика на лаптоп', 'href' => 'profilaktika-laptop.html'),
+		array('text' => 'Ремонт на залят лаптоп и дънни платки', 'href' => 'zalivane-technosti.html'),
+		array('text' => $torin_ohl_kat3['name'], 'href' => torin_category_href($torin_ohl_kat3)),
+	),
+
+	// 'prices' is deliberately NOT set. The slot stays unused this phase by
+	// design (D3-06, PRICE-01 is v2) and accepts numbers later with no redesign.
+);
+
+require_once(dirname(__FILE__) . '/includes/header.php');
+?>
+
+<main>
+<?php torin_render_service_page($torin_ohl_page); ?>
+</main>
+
+<?php require_once(dirname(__FILE__) . '/includes/footer.php'); ?>
