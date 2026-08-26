@@ -1,7 +1,18 @@
 <?php
-// Per-page metadata (02-RESEARCH N-5 mechanism). SEO-01 copy is Phase 3.
-$torin_title = 'ТОРИН КОМПЮТЪРС - ТОТАЛЕН РЕМОНТ НА ЛАПТОПИ';
-$torin_desc  = 'Ремонт на лаптопи и компютри в София — счупвания, екран и клавиатура, оптимизация, заливане и дънни платки, прегряване, нестандартна техника. Безплатна диагностика.';
+// Per-page metadata (02-RESEARCH N-5 mechanism). SEO-01 copy, plan 03-09.
+// The title is VERBATIM the phrase the h1 on this page already carries, plus
+// the short brand suffix. The two were out of step since Phase 2: the heading
+// had the keyword and the title opened with the shop name in capitals, which
+// 03-RESEARCH measured at 549 px with no keyword ahead of the brand. Matching
+// the h1 is also what makes it impossible for this title to describe a
+// different page than the one it labels.
+$torin_title = 'Ремонт на лаптопи и компютри в София · Торин';
+// 129 code points; the call to action begins at code point 48, inside the 95
+// point mobile truncation budget. Every claim is one the site already makes
+// elsewhere: the founding year is on the About page and the four repair classes
+// are four of the six categories. States no price, no turnaround and no
+// guarantee.
+$torin_desc  = 'Сервиз за лаптопи и компютри в София от 1993 г. Обадете се за безплатна диагностика — счупвания, заливане, дънни платки, батерии.';
 require_once(dirname(__FILE__) . '/includes/categories.php');
 // $site is already in scope transitively through header.php, but relying on
 // that makes this page silently depend on another file's include order. It is

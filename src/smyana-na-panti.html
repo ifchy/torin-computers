@@ -36,7 +36,10 @@ $torin_ekran_rec = torin_service_by_id('svc-ekran');
 // Keyword first, «София» second, short brand suffix last — the shape
 // 03-RESEARCH measured as fitting inside the ~600 px desktop truncation point.
 $torin_title = 'Смяна на панти на лаптоп София · Торин';
-$torin_desc  = 'Смяна на панти на лаптоп в София — панти, счупени легла в капака и напукана пластмаса. Обадете се за безплатен оглед.';
+// Extended by plan 03-09: at 117 code points this was the one description below
+// the 120-point floor. Lengthened with a real second clause about what the page
+// covers rather than padded with keywords; the call also moves to code point 34.
+$torin_desc  = 'Смяна на панти на лаптоп в София. Обадете се за безплатен оглед — счупени панти, счупени легла в капака и напукана пластмаса на корпуса.';
 
 // Depth 3. Assigned ONCE and read twice — by the renderer for the visible nav
 // and by jsonld.php for the matching BreadcrumbList. The hub href comes from

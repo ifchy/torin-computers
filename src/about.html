@@ -30,7 +30,10 @@ require_once(dirname(__FILE__) . '/includes/category-page.php');
 // Per-page metadata. 54 characters including the brand suffix, inside the
 // 55-character budget, so the suffix is kept on this page.
 $torin_title = 'За ТОРИН КОМПЮТЪРС — сервиз в София от 1993 г. · Торин';
-$torin_desc  = 'ТОРИН КОМПЮТЪРС е софийска фирма от 1993 г. — сервиз за лаптопи, компютри и монитори на ниво чип. Обадете се за безплатна диагностика.';
+// Reordered by plan 03-09: the call was at code point 98, past the 95-point
+// mobile truncation budget. Same claims, same register, call moved ahead of the
+// service list.
+$torin_desc  = 'ТОРИН КОМПЮТЪРС — софийска фирма от 1993 г. Обадете се за безплатна диагностика: сервиз за лаптопи, компютри и монитори на ниво чип.';
 
 // Assigned ONCE and read twice: the renderer draws the visible chain and
 // jsonld.php emits the matching BreadcrumbList from the same array.

@@ -27,15 +27,16 @@ require_once(dirname(__FILE__) . '/includes/services.php');
 
 $torin_cat = torin_category_by_id('kat-2');
 
-// The title is DERIVED from the record rather than retyped as a literal. The
-// three existing category pages use literals because their titles are
-// keyword-first and deliberately differ from the navigation label. This hub is
-// the opposite case: it chases no competitive keyword of its own, so its title
-// simply IS the record name plus a qualifier — and deriving it means a D-40
-// rename cannot strand a stale title here. Measured in 03-RESEARCH at 442 px /
-// 45 characters, comfortably inside the ~600 px desktop truncation point.
-$torin_title = $torin_cat['name'] . ' на лаптоп · Торин';
-$torin_desc  = 'Ремонт и смяна на екран, клавиатура, панти, портове и букса на лаптоп в София. Изберете вашия проблем и се обадете за безплатна диагностика.';
+// Title was derived from the record; plan 03-09 makes it a literal — the last
+// derived title 03-08 flagged. A derived title is invisible to the site-wide
+// SEO-01 gate, which checks all 23 without a PHP interpreter, so it silently
+// left the uniqueness set. Rename safety keeps a compensating control:
+// `title-matches-page` ties this lead to the h1 below. 45 code points / 442 px
+// (03-RESEARCH), inside the ~600 px desktop truncation point.
+$torin_title = 'Екран, клавиатура и портове на лаптоп · Торин';
+// 139 code points, call at code point 70. Reordered: the original reached its
+// call only at 107 and lost it to mobile truncation.
+$torin_desc  = 'Ремонт и смяна на екран, клавиатура, панти и букса на лаптоп в София. Обадете се за безплатна диагностика — изберете вашия проблем по-долу.';
 
 // Assigned ONCE and read twice — by torin_render_service_page() for the visible
 // nav and by jsonld.php for the BreadcrumbList, after footer.php includes it.
