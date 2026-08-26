@@ -1,0 +1,162 @@
+<?php
+// D3-03 CHILD page under category 2, rendered through the GENERALIZED
+// service-page renderer. Like its four siblings this page carries NO category
+// record: it supplies its own display name and symptom line. RESEARCH P-5
+// records what a child reaching for the category path instead would produce —
+// a full header, a full footer and nothing between them at HTTP 200 — which is
+// why the live gate counts h2 elements rather than only asserting a response.
+//
+// The name is READ FROM THE RECORD via torin_service_by_id() rather than
+// retyped, so the card label, the nav entry, the breadcrumb and this page
+// cannot disagree about what the service is called.
+//
+// THE PAGE DATA ARRAY IS DELIBERATELY NOT NAMED $torin_page. header.php is
+// required by every page, so anything it assigns lands in this file’s global
+// scope. It used to assign $torin_page and silently overwrote four Phase 3
+// pages that had named their own data array the same thing; on PHP 5.2 the
+// resulting $string['intro'] returned character zero, so those pages served a
+// single letter where their prose belonged and still answered 200. header.php
+// now uses $torin_nav_current, but the lesson holds: a page data array gets a
+// PAGE-SPECIFIC name, never a generic one.
+//
+// TERMINOLOGY CHECK («екран» over «матрица», the locked rule written out in
+// includes/services.php): this page names the screen only in passing, where the
+// failing hinge chafes the display cable. It says «екран» there, as the rule
+// requires for customer-facing prose. «матрица» does not appear on this page at
+// all — there is no place here where the bare LCD panel is discussed AS A PART,
+// which is the only sanctioned exception. Do not introduce one.
+require_once(dirname(__FILE__) . '/includes/category-page.php');
+require_once(dirname(__FILE__) . '/includes/services.php');
+
+$torin_self_id   = 'svc-panti';
+$torin_svc_rec   = torin_service_by_id($torin_self_id);
+$torin_cat2      = torin_category_by_id('kat-2');
+$torin_ekran_rec = torin_service_by_id('svc-ekran');
+
+// Keyword first, «София» second, short brand suffix last — the shape
+// 03-RESEARCH measured as fitting inside the ~600 px desktop truncation point.
+$torin_title = 'Смяна на панти на лаптоп София · Торин';
+$torin_desc  = 'Смяна на панти на лаптоп в София — панти, счупени легла в капака и напукана пластмаса. Обадете се за безплатен оглед.';
+
+// Depth 3. Assigned ONCE and read twice — by the renderer for the visible nav
+// and by jsonld.php for the matching BreadcrumbList. The hub href comes from
+// torin_category_href(), never typed, so the publish gate still decides.
+$torin_crumbs = array(
+	array('text' => 'Начало', 'href' => 'index.html'),
+	array('text' => $torin_cat2['name'], 'href' => torin_category_href($torin_cat2)),
+	array('text' => $torin_svc_rec['name'], 'href' => $torin_svc_rec['page']),
+);
+
+// Siblings are BUILT, not listed, and only published ones are included — the
+// convention plan 03-03 established on the first two children. A gated sibling
+// would resolve back to the hub and render as a second entry with a different
+// label pointing at the same page.
+$torin_siblings = array();
+foreach ($torin_services as $torin_svc) {
+	if ($torin_svc['parent'] !== 'kat-2' || $torin_svc['id'] === $torin_self_id) {
+		continue;
+	}
+	if (!$torin_svc['published']) {
+		continue;
+	}
+	$torin_siblings[] = array(
+		'text' => $torin_svc['name'],
+		'href' => torin_service_href($torin_svc),
+	);
+}
+
+$torin_panti_page = array(
+	// No category record: this page supplies its own name and symptom line.
+	'name'     => $torin_svc_rec['name'],
+
+	// 31 characters, inside the 48-character cap.
+	'h1'       => 'Смяна на панти на лаптоп в София',
+
+	'crumbs'   => $torin_crumbs,
+
+	'intro'    => 'Пантите държат целия капак на лаптопа и поемат натоварване при всяко отваряне и затваряне — десетки хиляди пъти за живота на машината. Затова повредата им почти никога не се появява наведнъж. Първо капакът започва да пружинира, после престава да стои под ъгъла, на който сте го оставили, а накрая пластмасата около пантата се напуква отвътре и капакът се повдига в единия ъгъл. Работим както по самите панти, така и по местата, в които те се захващат за капака и за основата на лаптопа.',
+
+	// [ASSUMED] The customer-facing symptom line, pending the real phrasing the
+	// owner hears daily (OWNER-QUESTIONS #16). Written as a customer would
+	// describe it, not as a technician would name it. Not confirmed shop
+	// language — do not quote it back as such.
+	'symptoms' => 'капакът не стои под ъгъл и се затваря сам, пантата скърца или засича при отваряне, пластмасата около пантата се е напукала, капакът се повдига в единия ъгъл',
+
+	'fixes'    => array(
+		array('text' => 'Смяна на панти на лаптоп'),
+		array('text' => 'Възстановяване на местата за захващане в капака и в основата'),
+		array('text' => 'Смяна на напукана пластмаса на капака и рамката около екрана'),
+		array('text' => 'Отстраняване на повреда по кабела на дисплея от дефектна панта'),
+	),
+
+	'blocks'   => array(
+		array(
+			'kind'    => 'prose',
+			'heading' => 'Пантата рядко е единствената повреда',
+			'items'   => array(
+				'Пантата на лаптопа не се захваща директно за метал, а за няколко пластмасови стойки в капака и в основата. Когато механизмът на пантата се разхлаби или обратно — започне да върви тежко, цялата сила при отваряне отива в тези стойки. Те не издържат дълго: пукат се отвътре, винтовете започват да се въртят на празно и накрая пантата откъсва леглото си от пластмасата. От този момент нататък ремонтът вече не е само смяна на панта, а и възстановяване на местата, за които тя се захваща.',
+				'Втората последица е по-скъпа. През пантата минава кабелът към екрана, а разхлабената или засичаща панта го трие при всяко отваряне. В началото това се вижда като трепкане или промяна на картината при определен ъгъл на капака, а по-късно кабелът прекъсва напълно. Затова колкото по-дълго се работи с разклатен капак, толкова по-голяма част от възела се оказва засегната. Ако вече забелязвате смущения в картината при движение на капака, вижте и страницата за екрана — възможно е да се наложи работа и по него.',
+			),
+			// The sibling href is RESOLVED, never typed: torin_service_href()
+			// honours the publish gate, so if the screen page were ever gated
+			// this link would fall back to the hub instead of 404-ing.
+			'link'    => array(
+				'text' => $torin_ekran_rec['name'],
+				'href' => torin_service_href($torin_ekran_rec),
+			),
+		),
+	),
+
+	// A KEY, never a literal: the term lives once, in site-config.php (D3-10).
+	'warranty_key' => 'default',
+
+	'process'  => array(
+		'Приемаме лаптопа и ви питаме откога капакът се държи така и дали е имало изпускане или удар. Отговорът показва дали да очакваме само износена панта, или и счупени легла в пластмасата.',
+		'Отваряме и затваряме машината на ръка и проследяваме къде точно засича — в самия механизъм на пантата или в захващането ѝ към корпуса.',
+		'Разглобяваме капака и оглеждаме стойките, винтовете и кабела към екрана. Тази стъпка е задължителна, защото повредените легла не се виждат отвън.',
+		'Съгласуваме с вас какво ще се прави — смяна само на пантите, възстановяване на леглата или смяна на пластмасата — и чак тогава започваме работа.',
+		'Сглобяваме машината и я тестваме: отваряме и затваряме капака многократно, проверяваме дали стои под различни ъгли и дали картината е стабилна при движение. Връщаме лаптопа с гаранционна карта.',
+	),
+
+	'faq'      => array(
+		array(
+			'q' => 'Може ли счупената пластмаса да се залепи, вместо да се сменя?',
+			'a' => 'В част от случаите да, и то трайно. Ако пукнатината е в мястото около винта, а самото легло е цяло, възстановяването с подходящо укрепване държи дълго. Когато обаче пластмасата се е раздробила на няколко части или пантата вече е излязла заедно с парче от корпуса, лепенето само отлага същия ремонт. Казваме ви откровено кой е вашият случай, след като разглобим капака.',
+		),
+		array(
+			'q' => 'Защо се чупи корпусът, а не самата панта?',
+			'a' => 'Защото пантата е метална, а това, за което тя се захваща, е пластмаса. С времето механизмът на пантата се затяга от износване и започва да върви по-тежко. Силата, която прилагате при отваряне, вече не отива в механизма, а директно в стойките на корпуса — и те поддават първи. Затова тежко отварящ се капак е предупреждение, а не дребно неудобство.',
+		),
+		array(
+			'q' => 'Мога ли да продължа да ползвам лаптопа, докато не съм го дал за ремонт?',
+			'a' => 'Може, но с внимание, и колкото по-кратко, толкова по-добре. Отваряйте капака с две ръце и по средата, а не за единия ъгъл, и избягвайте да го местите отворен. Всяко отваряне на разхлабен капак увеличава повредата в леглата и износва кабела към екрана. Ако видите, че капакът вече се разделя от рамката, спрете да го движите и го донесете така.',
+		),
+		array(
+			'q' => 'Трябва ли да се смени целият капак?',
+			'a' => 'Обикновено не. В повечето случаи се сменят пантите и се възстановяват леглата, а капакът остава оригиналният. Цял капак се налага, когато пластмасата е счупена на голяма площ или когато рамката около екрана вече не притиска панела равномерно. Ако се стигне дотам, ви го казваме преди работата, а не след нея.',
+		),
+		array(
+			'q' => 'Пантите за моя модел още ли се произвеждат?',
+			'a' => 'Зависи от машината. За по-новите модели обикновено има готови панти. За по-старите се работи със съвместима част или самата панта се възстановява, ако механизмът ѝ позволява. Проверяваме какво може да се намери за вашия модел още при огледа и ви казваме какво ще поставим, преди да го поставим.',
+		),
+	),
+
+	// Up to the hub, across to the published siblings, out to the
+	// self-diagnostic. Every internal href resolves through a publish gate.
+	'related'  => array_merge(
+		array(array('text' => $torin_cat2['name'], 'href' => torin_category_href($torin_cat2))),
+		$torin_siblings,
+		array(array('text' => 'Тествайте сам лаптопа си', 'href' => 'test-laptop.html'))
+	),
+
+	// 'prices' is deliberately NOT set (D3-06, PRICE-01 is v2).
+);
+
+require_once(dirname(__FILE__) . '/includes/header.php');
+?>
+
+<main>
+<?php torin_render_service_page($torin_panti_page); ?>
+</main>
+
+<?php require_once(dirname(__FILE__) . '/includes/footer.php'); ?>

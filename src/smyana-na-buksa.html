@@ -1,0 +1,192 @@
+<?php
+// D3-03 CHILD page under category 2, rendered through the GENERALIZED
+// service-page renderer. Carries NO category record: it supplies its own
+// display name and symptom line. RESEARCH P-5 records what a child reaching
+// for the category path instead would produce — a full header, a full footer
+// and nothing between them at HTTP 200 — which is why the live gate counts h2
+// elements rather than only asserting that the page responds.
+//
+// The name is READ FROM THE RECORD via torin_service_by_id() rather than
+// retyped, so the card label, the nav entry, the breadcrumb and this page
+// cannot disagree about what the service is called.
+//
+// THE PAGE DATA ARRAY IS DELIBERATELY NOT NAMED $torin_page — see the same note
+// on smyana-na-panti.html. header.php is required by every page, so anything it
+// assigns lands in this file’s global scope; a generic name there once silently
+// overwrote four Phase 3 page arrays and produced pages that served a single
+// letter at HTTP 200 while still answering 200.
+//
+// WHY THE URGENT TONE IS EARNED HERE, AND ONLY HERE AMONG THE FIVE CHILDREN.
+// UI-SPEC §5 allows tone: 'urgent' on callout and steps, and requires that
+// COLOUR IS NEVER THE SOLE CARRIER of the urgency. That condition is met by the
+// heading itself, which opens «Защо не отлагате…» and so states the urgency in
+// words, so a visitor who cannot see the red panel loses nothing. (The heading
+// is not quoted in full here on purpose: the gate counts occurrences of that
+// exact string and expects ONE, the real heading below.) This is the
+// second page in the phase to use the tone, after the liquid-damage first-aid
+// block, and it is a callout rather than a steps variant.
+//
+// THE ESCALATION ARGUMENT IS THE SHOP’S OWN, CARRIED AT ITS OWN STRENGTH.
+// site-current/mehanichni-problemi.html states it directly: a jack soldered to
+// the board passes through all of its layers, starts arcing on mechanical
+// damage, is very likely to put supply voltage onto layers that should not
+// carry it, and the result is damage to the board. It is not sharpened here,
+// and no probability, price or timeframe is attached to it.
+//
+// P-8 CARRYOVER FROM PLAN 03-05, DISCHARGED IN THE SECOND PARAGRAPH BELOW.
+// The D3-05 repurpose of problem-stari.html displaces the shop’s power-circuit
+// material; plan 03-05 names this page as the owner of its JACK-SIDE share. The
+// two arguments that belong to the jack are that the Charger circuit sits
+// directly on the laptop’s input power rails, and that abnormal current or
+// voltage arriving through that input path is what damages it. They are
+// REWRITTEN here for the jack in a few sentences, never copied — the full
+// Charger/StandBy explainer stays on the category-4 board-repair page, and a
+// gate asserts that no sentence over 90 characters is shared verbatim with it
+// or with problem-stari.html.
+//
+// TERMINOLOGY CHECK («екран» over «матрица», the locked rule written out in
+// includes/services.php): neither term appears on this page. Nothing here
+// discusses the screen, so there is no customer-facing surface for «екран» to
+// carry and no bare-panel part reference to justify the «матрица» exception.
+// Checked deliberately, not skipped.
+require_once(dirname(__FILE__) . '/includes/category-page.php');
+require_once(dirname(__FILE__) . '/includes/services.php');
+
+$torin_self_id = 'svc-buksa';
+$torin_svc_rec = torin_service_by_id($torin_self_id);
+$torin_cat2    = torin_category_by_id('kat-2');
+$torin_cat4    = torin_category_by_id('kat-4');
+
+// Keyword first, short brand suffix last. No «София» — the keyword phrase is
+// already long and 03-RESEARCH measured the combination past the ~600 px
+// desktop truncation point.
+$torin_title = 'Смяна на захранваща букса на лаптоп · Торин';
+$torin_desc  = 'Смяна на захранваща букса на лаптоп в София — разклатено гнездо, изпадащо зарядно, ремонт на платката под буксата. Обадете се.';
+
+// Depth 3. Assigned ONCE and read twice — by the renderer for the visible nav
+// and by jsonld.php for the matching BreadcrumbList. The hub href comes from
+// torin_category_href(), never typed, so the publish gate still decides.
+$torin_crumbs = array(
+	array('text' => 'Начало', 'href' => 'index.html'),
+	array('text' => $torin_cat2['name'], 'href' => torin_category_href($torin_cat2)),
+	array('text' => $torin_svc_rec['name'], 'href' => $torin_svc_rec['page']),
+);
+
+// Siblings are BUILT, not listed, and only published ones are included.
+$torin_siblings = array();
+foreach ($torin_services as $torin_svc) {
+	if ($torin_svc['parent'] !== 'kat-2' || $torin_svc['id'] === $torin_self_id) {
+		continue;
+	}
+	if (!$torin_svc['published']) {
+		continue;
+	}
+	$torin_siblings[] = array(
+		'text' => $torin_svc['name'],
+		'href' => torin_service_href($torin_svc),
+	);
+}
+
+$torin_buksa_page = array(
+	// No category record: this page supplies its own name and symptom line.
+	'name'     => $torin_svc_rec['name'],
+
+	// 34 characters, inside the 48-character cap.
+	'h1'       => 'Смяна на захранваща букса на лаптоп',
+
+	'crumbs'   => $torin_crumbs,
+
+	'intro'    => 'Захранващата букса е конекторът, през който минава цялото захранване на лаптопа, и същевременно частта, която дърпате и въртите по няколко пъти на ден. Затова тя се износва механично по-бързо от всичко останало около нея. Повредата почти винаги започва тихо: зарядното държи само в определено положение, индикаторът мига, а по-късно лаптопът спира да се зарежда изобщо. Работим както по самата букса, така и по платката под нея, когато конекторът вече е откъснал контактните си площадки.',
+
+	// [ASSUMED] The customer-facing symptom line, pending the real phrasing the
+	// owner hears daily (OWNER-QUESTIONS #16). Written as a customer would
+	// describe it, not as a technician would name it. Not confirmed shop
+	// language — do not quote it back as such.
+	'symptoms' => 'лаптопът се зарежда само ако държите щекера под ъгъл, индикаторът за зареждане мига или изгасва, буксата се клати или е хлътнала навътре, щекерът или гнездото се загряват и са потъмнели',
+
+	'fixes'    => array(
+		array('text' => 'Смяна на захранваща букса на лаптоп'),
+		array('text' => 'Възстановяване на контактни площадки и пътечки под откъсната букса'),
+		array('text' => 'Смяна на кабелен модул между буксата и дънната платка'),
+		array('text' => 'Ремонт на зарядната верига след повреда от буксата'),
+	),
+
+	'blocks'   => array(
+		array(
+			'kind'    => 'callout',
+			'tone'    => 'urgent',
+			'heading' => 'Защо не отлагате смяната на буксата',
+			'items'   => array(
+				'При повечето лаптопи буксата е запоена директно за дънната платка и преминава през всички нейни слоеве. Докато е здрава, това е най-стабилният начин да се закрепи конектор, който поема захранването на цялата машина. Когато обаче буксата се разхлаби механично, контактът в нея започва да искри. Оттам има голяма вероятност захранващо напрежение да попадне върху слоеве, които не би трябвало да го носят, а резултатът в такива случаи е увреждане на дънната платка.',
+				'Има и втора причина да не се чака, и тя обяснява защо един конектор изобщо може да стигне до платката. Веригата, която управлява захранването на лаптопа — процесорът Charger — стои непосредствено върху входните захранващи вериги, тоест точно по пътя, който минава през буксата. Затова тя е чувствителна именно към ток и напрежение, които пристигат по този вход извън нормалните си стойности. Разклатената букса произвежда точно такива отклонения при всяко прекъсване и възстановяване на контакта.',
+				'Така една дребна механична повреда в конектора се превръща в работа по дънната платка, която е несравнимо по-голяма от смяната на самата букса. Ако зарядното вече изпада или трябва да се държи под ъгъл, това е моментът да се направи нещо — а не след като лаптопът спре да се включва.',
+			),
+			// The href is RESOLVED through torin_category_href(), never typed,
+			// so the D-23 publish gate decides where it points. Destination:
+			// the category-4 board-repair page.
+			//
+			// The LABEL is deliberately not the record name. In this context the
+			// visitor has just been told their connector can become a board
+			// problem, so «Ремонт на дънни платки» names what they would go
+			// there for; the record name leads with «Заливане», which is a
+			// different failure path and would read as a non-sequitur here.
+			'link'    => array(
+				'text' => 'Ремонт на дънни платки',
+				'href' => torin_category_href($torin_cat4),
+			),
+		),
+	),
+
+	// A KEY, never a literal: the term lives once, in site-config.php (D3-10).
+	'warranty_key' => 'default',
+
+	'process'  => array(
+		'Приемаме лаптопа и ви питаме откога зарядното се държи така и дали е имало дърпане или падане с включен кабел. Отговорът показва дали да очакваме само букса, или и повреда по платката.',
+		'Проверяваме адаптера и щекера отделно от лаптопа, защото в част от случаите повредата е в самото зарядно, а не в машината, и тогава букса изобщо не се сменя.',
+		'Разглобяваме лаптопа и оглеждаме буксата и платката около нея — спойките, контактните площадки и следите от загряване, които не се виждат отвън.',
+		'Съгласуваме с вас какво следва — смяна на буксата или и възстановяване на платката под нея — и чак тогава започваме работа.',
+		'Поставяме частта и тестваме зареждането при включен и изключен адаптер, в различни положения на кабела, и проверяваме дали батерията наистина поема заряд. Връщаме лаптопа с гаранционна карта.',
+	),
+
+	'faq'      => array(
+		array(
+			'q' => 'Лаптопът не се зарежда. Сигурно ли е, че буксата е виновна?',
+			'a' => 'Не, и точно затова започваме с проверка на адаптера. Повредено зарядно, прекъснат кабел към щекера или изтощена батерия дават много подобна картина. Буксата е най-вероятната причина, когато зареждането зависи от положението на кабела или когато гнездото видимо се клати. Проверяваме и трите, преди да предложим смяна.',
+		),
+		array(
+			'q' => 'Може ли буксата да се запои обратно, вместо да се сменя?',
+			'a' => 'Зависи какво е останало под нея. Ако конекторът само се е отпоил, а контактните площадки на платката са цели, повторното запояване е коректно решение. Ако при откъсването са тръгнали и площадките или пътечките под тях, само запояване не помага — трябва да се възстанови и платката. Това се вижда след разглобяване, не по описание.',
+		),
+		array(
+			'q' => 'Опасно ли е да ползвам лаптопа, докато буксата се клати?',
+			'a' => 'Да, и това е основната причина да не се отлага. Всяко прекъсване и възстановяване на контакта под напрежение е момент, в който платката поема отклонение, за което не е проектирана. Ако нямате друг избор, зареждайте машината изключена и не я местете с включен кабел. Ако гнездото се загрява или е потъмняло, спрете да го ползвате.',
+		),
+		array(
+			'q' => 'Мога ли да ползвам универсален адаптер, докато чакам ремонт?',
+			'a' => 'Не го препоръчваме. Универсалните адаптери с превключвател за различни изходни напрежения са известен източник на повреди: превключвателят се измества дори при пренасяне в чанта, а по-високото напрежение обикновено е фатално за платката. Ако адаптерът ви е изгубен, по-безопасно е да се вземе такъв с точните параметри за модела.',
+		),
+		array(
+			'q' => 'Има ли лаптопи, при които буксата не е запоена за платката?',
+			'a' => 'Да, и при тях ремонтът е по-лек. При част от моделите буксата е отделен модул, свързан с платката чрез къс кабел, и тогава се подменя само този модул. Кой е вашият случай зависи от конкретната машина и се вижда още при разглобяването. Казваме ви го, преди да започнем.',
+		),
+	),
+
+	// Up to the hub, across to the published siblings, out to the
+	// self-diagnostic. Every internal href resolves through a publish gate.
+	'related'  => array_merge(
+		array(array('text' => $torin_cat2['name'], 'href' => torin_category_href($torin_cat2))),
+		$torin_siblings,
+		array(array('text' => 'Тествайте сам лаптопа си', 'href' => 'test-laptop.html'))
+	),
+
+	// 'prices' is deliberately NOT set (D3-06, PRICE-01 is v2).
+);
+
+require_once(dirname(__FILE__) . '/includes/header.php');
+?>
+
+<main>
+<?php torin_render_service_page($torin_buksa_page); ?>
+</main>
+
+<?php require_once(dirname(__FILE__) . '/includes/footer.php'); ?>

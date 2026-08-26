@@ -47,11 +47,17 @@
 // because changing a slug after publication needs a 301 and forfeits ranking
 // signal (D3-01/SEO-04).
 //
-// The publish flag on each record is the D-23 gate. All five ship FALSE here:
-// the pages do not exist yet, and the gate is exactly what stops a card or a
-// breadcrumb pointing at a file that would 404. Plan 03-03 creates the pages
-// and flips the booleans in the same change — create-a-file plus flip-a-boolean,
-// with zero edits in any consumer.
+// The publish flag on each record is the D-23 gate, and it is what stops a card
+// or a breadcrumb pointing at a file that would 404. All five records shipped
+// FALSE when this file was written, because none of the pages existed yet. Plan
+// 03-03 created two of them and flipped those two; plan 03-07 created the
+// remaining three and flipped the last three IN THE SAME CHANGE that landed the
+// files — create-a-file plus flip-a-boolean, with zero edits in any consumer.
+//
+// ALL FIVE ARE NOW PUBLISHED. The invariant to preserve is not the count: it is
+// that a record is only ever flipped to TRUE in the same change that lands the
+// file its 'page' value names. A published record with no file behind it is a
+// hub-reachable 404, which is the exact failure this gate exists to prevent.
 require_once(dirname(__FILE__) . '/categories.php');
 
 $torin_services = array(
@@ -87,7 +93,7 @@ $torin_services = array(
 		'symptoms'  => 'разхлабен капак, пукнат корпус около екрана, не стои отворен',
 		'page'      => 'smyana-na-panti.html',
 		'parent'    => 'kat-2',
-		'published' => false,
+		'published' => true, // published by plan 03-07
 	),
 	array(
 		'id'        => 'svc-portove',
@@ -96,7 +102,7 @@ $torin_services = array(
 		'symptoms'  => 'не разчита флашка, разклатен порт, няма образ на телевизора',
 		'page'      => 'remont-na-portove.html',
 		'parent'    => 'kat-2',
-		'published' => false,
+		'published' => true, // published by plan 03-07
 	),
 	array(
 		'id'        => 'svc-buksa',
@@ -105,7 +111,7 @@ $torin_services = array(
 		'symptoms'  => 'не се зарежда, изпада зарядното, клати се при включване',
 		'page'      => 'smyana-na-buksa.html',
 		'parent'    => 'kat-2',
-		'published' => false,
+		'published' => true, // published by plan 03-07
 	),
 );
 
