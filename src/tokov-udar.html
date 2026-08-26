@@ -32,7 +32,11 @@ $torin_crumbs = array(
 	array('text' => 'Токов удар и захранване', 'href' => 'tokov-udar.html'),
 );
 
-$torin_page = array(
+// Page-specific name, deliberately NOT $torin_page. Any variable a shared
+// include assigns lands in this page's global scope, and a generic name is
+// how four pages silently rendered a single letter where their prose belonged
+// (2026-08-26; header.php then assigned $torin_page). Keep it specific.
+$torin_tok_page = array(
 	'name'     => 'Токов удар и захранване',
 
 	// [ASSUMED] customer phrasing pending OWNER-QUESTIONS #16, following the
@@ -142,7 +146,7 @@ require_once(dirname(__FILE__) . '/includes/header.php');
 ?>
 
 <main>
-<?php torin_render_service_page($torin_page); ?>
+<?php torin_render_service_page($torin_tok_page); ?>
 </main>
 
 <?php require_once(dirname(__FILE__) . '/includes/footer.php'); ?>
