@@ -30,7 +30,16 @@ require_once(dirname(__FILE__) . '/asset-version.php');
 // nowhere in this file, which is why it is not written out here. This value is
 // used ONLY for comparison and is never echoed — do not "improve" it into
 // output.
-$torin_page = basename($_SERVER['SCRIPT_NAME']);
+// RENAMED from $torin_page after a live defect, 2026-08-26. This file is
+// required by every page, so any name it assigns is squatted in the GLOBAL
+// scope of the page that included it. Four Phase 3 pages had already named
+// their own $page data array $torin_page; this line silently overwrote each
+// one with the filename string, and PHP 5.2 answers $string['intro'] by
+// casting the key to 0 and returning character zero — so every lookup returned
+// a single letter, every foreach over it warned, and the pages still returned
+// HTTP 200 while rendering «s» where their prose belonged. Keep this name
+// narrow and nav-specific so a page-level array can never collide with it.
+$torin_nav_current = basename($_SERVER['SCRIPT_NAME']);
 
 // ── DEV-ONLY THEME SWITCHER (D-03) — delete this block at the Phase 4 cutover.
 // The guard is file existence and nothing else: never a request-path check
@@ -191,7 +200,7 @@ if (file_exists($torin_dev_switcher)) { torin_render_theme_switcher($torin_theme
 				<button class="nav__toggle" id="navToggle" type="button" aria-expanded="false" aria-controls="navList"><span class="visually-hidden">Меню</span><?php echo torin_icon('menu'); ?></button>
 
 				<ul class="nav__list" id="navList">
-					<li><a class="nav__link" href="index.html"<?php echo ($torin_page === 'index.html' ? ' aria-current="page"' : ''); ?>>Начало</a></li>
+					<li><a class="nav__link" href="index.html"<?php echo ($torin_nav_current === 'index.html' ? ' aria-current="page"' : ''); ?>>Начало</a></li>
 
 					<li class="nav__item--has-sub">
 						<button class="nav__disclosure" id="uslugiBtn" type="button" aria-expanded="false" aria-controls="uslugiList">Услуги<span class="nav__chevron"><?php echo torin_icon('chevron-down'); ?></span></button>
@@ -218,8 +227,8 @@ if (file_exists($torin_dev_switcher)) { torin_render_theme_switcher($torin_theme
 					<?php // D-20's sales line: this item covers laptopi.html, and the
 					      // footer's secondary row carries rezervni-chasti.html, so both
 					      // sales pages are reachable from every page on the site. ?>
-					<li><a class="nav__link" href="laptopi.html"<?php echo ($torin_page === 'laptopi.html' ? ' aria-current="page"' : ''); ?>>Лаптопи и части</a></li>
-					<li><a class="nav__link" href="test-laptop.html"<?php echo ($torin_page === 'test-laptop.html' ? ' aria-current="page"' : ''); ?>>Тествай сам</a></li>
+					<li><a class="nav__link" href="laptopi.html"<?php echo ($torin_nav_current === 'laptopi.html' ? ' aria-current="page"' : ''); ?>>Лаптопи и части</a></li>
+					<li><a class="nav__link" href="test-laptop.html"<?php echo ($torin_nav_current === 'test-laptop.html' ? ' aria-current="page"' : ''); ?>>Тествай сам</a></li>
 					<?php // D-21: Запитване folds into Контакти, which targets the
 					      // homepage CTA block rather than a page of its own. ?>
 					<li><a class="nav__link" href="index.html#contact-us">Контакти</a></li>

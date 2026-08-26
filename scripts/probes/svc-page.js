@@ -29,7 +29,12 @@
 async function run(session, cdp, opts) {
 	await cdp.open(session, opts.url, opts);
 
+	// Serialised into the page scope rather than read from process.env inside it:
+	// the evaluated string runs in the browser, which has no process.env.
+	const expectUrgent = process.env.SVC_EXPECT_URGENT === '1';
+
 	return await cdp.evaluate(session, `(() => {
+		const expectUrgent = ${expectUrgent};
 		const main = document.querySelector('main');
 		if (!main) return { error: 'no <main> found' };
 
@@ -69,8 +74,23 @@ async function run(session, cdp, opts) {
 		if (breadcrumbLinks.length === 0) {
 			inconclusive.push('no .breadcrumbs a in the served HTML — the 44px touch-target check asserted nothing');
 		}
-		if (!document.querySelector('.svc__block--urgent')) {
-			inconclusive.push('no .svc__block--urgent in the served HTML — the urgent-tone surface is absent');
+		// The urgent callout is NOT universal, and gating on it unconditionally
+		// was wrong. This probe was written against zalivane-technosti.html, the
+		// liquid-damage page, where a first-aid block genuinely must appear above
+		// the FAQ — a panicking visitor needs «изключете адаптера» first. Every
+		// other service page has no emergency to call out: a cracked screen is
+		// not a race against corrosion. Measured 2026-08-26: of all pages in
+		// src/, only zalivane-technosti.html declares .svc__block--urgent, so the
+		// unconditional form reported INCONCLUSIVE on every correctly-built child
+		// page and would have trained the reader to ignore the verdict.
+		//
+		// So it is opt-in: run with SVC_EXPECT_URGENT=1 for a page contracted to
+		// carry one. It is still REPORTED unconditionally as hasUrgentBlock below,
+		// so an unexpected disappearance is visible in the output either way. The
+		// breadcrumb and warranty gates stay unconditional — those surfaces belong
+		// on every service page, and their absence is always a defect.
+		if (expectUrgent && !document.querySelector('.svc__block--urgent')) {
+			inconclusive.push('no .svc__block--urgent in the served HTML — the urgent-tone surface is absent (SVC_EXPECT_URGENT was set)');
 		}
 		if (!document.querySelector('.svc__warranty__term')) {
 			inconclusive.push('no .svc__warranty__term in the served HTML — the TRUST-03 term line is absent');

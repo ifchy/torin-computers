@@ -5,10 +5,10 @@ milestone_name: milestone
 current_phase: 03
 current_phase_name: content-trust-signal-build-out
 status: executing
-stopped_at: Phase 03 Wave 3 fully merged (6/9 plans); wave deploy + verification pending, then Wave 4
+stopped_at: Phase 03 Waves 1-3 deployed and verified (6/9 plans); next is Wave 4 (03-07, 03-08)
 last_updated: "2026-08-18T00:00:00.000Z"
 last_activity: 2026-08-20
-last_activity_desc: Wave 3 complete and merged; 6 of 9 plans done
+last_activity_desc: Wave 3 deployed, header.php global collision fixed, all 15 pages verified clean
 progress:
   total_phases: 3
   completed_phases: 2
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-08-04)
 ## Current Position
 
 Phase: 03 (content-trust-signal-build-out) — EXECUTING
-Plan: 6 of 9 complete (03-01, 03-02 live-verified; 03-03/04/05/06 merged, UNVERIFIED pending wave deploy). Next: Wave 4 (03-07, 03-08).
+Plan: 6 of 9 complete and ALL live-verified. Next: Wave 4 (03-07, 03-08).
 Status: Executing Phase 03
 Last activity: 2026-08-18 — 03-01 deployed to staging and verified PASS at both viewports
 
@@ -145,6 +145,9 @@ Recent decisions affecting current work:
 - [Phase 3]: 03-03 chose «Екран или видеочип?» over the plan-mandated «Матрица или видеочип?» — arguable, since the heading contrasts the panel AS A PART against a chip, which is the sanctioned матрица exception. Went with екран because the rule names headings explicitly. «матрица» still appears twice in the page copy as real part references, so the search term is not lost. One-string edit to reverse.
 - [Phase 3]: src/includes/categories.php has an ODD single-quote count (139) at HEAD from straight apostrophes in English comments («category's», «owner's»). Pre-existing, benign, but the quote-balance gate is USELESS on that file — do not trust it there.
 - [Phase 3]: zsh does not word-split unquoted variable expansions. A `for f in $FILES` loop over a space-separated string silently treats the whole string as ONE filename. Use an array. Same trap that once made three render-check runs measure the same viewport.
+
+- [Phase 3]: LIVE DEFECT FOUND AND FIXED 2026-08-26 — header.php:33 assigned `$torin_page = basename($_SERVER['SCRIPT_NAME'])` into the GLOBAL scope of every page that includes it. Four Wave 3 pages had named their own $page data array `$torin_page`; header.php silently overwrote each with the filename string. PHP 5.2 answers $string['intro'] by casting the key to 0 and returning character ZERO, so every lookup returned one letter, all six foreach loops warned, and the pages still returned HTTP 200 while rendering «s» where their prose belonged. Renamed to `$torin_nav_current` (nav-specific, contained: 4 usages, all inside header.php). Pages grew 13.5KB -> 23KB once content actually rendered. NO LOCAL GATE COULD CATCH THIS — it needs a live PHP interpreter, which is why the deploy is the only real syntax/runtime check.
+- [Phase 3]: svc-page.js gated INCONCLUSIVE on .svc__block--urgent unconditionally. That block is liquid-damage-specific — measured, only zalivane-technosti.html declares one — so every correctly-built child page reported INCONCLUSIVE, which trains the reader to ignore the verdict. Now opt-in via SVC_EXPECT_URGENT=1; still reported unconditionally as hasUrgentBlock. Proven live in BOTH directions: zalivane+flag PASSES, child+flag correctly goes INCONCLUSIVE. Breadcrumb and warranty gates remain unconditional.
 
 ### Pending Todos
 
