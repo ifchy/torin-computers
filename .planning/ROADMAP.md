@@ -110,7 +110,7 @@ Plans:
   5. A visitor sees dedicated content for the non-standard-electrical-equipment category as one of the six headline services, and no longer sees EU-project/COVID content competing for attention on the homepage.
   6. Every page has a unique `<title>` and `<meta name="description">` that accurately reflects its own content, replacing the current identical/empty values across all 16 pages.
 
-**Plans**: 6/9 plans executed
+**Plans**: 8/9 plans executed
 
 Plans:
 **Wave 1**
@@ -130,8 +130,8 @@ Plans:
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
-- [ ] 03-07-PLAN.md — The remaining three category-2 child pages; open the publish gate on all five
-- [ ] 03-08-PLAN.md — The last three category pages to the Definition of Done; publish category 5
+- [x] 03-07-PLAN.md — The remaining three category-2 child pages; open the publish gate on all five
+- [x] 03-08-PLAN.md — The last three category pages to the Definition of Done; publish category 5
 
 **Wave 5** *(blocked on Wave 4 completion)*
 
@@ -167,5 +167,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 |-------|----------------|--------|-----------|
 | 1. Migration Safety Net & Foundation | 5/5 | Complete    | 2026-08-05 |
 | 2. Design System & Information Architecture | 9/9 | Complete    | 2026-08-09 |
-| 3. Content & Trust-Signal Build-Out | 6/9 | In Progress|  |
+| 3. Content & Trust-Signal Build-Out | 8/9 | In Progress|  |
 | 4. Hardening & Cutover | 0/TBD | Not started | - |

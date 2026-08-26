@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 03
 current_phase_name: content-trust-signal-build-out
 status: executing
-stopped_at: Phase 03 Waves 1-3 deployed and verified (6/9 plans); next is Wave 4 (03-07, 03-08)
+stopped_at: Phase 03 Waves 1-4 deployed and verified (8/9 plans); only 03-09 (site-wide SEO-01) remains
 last_updated: "2026-08-18T00:00:00.000Z"
 last_activity: 2026-08-20
-last_activity_desc: Wave 3 deployed, header.php global collision fixed, all 15 pages verified clean
+last_activity_desc: Wave 4 complete; all 23 pages live, 200, zero warnings
 progress:
   total_phases: 3
   completed_phases: 2
   total_plans: 23
-  completed_plans: 20
+  completed_plans: 22
 ---
 
 # Project State
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-08-04)
 ## Current Position
 
 Phase: 03 (content-trust-signal-build-out) — EXECUTING
-Plan: 6 of 9 complete and ALL live-verified. Next: Wave 4 (03-07, 03-08).
+Plan: 8 of 9 complete and ALL live-verified. Next: Wave 5 (03-09, site-wide SEO-01 closure).
 Status: Executing Phase 03
 Last activity: 2026-08-18 — 03-01 deployed to staging and verified PASS at both viewports
 
@@ -148,6 +148,13 @@ Recent decisions affecting current work:
 
 - [Phase 3]: LIVE DEFECT FOUND AND FIXED 2026-08-26 — header.php:33 assigned `$torin_page = basename($_SERVER['SCRIPT_NAME'])` into the GLOBAL scope of every page that includes it. Four Wave 3 pages had named their own $page data array `$torin_page`; header.php silently overwrote each with the filename string. PHP 5.2 answers $string['intro'] by casting the key to 0 and returning character ZERO, so every lookup returned one letter, all six foreach loops warned, and the pages still returned HTTP 200 while rendering «s» where their prose belonged. Renamed to `$torin_nav_current` (nav-specific, contained: 4 usages, all inside header.php). Pages grew 13.5KB -> 23KB once content actually rendered. NO LOCAL GATE COULD CATCH THIS — it needs a live PHP interpreter, which is why the deploy is the only real syntax/runtime check.
 - [Phase 3]: svc-page.js gated INCONCLUSIVE on .svc__block--urgent unconditionally. That block is liquid-damage-specific — measured, only zalivane-technosti.html declares one — so every correctly-built child page reported INCONCLUSIVE, which trains the reader to ignore the verdict. Now opt-in via SVC_EXPECT_URGENT=1; still reported unconditionally as hasUrgentBlock. Proven live in BOTH directions: zalivane+flag PASSES, child+flag correctly goes INCONCLUSIVE. Breadcrumb and warranty gates remain unconditional.
+
+- [Phase 3]: 03-07: all five category-2 children published ('published' => true reads 5, false reads 0). Cyrillic word counts: ekran 691, klaviatura 647, panti 783, portove 710, buksa 789. All titles distinct.
+- [Phase 3]: HARDENING DONE — every page data array now carries a page-specific name ($torin_ekran_page, $torin_klav_page, $torin_tok_page, $torin_about_page, plus 03-07/03-08's). No code reference to the generic $torin_page survives anywhere in src/*.html; only explanatory comments. header.php uses $torin_nav_current. Belt and braces: the include no longer squats the name AND no page depends on that.
+- [Phase 3]: CONVENTION worth carrying — a source comment must never quote a gated string verbatim. 03-07 hit this: `grep -c 'Защо не отлагате смяната на буксата'` returned 2 because a head comment quoted the heading.
+- [Phase 3]: 03-08: the plan's homepage-anchor gate `grep -oc 'index.html#kat-' -eq 1` can NEVER pass — two consumers render every category (card grid + Услуги dropdown), so each unpublished category emits TWO anchors. Correct assertion is one distinct CATEGORY: `grep -o 'index.html#kat-[0-9]' | sort -u | wc -l` -> 1, survivor #kat-6.
+- [Phase 3]: VERIFIED — index.html does NOT need re-deploying when a category is published. It reads categories.php at request time, so publishing kat-5 flipped its card and dropdown from anchor to page link with no index.html upload. Only #kat-6 remains as an anchor, correctly gated pending OWNER-QUESTIONS #3.
+- [Phase 3]: 03-08 category depth in Cyrillic words: mehanichni 1028, optimizatsiq 1070, pregryavane 955 — all above the 600 bar, and 1 & 3 slightly over the stated 600-1000 band. Left rather than cutting good copy. The plan's `wc -w` gate would have read 1457/1373/1217, inflated by English comments.
 
 ### Pending Todos
 
