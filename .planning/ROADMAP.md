@@ -15,7 +15,8 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Migration Safety Net & Foundation** - Lock down URL/ranking continuity and rollback discipline, and prove the PHP-include foundation on the real host, before any rebuild work touches the live site. (completed 2026-08-05)
 - [x] **Phase 2: Design System & Information Architecture** - Replace the dated jQuery/parallax theme with a modern, mobile-responsive design organized around the six owner-priority service categories. (completed 2026-08-09)
-- [ ] **Phase 3: Content & Trust-Signal Build-Out** - Rebuild all sixteen pages with correct SEO metadata and surface the shop's genuine trust signals and differentiators that no competitor has.
+- [x] **Phase 3: Content & Trust-Signal Build-Out** - Rebuild all sixteen pages with correct SEO metadata and surface the shop's genuine trust signals and differentiators that no competitor has. (delivered 2026-08-26; DIFF-02/DIFF-03 superseded 2026-09-11 — see Phase 3.5)
+- [ ] **Phase 3.5: Content Truth Revision** - Remove every claim describing a discontinued service, retire three URLs by redirect, and correct the category boundaries so the site describes the business that exists today.
 - [ ] **Phase 4: Hardening & Cutover** - Harden the contact path, tighten performance and SEO plumbing, and cut over the live site with verified URL/ranking continuity.
 
 ## Phase Details
@@ -99,14 +100,23 @@ Plans:
 ### Phase 3: Content & Trust-Signal Build-Out
 
 **Goal**: All sixteen pages are rebuilt with correct, unique SEO metadata and surface the shop's genuine trust signals and differentiators — assets no competitor currently offers — instead of leaving them buried in text or absent entirely.
+
+> **⚠ SUPERSEDED IN PART, 2026-09-11.** Phase 3 was executed in full and live-verified: 23 pages, all
+> 200, zero PHP warnings, SEO-01 closed, every probe passing. The work is not in question — the
+> *specification* changed underneath it. Battery regeneration and BGA/chip-level repair were
+> discontinued by the business (OWNER-QUESTIONS #31), retiring **DIFF-02** and **DIFF-03**, both of
+> which had been verified Complete on 2026-08-26. Success criterion 4 below therefore describes two
+> services the shop no longer offers. **Phase 3.5 carries out the revision**; this phase closes on
+> what it actually delivered, and is not re-opened.
+
 **Depends on**: Phase 2
-**Requirements**: TRUST-01, TRUST-02, TRUST-03, DIFF-01, DIFF-02, DIFF-03, CONTENT-01, CONTENT-02, SEO-01
+**Requirements**: TRUST-01, TRUST-02, TRUST-03, DIFF-01, ~~DIFF-02~~, ~~DIFF-03~~, CONTENT-01, CONTENT-02, SEO-01
 **Success Criteria** (what must be TRUE):
 
   1. A visitor sees a brand-logo row (Lenovo, HP, Dell, Asus, Acer, Apple, MSI, etc.) confirming which hardware brands Torin services.
   2. A visitor sees a Google rating badge linking to Torin's Google Business Profile reviews.
   3. A visitor sees warranty terms summarized directly on relevant service pages, not only buried in the standalone warranty page.
-  4. A visitor sees the self-diagnostic tool, the battery-regeneration story, and the BGA/chip-level repair expertise each surfaced as distinct, visually prominent content rather than buried in nav or paragraph text.
+  4. ~~A visitor sees the self-diagnostic tool, the battery-regeneration story, and the BGA/chip-level repair expertise each surfaced as distinct, visually prominent content rather than buried in nav or paragraph text.~~ — **delivered as specified, then two thirds superseded 2026-09-11.** Only the self-diagnostic tool (DIFF-01) remains a live claim; the other two describe discontinued services and are removed in Phase 3.5.
   5. A visitor sees dedicated content for the non-standard-electrical-equipment category as one of the six headline services, and no longer sees EU-project/COVID content competing for attention on the homepage.
   6. Every page has a unique `<title>` and `<meta name="description">` that accurately reflects its own content, replacing the current identical/empty values across all 16 pages.
 
@@ -143,15 +153,42 @@ Plans:
 
 **UI hint**: yes
 
+### Phase 3.5: Content Truth Revision
+
+**Goal**: Every factual claim on the site describes a service the shop actually offers today. No page advertises battery regeneration, BGA/reballing or product sales; the three retired URLs redirect rather than 404; and the category boundaries match how the shop actually divides the work.
+**Depends on**: Phase 3
+**Requirements**: DIFF-04, CONTENT-01, SEO-05, TRUST-01 (correction), TRUST-02 (enable)
+**Success Criteria** (what must be TRUE):
+
+  1. No page makes a **battery-regeneration** claim, and no page makes a **BGA / reballing / chip-level** claim — 57 chip-level instances across 9 files and battery content across 8 files, all removed.
+  2. **Category 4** («Заливане и ремонт на дънни платки») describes what the shop still does: liquid cleaning, corrosion removal, non-BGA component-level soldering, and board replacement where the case calls for it — and reads as a complete service page, not a page with holes where claims were cut.
+  3. The three **reballing photographs** (`profilaktika17.jpg` infrared station, `profilaktika7.jpg` pads before new balls, `profilaktika15.jpg` hot-air-gun damage) no longer appear on any page, and no evidence strip renders short or empty as a result.
+  4. `za-bateriite.html`, `laptopi.html` and `rezervni-chasti.html` each return a **301 redirect** to a relevant destination — never a 404 — and no internal link still points at them.
+  5. **Category 1 and 2** are divided by failure type, not component: category 1 is «има видима повреда» (physical/mechanical), category 2 is «изглежда здрав, но не работи» (electronic). The `svc-panti` parent inconsistency and the «пукнат екран» misplacement are both resolved, and the five component child pages are reachable from whichever category applies.
+  6. The brand row no longer names **Apple** or **Chromebook**.
+  7. «Безплатна диагностика» reads «безплатна **първоначална** диагностика» everywhere, and both it and the warranty summary state that **category 6 is excluded**.
+  8. The **Google rating badge is live** — 4.7, a rounded review count with a «+», and the verified profile URL — on the homepage and every service page.
+  9. Every page still returns 200 with zero PHP warnings, and the SEO-01 uniqueness gate still passes across the whole tree.
+
+**Cross-cutting constraints:**
+
+- Retirement is **301, never deletion** — all three URLs are among the original 16 indexed pages (SEO-04's intent).
+- **Invent nothing.** Where a cut leaves a page thin, either restructure honestly or record the gap against OWNER-QUESTIONS — do not fill it with plausible-sounding replacement copy. This is the rule Category 6 was built under and it holds here.
+- The **live deploy is the only PHP check** — no local interpreter exists. A page returning 200 proves nothing on its own.
+
+**Plans**: TBD
+
 ### Phase 4: Hardening & Cutover
 
 **Goal**: The contact path is secure and frictionless, page performance and SEO plumbing are solid, and the redesigned site goes live on the existing host with zero loss of URL or ranking continuity.
 **Depends on**: Phase 3
-**Requirements**: CONTACT-01, CONTACT-02, CONTACT-03, CONTACT-04, DESIGN-02, SEO-03, MIGR-02
+**Requirements**: CONTACT-01, ~~CONTACT-02~~, CONTACT-03, CONTACT-04, CONTACT-05, CONTACT-06, OWNER-01, OWNER-02, ANALYTICS-01, DESIGN-02, SEO-03, MIGR-02
 **Success Criteria** (what must be TRUE):
 
-  1. A visitor can tap-to-call any of the shop's phone numbers and click to start a WhatsApp or Viber chat directly from mobile.
-  2. A visitor's contact-form submission is protected by a honeypot and delivered via authenticated SMTP/PHPMailer, and the unstaffed Zendesk chat widget is gone from every page.
+  1. A visitor can tap-to-call any of the shop's phone numbers from mobile. ~~and click to start a WhatsApp or Viber chat~~ — **Viber dropped 2026-09-11** in favour of the contact form (CONTACT-02 retired); no Viber affordance ships, and the form is the written-contact path.
+  2. A visitor's contact-form submission — carrying name, phone, email, device model, fault description and photographs — is protected by a honeypot, gated by explicit privacy consent, and delivered via authenticated SMTP/PHPMailer, and the unstaffed Zendesk chat widget is gone from every page.
+  2a. The shop owner can change published **working hours** and schedule a **holiday banner** by editing a file, with the banner disabled by default and auto-expiring.
+  2b. The shop can see which **contact actions** are used and which **service pages** are visited.
   3. A visitor experiences fast mobile page loads, with all images optimized/compressed and no jQuery/ScrollMagic/pagePiling overhead remaining anywhere on the site.
   4. `robots.txt` and `sitemap.xml` exist on the live site and have been submitted to Search Console.
   5. The redesigned site is live at torin.bg on `bell.host.bg` at the same URLs, with `.htaccess`, the Search Console verification file, favicon, and `robots.txt` all confirmed intact post-cutover, and Search Console shows no new 404s or ranking drops in the days following launch.
@@ -161,11 +198,12 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4
+Phases execute in numeric order: 1 → 2 → 3 → 3.5 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Migration Safety Net & Foundation | 5/5 | Complete    | 2026-08-05 |
 | 2. Design System & Information Architecture | 9/9 | Complete    | 2026-08-09 |
-| 3. Content & Trust-Signal Build-Out | 9/9 | In Progress|  |
+| 3. Content & Trust-Signal Build-Out | 9/9 | Built — partly superseded | 2026-08-26 |
+| 3.5. Content Truth Revision | 0/TBD | Not started | - |
 | 4. Hardening & Cutover | 0/TBD | Not started | - |

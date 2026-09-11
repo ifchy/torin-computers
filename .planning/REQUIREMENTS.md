@@ -19,33 +19,52 @@ Requirements for the redesign launch. Each maps to roadmap phases.
 
 ### Trust Signals
 
-- [x] **TRUST-01**: User sees an "all brands serviced" row (Lenovo, HP, Dell, Asus, Acer, Apple, MSI, etc.)
+- [x] **TRUST-01**: User sees an "all brands serviced" row — **Apple and Chromebook excluded** by the owner 2026-09-11 (OWNER-QUESTIONS #22); still ships `Apple` in `site-config.php` and must be corrected
 - [ ] **TRUST-02**: User sees a Google rating badge linking to the shop's Google Business Profile reviews
 - [x] **TRUST-03**: User sees warranty terms summarized directly on relevant service pages, not only buried in a separate warranty page
 
 ### Differentiators
 
 - [x] **DIFF-01**: User sees the self-diagnostic tool ("Тествай сам своя лаптоп") surfaced as a homepage-level feature, not buried in nav
-- [x] **DIFF-02**: User sees the battery-regeneration story (Panasonic-cell regeneration vs. new-battery resale) surfaced as a distinct differentiator
-- [x] **DIFF-03**: User sees the shop's BGA/chip-level repair expertise presented with clear visual hierarchy alongside liquid/motherboard-damage content
+- ~~**DIFF-02**~~: **RETIRED 2026-09-11** — battery regeneration is discontinued by the business (OWNER-QUESTIONS #31). Was built and verified Complete 2026-08-26; the service no longer exists, so the requirement is withdrawn rather than failed.
+- ~~**DIFF-03**~~: **RETIRED 2026-09-11** — BGA/reballing/chip-level repair is discontinued by the business (OWNER-QUESTIONS #31). Same status: built, verified, then withdrawn with the service.
+- [ ] **DIFF-04**: User sees that the shop services **medical and industrial equipment** — work no competitor in the researched set offers — presented as a distinct capability rather than a line in a list
+
+> **Why DIFF-04 exists.** Retiring DIFF-02 and DIFF-03 left DIFF-01 as the only differentiator, which
+> does not carry the phase goal ("assets no competitor currently offers"). Category 6 was confirmed as
+> medical and industrial equipment on 2026-09-11, and competitor research in Phase 3 found none of
+> eight competitors touching it. DIFF-04 promotes that from a category to a differentiator.
+> It cannot be met until the remaining OWNER-QUESTIONS #3 sub-answers arrive.
 
 ### Content
 
-- [ ] **CONTENT-01**: User sees dedicated content for "нестандартно ел. оборудване" (non-standard electrical equipment) servicing as one of the six headline categories (scope to be confirmed with owner during phase work)
+- [ ] **CONTENT-01**: User sees dedicated content for **medical and industrial equipment** servicing as one of the six headline categories — scope answered 2026-09-11 (OWNER-QUESTIONS #3); page is authored and gated, still awaiting the 3a-3f specifics before publication
 - [x] **CONTENT-02**: User no longer sees EU-project/COVID content competing for attention on the homepage (moved to About page)
 
 ### Contact & Conversion
 
 - [ ] **CONTACT-01**: User can tap-to-call any of the shop's phone numbers on mobile
-- [ ] **CONTACT-02**: User can click to start a WhatsApp or Viber chat
+- ~~**CONTACT-02**~~: **RETIRED 2026-09-11** — the Viber button is dropped in favour of the contact form (OWNER-QUESTIONS #21/#2). All three published numbers were tested and none had a Viber account; rather than provision one, the shop chose the form as the written-contact path. Reverses D-16.
 - [ ] **CONTACT-03**: User's contact form submission goes through a hardened handler (honeypot + authenticated SMTP/PHPMailer) instead of the current unprotected bare `mail()`
 - [ ] **CONTACT-04**: User no longer sees the unstaffed Zendesk chat widget
+- [ ] **CONTACT-05**: User can submit an enquiry carrying **name, phone, email, device model, fault description and one or more photographs** of the damage (OWNER-QUESTIONS #2)
+- [ ] **CONTACT-06**: User giving personal data through the form sees a privacy note and gives explicit consent, and the terms page states what happens to their data and their device (OWNER-QUESTIONS #2/#27)
+
+### Owner Self-Service
+
+- [ ] **OWNER-01**: Shop owner can change the published **working hours** by editing one file, without a developer, and the site renders from it (OWNER-QUESTIONS #20)
+- [ ] **OWNER-02**: Shop owner can schedule a **holiday/absence banner** from one file — disabled by default, and **auto-hiding once the period ends** rather than needing to be switched off (OWNER-QUESTIONS #8)
+
+### Analytics
+
+- [ ] **ANALYTICS-01**: Shop can see **which contact actions are used** (call, form submit) and **which service pages are visited**, so service demand is observable (OWNER-QUESTIONS #1)
 
 ### SEO & Technical Hygiene
 
 - [x] **SEO-01**: Every page has a unique `<title>` and `<meta name="description">` (currently identical/empty across all 16 pages)
 - [x] **SEO-02**: Every page declares `lang="bg"` instead of the current `lang="en"`
 - [ ] **SEO-03**: Site has a `robots.txt` and `sitemap.xml`, submitted to Search Console
+- [ ] **SEO-05**: Every **retired** page URL returns a **301 redirect to a relevant destination, never a 404** — covers `za-bateriite.html`, `laptopi.html`, `rezervni-chasti.html` and `covid.html` (OWNER-QUESTIONS #31/#4)
 - [x] **SEO-04**: All existing page URLs are preserved unchanged through the redesign (no slug/filename changes)
 
 ### Migration Safety
@@ -90,22 +109,29 @@ Which phases cover which requirements. Populated during roadmap creation.
 | DESIGN-02 | Phase 4 | Pending |
 | IA-01 | Phase 2 | Complete |
 | IA-02 | Phase 2 | Complete |
-| TRUST-01 | Phase 3 | Complete |
+| TRUST-01 | Phase 3 | Complete — brand list needs Apple removed |
 | TRUST-02 | Phase 3 | Pending — gated: badge built and wired, OFF by default pending OWNER-QUESTIONS #7 (rating, review count, profile URL) |
 | TRUST-03 | Phase 3 | Complete |
 | DIFF-01 | Phase 3 | Complete |
-| DIFF-02 | Phase 3 | Complete |
-| DIFF-03 | Phase 3 | Complete |
-| CONTENT-01 | Phase 3 | Pending — partial: page authored with zero invented claims, kat-6 unpublished pending OWNER-QUESTIONS #3a-#3f |
+| DIFF-02 | Phase 3 | RETIRED 2026-09-11 — service discontinued |
+| DIFF-03 | Phase 3 | RETIRED 2026-09-11 — service discontinued |
+| CONTENT-01 | Phase 3.5 | Pending — scope answered (medical/industrial); awaiting #3a-#3f specifics |
 | CONTENT-02 | Phase 3 | Complete |
 | CONTACT-01 | Phase 4 | Pending |
-| CONTACT-02 | Phase 4 | Pending |
+| CONTACT-02 | Phase 4 | RETIRED 2026-09-11 — Viber dropped for the form |
 | CONTACT-03 | Phase 4 | Pending |
 | CONTACT-04 | Phase 4 | Pending |
 | SEO-01 | Phase 3 | Complete |
 | SEO-02 | Phase 2 | Complete |
 | SEO-03 | Phase 4 | Pending |
 | SEO-04 | Phase 1 | Complete |
+| SEO-05 | Phase 3.5 | Pending |
+| DIFF-04 | Phase 3.5 | Pending |
+| CONTACT-05 | Phase 4 | Pending |
+| CONTACT-06 | Phase 4 | Pending |
+| OWNER-01 | Phase 4 | Pending |
+| OWNER-02 | Phase 4 | Pending |
+| ANALYTICS-01 | Phase 4 | Pending |
 | MIGR-01 | Phase 1 | Complete |
 | MIGR-02 | Phase 4 | Pending |
 | MIGR-03 | Phase 1 | Complete |
