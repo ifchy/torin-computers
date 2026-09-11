@@ -40,7 +40,7 @@ second conversation.
 ## Blocking — work cannot complete correctly without these
 
 ### 1. Google Search Console access
-**Status:** OPEN
+**Status:** ANSWERED 2026-09-11
 **Question:** Which Google account verified ownership of torin.bg? The verification file `google1718743335455f1c.html` is live on the site, so someone has access. Can they grant it, or share the login?
 **Why it matters:** Needed to cross-check the URL inventory against real indexed pages, to submit the sitemap, and to watch for ranking loss at cutover.
 **Blocks:** MIGR-01 (retrofit), SEO-03, cutover monitoring in Phase 4
@@ -60,12 +60,18 @@ a different way, but each needs something only the owner can provide:
   before cutover, not after.
 - Are there **other domains** pointing at this site (e.g. a `.com`, or an old domain redirecting in)?
   Those need handling at cutover too.
-**Answer:**
+**Answer:** **No GSC account exists.** The owner will provide access to a **new** account created under the same
+Google Business account. Registrar, Bing, penalty history and other-domain questions remain unasked.
+
+**NEW SCOPE REQUEST:** add **Google Analytics** tracking for (a) the contact buttons and (b) which
+service pages are visited, so the shop can see which services draw the most interest. This is new
+work, not part of Phase 3 — it needs its own plan.
+
 
 ---
 
 ### 2. Should the contact form exist at all?
-**Status:** OPEN
+**Status:** ANSWERED 2026-09-11
 **Question:** The new design leads with phone call + Viber/WhatsApp as the primary contact actions. Is a written enquiry form still wanted alongside them, or should it be dropped?
 **Why it matters:** Determines whether `mailer.php` needs hardening at all (PHPMailer/SMTP/honeypot work in Phase 4), and how the CTA blocks are laid out.
 **Blocks:** Phase 2 CTA design (partially — designed so removal is a subtraction), CONTACT-03 in Phase 4
@@ -87,12 +93,17 @@ a different way, but each needs something only the owner can provide:
 **If the answer is "drop it":** note this interacts with question **#21** — the Viber button is
 currently a dead end for anyone without Viber installed, and the form is the obvious fallback for
 those visitors. Dropping both leaves phone as the only path.
-**Answer:**
+**Answer:** **Keep it.** Fields confirmed: **name, phone, email, device model, fault description, and photo
+upload.** Photo upload was previously listed as optional-extra; it is now required scope.
+
+Still unanswered and needed before build: destination email address, expected reply time, whether
+phone is mandatory, and the GDPR consent/privacy position.
+
 
 ---
 
 ### 3. Category 6 — «Сервиз на нестандартно ел. оборудване»: what is actually in scope?
-**Status:** OPEN — **the single biggest content gap in the project**
+**Status:** ANSWERED (partial) 2026-09-11
 **Blocks:** Phase 3 plan 03-05, Phase 4 cutover, ROADMAP success criterion 5
 **Raised:** Phase 1, escalated in Phase 2, expanded 2026-08-19 during Phase 3 execution
 
@@ -186,12 +197,23 @@ none yet.
 - Its symptom line currently reads **«нестандартна или стара техника, която другаде не приемат»** and
   is marked `[ASSUMED]` — it was written by the developer, not the owner. Is it accurate?
 
-**Answer:**
+**Answer:** **Category 6 is MEDICAL AND INDUSTRIAL EQUIPMENT.**
+
+The owner also made an important structural point: this category sits **far apart** from laptops and
+computers, so the service conventions that apply to categories 1-5 **do not transfer** - warranty,
+turnaround and free diagnostics all work differently here (see #23 and #24, both of which now
+explicitly carve category 6 out).
+
+Still open from the sub-questions: 3a specific device types, 3b the common jobs, 3c what is
+explicitly refused (the highest-cost gap - the page generates enquiries with nothing steering wrong
+ones away), 3d photographs and war stories, 3e pricing and turnaround specifics, 3f whether
+«Нестандартна техника» is the right name.
+
 
 ---
 
 ### 4. `covid.html` — has the EU publicity obligation expired?
-**Status:** OPEN
+**Status:** ANSWERED 2026-09-11
 **Question:** The page publicises EU project **BG16RFOP002-2.073** (ОПИК 2014-2020, 10 000 лв, beneficiary ТОРИН КЪМПАНИ ООД). EU grants carry mandatory publicity obligations for a defined period. Has that period ended, and is it safe to retire the page?
 **Why it matters:** Removing it too early risks an audit finding against the company — a legal/financial risk, not just an SEO one.
 **Current plan (safe default):** Remove the content from the homepage, but keep `covid.html` live and unlinked. Costs nothing and carries no risk. Only retire it — with a 301 redirect, never a 404 — once this is confirmed.
@@ -213,7 +235,13 @@ another beneficiary's text. Should we (a) correct it to the right company name, 
 as-is because it reproduces submitted grant text that shouldn't be altered, or (c) leave it and note
 it? This is a judgement call about a document with a compliance dimension, so it should not be a
 developer decision.
-**Answer:**
+**Answer:** **Safe to remove.** The owner is not concerned about removing it completely. Developer research
+indicates the website-publicity obligation has already expired and only document retention remains.
+
+**Note:** this is research, not a sighted contract clause. Retirement should still use a **301
+redirect, never a 404** (the project convention). The «Венера-АКС ООД» question (#28) becomes moot if
+the page goes.
+
 
 ---
 
@@ -243,7 +271,7 @@ something the repurpose would break.
 ---
 
 ### 6. Is there a cPanel / hosting control-panel login for `bell.host.bg`?
-**Status:** OPEN
+**Status:** ANSWERED 2026-09-11
 **Question:** Separate from the FTP credentials — is there a hosting control-panel account? If so, what are the details?
 **Why it matters:** The host runs **PHP 5.2.17**. PHPMailer 6.x needs PHP ≥5.5. The host uses CloudLinux Alt-PHP, which normally exposes PHP-version switching through cPanel's "MultiPHP Manager" / "Select PHP Version". With a cPanel login, upgrading PHP is straightforward; without one, an older mail library must be chosen instead.
 **Blocks:** Phase 4 (CONTACT-03)
@@ -262,12 +290,14 @@ something the repurpose would break.
 **Why the PHP version matters beyond email:** PHP 5.2 was released in 2006 and has had no security
 patches since 2011. Everything the redesign needs works on it, so this is not blocking — but it is
 worth the owner knowing the server software is nineteen years old.
-**Answer:**
+**Answer:** **Control-panel credentials obtained.** The owner has provided them. Walk-through of what is needed
+(the PHP version upgrade for the mailer) is deferred until Phase 4 reaches that point.
+
 
 ---
 
 ### 20. Working hours — 8:00–16:00 or 9:00–17:00?
-**Status:** OPEN
+**Status:** ANSWERED 2026-09-11
 **Question:** The current site contradicts itself about the shop's working hours:
 
 | Source | Hours |
@@ -297,7 +327,15 @@ directly in search results, so every gap becomes a guess:
 **Why this one is worth being fussy about:** the hours ship in the footer of all sixteen pages *and*
 into the `LocalBusiness` structured data Google reads. A wrong value does not just look wrong — it
 sends real customers to a closed shop, and Google may show "Open now" when you are not.
-**Answer:**
+**Answer:** **8:00–16:00, Monday to Friday.** `profilaktika-laptop.html`'s 9:00–17:00 is stale.
+
+**Independently corroborated 2026-09-11** by reading the Google Business Profile directly, which also
+answers what the owner did not state: **Saturday and Sunday closed**, and **no lunch break** listed.
+
+**NEW SCOPE REQUEST:** the hours should live in a **file the owner can edit**, which the site reads
+to render them — rather than being changed by a developer. Same pattern as the #8 banner request.
+Public holidays, drop-off-vs-collection and call-ahead remain unasked.
+
 
 ---
 
@@ -382,7 +420,7 @@ local ranking. Also worth noting: **which categories** the profile is listed und
 ---
 
 ### 8. `otpuska.js` holiday banner — keep or drop?
-**Status:** OPEN
+**Status:** ANSWERED 2026-09-11
 **Question:** The site has a script that shows a holiday/absence banner. Is this still used? Should the redesign keep an equivalent, or drop it?
 **Why it matters:** If kept, it needs a maintained modern replacement rather than the current jQuery-era implementation.
 **Blocks:** Phase 4
@@ -399,7 +437,15 @@ local ranking. Also worth noting: **which categories** the profile is listed und
 
 **Note it interacts with #20 (working hours):** if the shop closes for holidays, the structured data
 Google reads should ideally reflect that too, or Google may show the shop as open when it is not.
-**Answer:**
+**Answer:** **Keep, but rebuilt as owner-controlled.** Requirements:
+- **Disabled by default.**
+- Controlled from a **file the owner can edit** to define a vacation period.
+- **Auto-hides once the period expires** - not only when someone remembers to switch it off.
+- Redesign suggestions welcome.
+
+Pairs with #20's request for an owner-editable working-hours file - same pattern, likely the same
+mechanism.
+
 
 ---
 
@@ -425,7 +471,7 @@ wanted in the first place.
 ---
 
 ### 10. Which theme goes live?
-**Status:** ANSWERED (2026-08-05, by the developer — worth confirming with the owner at review)
+**Status:** CONFIRMED 2026-09-11
 **Question:** Two themes will be built and switchable at `torin.bg/new` during development:
 - **Theme A — logo colours:** amber `#fbad03` + electric blue `#0547dc`
 - **Theme B — current site colours:** amber `#ffc70a` + navy `#0e305d`
@@ -434,12 +480,13 @@ Which should ship?
 **Why it matters:** The switcher is development-only and gets removed at cutover with one theme hard-baked.
 **Blocks:** ~~Phase 4 cutover~~ — resolved
 **Raised:** Phase 2 discussion
-**Answer:** **Theme B** (`#ffc70a` + `#0e305d`) is the default and ships live. Theme A stays in the dev switcher as the comparison option. Still worth showing the owner both at `torin.bg/new` before cutover, since it's their brand.
+**Answer:** **Theme B** confirmed by the owner.
+ **Theme B** (`#ffc70a` + `#0e305d`) is the default and ships live. Theme A stays in the dev switcher as the comparison option. Still worth showing the owner both at `torin.bg/new` before cutover, since it's their brand.
 
 ---
 
 ### 11. Is there an original vector or high-resolution logo file?
-**Status:** OPEN
+**Status:** ANSWERED (partial) 2026-09-11
 **Question:** The only logo on the site is `torin-logo.png` at **150×80 pixels**. Does an original vector (AI/EPS/SVG/PDF) or larger raster version exist — perhaps from whoever designed it?
 **Why it matters:** At 150×80 the logo looks visibly soft on modern phone and laptop screens. If no original exists it will need redrawing from scratch.
 **Blocks:** Logo redraw (timing flexible)
@@ -456,14 +503,16 @@ Which should ship?
   redrawn loosely.
 - Is there a **favicon** source, or should one be generated from the logo? The current site has none
   at modern sizes.
-**Answer:**
+**Answer:** A **larger raster image exists** and will be provided; delivery method to be arranged. Vector
+source, designer contact, brand guidelines and trademark status all still unknown.
+
 
 ---
 
 ## Structural — reshapes the site's organisation
 
 ### 15. Is the sales line still active, and should it have nav prominence?
-**Status:** OPEN
+**Status:** ANSWERED 2026-09-11
 **Question:** The site sells **употребявани лаптопи** (`laptopi.html`) and **резервни части** (`rezervni-chasti.html`) — a second business line alongside repair. Is this still active? The plan gives it a nav item **«Лаптопи и части»**. Is that the right weight, or is repair the only focus now?
 **Why it matters:** If still active it's revenue that would otherwise disappear from navigation. If not, the pages should be handled differently.
 **Blocks:** Phase 2 nav finalisation
@@ -481,12 +530,16 @@ Which should ship?
 
 **If it is no longer active:** the two URLs are indexed, so they should be redirected rather than
 deleted — tell us where each should point.
-**Answer:**
+**Answer:** **The sales line is DISCONTINUED.** Selling used laptops and spare parts has stopped.
+
+`laptopi.html` and `rezervni-chasti.html` are both indexed URLs, so they retire via **301 redirect,
+never deletion**. Redirect targets still to be chosen.
+
 
 ---
 
 ### 16. What do customers actually say when they call?
-**Status:** OPEN
+**Status:** DEFERRED 2026-09-11
 **Question:** In the owner's own words — what are the most common complaints, phrased the way customers phrase them? (e.g. «прегрява», «не се включва», «изключва се сам», «бавен е», «залях го»…) Ideally 4–6 per service category.
 **Why it matters:** The new design puts a symptom line under each category card and builds a symptom-organised «Не откривате проблема си?» section. Customers describe *symptoms*; the six categories are named by *cause*. The owner hears the real phrasing daily — far better than inventing it.
 **Blocks:** Phase 3 content
@@ -515,12 +568,17 @@ the technician's:
   Answering those on the page reduces phone time.
 - Anything customers say in **English or transliterated** («лаптопа ми не буутва», «дъното гърми»)
   — people search that way too.
-**Answer:**
+**Answer:** The meeting ran out of time before reaching this. The developer will instead **research** what users
+actually search for in these categories and propose phrasing for owner review.
+
+This leaves every `[ASSUMED]` symptom line on the site unconfirmed, including the six category cards
+and the «Не откривате проблема си?» section.
+
 
 ---
 
 ### 17. Categories 1 and 2 overlap — confirm the split and the new names
-**Status:** DECIDED — needs confirmation, not blocking
+**Status:** ANSWERED 2026-09-11
 **Question:** "Ремонт на счупвания" and "Смяна на матрици, клавиатури, USB портове, захранващи букси, панти" describe overlapping work — a cracked screen is both a счупване and a смяна на матрица. As originally written, category 1 had no services that weren't already in category 2.
 
 **Decision taken (developer delegated this to Claude, 2026-08-05):**
@@ -532,12 +590,36 @@ the technician's:
 **Why it matters:** Determines what content each of the two pages carries.
 **Blocks:** Nothing — Phase 3 can proceed on this split
 **Raised:** Phase 2 discussion
-**Answer:**
+**Answer:** **The boundary is redefined by failure type, not by component.**
+
+- **Category 1** — physical and mechanical damage to components.
+- **Category 2** — malfunction or electronic fault.
+
+**Implementation note (developer):** stated that way it is a technician's distinction — a customer
+with a dark screen cannot tell which it is, which is what they are paying to find out. The agreed
+customer-facing form of the same boundary is the observable proxy:
+
+- **Category 1** — има видима повреда
+- **Category 2** — изглежда здрав, но не работи
+
+Revised symptom lines:
+- **1 · Счупвания и механични повреди** — паднал лаптоп, счупен корпус, пукнат екран, счупени панти
+- **2 · Екран, клавиатура и портове** — екранът не светва, клавиши не реагират, портът не зарежда
+
+**Two inconsistencies this exposes in already-shipped work:**
+1. `svc-panti` is parented to `kat-2`, but `kat-1`'s symptom line already claims «разхлабени панти».
+2. `kat-2`'s symptom line leads with «пукнат екран», which is physical damage and belongs to
+   category 1 under this rule.
+
+**The five child pages are COMPONENT pages and should not be re-parented** — a component fails both
+ways, and a cracked screen and a dark screen are the same repair. Both categories link to the
+relevant children; `torin_service_href()` already supports this, so it is a data change.
+
 
 ---
 
 ### 19. Category 5 renamed — confirm
-**Status:** DECIDED — needs confirmation, not blocking
+**Status:** CONFIRMED 2026-09-11
 **Question:** "Смяна на вентилатори" describes the *fix*, but customers only know the *symptom* — «прегрява», «шуми», «изключва се сам». They may not recognise the category as theirs. It was also the thinnest of the six, holding essentially one service.
 
 **Decision taken (developer delegated this to Claude, 2026-08-05):** renamed to **«Прегряване и охлаждане»**. Customers recognise the symptom immediately, and it naturally absorbs профилактика (dust cleaning, thermal paste), so the category is no longer thin.
@@ -556,7 +638,8 @@ the technician's:
 
 **Blocks:** Nothing
 **Raised:** Phase 2 discussion
-**Answer:**
+**Answer:** **Keep «Прегряване и охлаждане».** The owner confirmed the developer's rename.
+
 
 ---
 
@@ -589,7 +672,7 @@ the technician's:
 ---
 
 ### 22. Which brands does Torin actually service — and which six to eight should the row name?
-**Status:** OPEN
+**Status:** ANSWERED 2026-09-11
 **Question:** TRUST-01 puts a «Обслужваме всички марки» row on the site. Which brands does the shop
 genuinely work on, and which six to eight should be named in the row?
 **Why it matters:** The list currently in the roadmap — Lenovo, HP, Dell, Asus, Acer, Apple, MSI —
@@ -624,12 +707,20 @@ Please strike out any you do not service and add any that are missing.
 - Do you hold **any authorised-service status** with a manufacturer? Competitor research found none
   of eight competitors claiming it — if Torin has any, that is a real differentiator worth stating.
   If not, we say nothing, which is what the site does now.
-**Answer:**
+**Answer:** **Exclude Apple and Chromebook.** Both may still be accepted if a customer asks, but they are
+preferably avoided and must not be advertised.
+
+**LIVE FACTUAL ERROR:** `site-config.php:175` currently ships `Apple` in the brand row, so the
+staging site presently advertises a brand the shop avoids. Needs removal.
+
+The remaining names (Lenovo, HP, Dell, Asus, Acer, MSI) are unconfirmed individually, as are the
+gaming, business and workstation sub-questions and authorised-service status.
+
 
 ---
 
 ### 23. Do warranty terms vary by type of repair?
-**Status:** OPEN
+**Status:** ANSWERED 2026-09-11
 **Question:** TRUST-03 puts a warranty summary on every category page. Is it **one set of terms for
 all repairs**, or do they differ — e.g. board-level work vs. a keyboard swap vs. software
 optimisation? If they differ, what are the actual terms per type?
@@ -664,12 +755,23 @@ could void a claim. **Is that reframing correct?** If it is genuinely a conditio
 who used the laptop lightly could be refused — then it must be stated as a condition, plainly, and
 the reframing is wrong. This is the kind of clause customers hold you to, so it should not be a
 developer's interpretation.
-**Answer:**
+**Answer:** **1 month for all repairs, EXCEPT category 6** (medical and industrial equipment), where the standard
+terms do not apply.
+
+**Voided by:** liquid, impact, or another shop opening or working on the device — with the owner's own
+caveat that there is currently **no reliable way to detect** third-party opening.
+
+Still unanswered: parts-vs-labour cover, whether it covers the specific fault or the device
+generally, receipt requirement, re-repair vs refund, and transferability on resale.
+
+**The 5–6 hours a day clause was not ruled on.** `warrently.html` still reproduces it in the shop's
+published wording, and the source comment forbidding harmonisation stays in force.
+
 
 ---
 
 ### 24. Free diagnostics — what happens if the customer declines the repair?
-**Status:** OPEN
+**Status:** ANSWERED 2026-09-11
 **Question:** «Безплатна диагностика» appears across the site as a trust signal. If a customer has
 the diagnosis done and then declines the repair, is it still free, or is there a fee?
 **Why it matters:** Competitors commonly charge a declined-repair fee. If Torin genuinely doesn't,
@@ -695,12 +797,20 @@ strong differentiator and deserves a prominent line next to every «безпла
 If it has conditions, the site must state them — an unqualified promise that turns out to have
 conditions is exactly the kind of thing that produces a bad Google review, which then sits next to
 the rating badge from question **#7**.
-**Answer:**
+**Answer:** **Applies to categories 1–5 only**, not category 6.
+
+**Wording change requested:** add «**първоначална**» (initial) so it reads as a quick basic
+diagnostic rather than an unlimited free investigation — e.g. «безплатна първоначална диагностика».
+This ships on many pages and every instance needs updating.
+
+The boundary sub-questions (disassembly, reassembly fee, data recovery, already-opened devices)
+remain unanswered.
+
 
 ---
 
 ### 25. Which legal entity operates the shop, and what is the ЕИК?
-**Status:** OPEN — **new, raised 2026-08-19 during Phase 3 execution**
+**Status:** ANSWERED (partial) 2026-09-11
 **Question:** The site uses two different company names, and states no company registration number
 anywhere:
 
@@ -729,12 +839,18 @@ Which is the **registered legal entity** that trades as ТОРИН КОМПЮТ�
 may need stating.
 **Blocks:** Legal page accuracy (Phase 3 plan 03-06), `LocalBusiness` schema completeness
 **Raised:** Phase 3 execution, 2026-08-19
-**Answer:**
+**Answer:** - **Registered legal entity:** ТОРИН КЪМПАНИ ООД
+- **Trade name to use everywhere:** ТОРИН КОМПЮТЪРС (as the logo says)
+- **Address:** ул. Свети Иван Рилски 46
+
+**⚠ The ЕИК was NOT provided** — and it is the single thing the legal pages actually need to make the
+contracting party identifiable. Still outstanding, as is VAT registration status.
+
 
 ---
 
 ### 26. Address format — `46` or `№46`, and is there access guidance?
-**Status:** OPEN — **new, raised 2026-08-19**
+**Status:** ANSWERED 2026-09-11
 **Question:** The site writes the address two ways — `ул. Свети Иван Рилски 46` and `ул. Свети Иван
 Рилски №46`. Which is correct/preferred? And is there anything a first-time visitor needs to know to
 actually find the door?
@@ -749,12 +865,18 @@ freeze one form into structured data on all sixteen pages. Worth settling once.
   and adds third-party tracking; a link costs nothing.)
 **Blocks:** Nothing — but it ships site-wide, so cheap to fix now and annoying later
 **Raised:** Phase 3 execution, 2026-08-19
-**Answer:**
+**Answer:** **Use `ул. Свети Иван Рилски 46` — without the № sign.** The owner prefers the № sign aesthetically
+but chose consistency with the Google Business Profile, which omits it.
+
+Verified 2026-09-11: GBP renders it `ul. "Sveti Ivan Rilski" 46, 1606 Sofia`, with a «Пette Kyosheta»
+district prefix the site does not use. Access guidance (floor, parking, landmark, map embed) still
+unasked.
+
 
 ---
 
 ### 27. Customer data and device handling — what should the site promise?
-**Status:** OPEN — **new, raised 2026-08-19**
+**Status:** DEFERRED 2026-09-11
 **Question:** Repair customers hand over devices containing personal data. What is the shop's actual
 practice, and what should the site say about it?
 **Why it matters:** "Is my data safe?" is one of the most common unspoken worries for anyone leaving
@@ -774,7 +896,12 @@ differentiator — but only if the answer is accurate, since it becomes a public
   should inform `uslovia.html` rather than the page being written from scratch.
 **Blocks:** Content accuracy on `uslovia.html` (Phase 3 plan 03-06)
 **Raised:** Phase 3 execution, 2026-08-19
-**Answer:**
+**Answer:** Direction rather than answer: **research what competitors say**, decide from there, and **skip
+anything that can safely be skipped** rather than making commitments the shop has not thought
+through.
+
+Nothing on this ships until it is decided — silence is the safe state for a public commitment.
+
 
 ---
 
@@ -855,6 +982,53 @@ becomes obsolete along with it.
 **Blocks:** Nothing now — becomes live the moment #2 is answered "keep the form"
 **Raised:** Phase 3 execution, plan 03-06 (which correctly identified that the string was outside its files)
 **Answer:**
+
+---
+
+### 31. SCOPE CHANGE — three service lines discontinued
+**Status:** ANSWERED 2026-09-11 — **this changes requirements, not just content**
+**Raised:** Owner conversation, recorded 2026-09-11
+
+Three service lines the site currently advertises have been **discontinued by the business**. This is
+not a defect in the delivered work — Phase 3 built exactly what was specified. The specification is
+what changed.
+
+| Discontinued | Requirement affected | Site surface |
+|---|---|---|
+| **Battery regeneration** | **DIFF-02** (verified Complete 2026-08-26) | `za-bateriite.html` + 7 other files |
+| **BGA / reballing / chip-level** | **DIFF-03** (verified Complete 2026-08-26) | 57 claims across 9 files |
+| **Sales line** — used laptops, spare parts | none directly | `laptopi.html`, `rezervni-chasti.html` |
+
+**Two of the three differentiators Phase 3 exists to surface no longer exist.** Only **DIFF-01** (the
+self-diagnostic tool) survives. The phase goal reads "surface the shop's genuine trust signals and
+differentiators — assets no competitor currently offers", so the goal itself needs revisiting, not
+just the pages.
+
+**Category 6 is the likely replacement differentiator.** Medical and industrial equipment is
+genuinely unusual — none of the eight competitors researched in Phase 3 touches it.
+
+**Category 4 re-scoped (owner-confirmed 2026-09-11).** «Заливане и ремонт на дънни платки» keeps its
+place as a headline category but now covers the **basic board services**:
+- liquid cleaning
+- corrosion removal
+- **non-BGA** soldering — component-level work (capacitors, mosfets, fuses, connectors)
+- **board replacement** where the case calls for it
+
+Everything chip-level goes: the computer-controlled infrared BGA station, AMTECH flux, the 90%
+success-rate claim, the three reballing stages, «северен мост / южен мост / видеочип».
+
+**Three of the seven repair photographs deployed in Phase 3 are reballing photos** and must be
+withdrawn with the claims: `profilaktika17.jpg` (the infrared station), `profilaktika7.jpg` (pads
+cleaned before new balls), `profilaktika15.jpg` (hot-air-gun damage).
+
+**Retirement method is not deletion.** `za-bateriite.html`, `laptopi.html` and `rezervni-chasti.html`
+are all indexed URLs from the original 16. The project convention — set in #4 and upheld by SEO-04's
+intent — is **301 redirect, never 404**. Redirect targets still to be chosen.
+
+**Also reversed:** the **Viber button is dropped** in favour of the contact form (see #21 and #2).
+That reverses D-16, which made chat an equal-weight primary action, and retires the cutover gate
+tracked in `.planning/todos/pending/verify-viber-button-before-launch.md`.
+**Answer:** Recorded. Requires a requirements revision before any content work — see STATE.md.
 
 ---
 
