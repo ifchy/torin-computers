@@ -5,10 +5,10 @@ milestone_name: milestone
 current_phase: 03
 current_phase_name: content-trust-signal-build-out
 status: verifying
-stopped_at: Phase 03 verified (human_needed) — 7/9 requirements Complete, TRUST-02 and CONTENT-01 gated on owner input; 8 UAT items open
+stopped_at: Owner answers received — SCOPE CHANGE: DIFF-02 and DIFF-03 discontinued. Phase 03 verification superseded; requirements revision needed before further content work.
 last_updated: "2026-08-26T12:22:08.156Z"
-last_activity: 2026-08-26
-last_activity_desc: Phase 03 verification complete — status human_needed, 03-UAT.md written
+last_activity: 2026-09-11
+last_activity_desc: Owner answers merged; two differentiator requirements retired by the business
 progress:
   total_phases: 3
   completed_phases: 2
@@ -165,6 +165,18 @@ Recent decisions affecting current work:
 - [Phase 3]: W-1 SUBSTANTIVE — za-bateriite.html advertises a 1-YEAR battery warranty whose «Пълни гаранционни условия» link lands on warrently.html, which states «за всички сервизни дейности и услуги е 1 месец» and never mentions batteries. Inherited from the legacy site and correctly left unharmonised per OWNER-QUESTIONS #23, but Phase 3 RAISED the exposure by giving batteries their own page. Must become a named rider on #23 — never fixed by guessing which term the shop honours.
 - [Phase 3]: W-3 the dev theme switcher renders on all 23 staging pages — documented Phase-2 artefact with a Phase-4 removal step, not a leak. W-4 google1718743335455f1c.html (Search Console token) has no counterpart in src/ — MIGR-02/Phase 4, easy to lose at cutover.
 - [Phase 3]: TRUST-02's ENABLED render path has never executed anywhere — no local PHP runtime and staging serves the disabled branch. Presence and wiring at both call sites (index.html:285, category-page.php:561) are proven; rendering is NOT. Recorded as behavior_unverified, not as passing.
+
+- [Phase 3/4]: SCOPE CHANGE 2026-09-11 (OWNER-QUESTIONS #31) — battery regeneration, BGA/reballing and the sales line are DISCONTINUED by the business. DIFF-02 and DIFF-03, both verified Complete on 2026-08-26, describe services the shop no longer offers. Only DIFF-01 (self-diagnostic) survives. 57 chip-level claims across 9 files; battery content across 8. This is a requirements revision, not gap closure — Phase 3 built what was specified.
+- [Phase 3/4]: Category 4 re-scoped by the owner: «Заливане и ремонт на дънни платки» now covers liquid cleaning, corrosion removal, NON-BGA component-level soldering, and board replacement where the case calls for it. Everything chip-level goes (infrared station, AMTECH, 90% claim, reballing stages, северен/южен мост, видеочип).
+- [Phase 3/4]: Three deployed repair photos are reballing photos and must be withdrawn with the claims: profilaktika17.jpg (infrared station), profilaktika7.jpg (pads before new balls), profilaktika15.jpg (hot-air-gun damage).
+- [Phase 3/4]: Retirement is by 301 REDIRECT, never deletion — za-bateriite.html, laptopi.html and rezervni-chasti.html are all indexed URLs from the original 16. Targets still to be chosen.
+- [Phase 3/4]: Category 1/2 boundary redefined (OWNER-QUESTIONS #17): cat 1 = physical/mechanical damage, cat 2 = electronic malfunction. Customer-facing form of the same rule: «има видима повреда» vs «изглежда здрав, но не работи». Exposes two shipped inconsistencies — svc-panti is parented to kat-2 while kat-1's symptom line claims «разхлабени панти», and kat-2's symptom line leads with «пукнат екран» which is physical damage. The five child pages are COMPONENT pages and should NOT be re-parented; both categories link to the relevant ones.
+- [Phase 3]: LIVE FACTUAL ERROR — site-config.php:175 ships 'Apple' in the brand row, but the owner excludes Apple and Chromebook. The staging site currently advertises a brand the shop avoids.
+- [Phase 4]: Viber button DROPPED in favour of the contact form — reverses D-16 (chat as equal-weight primary action) and retires the verify-viber-button-before-launch todo. Contact form confirmed with name, phone, email, device model, fault description AND photo upload.
+- [Phase 4]: NEW SCOPE from owner — (a) owner-editable working-hours file the site reads, (b) owner-editable holiday banner, off by default, auto-expiring, (c) Google Analytics on contact buttons and service-page visits, (d) a services list for owner-supplied turnaround times. Prices will NEVER be published — they change too dynamically.
+- [Phase 3]: GBP verified live 2026-09-11 — rating 4.7, 157 reviews, profile https://maps.google.com/?cid=7041654319750291392. Owner wants the review count rounded with a '+' so it stays accurate longer. GBP business name is «Torin Kampani» (the legal entity, in Latin); owner wants it changed to the trade name.
+- [Phase 3]: Legal entity ТОРИН КЪМПАНИ ООД, trade name ТОРИН КОМПЮТЪРС, address «ул. Свети Иван Рилски 46» WITHOUT the № sign (chosen for consistency with GBP). ЕИК still NOT provided — the one thing the legal pages actually need.
+- [Phase 3]: Warranty is 1 month for all EXCEPT category 6. Free diagnostics applies to categories 1-5 only and must be reworded «първоначална» (initial). Both ship on many pages.
 
 ### Pending Todos
 
