@@ -176,7 +176,24 @@ Plans:
 - **Invent nothing.** Where a cut leaves a page thin, either restructure honestly or record the gap against OWNER-QUESTIONS — do not fill it with plausible-sounding replacement copy. This is the rule Category 6 was built under and it holds here.
 - The **live deploy is the only PHP check** — no local interpreter exists. A page returning 200 proves nothing on its own.
 
-**Plans**: TBD
+**Plans**: 7 plans
+
+Plans:
+**Wave 1**
+
+- [ ] 03.5-01-PLAN.md — Tracer: rating badge live, brand row corrected, three URLs retired by 301, and `scripts/truth-gate.js` — proven end-to-end through config, shared chrome and `.htaccess`
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 03.5-02-PLAN.md — Homepage: the two retired differentiator sections removed, the category 1/2 boundary redrawn, the evidence gate made opt-in
+- [ ] 03.5-03-PLAN.md — Category 4 re-scoped to liquid cleaning, corrosion removal, non-BGA component soldering and board replacement
+- [ ] 03.5-04-PLAN.md — The two thermal pages, and the three reballing photographs withdrawn from the repository
+- [ ] 03.5-05-PLAN.md — About, surge damage and category 6: component-level vocabulary, the category-6 carve-outs, and the gaps filed against OWNER-QUESTIONS
+- [ ] 03.5-06-PLAN.md — The component pages, the last reworded diagnostics claims, and the gate-safe stylesheet comment
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [ ] 03.5-07-PLAN.md — Tree-wide truth audit, the full live deploy and verification sweep, and `03.5-TRUTH-AUDIT.md`
 
 ### Phase 4: Hardening & Cutover
 
@@ -205,5 +222,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 3.5 → 4
 | 1. Migration Safety Net & Foundation | 5/5 | Complete    | 2026-08-05 |
 | 2. Design System & Information Architecture | 9/9 | Complete    | 2026-08-09 |
 | 3. Content & Trust-Signal Build-Out | 9/9 | Built — partly superseded | 2026-08-26 |
-| 3.5. Content Truth Revision | 0/TBD | Not started | - |
+| 3.5. Content Truth Revision | 0/7 | Planned | - |
 | 4. Hardening & Cutover | 0/TBD | Not started | - |
