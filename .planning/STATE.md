@@ -6,7 +6,7 @@ current_phase: 03
 current_phase_name: content-trust-signal-build-out
 status: verifying
 stopped_at: Owner answers received — SCOPE CHANGE: DIFF-02 and DIFF-03 discontinued. Phase 03 verification superseded; requirements revision needed before further content work.
-last_updated: "2026-08-26T12:22:08.156Z"
+last_updated: "2026-09-11T00:00:00.000Z"
 last_activity: 2026-09-11
 last_activity_desc: Owner answers merged; two differentiator requirements retired by the business
 progress:
@@ -27,10 +27,11 @@ See: .planning/PROJECT.md (updated 2026-08-04)
 
 ## Current Position
 
-Phase: 03 (content-trust-signal-build-out) — EXECUTING
-Plan: 9 of 9 complete and ALL live-verified. Next: phase verification.
-Status: Executing Phase 03
-Last activity: 2026-08-26 — Phase 03 executed and live-verified; verification report outstanding
+Phase: 03 (content-trust-signal-build-out) — BUILT, but its requirements have changed
+Plan: 9 of 9 executed and live-verified. Verification status human_needed.
+Status: SCOPE CHANGE received 2026-09-11 — DIFF-02 and DIFF-03 describe discontinued services.
+Next: requirements revision, then a content-revision phase. Do NOT close Phase 03 as-is.
+Last activity: 2026-09-11 — owner answers merged, scope change recorded
 
 Progress: [██████░░░░] 65%
 
