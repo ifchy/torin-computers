@@ -23,14 +23,50 @@
 // live until it has genuine content, and until then torin_category_href() sends
 // the card to that category's own homepage anchor instead. Publishing later is
 // one boolean flip with zero edits in any consumer.
+// ── D3.5-04: THE CATEGORY 1/2 BOUNDARY IS FAILURE TYPE, NOT COMPONENT ────────
+//
+// The owner's own distinction is physical or mechanical damage versus
+// malfunction or electronic fault. Stated that way it is a TECHNICIAN'S rule,
+// and a customer staring at a dark screen cannot apply it. The agreed
+// CUSTOMER-FACING form of the SAME boundary is the observable proxy, and it is
+// what the two symptom lines below encode:
+//
+//   category 1 — «има видима повреда»
+//   category 2 — «изглежда здрав, но не работи»
+//
+// That rule is written down here so the next reader does not re-derive the
+// technician's version — which is what produced the two inconsistencies plan
+// 03.5-02 resolves: category 1's line claimed a loose-hinge symptom while the
+// hinge child page hangs off category 2, and category 2's line opened with
+// damage that is plainly visible and therefore belongs to category 1
+// (ROADMAP SC-5).
+//
+// ⚠ THE FIVE CHILD RECORDS IN services.php ARE NOT RE-PARENTED, AND THAT IS
+// DELIBERATE. Reading category 1's new line and nothing else makes the hinge
+// child's parent key look like an oversight. It is not. Those are COMPONENT
+// pages: a component fails both ways, and a screen that is physically damaged
+// and a screen that stays dark are the SAME repair reached from either
+// category. torin_service_href() routes by record, so this is a data change
+// with no template change and both categories already reach the child pages —
+// mehanichni-problemi.html resolves four of the five through that accessor
+// today. Re-parenting would additionally rewrite each page's breadcrumb and
+// its already-indexed BreadcrumbList, for no gain.
+//
+// THE [ASSUMED] MARKER STAYS ON EVERY SYMPTOM LINE IN THIS FILE, including the
+// two rewritten here. OWNER-QUESTIONS #16 — the phrasing customers actually
+// use — was deferred by the owner to developer research and is NOT answered by
+// this phase. For kat-1 and kat-2 the lines are now OWNER-DERIVED rather than
+// drafting placeholders; they are still not confirmed literal customer speech,
+// so they must not be quoted back as such.
 $torin_categories = array(
 	array(
 		'id'        => 'kat-1',
 		'name'      => 'Счупвания и механични повреди',
-		// [ASSUMED] Placeholder standing in for the real customer phrasing the
-		// owner hears daily (OWNER-QUESTIONS #16). Phase 3 replaces it. Not
-		// confirmed shop language — do not quote it back as such.
-		'symptoms'  => 'паднал лаптоп, счупен корпус, разхлабени панти',
+		// [ASSUMED] Owner-derived per D3.5-04, still unconfirmed as literal
+		// customer speech. Two changes from the line this replaces: the hinge
+		// symptom moves from loose to broken, and a physically damaged screen is
+		// ADDED — it is visible damage, and visible damage is this category.
+		'symptoms'  => 'паднал лаптоп, счупен корпус, пукнат екран, счупени панти',
 		'page'      => 'mehanichni-problemi.html',
 		'icon'      => 'cat-1',
 		'published' => true,
@@ -38,8 +74,13 @@ $torin_categories = array(
 	array(
 		'id'        => 'kat-2',
 		'name'      => 'Екран, клавиатура и портове',
-		// [ASSUMED] Placeholder customer phrasing pending OWNER-QUESTIONS #16.
-		'symptoms'  => 'пукнат екран, не свети, липсващи клавиши, не се зарежда',
+		// [ASSUMED] Owner-derived per D3.5-04, still unconfirmed as literal
+		// customer speech. The physically damaged screen that used to LEAD this
+		// line is gone — that was the misplacement ROADMAP SC-5 names, and it now
+		// sits in category 1. What remains is the looks-intact-but-does-not-work
+		// half of the boundary: three things a customer can observe without
+		// knowing which part failed.
+		'symptoms'  => 'екранът не светва, клавиши не реагират, портът не зарежда',
 		'page'      => 'ekran-klaviatura-portove.html',
 		'icon'      => 'cat-2',
 		'published' => true, // published by plan 03-03 as a D3-03 routing hub
