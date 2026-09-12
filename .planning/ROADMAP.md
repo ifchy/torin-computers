@@ -176,12 +176,12 @@ Plans:
 - **Invent nothing.** Where a cut leaves a page thin, either restructure honestly or record the gap against OWNER-QUESTIONS — do not fill it with plausible-sounding replacement copy. This is the rule Category 6 was built under and it holds here.
 - The **live deploy is the only PHP check** — no local interpreter exists. A page returning 200 proves nothing on its own.
 
-**Plans**: 7 plans
+**Plans**: 1/7 plans executed
 
 Plans:
 **Wave 1**
 
-- [ ] 03.5-01-PLAN.md — Tracer: rating badge live, brand row corrected, three URLs retired by 301, and `scripts/truth-gate.js` — proven end-to-end through config, shared chrome and `.htaccess`
+- [x] 03.5-01-PLAN.md — Tracer: rating badge live, brand row corrected, three URLs retired by 301, and `scripts/truth-gate.js` — proven end-to-end through config, shared chrome and `.htaccess`
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -206,6 +206,7 @@ Plans:
   2. A visitor's contact-form submission — carrying name, phone, email, device model, fault description and photographs — is protected by a honeypot, gated by explicit privacy consent, and delivered via authenticated SMTP/PHPMailer, and the unstaffed Zendesk chat widget is gone from every page.
   2a. The shop owner can change published **working hours** and schedule a **holiday banner** by editing a file, with the banner disabled by default and auto-expiring.
   2b. The shop can see which **contact actions** are used and which **service pages** are visited.
+
   3. A visitor experiences fast mobile page loads, with all images optimized/compressed and no jQuery/ScrollMagic/pagePiling overhead remaining anywhere on the site.
   4. `robots.txt` and `sitemap.xml` exist on the live site and have been submitted to Search Console.
   5. The redesigned site is live at torin.bg on `bell.host.bg` at the same URLs, with `.htaccess`, the Search Console verification file, favicon, and `robots.txt` all confirmed intact post-cutover, and Search Console shows no new 404s or ranking drops in the days following launch.
@@ -222,5 +223,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 3.5 → 4
 | 1. Migration Safety Net & Foundation | 5/5 | Complete    | 2026-08-05 |
 | 2. Design System & Information Architecture | 9/9 | Complete    | 2026-08-09 |
 | 3. Content & Trust-Signal Build-Out | 9/9 | Built — partly superseded | 2026-08-26 |
-| 3.5. Content Truth Revision | 0/7 | Planned | - |
+| 3.5. Content Truth Revision | 1/7 | In Progress|  |
 | 4. Hardening & Cutover | 0/TBD | Not started | - |
