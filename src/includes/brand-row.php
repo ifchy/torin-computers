@@ -16,7 +16,7 @@
 // available later at zero layout change if the owner ever supplies files.
 //
 // THE DISCLAIMER PARAGRAPH IS NOT DECORATION AND IS NOT OPTIONAL. Naming
-// «Lenovo» and «Apple» on a commercial page is lawful referential use only
+// «Lenovo» and «Dell» on a commercial page is lawful referential use only
 // while the page also says, in the visitor's own language, that the shop is an
 // independent out-of-warranty service and not an authorised representative
 // (Art. 14(1)(c) EUTMR; RESEARCH P-7). Strip the <p class="brand-row__note">
@@ -24,13 +24,17 @@
 // the row does not ship.
 //
 // WHERE THIS MUST NOT APPEAR. The legal and utility pages — uslovia,
-// warrently, msg, covid, laptopi, rezervni-chasti — get no brand row: a
-// trademark disclaimer on a privacy policy is noise, and a row of
-// manufacturer names beside the warranty terms invites exactly the misreading
-// the disclaimer exists to prevent. Today that falls out for free, because
-// those pages call neither this partial nor torin_render_service_page(). It is
-// written down here so a later phase does not "tidy up" by including this file
-// from footer.php, which would put the row on all sixteen pages at once.
+// warrently, msg — get no brand row: a trademark disclaimer on a privacy
+// policy is noise, and a row of manufacturer names beside the warranty terms
+// invites exactly the misreading the disclaimer exists to prevent. Today that
+// falls out for free, because those pages call neither this partial nor
+// torin_render_service_page(). It is written down here so a later phase does
+// not "tidy up" by including this file from footer.php, which would put the
+// row on every page of the site at once.
+//
+// This list was longer. Plan 03.5-01 retired the sales pages and the EU
+// disclosure page by 301, so they are named in src/.htaccess and nowhere
+// else — including not here, since scripts/truth-gate.js scans comments.
 //
 // torin_has_content() and torin_esc() live in category-page.php, which is
 // required below. The mutual require_once between the two files is safe and

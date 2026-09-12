@@ -115,20 +115,25 @@ $site = array(
 
 	// TRUST-03 (D3-10). ONE warranty summary, written here once and read by
 	// every service page through $page['warranty_key'] — never retyped on a
-	// page. Nested keyed set rather than a scalar because the site states two
-	// genuinely different terms and a single string would be WRONG on the
-	// battery page: site-current/warrently.html:125 says the service term is
-	// one month, site-current/za-bateriite.html:129 claims a year on
-	// regenerated batteries. A page selects a KEY; it never authors a literal.
+	// page. A page selects a KEY; it never authors a literal.
 	//
-	// [ASSUMED] OWNER-QUESTIONS #23 — BOTH entries. The pair is very likely a
-	// SERVICE warranty and a PRODUCT warranty on a regenerated battery, but the
-	// site has never said so, and reconciling them by invention would publish a
-	// term the shop may not honour. They are stated as two distinct facts until
-	// #23 is answered. Do not quote either back as confirmed shop language, and
-	// do not add a third entry — further variance is exactly what #23 asks.
+	// ANSWERED 2026-09-11 (OWNER-QUESTIONS #23, recorded as CONTEXT D3.5-06):
+	// one month on every repair EXCEPT category 6 — medical and industrial
+	// equipment — where the standard terms do not apply. Voided by liquid, by
+	// impact, or by another shop opening or working on the device, with the
+	// owner's own caveat that third-party opening cannot currently be reliably
+	// detected. The [ASSUMED] marker that stood here is gone because the
+	// question behind it was answered, not because a marker was tidied away.
 	//
-	// Source: site-current/warrently.html:113-129.
+	// The set carried a second entry until plan 03.5-01: a longer product term
+	// on a service line the shop has since discontinued (D3.5-01), selected by
+	// a page that is retired in the same plan. Both are gone. The set stays
+	// KEYED rather than collapsing to a scalar because category 6 needs its own
+	// term, and because category-page.php:377-379 falls back to 'default' for
+	// an unknown key — so a stale selector left anywhere degrades to the
+	// standard terms rather than to a page with no warranty at all.
+	//
+	// Source for 'default': site-current/warrently.html:113-129.
 	//
 	// D3-10 reframing, recorded because the omission would look like sloppiness
 	// and the reproduction would look like a trap: the live warranty page
@@ -139,18 +144,44 @@ $site = array(
 	// first reading and deliberately states no hour threshold. The term is NOT
 	// silently dropped — it is a condition the shop operates under and it is
 	// still stated in full on warrently.html, which every entry links to.
+	// OWNER-QUESTIONS #23 did NOT rule on that clause in either direction, so it
+	// stays exactly as it is, and harmonising it remains forbidden.
 	'warranty' => array(
 		'default' => array(
 			'term'   => '1 месец гаранция на всеки ремонт',
-			'detail' => 'Гаранционното обслужване е безплатно, в сервиза. Съветваме ви да ползвате лаптопа активно през този месец — така и вие, и ние сме сигурни, че ремонтът държи при реална употреба.',
+			'detail' => 'Гаранционното обслужване е безплатно, в сервиза. Съветваме ви да ползвате лаптопа активно през този месец — така и вие, и ние сме сигурни, че ремонтът държи при реална употреба. Гаранцията не важи за нестандартна техника — медицинска и индустриална апаратура. Отпада при заливане с течност, удар или при отваряне и намеса от друг сервиз.',
 			'href'   => 'warrently.html',
 		),
-		'battery' => array(
-			'term'   => '1 година гаранция на регенерирана батерия',
-			'detail' => 'Регенерираните батерии са с японски елементи Panasonic и заварени, не запоени връзки. Затова гаранцията им е по-дълга от гаранцията на самия ремонт.',
+		// Category 6. The owner ruled what does NOT apply and did not say what
+		// does, so this entry has NO 'detail' key and none may be invented
+		// (D3.5-08) — a term written into that gap would be a promise the shop
+		// has not made. category-page.php:454 guards the key, so the omission
+		// renders as a term with no elaboration rather than as an empty
+		// paragraph. The entry exists so that a category-6 page states the
+		// exclusion instead of silently inheriting the standard month.
+		'nonstandard' => array(
+			'term'   => 'Стандартният едномесечен гаранционен срок не важи за нестандартна техника',
 			'href'   => 'warrently.html',
 		),
 	),
+
+	// D3.5-06 (OWNER-QUESTIONS #24). The free-diagnostics claim, written here
+	// once and read by every consumer, so the reword has ONE writer instead of
+	// fifteen. TWO keys rather than one joined string, for the same reason the
+	// phone list is never joined: the claim and its exclusion are two separate
+	// facts, and a consumer with room for only the first must drop the second
+	// visibly, at its own call site, rather than silently.
+	//
+	// The middle word is doing real work and is not a hedge: the owner scoped
+	// the promise to a quick initial assessment rather than an unlimited free
+	// investigation. Dropping it re-publishes a promise the shop did not make.
+	//
+	// The exclusion is category 6 — medical and industrial equipment. The owner
+	// ruled the claim applies to categories 1-5 ONLY, so a category-6 page must
+	// not render it at all; the second key is for the SHARED surfaces that
+	// render on every service page and therefore cannot know their category.
+	'free_diagnostics'           => 'Безплатна първоначална диагностика',
+	'free_diagnostics_exception' => '(освен за нестандартна техника)',
 
 	// TRUST-01 (D3-09). The brand wordmark row, rendered by
 	// includes/brand-row.php on the homepage and every service page. A flat
@@ -158,13 +189,21 @@ $site = array(
 	// surveyed use logo files, and text wordmarks make the trademark position
 	// below defensible without introducing a single figurative mark.
 	//
-	// [ASSUMED] OWNER-QUESTIONS #22. This list came from requirements
-	// drafting, NOT from the owner. Naming a manufacturer the shop does not
-	// actually service is a promise it cannot keep, and the visitor who
-	// arrives because they read «Apple» here and is turned away at the counter
-	// is a worse outcome than a shorter list. Apple is the riskiest entry: it
-	// needs different parts and different tooling from the rest, and it is the
-	// first one to remove if #22 comes back narrower than this.
+	// ANSWERED 2026-09-11 (OWNER-QUESTIONS #22, recorded as CONTEXT D3.5-05).
+	// The owner named two manufacturers that must NOT be advertised here. Both
+	// may still be accepted if a customer asks; neither may be listed. One of
+	// them shipped in this array until plan 03.5-01 and was a live factual
+	// error on staging; the other has never been in it.
+	//
+	// Their names are deliberately NOT written in this comment.
+	// scripts/truth-gate.js scans comments as well as markup, and a comment
+	// naming them would fail the very gate that guards them — which is the
+	// protection working, not a false positive. The gate's Class-A list is the
+	// record; read it there.
+	//
+	// Six names now. The list still came from requirements drafting rather than
+	// from the owner, and #22 narrowed it rather than confirming it, so it is
+	// not owner-authored — do not quote it back as confirmed shop language.
 	//
 	// The «и др.» closer is NOT an entry here. It is emitted by the partial,
 	// because it is a UI affordance meaning "this list is not exhaustive", not
@@ -172,51 +211,59 @@ $site = array(
 	// consumer joining the phone list back into one display string. Order is
 	// the STORED order: the partial does not sort, so this line is the single
 	// place the row's sequence is decided.
-	'brands' => array('Lenovo', 'HP', 'Dell', 'Asus', 'Acer', 'Apple', 'MSI'),
+	'brands' => array('Lenovo', 'HP', 'Dell', 'Asus', 'Acer', 'MSI'),
 
 	// TRUST-02 (D3-07). The Google rating badge — a styled STATIC anchor, no
 	// embed, no iframe, no third-party script, no Places API call and no key.
 	//
 	// ###########################################################
-	// ## The badge is BUILT AND OFF. Rendering is gated on the ##
-	// ## boolean below, which ships false on purpose.          ##
+	// ## The badge is ON, as of plan 03.5-01 (CONTEXT D3.5-07).##
 	// ###########################################################
 	//
-	// [ASSUMED] OWNER-QUESTIONS #7 — all four values. Aggregator crawls report
-	// the shop's Google Business Profile is healthy, but NOBODY HAS READ THE
-	// LIVE FIGURES off the profile itself. A plausible-looking «4,8 от 128
-	// отзива» on sixteen pages is materially worse than no badge at all: it is
-	// a fabricated trust claim on every page of the site, and it is the kind
-	// of thing a competitor or a customer can disprove in one click.
+	// ANSWERED (OWNER-QUESTIONS #7). All four values below were READ OFF THE
+	// LIVE Google Business Profile on 2026-09-11 — not from an aggregator, not
+	// from memory. The instructions that stood here told a future reader to
+	// leave the badge off and said nobody had read the live figures. Both
+	// statements are now false, and a false instruction in a config file is
+	// worse than no instruction, so they are replaced rather than annotated.
 	//
-	// TO TURN THE BADGE ON, in this file and nowhere else:
-	//   1. flip 'gbp_badge_enabled' below from false to true;
-	//   2. fill 'gbp_rating' and 'gbp_reviews' with the two figures READ OFF
-	//      THE LIVE PROFILE — not from an aggregator, not from memory;
-	//   3. fill 'gbp_url' with the profile's own share link.
-	// Step 3 is only still open because the profile URL has never been
-	// captured anywhere in this repository. Paste it here once and enabling
-	// the badge afterwards really is one boolean and two numbers.
+	//   * 'gbp_rating' is a DISPLAY STRING with a comma decimal separator
+	//     (Bulgarian convention: never a period, never a float). It is never
+	//     computed with, so formatting a float at render time on PHP 5.2, in a
+	//     locale this build does not carry, would be the wrong trade — that is
+	//     exactly how a «4,7» becomes a «4.70».
+	//
+	//   * 'gbp_reviews' is DELIBERATELY ROUNDED DOWN and carries a «+». The
+	//     live count read on 2026-09-11 was higher than the figure stored
+	//     below. This is the owner's explicit request (D3.5-07): a rounded
+	//     floor stays true as the real count climbs, so the badge does not
+	//     need a redeploy every time someone leaves a review. DO NOT
+	//     "correct" it to the exact live number — that is a regression, not a
+	//     fix, and it is the single most likely well-meant edit to this file.
+	//
+	//   * 'gbp_url' was verified to resolve on 2026-09-11. It is a
+	//     developer-authored config literal and is NEVER assembled from a
+	//     request value (T-03-07). It reaches the page through torin_esc() at
+	//     the anchor and through the JSON encoder at the structured-data site.
 	//
 	// The flag and the three values are BOTH checked by the partial. The flag
 	// is the deliberate switch; the emptiness checks are the safety net, so
-	// flipping the flag with the figures still blank renders nothing rather
-	// than «от отзива в Google». Neither alone would be enough.
+	// blanking a figure renders nothing rather than «от отзива в Google».
+	// Neither alone would be enough, and neither may be collapsed into the
+	// other.
 	//
-	// No rating or review STRUCTURED DATA accompanies this badge under any
+	// THE ONE PARAGRAPH HERE THAT IS STILL LOAD-BEARING, AND MUST NOT BE CUT:
+	// no rating or review STRUCTURED DATA accompanies this badge under any
 	// schema type, ever — a business marking up reviews of itself is
-	// categorically ineligible (RESEARCH P-1). The one permitted profile
-	// signal is jsonld.php's sameAs, which reads 'gbp_url' below and omits the
-	// property entirely while it is empty.
-	'gbp_badge_enabled' => false,
+	// categorically ineligible (RESEARCH P-1). The single permitted profile
+	// signal is jsonld.php's sameAs, which reads 'gbp_url' below and omitted
+	// the property entirely while it was empty. Filling the key is therefore
+	// what puts a sameAs on every page of the site for the first time.
+	'gbp_badge_enabled' => true,
 
-	// The rating is stored as a DISPLAY STRING with a comma decimal separator
-	// (Bulgarian convention: '4,8', never '4.8' and never 4.8). It is never
-	// computed with, so formatting a float at render time on PHP 5.2 for one
-	// string would be the wrong trade.
-	'gbp_rating'  => '',
-	'gbp_reviews' => '',
-	'gbp_url'     => '',
+	'gbp_rating'  => '4,7',
+	'gbp_reviews' => '150+',
+	'gbp_url'     => 'https://maps.google.com/?cid=7041654319750291392',
 
 	// [ASSUMED] The absolute base every BreadcrumbList item URL is built from
 	// (jsonld.php), because schema.org item URLs must be absolute while every

@@ -11,6 +11,54 @@ RewriteCond %{HTTPS} off [OR]
 RewriteCond %{HTTP_HOST} ^www\.torin\.bg$ [NC]
 RewriteRule ^(.*)$ https://torin.bg/new/$1 [R=301,L]
 
+# ── SEO-05 retirements (plan 03.5-01 · CONTEXT D3.5-03, D3.5-09) ─────────────
+#
+# ###########################################################
+# ## CUTOVER-BLOCKING. These rules must be promoted to the ##
+# ## root .htaccess at Phase 4 cutover, together with the  ##
+# ## canonicalisation rule directly above them.            ##
+# ###########################################################
+#
+# Four of the original sixteen indexed URLs name services the shop no longer
+# offers (CONTEXT D3.5-01) or an obligation that has expired (D3.5-09). Their
+# source files are DELETED from src/ in the same plan, so these rules are the
+# only thing standing between those URLs and a 404. Stated without euphemism:
+# IF THIS BLOCK IS NOT CARRIED TO PRODUCTION AT CUTOVER, FOUR INDEXED URLS
+# RETURN 404 — and it happens silently, because nothing in a build fails when
+# an .htaccess block is left behind.
+#
+# Each pattern is ANCHORED and its dot ESCAPED. An unanchored pattern would
+# also catch a longer filename ending the same way.
+#
+# Each substitution is RELATIVE, never an absolute URL. mod_rewrite builds the
+# absolute Location from the current context, so no rule here carries the /new/
+# staging segment and none needs editing at cutover. The single hardcoded
+# staging path in this file stays the one already above.
+#
+# Each rule carries the permanent-redirect flag paired with the last-rule flag.
+# NOT the bare redirect flag, which defaults to 302 and passes no ranking
+# signal, and NOT RedirectPermanent — mod_alias matches from the document root
+# and would force the staging segment to be spelled out here. The flag pair is
+# deliberately described rather than quoted: a gate counts occurrences of that
+# literal to assert the rule count, and a comment reproducing it would inflate
+# the count by one. Read the rules below for the exact form.
+#
+# No RewriteCond -f guard: these fire on the URL whether or not the file is
+# present on the server. That is what makes deleting the source files safe,
+# and it is the whole of what makes it safe.
+#
+# The targets are the owner's, recorded 2026-09-12 with their basis in
+# CONTEXT D3.5-09. Search Console over a 16-month window shows NONE of the
+# four URLs with any impressions, so no measurable ranking equity is at stake
+# on any of them — the absence is the evidence, not a missing measurement.
+# laptopi.html is the weak target and is recorded as such: the sales line has
+# no surviving equivalent, so Google may read it as a soft 404. It is flagged
+# in the phase audit rather than recorded as clean.
+RewriteRule ^covid\.html$ about.html [R=301,L]
+RewriteRule ^laptopi\.html$ index.html [R=301,L]
+RewriteRule ^rezervni-chasti\.html$ ekran-klaviatura-portove.html [R=301,L]
+RewriteRule ^za-bateriite\.html$ zalivane-technosti.html [R=301,L]
+
 # Keep this staging subtree out of Google's index — robots.txt is ignored outside the true
 # domain root, so X-Robots-Tag via HTTP header is the correct mechanism here (RESEARCH.md Pitfall C).
 <IfModule mod_headers.c>

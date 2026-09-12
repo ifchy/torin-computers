@@ -75,40 +75,37 @@ require_once(dirname(__FILE__) . '/icons.php');
 					</div>
 				</div>
 
-				<?php // D-20's sales line stays reachable from every page: the nav item
-				      // covers laptopi.html and this row carries rezervni-chasti.html
-				      // alongside it, so neither sales page depends on the other. ?>
+				<?php // D-33's secondary row. It carried two sales links until plan
+				      // 03.5-01; the shop discontinued sales (CONTEXT D3.5-01), so both
+				      // are gone here and from the nav, and both URLs 301 from
+				      // src/.htaccess. Three items now — a subtraction, not a
+				      // rebalancing. ?>
 				<ul class="footer-links">
 					<li><a href="about.html">за нас</a></li>
 					<li><a href="warrently.html">гаранция</a></li>
 					<li><a href="uslovia.html">условия</a></li>
-					<li><a href="rezervni-chasti.html">резервни части</a></li>
-					<li><a href="laptopi.html">лаптопи</a></li>
 				</ul>
 
 			</div>
 
-			<?php // The EU-publicity page, reachable again. It had zero inbound links
-			      // across all sixteen deployed pages — a reachability regression,
-			      // since the legacy homepage linked it. D-35 permits keeping it live
-			      // and unlinked OR linked only from the footer, so this is inside the
-			      // decision as written and needs no new one; it closes the residual
-			      // publicity-audit exposure (Reg. EU 1303/2013 Art. 115 + Annex XII)
-			      // at the cost of one anchor.
+			<?php // The legal line carried an anchor to the EU-publicity page until
+			      // plan 03.5-01. It is gone, and so is the page: the owner confirmed
+			      // on 2026-09-12 that the operational-programme publicity obligation
+			      // has expired and only document retention remains (CONTEXT D3.5-09,
+			      // OWNER-QUESTIONS #4). The disclosure itself was NOT dropped — plan
+			      // 03-05 relocated it into about.html, and the retired URL 301s
+			      // there from src/.htaccess, so the statement and its inbound links
+			      // both survive the page that used to hold them.
 			      //
-			      // It belongs HERE, in the legal line, and must NOT be promoted into
-			      // the navigation, the contact block, or the secondary-links row
-			      // above. That row is D-33's five-item set and an EU-funding
-			      // disclosure is a legal notice, not a service link — promoting it
-			      // would re-create under a compliance justification exactly the
-			      // competition for attention D-35 removed.
-			      //
-			      // The link text is the same string covid.html carries as its own
-			      // title, so the two cannot drift into two names for one page.
-			      // components.css gives this anchor an explicit on-dark colour: the
-			      // page link colour it would otherwise inherit is unreadable on this
-			      // footer's fill. ?>
-			<p class="site-footer__legal footer-legal">TORIN Company Ltd. &copy; <?php echo date("Y"); ?> г. · <a href="covid.html">Проект BG16RFOP002-2.073</a></p>
+			      // The reasoning that put the anchor here is therefore SPENT, not
+			      // overruled: it closed a live publicity-audit exposure while the
+			      // obligation ran. If a future phase reintroduces a legal notice
+			      // needing site-wide reachability, this line is where it goes — and
+			      // it still must NOT be promoted into the navigation, the contact
+			      // block, or D-33's secondary row above, for the reason D-35 gave:
+			      // a legal notice competing for attention with service links loses,
+			      // and drags the service links down with it. ?>
+			<p class="site-footer__legal footer-legal">TORIN Company Ltd. &copy; <?php echo date("Y"); ?> г.</p>
 		</div>
 	</footer>
 <?php
