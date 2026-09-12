@@ -9,28 +9,28 @@
 // link is the whole point of D-28, and the internal link from a second topical
 // context is the benefit.
 //
-// This page has a SECOND job: it is DIFF-03 depth. The strongest evidence the
-// shop has — its own reflow equipment, its flux, and photographs of what the
-// amateur method does to a board — has always been buried on a page about
-// cleaning. The homepage now carries a condensed DIFF-03 summary block and
-// hands off HERE. That block is deliberately NOT restated below: an automated
-// check asserts that no sentence over 90 characters is shared verbatim between
-// the two files, because two differently-worded copies of the same claim is
-// how a shop ends up contradicting itself, and two identical ones is how two
-// pages compete for the same query.
+// PHASE 3.5 SUBTRACTION (plan 03.5-04, CONTEXT D3.5-01 / D3.5-02). This page
+// used to carry a SECOND job: depth for a service line the shop has since
+// discontinued. Three content blocks served that job — the equipment and its
+// consumables, the method comparison against the cheap amateur tool, and the
+// outcome figures — and all three are gone, together with the page title that
+// advertised the withdrawn process and two of the three evidence photographs.
 //
-// Ported from site-current/profilaktika-laptop.html:361 (the three soldering
-// methods, uneven heating, damaged contact pads, short-lived results), :380
-// (melted plastic components), :398 (the German machine whose infrared heat
-// source is outside the visible spectrum, and the know-how caveat), :411 (the
-// AMTECH flux, the software profiles, the cooling-system reinforcement, the
-// up-to-10-degree figure and the 90 percent rate), plus
-// site-current/index.html:563-576 (the profilaktika service list) and
-// site-current/warrently.html:120 (the soft contact pads replaced with
-// aluminium or copper plates). Every figure is quoted at the strength the
-// source states it and NOTHING is amplified: no certification is claimed, no
-// exclusivity is claimed, and the durability rate is attributed as the shop
-// own measured experience rather than as a guarantee.
+// NOTHING WAS WRITTEN TO REPLACE THEM (D3.5-08). The page is shorter by design
+// and still complete: cleaning and washing the cooling system and changing the
+// thermal paste was always its actual subject, and every paragraph about dust,
+// paste, heat pipes and contact pads survives untouched. The withdrawn material
+// was an addition to a finished page, not its substance. DO NOT REFILL THE GAP
+// with replacement copy — a plausible-sounding service claim on a repair shop
+// site is a promise a customer will act on.
+//
+// Ported from site-current/index.html:563-576 (the profilaktika service list)
+// and site-current/warrently.html:120 (the soft contact pads replaced with
+// aluminium or copper plates). The source line ranges that supplied the three
+// withdrawn blocks are deliberately NOT listed here: naming them would preserve
+// a description of the claim this plan exists to remove. Every figure that
+// remains is quoted at the strength the source states it and NOTHING is
+// amplified — no certification is claimed and no exclusivity is claimed.
 //
 // THE WORKING-HOURS SENTENCE IS DELIBERATELY NOT PORTED (RESEARCH P-11). The
 // source page states hours that DISAGREE with the value the rest of this tree
@@ -41,8 +41,11 @@
 // are omitted for the same reason.
 require_once(dirname(__FILE__) . '/includes/category-page.php');
 
-$torin_title = 'Профилактика на лаптоп и реболинг на чипове · Торин';
-$torin_desc  = 'Профилактика на лаптоп в София — обадете се за безплатна диагностика. Почистваме охлаждането и сменяме термопастата. Заповядайте.';
+// The title named the withdrawn process and was the strongest SEO signal on the
+// page pointing at it. Rewritten around what the page is FOR. The h1 below is
+// unchanged, and the leading segment still shares its keywords with it.
+$torin_title = 'Профилактика и почистване на лаптоп · Торин';
+$torin_desc  = 'Профилактика на лаптоп в София — почистваме охлаждането и сменяме термопастата. Обадете се за безплатна първоначална диагностика.';
 
 $torin_crumbs = array(
 	array('text' => 'Начало', 'href' => 'index.html'),
@@ -66,21 +69,35 @@ $torin_prof_page = array(
 
 	'crumbs' => $torin_crumbs,
 
-	'intro'  => 'Профилактиката е почистване и измиване на охладителната система, смяна на термопастата и проверка на топлоотвеждащите тръби. Звучи дребно, но е единствената работа по един лаптоп, която предотвратява останалите: прахът в радиатора вдига работните температури, високите температури отлепят чипсетите от дънната платка, а отлепеният чипсет е вече ремонт на ниво чип. Най-евтиният ремонт е този, който не се е наложил.',
+	// The causal chain (dust -> heat -> a chipset lifting off the board) is the
+	// best argument this page makes for doing профилактика at all, and it is
+	// true, so it stays. It now ENDS AT THE DAMAGE instead of continuing into a
+	// repair the shop no longer offers. The closing line is unchanged.
+	'intro'  => 'Профилактиката е почистване и измиване на охладителната система, смяна на термопастата и проверка на топлоотвеждащите тръби. Звучи дребно, но е единствената работа по един лаптоп, която предотвратява останалите: прахът в радиатора вдига работните температури, а високите температури отлепят чипсетите от дънната платка — повреда от съвсем друг порядък. Най-евтиният ремонт е този, който не се е наложил.',
 
 	// Three of the shop own photographs, ported into src/img/repairs/. The w/h
 	// values are each FILE true intrinsic pixels, read off the files
 	// themselves — they are not the display size, which CSS fixes at 100x100,
 	// and they are what reserves the box before the bytes arrive.
 	//
-	// Each caption says what the photograph PROVES. The middle one is an
-	// extreme magnification of four contact pads, two of them visibly torn —
-	// it is the single clearest piece of evidence on this page and the reason
-	// the callout below is not just an opinion about a tool.
+	// STRIP REBUILT WHOLE in plan 03.5-04. All three entries that shipped here
+	// are withdrawn: two were photographs OF the discontinued service, and the
+	// third — an extreme magnification of four contact pads, two of them torn —
+	// lost its only explanation when the method-comparison block that pointed
+	// at it went. It was DROPPED, not re-captioned: a photograph that needs
+	// a caption invented for it is not evidence (D3.5-08). Its file stays in
+	// src/img/repairs/ and is simply unused by this page.
+	//
+	// The three below were OPENED and judged by what they show, never by their
+	// filename — two earlier plans each found a plan-named photograph to be
+	// something other than its name promised. Each shows the subject this page
+	// is actually about: a cooling system choked with dust. The first is a wide
+	// 585x155 panorama, which the contract explicitly covers — object-fit crops
+	// it to the square box rather than distorting it.
 	'evidence' => array(
-		array('file' => 'profilaktika17.jpg', 'w' => '200', 'h' => '200', 'caption' => 'Инфрачервена станция за реболинг на BGA чипове'),
-		array('file' => 'profilaktika14.jpg', 'w' => '200', 'h' => '200', 'caption' => 'Контактни падове на чип, увредени при неравномерно нагряване'),
-		array('file' => 'profilaktika15.jpg', 'w' => '200', 'h' => '200', 'caption' => 'Повреда от нагряване с пистолет за горещ въздух'),
+		array('file' => 'profilaktika3.jpg', 'w' => '585', 'h' => '155', 'caption' => 'Радиатор под плътен слой прах — въздухът вече не минава между ребрата'),
+		array('file' => 'profilaktika1.jpg', 'w' => '200', 'h' => '200', 'caption' => 'Свален вентилатор със сплъстен прах на изхода на охлаждането'),
+		array('file' => 'profilaktika2.jpg', 'w' => '354', 'h' => '227', 'caption' => 'Прахът, изваден от охладителната система на една машина'),
 	),
 
 	'fixes'  => array(
@@ -88,47 +105,36 @@ $torin_prof_page = array(
 		array('text' => 'Смяна на термопастата на процесора и основните чипсети'),
 		array('text' => 'Подмяна на меките контактни гуми с алуминиеви или медни пластини'),
 		array('text' => 'Смяна на вентилатор и на смазката на въртящите елементи'),
-		array('text' => 'Подсилване на охлаждането след ремонт на ниво чип'),
+		// A fifth entry stood here and named the withdrawn repair as the
+		// occasion for reinforcing the cooling. Removed. The CAPABILITY is not
+		// lost with it: the aluminium/copper plate entry above states the same
+		// reinforcement in its concrete, surviving form, and the overheating
+		// page states it again as a step every repaired machine gets.
 	),
 
-	'blocks' => array(
-
-		array(
-			'kind'    => 'prose',
-			'heading' => 'С какво работим',
-			'items'   => array(
-				'Машината, с която запояваме чипсети, е с инфрачервен източник на топлина в невидимата за окото област. Това има две последици: платката се загрява равномерно и без светлинен удар, а човекът, който работи с нея, не е изложен на видимо излъчване. Попитахме производителя как точно работи този източник и получихме кратък отговор — това е know-how на германската фирма производител. Не твърдим повече от това, защото и на нас не ни е казано повече.',
-				'Машината се управлява от компютърен софтуер с предварително зададени профили според производителя и качеството на платката, така че всяка платка получава температурния режим, за който е проектирана. Другото, което определя резултата, са консумативите. Най-важният от тях е флюсът — той обуславя средата, в която се извършва запояването — и ние използваме флюс на американската фирма AMTECH.',
-			),
-		),
-
-		array(
-			'kind'    => 'callout',
-			'heading' => 'Защо пистолетът за горещ въздух е проблем',
-			'items'   => array(
-				'Най-разпространеният у нас начин за сваляне и поставяне на чип е пистолетът за горещ въздух. Той е достъпен и всеки може да си купи такъв, но не създава равномерна температура. Резултатът е локално прегряване: или самият чип се поврежда вътрешно, или се разрушават контактните падове под него — вижте втората снимка по-горе, тя е реално увеличение на четири пада, два от които вече са увредени. Платка с разрушени падове се нуждае от нов чип, който често струва повече от целия ремонт.',
-				'Второто, което горещият въздух прави, е да стопява пластмасовите детайли около зоната на работа — конектори, гнезда, водачи. Това не се случва с инфрачервен източник, който щади пластмасата. И третото: дори когато ремонтът тръгне, той обикновено е краткотраен, защото топченцата под чипа не са се стопили равномерно. Ако някой ви е ремонтирал платка по този начин и тя е издържала няколко седмици, сега знаете защо.',
-			),
-			'link'    => array(
-				'text' => 'Ремонт на дънни платки',
-				'href' => 'zalivane-technosti.html',
-			),
-		),
-
-		array(
-			'kind'    => 'prose',
-			'heading' => 'Какво постигаме',
-			'items'   => array(
-				'След като залепим чипсета, подсилваме охладителната система, вместо да я върнем както си е била — иначе същата температура ще доведе до същата повреда. Измерено на машините, които минават през нас, това дава до 10 градуса по-ниски работни температури.',
-				'При тези ремонти достигаме 90 процента успеваемост и устойчивост на ремонта във времето. Това е нашият собствен резултат, натрупан от машините, по които сме работили, а не гаранция — и точно затова гаранционният срок по-долу е срок, а не процент. Има и случаи, в които процедурата не може да се извърши: при нискокачествени многослойни платки вътрешните напрежения между слоевете надуват платката при нагряване, а трайно прегрелите чипсети имат микропукнатини и подлежат само на подмяна.',
-			),
-		),
-	),
+	// 'blocks' IS DELIBERATELY NOT SET, and the key is ABSENT rather than an
+	// empty list so isset() short-circuits and no section wrapper is emitted.
+	//
+	// Three blocks stood here and all three were wholly about the discontinued
+	// service: the equipment and its consumables, the comparison against the
+	// cheap amateur method for lifting a chip off a board, and the outcome
+	// figures. None could survive a sentence-level edit — a block with two of
+	// five paragraphs cut is the "page with holes" shape D3.5-02 names, and a
+	// rewritten method comparison would still be claiming a better way of doing
+	// work the shop no longer does. Removed whole, and NOT replaced.
+	//
+	// A service page with no blocks is an already-shipped shape on this site,
+	// not a degraded one: the spine — intro, evidence, fixes, warranty, process,
+	// FAQ, related — is the contract, and blocks are optional by design (D-24).
+	// The Cyrillic word count this costs is REPORTED in the plan SUMMARY as a
+	// shortfall against a reference figure. It is not to be paid back with new
+	// copy (D3.5-08).
 
 	// A KEY, never a literal: the term lives once, in site-config.php, and this
 	// page renders the same service warranty every other repair page renders.
-	// The longer battery term is a different entry in the same set, selected by
-	// za-bateriite.html — the set is what stops the two contradicting.
+	// Resolving it through the shared set is what stops two pages stating two
+	// different terms; typing the term here would make this page a second writer
+	// of a fact that must have exactly one.
 	'warranty_key' => 'default',
 
 	'process' => array(
@@ -147,7 +153,14 @@ $torin_prof_page = array(
 		),
 		array(
 			'q' => 'Лаптопът вече се изключва сам под натоварване. Ще помогне ли профилактика?',
-			'a' => 'Понякога да, понякога вече не. Изключването под натоварване е защитна реакция срещу висока температура и ако причината е само задръстено охлаждане, профилактиката го решава. Ако обаче прегряването е продължило дълго, чипсетът може вече да се е отлепил от платката, а това е ремонт на ниво чип, не почистване. Разликата се вижда на диагностиката, която е безплатна — не я гадаем по телефона.',
+			// The true half stays: prolonged overheating can lift a chipset, and
+			// that is a different and heavier job than cleaning. The half that
+			// promised the job is gone and is NOT replaced by another promise.
+			// The diagnostics claim carries the D3.5-06 reword; it is written as
+			// prose here rather than spliced from site-config.php because the
+			// shared value is a capitalised noun phrase and splicing it into a
+			// mid-sentence Bulgarian clause produces broken grammar.
+			'a' => 'Понякога да, понякога вече не. Изключването под натоварване е защитна реакция срещу висока температура и ако причината е само задръстено охлаждане, профилактиката го решава. Ако обаче прегряването е продължило дълго, чипсетът може вече да се е отлепил от платката, а това е друга и много по-тежка работа, не почистване. Разликата се вижда на първоначалната диагностика, която е безплатна — не я гадаем по телефона.',
 		),
 		array(
 			'q' => 'Ползвам лаптопа в леглото или на скута си. Има ли значение?',
