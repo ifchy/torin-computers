@@ -3,9 +3,16 @@
 // authored to the D3-14 Definition of Done. The display name and the symptom
 // line are read from the category record, never retyped here.
 //
-// This is the DEEP case — four sub-services against category 1's two — and it
-// is where the BGA and chip-level expertise lives naturally (D-14/DIFF-03)
-// rather than needing its own homepage treatment.
+// SCOPE — RE-SCOPED by D3.5-02 on 2026-09-12, recorded in OWNER-QUESTIONS #31.
+// This category covers the BASIC BOARD SERVICES: washing and cleaning a
+// liquid-damaged board, removing corrosion and restoring eaten tracks,
+// component-level soldering of the discrete parts (capacitors, mosfets, fuses,
+// connectors), and replacing the board where the case calls for it. The
+// package-level service line this page used to lead with was DISCONTINUED BY
+// THE BUSINESS; every claim about it was withdrawn from here deliberately, was
+// not lost by accident, and must not be reintroduced. The category keeps its
+// headline slot and its name — only what it claims changed.
+// scripts/truth-gate.js is the mechanical guard; this paragraph is the reason.
 //
 // This page is also the DESTINATION decided for the board-level power-circuit
 // copy that D3-05 displaces from problem-stari.html (RESEARCH P-8). That page
@@ -18,7 +25,13 @@
 //
 // Every string below is PORTED, not invented: the first-aid steps come from
 // site-current/zalivane-technosti.html:116, :118 and :148 and the power-circuit
-// prose from site-current/problem-stari.html:109-155. The legacy MARKUP is
+// prose from site-current/problem-stari.html:109-155. The 2026-09-12 re-scope
+// added nothing from outside that rule either — the service lines come from
+// OWNER-QUESTIONS #31 in the owner's own terms, and the board-level explainer
+// and the rewritten fifth FAQ come from src/problem-stari.html's already
+// published wording for the same surviving work. Where a slot could not be
+// written from one of those, it was CUT rather than filled (D3.5-08). The
+// legacy MARKUP is
 // deliberately left behind (P-9) — no Bootstrap class, no icon font, no inline
 // style enters this tree. Working hours and phone numbers are NOT restated
 // here; site-config.php owns those facts (P-11).
@@ -32,7 +45,13 @@ $torin_cat = torin_category_by_id('kat-4');
 // prerequisite for a keyword-first title (D3-14), and it is why the h1 below
 // is also an explicit override rather than the record name.
 $torin_title = 'Ремонт на залят лаптоп и дънна платка · Торин';
-$torin_desc  = 'Ремонт на залят лаптоп и дънни платки в София. Не включвайте лаптопа — обадете се веднага за безплатна диагностика още днес.';
+// The description is REWRITTEN WHOLE for the re-scope rather than patched: it
+// now leads with the washing/repair pair the category actually offers, keeps
+// the one instruction worth putting in a search result for someone holding a
+// wet laptop, and carries the diagnostics claim in its permitted form.
+// 134 code points, call opens at code point 75 (D3-14 budget: 120-140, call
+// before 95).
+$torin_desc  = 'Промиване и ремонт на залята дънна платка в София. Не включвайте лаптопа — обадете се веднага. Първоначалната диагностика е безплатна.';
 
 // The breadcrumb chain, assigned ONCE and read twice: torin_render_service_page()
 // renders the visible nav from it, and jsonld.php emits the matching
@@ -53,7 +72,7 @@ $torin_cat_page = array(
 
 	'crumbs' => $torin_crumbs,
 
-	'intro'  => 'Заливането с течност е една от най-честите причини лаптоп да спре да дава признаци на живот. Работим по дънни платки на ниво чип: почистваме следите от корозия, възстановяваме разядени пътечки и ремонтираме захранващите вериги. Приемаме и машини, за които другаде са ви казали, че не подлежат на ремонт — диагностиката е безплатна и ви казваме честно какво може да се направи.',
+	'intro'  => 'Заливането с течност е една от най-честите причини лаптоп да спре да дава признаци на живот. Промиваме и почистваме залятата платка, премахваме корозията и възстановяваме разядените пътечки, подменяме дефектиралите компоненти и ремонтираме захранващите вериги. Когато платката вече не подлежи на ремонт, подменяме я. Първоначалната диагностика е безплатна и ви казваме честно какво може да се направи.',
 
 	// Three of the shop's own photographs of liquid damage, ported from
 	// site-current/assets1/img/ into src/img/repairs/ (UI-SPEC §4). The w/h
@@ -70,11 +89,18 @@ $torin_cat_page = array(
 		array('file' => 'zalivane3.jpg', 'w' => '200', 'h' => '200', 'caption' => 'Свален чипсет и падовете под него при работа на ниво чип'),
 	),
 
+	// The re-scoped service definition (D3.5-02 / OWNER-QUESTIONS #31), stated
+	// as services a customer would recognise rather than as technique names.
+	// Three of the four entries that stood here described a service line the
+	// business has discontinued and were withdrawn with it; the power-circuits
+	// entry is the survivor and is unchanged. Every entry below is one of the
+	// four lines the owner gave, in the owner's own terms.
 	'fixes'  => array(
-		array('text' => 'Дозапояване на отпоени BGA чипове'),
-		array('text' => 'Ребоулинг на BGA чипове'),
-		array('text' => 'Подмяна на чипсет'),
+		array('text' => 'Промиване и почистване на залята дънна платка'),
+		array('text' => 'Почистване на корозия и възстановяване на разядени пътечки'),
+		array('text' => 'Подмяна на дефектирали компоненти по платката — кондензатори, мосфети, предпазители, конектори'),
 		array('text' => 'Сервиз на захранващи вериги'),
+		array('text' => 'Подмяна на дънната платка, когато ремонтът не е надеждният изход'),
 	),
 
 	'blocks' => array(
@@ -100,6 +126,25 @@ $torin_cat_page = array(
 			),
 		),
 
+		// ADDED 2026-09-12 with the re-scope. With the withdrawn block gone,
+		// nothing on the page said what the shop actually DOES to a damaged
+		// board — the page listed services and then explained none of them.
+		// Both paragraphs are assembled from wording the site already
+		// publishes for this same surviving work (src/problem-stari.html
+		// intro and FAQ) plus the owner's own four service lines. It names no
+		// success rate, no temperature, no piece of equipment and no
+		// consumable: those four are precisely what was withdrawn, and a
+		// replacement block that reached for any of them would be the
+		// withdrawn claim wearing new words.
+		array(
+			'kind'    => 'prose',
+			'heading' => 'Какво означава ремонт по самата платка',
+			'items'   => array(
+				'Работим по самата платка, а не по каталожния номер на модела. На практика това означава да бъде възстановен съществуващият възел, вместо да бъде подменен с нов: възстановяваме разядени пътечки, подменяме отделни дефектирали компоненти и ремонтираме захранващите вериги. Точно подмяната на цял модул е тази, която опира до наличност на части — затова в част от случаите има какво да се направи и след като другаде са отказали.',
+				'Компонентите, които се подменят поотделно, са дискретните елементи по платката: кондензатори, мосфети, предпазители, конектори. Когато повредата е стигнала отвъд тях, по-надеждният изход е подмяна на платката, а не ремонт — и ви го казваме, преди да започнем, а не след това.',
+			),
+		),
+
 		// The P-8 destination: the StandBy/Charger explainer from
 		// site-current/problem-stari.html:109-155, condensed.
 		array(
@@ -116,8 +161,8 @@ $torin_cat_page = array(
 			'kind'    => 'prose',
 			'heading' => 'Кога ремонтът не си струва',
 			'items'   => array(
-				'Не всяка залята платка може да бъде спасена и предпочитаме да ви кажем това преди ремонта, а не след него. Когато течността е стояла дни наред, корозията разяжда цели слоеве от платката, а не само повърхността. Когато е попаднала под чипсетите, ремонтът е възможен, но е сред най-тежките. И когато машината е на осем или повече години, цената на ремонта често надхвърля стойността на самия лаптоп.',
-				'В такива случаи ви казваме какво друго може да се направи: изваждане на данните от диска, прехвърлянето им на нова машина, или използване на лаптопа за части, ако друг същия модел е ремонтируем. Диагностиката остава безплатна и когато отговорът е, че не си струва. Предпочитаме да загубим един ремонт, отколкото да ви вземем пари за платка, която няма да издържи.',
+				'Не всяка залята платка може да бъде спасена и предпочитаме да ви кажем това преди ремонта, а не след него. Когато течността е стояла дни наред, корозията разяжда цели слоеве от платката, а не само повърхността. Когато е попаднала под големите чипове, следите не се виждат отвън и не се измиват — там обикновено по-надеждният изход е подмяна на платката, а не ремонт. И когато машината е на осем или повече години, цената често надхвърля стойността на самия лаптоп.',
+				'В такива случаи ви казваме какво друго може да се направи: изваждане на данните от диска, прехвърлянето им на нова машина, или използване на лаптопа за части, ако друг същия модел е ремонтируем. Първоначалната диагностика остава безплатна и когато отговорът е, че не си струва. Предпочитаме да загубим един ремонт, отколкото да ви вземем пари за платка, която няма да издържи.',
 			),
 		),
 	),
@@ -128,7 +173,7 @@ $torin_cat_page = array(
 
 	'process' => array(
 		'Приемаме лаптопа и записваме какво точно се е случило — каква течност, кога и включван ли е след това. Тези три отговора променят подхода.',
-		'Разглобяваме машината и оценяваме щетите по платката под увеличение, включително под чипсетите, където следите не се виждат отвън.',
+		'Разглобяваме машината и оглеждаме платката под увеличение — включително зоните под големите чипове, където следите от течността не личат отвън.',
 		'Промиваме и почистваме платката ултразвуково, за да спрем окисляването, преди то да продължи.',
 		'Ремонтираме: възстановяваме разядени пътечки, подменяме дефектирали компоненти и работим по захранващите вериги.',
 		'Обаждаме се с диагнозата и цената, преди да продължим. Не започваме платен ремонт, без да сте се съгласили.',
@@ -138,7 +183,7 @@ $torin_cat_page = array(
 	'faq' => array(
 		array(
 			'q' => 'Лаптопът работи след заливането. Трябва ли изобщо да идвам?',
-			'a' => 'Да. Отвън всичко може да изглежда наред, докато вътре окисляването вече е започнало. След няколко дни пътечките започват да се разяждат и платка, която днес е ремонтируема, след седмица може вече да не е. Диагностиката е безплатна и отнема по-малко време от това да чакате да се появи проблем.',
+			'a' => 'Да. Отвън всичко може да изглежда наред, докато вътре окисляването вече е започнало. След няколко дни пътечките започват да се разяждат и платка, която днес е ремонтируема, след седмица може вече да не е. Първоначалната диагностика е безплатна и отнема по-малко време от това да чакате да се появи проблем.',
 		),
 		array(
 			'q' => 'Заляха ме с вода, а не с нещо сладко. Това по-безобидно ли е?',
@@ -146,15 +191,22 @@ $torin_cat_page = array(
 		),
 		array(
 			'q' => 'Колко време отнема ремонтът?',
-			'a' => 'Зависи от щетата. Почистване и промивка при бърза реакция обикновено е въпрос на дни. Ремонт на захранващи вериги или работа по чипсет отнема повече, защото включва тестване. Казваме ви срока заедно с цената, след диагностиката, а не преди нея.',
+			'a' => 'Зависи от щетата. Почистване и промивка при бърза реакция обикновено е въпрос на дни. Ремонт на захранващи вериги и възстановяване на разядени пътечки отнема повече, защото включва тестване. Казваме ви срока заедно с цената, след диагностиката, а не преди нея.',
 		),
 		array(
 			'q' => 'Ще запазя ли данните си?',
 			'a' => 'В повечето случаи да — дискът обикновено остава незасегнат дори когато платката не подлежи на ремонт. Ако данните са важни за вас, кажете го при приемането и ги изваждаме първо, преди каквато и да е друга работа.',
 		),
+		// The QUESTION is kept deliberately — it is what a customer with a
+		// refused laptop actually types, and dropping it would forfeit the
+		// page's best match for that intent. Only the ANSWER changed: its old
+		// basis was the withdrawn equipment, so the whole premise went with
+		// the service line. The replacement rests on the surviving work and
+		// on the honest second option, both from OWNER-QUESTIONS #31 and
+		// src/problem-stari.html's published wording.
 		array(
 			'q' => 'Други сервизи ми отказаха. Има ли смисъл да опитвам пак?',
-			'a' => 'Има. Ремонтът на ниво чип изисква оборудване, което не всеки сервиз има — инфрачервена станция с компютърно управление за работа по BGA чипове и възможност за възстановяване на пътечки под увеличение. Отказът другаде често означава, че там не се извършва този вид работа, а не че платката е негодна.',
+			'a' => 'Има. Работим по самата платка, а не по каталожния номер на модела: възстановяваме разядени от корозия пътечки и подменяме отделни дефектирали компоненти. Отказът другаде често означава, че там такава работа не се извършва, а не че платката е негодна. Когато и тя не е достатъчна, остава подмяна на платката — казваме ви кое от двете е реалистично, преди да започнем.',
 		),
 	),
 
