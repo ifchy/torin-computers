@@ -553,11 +553,22 @@ function torin_render_service_page($page) {
 					<a class="btn btn--primary" href="tel:<?php echo torin_esc($site['phone_e164']); ?>"><?php echo torin_icon('phone'); ?>Обадете се</a>
 					<a class="btn btn--primary" href="viber://chat?number=<?php echo rawurlencode($site['viber']); ?>"><?php echo torin_icon('chat'); ?>Пишете във Viber</a>
 				</div>
-				<p class="cta-block__note">Безплатна диагностика · Отговаряме в работно време</p>
+<?php			// D3.5-06. The claim and its category-6 exclusion are READ from
+			// site-config.php, never typed here: this note renders on all 15 service
+			// pages, so a literal in this line would be fifteen copies of one fact.
+			//
+			// The exclusion belongs HERE and not in a hero pill. This note sits
+			// directly above the call-to-action a visitor is about to use, which is
+			// the last moment the carve-out can still change what they do. A pill in
+			// a hero is decoration by the time they reach the phone number. ?>
+				<p class="cta-block__note"><?php echo torin_esc($site['free_diagnostics']); ?> <?php echo torin_esc($site['free_diagnostics_exception']); ?> · Отговаряме в работно време</p>
 <?php			// TRUST-02, as the LAST CHILD of .cta-block — the rating sits where
-				// the visitor is being asked to call. It renders nothing today
-				// (OWNER-QUESTIONS #7) and that absence is the specified state, not
-				// an omission; see rating-badge.php.
+				// the visitor is being asked to call. This used to say the badge
+				// renders nothing and that the absence was the specified state. Both
+				// were true until plan 03.5-01 and are now false: OWNER-QUESTIONS #7
+				// is answered and the badge is switched on in site-config.php. The
+				// absent state still exists and is still specified — see
+				// rating-badge.php — it is simply no longer the one that ships.
 				torin_render_rating_badge(); ?>
 			</div>
 		</div>

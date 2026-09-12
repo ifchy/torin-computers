@@ -83,10 +83,19 @@
 //    designed outcome, not an oversight. If it ever starts failing, the Class-A
 //    phrase has been loosened — tighten it back; do not allowlist the page.
 //
-// 2. src/.htaccess is allowlisted for the retired page filenames. The 301 rules
-//    must name them; a gate that forbade that would forbid the fix. The
-//    positive assertion that the rules exist and are well-formed lives in plan
-//    03.5-01 Task 3 instead.
+// 2. src/.htaccess is allowlisted for the retired page filenames. It is the
+//    one file whose job is to name a retired URL, and a gate that forbade that
+//    would forbid the fix. The positive assertion that the rules exist and are
+//    well-formed lives in plan 03.5-01 Task 3 instead.
+//
+//    MEASURED 2026-09-12, and worth writing down because it is the opposite of
+//    what the plan assumed: a correctly written rule pattern does NOT trip this
+//    gate even without the allowlist. The patterns are dot-escaped (^name\.html$),
+//    so the text on disk is «name\.html» and the plain substring «name.html» is
+//    not present in it. What the allowlist actually covers today is the block's
+//    PROSE, which names one retired URL while recording it as the weak target.
+//    Keep the allowlist anyway: it is what makes an unescaped pattern — a real
+//    and easy mistake — survivable rather than a gate failure someone silences.
 //
 // ─────────────────────────────────────────────────────────────────────────────
 // MATCHING
@@ -221,7 +230,7 @@ const ALLOWLIST = [
 	{
 		file: 'src/.htaccess',
 		tokens: ['retired-za-bateriite', 'retired-laptopi', 'retired-rezervni-chasti', 'retired-covid'],
-		why: 'the 301 rules must name the retired filenames — a gate forbidding that would forbid the fix (SEO-05)',
+		why: 'the one file whose job is to name a retired URL (SEO-05) — in practice this covers the block prose, since dot-escaped rule patterns do not contain the plain filename',
 	},
 ];
 

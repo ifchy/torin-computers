@@ -58,8 +58,22 @@ if (file_exists($torin_dev_switcher)) { include($torin_dev_switcher); }
 if (!isset($torin_title)) {
 	$torin_title = 'ТОРИН КОМПЮТЪРС - ТОТАЛЕН РЕМОНТ НА ЛАПТОПИ';
 }
+// The fallback description below lost its trailing free-diagnostics sentence in
+// plan 03.5-01. REMOVED, not reworded: D3.5-06 scopes that claim to categories
+// 1-5, and the sentence sat in the same breath as «нестандартна техника» —
+// category 6 — so the reworded form would have contradicted itself inside one
+// description. Nothing replaces it. Every page on the site sets its own
+// $torin_desc, so this fallback renders nowhere today and has no search value
+// to preserve; it exists as the not-empty guarantee for a future stub page.
+//
+// KEEP THIS COMMENT OUTSIDE THE IF-BLOCK. scripts/seo-metadata-check.js reads
+// both fallbacks straight out of this mechanism rather than copying them, and
+// its matcher allows only whitespace between the brace and the assignment.
+// A comment placed inside the block halts that gate with «the mechanism
+// changed shape» — which is the gate doing its job, and which is how this
+// paragraph came to be here.
 if (!isset($torin_desc)) {
-	$torin_desc = 'ТОРИН КОМПЮТЪРС — ремонт на лаптопи в София: счупвания, екран и клавиатура, оптимизация, заливане и дънни платки, прегряване, нестандартна техника. Безплатна диагностика.';
+	$torin_desc = 'ТОРИН КОМПЮТЪРС — ремонт на лаптопи в София: счупвания, екран и клавиатура, оптимизация, заливане и дънни платки, прегряване, нестандартна техника.';
 }
 ?>
 <!DOCTYPE html>
@@ -224,10 +238,12 @@ if (file_exists($torin_dev_switcher)) { torin_render_theme_switcher($torin_theme
 						</ul>
 					</li>
 
-					<?php // D-20's sales line: this item covers laptopi.html, and the
-					      // footer's secondary row carries rezervni-chasti.html, so both
-					      // sales pages are reachable from every page on the site. ?>
-					<li><a class="nav__link" href="laptopi.html"<?php echo ($torin_nav_current === 'laptopi.html' ? ' aria-current="page"' : ''); ?>>Лаптопи и части</a></li>
+					<?php // D-20's sales line stood here until plan 03.5-01. The shop
+					      // discontinued sales (CONTEXT D3.5-01), so the item and its
+					      // footer counterpart are gone and both URLs 301 from
+					      // src/.htaccess. The nav is FOUR items now, and that is a
+					      // subtraction inside IA-02's flat-nav decision, not a redesign:
+					      // the four survivors keep their order, labels and weighting. ?>
 					<li><a class="nav__link" href="test-laptop.html"<?php echo ($torin_nav_current === 'test-laptop.html' ? ' aria-current="page"' : ''); ?>>Тествай сам</a></li>
 					<?php // D-21: Запитване folds into Контакти, which targets the
 					      // homepage CTA block rather than a page of its own. ?>
