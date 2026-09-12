@@ -1,8 +1,21 @@
 # public_html/new/.htaccess — Phase 1 rehearsal file, scoped to the /new/ staging subtree only.
-# At Phase 4 cutover, this file (or its rules) is promoted to the root .htaccess with the
-# redirect target changed from https://torin.bg/new/$1 to https://torin.bg/$1 (drop /new/).
+# At Phase 4 cutover, this file (or its rules) is promoted to the root .htaccess. TWO edits are
+# required there, not one:
+#   1. the canonicalisation target changes from https://torin.bg/new/$1 to https://torin.bg/$1
+#   2. the RewriteBase directly below changes from /new/ to /
+# Missing either one breaks a redirect silently, at 301, with no build failure.
 
 RewriteEngine On
+
+# RewriteBase is REQUIRED, and its absence is not a style question — it was a live defect.
+# In a per-directory .htaccess a relative substitution has no URL-space base to resolve
+# against, so when a rule forces an external redirect Apache builds the Location from the
+# DIRECTORY'S FILESYSTEM PATH. Measured on this host with the base missing, all four
+# retirement rules below answered 301 with a Location of
+# https://torin.bg/home/torin/public_html/new/<target> — a server path leaked into a public
+# URL, and every one of them 404'd on the follow. The 301 itself looked correct, which is
+# why only following the redirect caught it.
+RewriteBase /new/
 
 # Canonicalize all 4 protocol/host variants to https://torin.bg/new/... in exactly 1 hop.
 # Target is a hardcoded literal, never %{HTTP_HOST} reflection — reflecting the client-supplied
@@ -30,10 +43,15 @@ RewriteRule ^(.*)$ https://torin.bg/new/$1 [R=301,L]
 # Each pattern is ANCHORED and its dot ESCAPED. An unanchored pattern would
 # also catch a longer filename ending the same way.
 #
-# Each substitution is RELATIVE, never an absolute URL. mod_rewrite builds the
-# absolute Location from the current context, so no rule here carries the /new/
-# staging segment and none needs editing at cutover. The single hardcoded
-# staging path in this file stays the one already above.
+# Each substitution is RELATIVE, never an absolute URL — which is safe ONLY
+# because RewriteBase is set at the top of this file. Relative substitutions
+# resolve against that base; without it they resolve against the filesystem
+# path and leak it into the Location. That is not a hypothetical: it is what
+# this block actually did on its first deploy. Keep the two together.
+#
+# The staging segment therefore appears in exactly two places in this file —
+# the canonicalisation target and the RewriteBase — and both are listed in the
+# cutover note at the top. No individual rule below carries it.
 #
 # Each rule carries the permanent-redirect flag paired with the last-rule flag.
 # NOT the bare redirect flag, which defaults to 302 and passes no ranking
