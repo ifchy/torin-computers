@@ -179,6 +179,9 @@ Recent decisions affecting current work:
 - [Phase 3]: Legal entity ТОРИН КЪМПАНИ ООД, trade name ТОРИН КОМПЮТЪРС, address «ул. Свети Иван Рилски 46» WITHOUT the № sign (chosen for consistency with GBP). ЕИК still NOT provided — the one thing the legal pages actually need.
 - [Phase 3]: Warranty is 1 month for all EXCEPT category 6. Free diagnostics applies to categories 1-5 only and must be reworded «първоначална» (initial). Both ship on many pages.
 
+- [Phase 4 — CUTOVER BLOCKER, found 2026-09-12]: **No host canonicalisation exists.** All four variants return 200 with no redirect: `http://www.torin.bg/`, `http://torin.bg/`, `https://torin.bg/`, `https://www.torin.bg/`. The same content is served on four hosts, so ranking signals are split four ways. Google Search Console shows the variant actually indexed and ranking is **`http://www.torin.bg/`** (23 clicks / 16,845 impressions) — the LEAST preferred form (insecure + www), while the rebuilt site's `site-config.php:237` sets `base_url` to `https://torin.bg/`. At cutover this must be resolved deliberately: pick one canonical host, 301 the other three to it, and make sure the chosen canonical is the one GSC's history attaches to — or the ranking history sits on a host that now redirects away. SEO-04 covers URL *paths*; nothing in the project covers the *host*, which is how this went unnoticed for three phases.
+- [Phase 4]: GSC data point 2026-09-12 — homepage 23 clicks on 16,845 impressions. Worth checking average position before drawing conclusions (a 0.14% CTR is normal at position 40 and alarming at position 5), but it is the first real traffic number the project has had.
+
 ### Pending Todos
 
 None yet.
