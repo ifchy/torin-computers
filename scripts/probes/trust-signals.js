@@ -1,26 +1,35 @@
 //
-// trust-signals.js — rendered proof of the four surfaces plan 03-02 adds to the
-// homepage: the brand wordmark row, the Google rating badge, and the two
-// differentiator sections with their evidence strips.
+// trust-signals.js — rendered proof of the trust surfaces on the homepage and
+// on any page that carries the shared brand row: the brand wordmark row, the
+// Google rating badge, section order and tint alternation, heading integrity,
+// mobile overflow, and — where a page has one — an evidence strip.
 //
-// Five things this plan changed are only correct if a real layout engine says
-// so, and every one of them looks fine in the markup:
+// AMENDED 2026-09-12 by plan 03.5-02. The two differentiator sections this
+// probe was originally written against were deleted from the homepage in that
+// plan, along with the only two evidence strips the homepage carried. Both
+// described service lines the shop discontinued (03.5-CONTEXT D3.5-01). The
+// probe's other five measurements are unchanged and still unconditional.
 //
-//   1. SECTION ORDER AND TINT ALTERNATION. Inserting two sections into a
-//      contracted eight-row order reassigns the tint on three sections that
-//      already existed (catch-all, self-diagnostic, CTA). Getting one wrong
-//      produces two adjacent tinted bands, which is a purely visual defect.
+// What is only correct if a real layout engine says so, and looks fine in the
+// markup either way:
+//
+//   1. SECTION ORDER AND TINT ALTERNATION. The homepage now serves six bands —
+//      hero, categories, brands, catch-all, self-diagnostic, contact — of which
+//      three are tinted, in strict plain/tint alternation. One tint wrong
+//      produces two adjacent tinted bands, a purely visual defect. NOTE that
+//      the brand row is INJECTED by a PHP partial at render time and carries no
+//      opening tag in index.html's source, so the rendered count is one higher
+//      than any count grepped out of that file. The two numbers are both right.
+//      Never reconcile them by editing one toward the other.
 //   2. BRAND ROW WRAPPING. The row is a wrapping flex row of fixed-height
-//      chips. Whether seven brands plus a closer actually WRAP at 360px rather
+//      chips. Whether the brands plus a closer actually WRAP at 360px rather
 //      than overflow depends on the resolved metrics of a webfont loaded over
 //      the network — it is measured, not derived.
 //   3. EVIDENCE BOX SIZING. The width/height ATTRIBUTES carry each file's true
 //      intrinsic pixels while CSS sets the display size to 100x100. If that
 //      contract breaks, the box takes the attribute size and the strip
 //      silently renders 200px or 585px wide.
-//   4. RATING BADGE. Today it must be ABSENT (OWNER-QUESTIONS #7). Its
-//      computed background and box height are reported when it is present, so
-//      the same probe verifies the present state once the owner enables it.
+//   4. RATING BADGE. See the note below — its shipped state inverted.
 //   5. MOBILE OVERFLOW. Long Bulgarian brand names in a wrapping row and a
 //      three-column 100px grid are both plausible sources of horizontal scroll.
 //
@@ -30,18 +39,46 @@
 // report desktop numbers.
 //
 // ABSENT SURFACES FORCE INCONCLUSIVE, NEVER PASS. [].every() is true, so a page
-// served without a brand row or without an evidence strip would clear this
-// probe's strongest assertions by having nothing to assert over. That is the
-// exact false-pass shape plan 03-01 hit and hardened against, so every measured
-// surface that is missing is named in `inconclusive` and the verdict degrades
-// rather than passing vacuously.
+// served without a brand row would clear this probe's strongest assertions by
+// having nothing to assert over. That is the exact false-pass shape plan 03-01
+// hit and hardened against, so every measured surface that is missing is named
+// in `inconclusive` and the verdict degrades rather than passing vacuously.
 //
-// The rating badge is the ONE deliberate exception: its absence is the
-// specified, shipped state (UI-SPEC §2a), so it is reported as
-// `ratingBadgePresent: false` and does NOT make the run inconclusive.
+// TWO DELIBERATE NON-GATES, both reported unconditionally in the result object.
+//
+// 1. THE EVIDENCE STRIP IS OPT-IN, via TRUST_EXPECT_EVIDENCE=1. Until plan
+//    03.5-02 the zero-strip case was pushed into `inconclusive`
+//    unconditionally. The homepage now serves ZERO strips by design, so the
+//    unconditional form would make every future homepage run INCONCLUSIVE
+//    forever — and a verdict nobody reads is worse than no verdict. That is not
+//    a hypothetical: it is the finding that produced SVC_EXPECT_URGENT in
+//    scripts/probes/svc-page.js, after the unconditional urgent-block check
+//    reported INCONCLUSIVE on every correctly built child page. Same shape,
+//    same fix. Point the probe at a page CONTRACTED to carry a strip and set
+//    the flag; `evidenceStrips` is reported either way, so an unexpected
+//    disappearance stays visible in the output. The 100x100 box contract and
+//    the honest-attributes check are untouched — they simply have nothing to
+//    assert when there is no strip, which is what the flag makes explicit.
+//
+// 2. THE RATING BADGE IS REPORTED, NOT GATED — but no longer for the original
+//    reason. This comment used to say the badge's ABSENCE was the specified,
+//    shipped state (UI-SPEC §2a). That inverted on 2026-09-12: plan 03.5-01
+//    answered OWNER-QUESTIONS #7, switched the badge on, and it was verified
+//    rendering live on the homepage and on a service page at both viewports.
+//    Absence on either of those pages is now a DEFECT, not a contract. It stays
+//    reported rather than gated because this probe may legitimately be pointed
+//    at pages that carry no badge, so gating it here would reintroduce exactly
+//    the permanent-INCONCLUSIVE problem note 1 removes. A caller that needs the
+//    badge proven must read `ratingBadgePresent` out of the JSON explicitly —
+//    PASS alone does not prove it rendered.
 //
 async function run(session, cdp, opts) {
 	await cdp.open(session, opts.url, opts);
+
+	// Serialised into the page scope rather than read from process.env inside
+	// it: the evaluated string runs in the browser, which has no process.env.
+	// Same mechanism svc-page.js uses for expectUrgent.
+	const expectEvidence = process.env.TRUST_EXPECT_EVIDENCE === '1';
 
 	// Force the lazy evidence images to load BEFORE measuring.
 	//
@@ -84,6 +121,7 @@ async function run(session, cdp, opts) {
 	})()`);
 
 	return await cdp.evaluate(session, `(() => {
+		const expectEvidence = ${expectEvidence};
 		const main = document.querySelector('main');
 		if (!main) return { error: 'no <main> found' };
 
@@ -169,15 +207,33 @@ async function run(session, cdp, opts) {
 		if (!document.querySelector('.brand-row__note')) {
 			inconclusive.push('no .brand-row__note in the served HTML — the mandatory trademark disclaimer is absent');
 		}
-		if (evidenceStrips === 0) {
-			inconclusive.push('no .evidence in the served HTML — the 100x100 box check asserted nothing');
+		// OPT-IN (TRUST_EXPECT_EVIDENCE=1). The homepage serves zero strips by
+		// design since plan 03.5-02, so gating this unconditionally would pin
+		// every homepage run at INCONCLUSIVE. Set the flag for a page
+		// contracted to carry a strip. evidenceStrips is returned either way.
+		if (expectEvidence && evidenceStrips === 0) {
+			inconclusive.push('no .evidence in the served HTML — the 100x100 box check asserted nothing (TRUST_EXPECT_EVIDENCE was set)');
+		}
+		// UNCONDITIONAL, and the flag does not soften it. A strip that IS in the
+		// served response but holds no images is an absent surface where one was
+		// promised — a different failure from having no strip at all, and always
+		// a defect. Without this, making the zero-strip case opt-in would have
+		// opened a second vacuous route: zero boxes inside a present strip would
+		// excuse the box contract below with nothing reporting it.
+		if (evidenceStrips > 0 && evidenceBoxes.length === 0) {
+			inconclusive.push('an .evidence strip is present but contains no img — the 100x100 box check asserted nothing');
 		}
 		if (evidenceBoxes.length > 0 && evidenceBoxes.some(b => !b.complete || b.naturalW === 0)) {
 			inconclusive.push('at least one evidence image did not load — its rendered box size is not a measurement of the CSS contract');
 		}
 
+		// Deliberately NON-VACUOUS: false when there is nothing to measure, so
+		// the reported value never claims a contract was proven when it was not.
+		// The verdict below excuses it only in the genuinely-no-strip case,
+		// which TRUST_EXPECT_EVIDENCE is what governs.
 		const evidenceBoxesOk = evidenceBoxes.length > 0 &&
 			evidenceBoxes.every(b => Math.round(b.w) === 100 && Math.round(b.h) === 100);
+		const evidenceContractApplies = evidenceBoxes.length > 0;
 		const attrsHonest = evidenceBoxes.every(
 			b => !b.complete || b.naturalW === 0 ||
 				(String(b.naturalW) === String(b.attrW) && String(b.naturalH) === String(b.attrH))
@@ -198,14 +254,23 @@ async function run(session, cdp, opts) {
 			brandDuplicates: brandDuplicates,
 			brandCloserIsLast: closerIsLast,
 			minAdjacentGap: minAdjacentGap,
-			// The absent badge is the SPECIFIED state today (UI-SPEC §2a), so
-			// this is reported and deliberately does NOT force INCONCLUSIVE.
+			// REPORTED, NOT GATED — and no longer because absence is specified.
+			// The badge ships ENABLED since plan 03.5-01 and was verified
+			// rendering live 2026-09-12, so its absence on the homepage or on a
+			// service page is a defect. It stays out of the verdict only because
+			// this probe may be pointed at pages that carry no badge. A caller
+			// that needs it proven must read this field; PASS does not prove it.
 			ratingBadgePresent: !!badge,
 			ratingBadgeBackground: badge ? getComputedStyle(badge).backgroundColor : null,
 			ratingBadgeHeight: badgeBox ? +badgeBox.height.toFixed(1) : null,
+			// Reported UNCONDITIONALLY, flag or no flag. The number is evidence
+			// even when it is not a gate: a strip that vanishes unexpectedly from
+			// a page that should have one is visible here either way.
 			evidenceStrips: evidenceStrips,
+			evidenceExpected: expectEvidence,
 			evidenceBoxes: evidenceBoxes,
 			evidenceBoxesOk: evidenceBoxesOk,
+			evidenceContractApplies: evidenceContractApplies,
 			evidenceAttrsHonest: attrsHonest,
 			h1Count: document.querySelectorAll('h1').length,
 			headingCount: headings.length,
@@ -219,7 +284,15 @@ async function run(session, cdp, opts) {
 				brandDuplicates.length === 0 &&
 				closerIsLast &&
 				(minAdjacentGap === null || minAdjacentGap > 0) &&
-				evidenceBoxesOk &&
+				// The box contract is required whenever there is a box to
+				// measure. It is excused ONLY when no evidence image was served
+				// at all — and that case cannot pass silently on a page
+				// contracted to carry one, because TRUST_EXPECT_EVIDENCE=1 sends
+				// it to INCONCLUSIVE above before this expression is reached. A
+				// present-but-empty strip is likewise caught above. Without this
+				// guard the homepage would go from permanently INCONCLUSIVE to
+				// permanently FAIL, which is not an improvement.
+				(!evidenceContractApplies || evidenceBoxesOk) &&
 				attrsHonest
 			) ? 'PASS' : 'FAIL')
 		};

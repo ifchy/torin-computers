@@ -7,13 +7,31 @@
 // the h1 is also what makes it impossible for this title to describe a
 // different page than the one it labels.
 $torin_title = 'Ремонт на лаптопи и компютри в София · Торин';
-// 129 code points; the call to action begins at code point 48, inside the 95
+// 127 code points; the call to action begins at code point 48, inside the 95
 // point mobile truncation budget. Every claim is one the site already makes
-// elsewhere: the founding year is on the About page and the four repair classes
-// are four of the six categories. States no price, no turnaround and no
-// guarantee.
-$torin_desc  = 'Сервиз за лаптопи и компютри в София от 1993 г. Обадете се за безплатна диагностика — счупвания, заливане, дънни платки, батерии.';
+// elsewhere: the founding year is on the About page and the three repair
+// classes are three of the six categories. States no price, no turnaround and
+// no guarantee.
+//
+// REWRITTEN WHOLE by plan 03.5-02, not patched. The previous form ended by
+// naming a service line the shop has discontinued (D3.5-01), and inserting the
+// D3.5-06 reword into it would have taken it to 143 code points against a hard
+// ceiling of 140 — so the list of classes was shortened rather than the reword
+// dropped.
+//
+// This is the ONE surface on this page where the diagnostics claim is a literal
+// instead of a read from site-config.php. seo-metadata-check.js resolves this
+// value with literalAssignment(), which matches only a one-line single-quoted
+// assignment carrying no concatenation and no variable; reading the config here
+// would make the description invisible to the gate that guards it. The literal
+// is the lesser cost, and truth-gate.js proves it carries the reword.
+$torin_desc  = 'Сервиз за лаптопи и компютри в София от 1993 г. Обадете се за безплатна първоначална диагностика — счупвания, екрани, заливане.';
 require_once(dirname(__FILE__) . '/includes/categories.php');
+// The five child records and torin_service_href(). Required because the
+// catch-all's power/battery disclosure routes to a CHILD page, and no href on
+// this page is ever hand-typed — the accessor honours the publish gate, so an
+// unpublished child falls back to its parent hub instead of 404-ing.
+require_once(dirname(__FILE__) . '/includes/services.php');
 // $site is already in scope transitively through header.php, but relying on
 // that makes this page silently depend on another file's include order. It is
 // required explicitly for the same reason categories.php is, and require_once
@@ -45,16 +63,23 @@ require_once(dirname(__FILE__) . '/includes/header.php');
 					<a class="btn btn--primary" href="viber://chat?number=<?php echo rawurlencode($site['viber']); ?>"><?php echo torin_icon('chat'); ?>Пишете във Viber</a>
 				</div>
 
-				<p class="trust-badge">Безплатна диагностика</p>
+				<?php // D3.5-06. The claim is READ from site-config.php, never typed
+				      // here, so the site has ONE writer for it. The category-6
+				      // carve-out deliberately does NOT ride along: a hero pill is not
+				      // where a carve-out belongs, and the CTA note further down — the
+				      // surface a visitor reads immediately before calling — carries it
+				      // there instead. Both are visible on the same page. ?>
+				<p class="trust-badge"><?php echo htmlspecialchars($site['free_diagnostics'], ENT_QUOTES, 'UTF-8'); ?></p>
 			</div>
 		</div>
 	</section>
 
 	<?php
 	// The six-category grid (IA-01, D-09). Exactly six — nothing else may appear
-	// here as a seventh peer item. Регенерация на батерии, подмяна на кабел на
-	// адаптор and безплатна диагностика map to none of the six and live
-	// elsewhere on the page (D-15, D-26).
+	// here as a seventh peer item. Подмяна на кабел на адаптор and the
+	// first-assessment diagnostics claim map to none of the six and live
+	// elsewhere on the page (D-15, D-26). This comment used to name a third such
+	// item; plan 03.5-02 withdrew it along with its service line (D3.5-01).
 	//
 	// Every card is rendered from $torin_categories, and every href comes from
 	// torin_category_href(). No category filename is hand-typed on this page:
@@ -103,12 +128,13 @@ require_once(dirname(__FILE__) . '/includes/header.php');
 	// rule of ours (the element owns its own state). That is D-11's actual
 	// requirement, and it is what makes the content indexable.
 	//
-	// ⚠ CARRIED FORWARD, NOT PRICED (D-13 / OWNER-QUESTIONS #9): battery
-	// regeneration is DIFF-02, a differentiator no competitor offers, and it
-	// sits in a folded section. 02-RESEARCH §3c adds a cost the original
-	// trade-off did not account for — collapsed content is reliably indexed but
-	// practitioner evidence suggests it is weighted lower for ranking. Phase 3
-	// must treat DIFF-02 as knowingly unmet, not silently passing.
+	// ⚠ THE D-13 / OWNER-QUESTIONS #9 TRADE-OFF IS SETTLED, NOT STILL OPEN.
+	// This block used to warn that DIFF-02 sat in a folded section and was
+	// therefore knowingly unmet. DIFF-02's service line was discontinued by the
+	// owner (D3.5-01) and plan 03.5-02 removed every claim about it from this
+	// page, so the ranking cost 02-RESEARCH §3c priced no longer applies to
+	// anything here. What survives below is a SYMPTOM entry, which is what a
+	// folded catch-all is for. Do not reopen the trade-off.
 	//
 	// Category names in these bodies are read from the data file, never retyped,
 	// so a D-40 rename cannot leave a stale name behind here.
@@ -121,7 +147,14 @@ require_once(dirname(__FILE__) . '/includes/header.php');
 		<div class="container">
 			<span class="eyebrow" aria-hidden="true"></span>
 			<h2 id="ne-otkrivate-h">Не откривате проблема си?</h2>
-			<p class="catch-all__lede">Опишете какво прави лаптопът — ще намерим къде се вписва. Обадете се, диагностиката е безплатна.</p>
+			<?php // D3.5-06. The trailing diagnostics clause was DROPPED here rather
+			      // than reworded. The claim now has exactly TWO surfaces on this
+			      // page — the hero pill and the CTA note — and both read it from
+			      // site-config.php. A third copy in running prose cannot be read
+			      // from config without interpolating a capitalised sentence into
+			      // the middle of another one, so the honest resolution is
+			      // subtraction rather than a fourth phrasing of one fact. ?>
+			<p class="catch-all__lede">Опишете какво прави лаптопът — ще намерим къде се вписва. Обадете се.</p>
 
 			<details class="disc" id="sym-ne-se-vklyuchva" name="symptoms">
 				<summary><span class="disc__row">Не се включва / няма реакция <?php echo torin_icon('chevron-down'); ?></span></summary>
@@ -135,12 +168,39 @@ require_once(dirname(__FILE__) . '/includes/header.php');
 				</div>
 			</details>
 
+			<?php // REWRITTEN by plan 03.5-02. This entry is KEPT, not deleted: a
+			      // laptop that stops holding charge is one of the commonest calls
+			      // the shop takes, and the catch-all exists precisely for symptoms
+			      // that map to no single category. What was removed is the claim
+			      // that the shop restores the pack itself — that service line is
+			      // discontinued (D3.5-01) — and the link to the URL that described
+			      // it, which now 301s.
+			      //
+			      // Every sentence below is CONDENSED from what the site already
+			      // says, never newly invented (D3.5-08):
+			      //   smyana-na-buksa.html:156 — a failed charger, a broken cable to
+			      //     the plug and a worn pack all present very similarly, and all
+			      //     of them get checked before anything is proposed;
+			      //   smyana-na-buksa.html:147 — the adapter and the plug are tested
+			      //     separately from the machine, because in some cases the fault
+			      //     is in the charger rather than in the laptop.
+			      //
+			      // It deliberately does NOT say the shop supplies, sells or fits a
+			      // replacement pack. The sales line is discontinued too and no
+			      // source on this site supports that claim.
+			      //
+			      // Both hrefs come from accessors. The child record resolves through
+			      // torin_service_href(), which honours the publish gate; the hub
+			      // through the same torin_category_href() every card on this page
+			      // uses. No filename is typed here. ?>
 			<details class="disc" id="sym-bateriya" name="symptoms">
 				<summary><span class="disc__row">Батерията не държи <?php echo torin_icon('chevron-down'); ?></span></summary>
 				<div class="disc__body">
-					<p>Регенерираме батерии — възстановяваме капацитета на клетките, вместо да сменяме цялата батерия. Това е услуга, която малко сервизи в София предлагат.</p>
+					<p>Изтощен батериен пакет, повредено зарядно, прекъснат кабел към щекера и разклатена захранваща букса дават много подобна картина. Проверяваме адаптера и щекера отделно от лаптопа и оглеждаме буксата, преди да предложим каквото и да е.</p>
 					<ul class="disc__links">
-						<li><a href="za-bateriite.html">За батериите и регенерацията</a></li>
+<?php $torin_svc_buksa = torin_service_by_id('svc-buksa'); ?>
+						<li><a href="<?php echo htmlspecialchars(torin_service_href($torin_svc_buksa), ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($torin_svc_buksa['name'], ENT_QUOTES, 'UTF-8'); ?></a></li>
+						<li><a href="<?php echo htmlspecialchars(torin_category_href($torin_cat_by_id['kat-2']), ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($torin_cat_by_id['kat-2']['name'], ENT_QUOTES, 'UTF-8'); ?></a></li>
 					</ul>
 				</div>
 			</details>
@@ -173,69 +233,42 @@ require_once(dirname(__FILE__) . '/includes/header.php');
 	</section>
 
 	<?php
-	// DIFF-03 — the board-level / BGA capability, promoted to its own homepage
-	// surface. This is the differentiator that answers «казаха ми, че не
-	// подлежи на ремонт», and it was previously reachable only by opening the
-	// category-4 page.
+	// ⚠ SOURCE AND RENDERED SECTION COUNTS DIFFER BY EXACTLY ONE, ALWAYS.
+	// NEVER satisfy one by editing toward the other, and never close a shortfall
+	// by adding a section back — this is the phase that forbids inventing
+	// content (D3.5-08).
 	//
-	// Every claim below is the shop's OWN, condensed from
-	// site-current/index.html:593-640 (the three tiers) and
-	// site-current/profilaktika-laptop.html:398 and :411 (the German infrared
-	// machine, the AMTECH flux, the up-to-10-degree figure and the 90% rate).
-	// Nothing is amplified: the source's ceiling is this block's ceiling.
+	// torin_render_brand_row() emits its own band element at RENDER time (see
+	// brand-row.php) and is called above between the tinted category grid and
+	// the tinted catch-all. Being a PHP include, it contributes no opening tag
+	// to this source file — and this comment deliberately does not write that
+	// tag out either, because the gate that counts them counts comments too.
+	// That one injected band is what keeps the two tinted bands on either side
+	// of it from becoming neighbours.
 	//
-	// It is a CONDENSED SUMMARY that hands off to the depth page — it
-	// deliberately restates no paragraph zalivane-technosti.html already
-	// carries, or the two pages compete for the same query.
+	// Plan 03.5-02 deleted the two sections that used to sit here, which carried
+	// claims about service lines the owner discontinued (D3.5-01). Nothing
+	// replaced them: category 6 is the intended replacement differentiator
+	// (DIFF-04) and its publication is gated pending OWNER-QUESTIONS #3a-#3f, so
+	// a stand-in would be exactly the fabrication D3.5-08 forbids.
 	//
-	// PLAIN surface, section 5 of the UI-SPEC order table.
+	//   source:   5 section openings, 3 tinted
+	//   rendered: 6 sections, 3 tinted, adjacent tinted pairs 0
+	//
+	// Rendered order after the deletion:
+	//   plain hero -> tint categories -> plain brands -> tint catch-all ->
+	//   plain self-diagnostic -> tint contact. Strict alternation.
+	//
+	// If a probe ever reports a non-zero adjacent-tinted-pair count here, the
+	// likeliest cause is the brand row having disappeared, not a tint class
+	// being wrong: the partial emits NOTHING AT ALL when its list is empty.
+	// Diagnose the list in site-config.php first. Do not add a section and do
+	// not change a tint class.
+	//
+	// 03-UI-SPEC.md still shows the old eight-row order. It is a closed-phase
+	// artifact and is deliberately NOT rewritten; the amended order is recorded
+	// in 03.5-02-SUMMARY.md and here.
 	?>
-	<section class="section diff">
-		<div class="container">
-			<span class="eyebrow" aria-hidden="true"></span>
-			<h2>Какво можем, което другите отказват</h2>
-			<p>Ремонтът на ниво чип е това, което най-често чувате другаде като «не подлежи на ремонт». Работим в три степени според състоянието на платката: дозапояване на отпоени BGA чипове, ребоулинг с нови топченца и подмяна на чипсет — северен мост, южен мост или видеочип — когато самият чип е дефектирал.</p>
-			<p>Запояването се извършва с професионална машина от последно поколение, чийто източник на топлина е инфрачервен, в невидимата за окото област — германска know-how технология, управлявана софтуерно по профили според платката. Използваме флюс на американската фирма AMTECH, а след залепянето на чипсета подсилваме охладителната система и постигаме до 10 градуса по-ниски работни температури. При тези ремонти достигаме 90% успеваемост и устойчивост на ремонта във времето.</p>
-			<?php // Three photographs the shop took itself. Captions describe what each
-			      // one PROVES — the machine, the stage of the work, and the damage the
-			      // amateur method does — never what it depicts decoratively. ?>
-			<?php torin_render_evidence(array(
-				array('file' => 'profilaktika17.jpg', 'w' => '200', 'h' => '200', 'caption' => 'Инфрачервена станция за реболинг на BGA чипове'),
-				array('file' => 'profilaktika7.jpg',  'w' => '200', 'h' => '200', 'caption' => 'Падовете на платката, почистени преди поставяне на нови топченца'),
-				array('file' => 'profilaktika15.jpg', 'w' => '200', 'h' => '200', 'caption' => 'Повреда от нагряване с пистолет за горещ въздух'),
-			)); ?>
-			<p><a href="zalivane-technosti.html">Ремонт на дънни платки</a></p>
-		</div>
-	</section>
-
-	<?php
-	// DIFF-02 — battery regeneration, moved OUT of the folded catch-all that
-	// Phase 2 left it in (D3-11). The catch-all entry stays, because it serves
-	// a visitor searching by symptom («батерията не държи»), but a
-	// differentiator no competitor offers cannot have a collapsed <details> as
-	// its only home: folded content is indexed but weighted lower, and 02-RESEARCH
-	// §3c is where that cost was first recorded against this exact section.
-	//
-	// Copy condensed from site-current/index.html:650-660 and
-	// site-current/za-bateriite.html:111. The source misspells the noun for
-	// regeneration and the adjective for Japanese in that passage; both ship
-	// CORRECTLY SPELLED here, and a gate asserts the two typo forms appear
-	// nowhere in this file — which is why they are described, not quoted.
-	//
-	// TINT surface, section 6 of the UI-SPEC order table.
-	?>
-	<section class="section section--tint diff">
-		<div class="container">
-			<span class="eyebrow" aria-hidden="true"></span>
-			<h2>Регенерация на батерии за лаптоп</h2>
-			<p>От години не внасяме нови батерии — заради нискокачествените клетки, които производителите влагат напоследък. Вместо това предлагаме пълна регенерация на стария пакет: подменяме елементите с нови и препрограмираме електрониката, за да работи батерията като напълно нова.</p>
-			<p>Клетките се свързват с машина за точково заваряване и специална лента HILUMIN, а не със запояване — всяка температурна интервенция нарушава химията на елемента и намалява работоспособността му. В последно време влагаме японски елементи Panasonic.</p>
-			<?php torin_render_evidence(array(
-				array('file' => 'baterii.jpg', 'w' => '370', 'h' => '250', 'caption' => 'Батериен пакет, отворен за подмяна на елементите'),
-			)); ?>
-			<p><a href="za-bateriite.html">Как работи регенерацията</a></p>
-		</div>
-	</section>
 
 	<?php // The self-diagnostic tool gets its own homepage block rather than
 	      // being reachable only from the navigation (D-12, DIFF-01). This is
@@ -269,7 +302,16 @@ require_once(dirname(__FILE__) . '/includes/header.php');
 					      // URL-encoded on the way into this query string. ?>
 					<a class="btn btn--primary" href="viber://chat?number=<?php echo rawurlencode($site['viber']); ?>"><?php echo torin_icon('chat'); ?>Пишете във Viber</a>
 				</div>
-				<p class="cta-block__note">Безплатна диагностика · Отговаряме в работно време</p>
+				<?php // D3.5-06. Claim and carve-out are both READ from site-config.php,
+				      // never typed here — the same two keys and the same composition
+				      // the shared service-page CTA uses (category-page.php), so the two
+				      // surfaces cannot drift.
+				      //
+				      // The exclusion belongs HERE rather than in the hero pill: this
+				      // note sits directly above the action a visitor is about to take,
+				      // which is the last moment a carve-out can still change what they
+				      // do. ?>
+				<p class="cta-block__note"><?php echo htmlspecialchars($site['free_diagnostics'], ENT_QUOTES, 'UTF-8'); ?> <?php echo htmlspecialchars($site['free_diagnostics_exception'], ENT_QUOTES, 'UTF-8'); ?> · Отговаряме в работно време</p>
 				<?php // OPTIONAL, pending OWNER-QUESTIONS #2 (should the form exist at
 				      // all?). Deliberately a SIBLING of the actions row, never a flex
 				      // child of it, and no stylesheet rule references it from a
@@ -278,10 +320,13 @@ require_once(dirname(__FILE__) . '/includes/header.php');
 				<div class="cta-block__form"></div>
 				<?php // TRUST-02, the LAST CHILD of .cta-block. Same partial the
 				      // service-page CTA calls, so the two surfaces cannot drift.
-				      // It emits nothing at all today — the badge is switched off in
-				      // site-config.php until the live Google Business Profile figures
-				      // are read (OWNER-QUESTIONS #7). That absence is the specified
-				      // state; see includes/rating-badge.php. ?>
+				      // This used to say the partial emits nothing and that the
+				      // absence was the specified state. Both were true until plan
+				      // 03.5-01 and are now false: OWNER-QUESTIONS #7 is answered and
+				      // the badge is switched on in site-config.php, verified rendering
+				      // live on this page 2026-09-12. The absent state still exists and
+				      // is still specified — see includes/rating-badge.php — it is
+				      // simply no longer the one that ships. ?>
 				<?php torin_render_rating_badge(); ?>
 			</div>
 		</div>
