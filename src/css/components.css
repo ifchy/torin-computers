@@ -226,7 +226,15 @@
 	font-weight: var(--fw-regular);
 }
 
-/* --- Trust badge «Безплатна диагностика» (D-15) -------------------------
+/* --- .trust-badge — the hero's free-diagnostics claim (D-15) -------------
+   Identified by CLASS NAME AND ROLE, never by quoting the text it carries.
+   That is not a style preference. This comment used to name the component by
+   reproducing its label, and the label changed under D3.5-06, so the comment
+   was both stale and — because scripts/truth-gate.js scans .css under src/ —
+   a Class-A hit sitting in an otherwise untouched stylesheet. Quoting the NEW
+   label would rebuild the same trap for whoever changes the copy next, so the
+   new label is not quoted either. The wording lives in site-config.php; the
+   element that renders it lives in the homepage hero.
    A trust/conversion element, never a line item in a service list. The pair
    that actually applies is --c-on-brand ink on the --c-brand fill: #16223a on
    #ffc70a = 10.14:1 in the shipping Theme B, #1a1200 on #fbad03 = 9.80:1 in

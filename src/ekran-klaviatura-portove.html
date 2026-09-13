@@ -34,9 +34,15 @@ $torin_cat = torin_category_by_id('kat-2');
 // `title-matches-page` ties this lead to the h1 below. 45 code points / 442 px
 // (03-RESEARCH), inside the ~600 px desktop truncation point.
 $torin_title = 'Екран, клавиатура и портове на лаптоп · Торин';
-// 139 code points, call at code point 70. Reordered: the original reached its
-// call only at 107 and lost it to mobile truncation.
-$torin_desc  = 'Ремонт и смяна на екран, клавиатура, панти и букса на лаптоп в София. Обадете се за безплатна диагностика — изберете вашия проблем по-долу.';
+// 134 code points, call at code point 60. Rewritten WHOLE by plan 03.5-06
+// rather than patched: the previous form carried the pre-D3.5-06 diagnostics
+// wording, and inserting the qualifying word into it would have taken it to
+// 153 — past the 140 ceiling. «на лаптоп» is dropped from the description and
+// not from the page: the title and the h1 both carry it, so the keyword is not
+// lost, and the routing instruction a hub exists for is what the budget buys
+// instead. Distinct from all five child descriptions (whole string and first
+// 60 code points), asserted by scripts/seo-metadata-check.js.
+$torin_desc  = 'Ремонт и смяна на екран, клавиатура, панти и букса в София. Обадете се — първоначалната диагностика е безплатна. Изберете проблема си.';
 
 // Assigned ONCE and read twice — by torin_render_service_page() for the visible
 // nav and by jsonld.php for the BreadcrumbList, after footer.php includes it.
@@ -96,7 +102,7 @@ $torin_cat_page = array(
 		),
 		array(
 			'q' => 'Трябва ли да донеса лаптопа в сервиза?',
-			'a' => 'Да. Всички ремонти в този раздел изискват разглобяване и оглед на място — по снимка не може да се каже дали е засегнат само екранът, или и кабелът към него. Диагностиката е безплатна. Ако предпочитате, обадете се предварително и опишете какво се е случило, за да знаете какво да очаквате при приемането.',
+			'a' => 'Да. Всички ремонти в този раздел изискват разглобяване и оглед на място — по снимка не може да се каже дали е засегнат само екранът, или и кабелът към него. Първоначалната диагностика е безплатна. Ако предпочитате, обадете се предварително и опишете какво се е случило, за да знаете какво да очаквате при приемането.',
 		),
 	),
 
