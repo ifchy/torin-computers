@@ -13,14 +13,25 @@
 //
 // CONTENT-02 lands here. RESEARCH C-1 found that the EU publicity obligation
 // was scoped to the implementation period, that homepage placement was never
-// required, and that the footer link to the disclosure page already exceeds
-// the compliant minimum. So the homepage half of CONTENT-02 was already
+// required, and that the footer link then in place already exceeded the
+// compliant minimum. So the homepage half of CONTENT-02 was already
 // satisfied structurally; what remained was to make the disclosure reachable
 // from a CONTENT page as well as from a legal footer line. That is the third
-// block below: one short paragraph and a link, chosen over prose folded into
-// the history so the disclosure is findable without competing for attention.
-// covid.html itself stays live, stays linked from the footer, and is not
-// edited by this plan.
+// block below: one short paragraph, chosen over prose folded into the history
+// so the disclosure is findable without competing for attention.
+//
+// AMENDED by plan 03.5-05 (CONTEXT D3.5-09). The dedicated EU-publicity page
+// was retired in plan 03.5-01 and its URL now 301s to THIS page, because the
+// disclosure had already been relocated here. The block below therefore lost
+// its link and the clause promising the detail on a separate page: the link
+// pointed back at the page the reader is already on, and the clause was no
+// longer true. The disclosure paragraph itself is untouched. The footer anchor
+// to the same page went in 03.5-01, so this page's paragraph is now the only
+// place the disclosure is stated on the site — which is why it is not cut.
+// The retired filename is deliberately not spelled anywhere in this file —
+// truth-gate.js
+// scans comments as well as markup and a comment naming it would trip the
+// very gate that guards it.
 //
 // The street address is NOT retyped anywhere on this page. footer.php renders
 // it once, as a link to the map destination site-config.php owns (P-11), and
@@ -31,9 +42,13 @@ require_once(dirname(__FILE__) . '/includes/category-page.php');
 // 55-character budget, so the suffix is kept on this page.
 $torin_title = 'За ТОРИН КОМПЮТЪРС — сервиз в София от 1993 г. · Торин';
 // Reordered by plan 03-09: the call was at code point 98, past the 95-point
-// mobile truncation budget. Same claims, same register, call moved ahead of the
-// service list.
-$torin_desc  = 'ТОРИН КОМПЮТЪРС — софийска фирма от 1993 г. Обадете се за безплатна диагностика: сервиз за лаптопи, компютри и монитори на ниво чип.';
+// mobile truncation budget. Same register, call moved ahead of the service list.
+// REWRITTEN WHOLE by plan 03.5-05: the old text ended on a capability the shop
+// no longer offers (D3.5-01) and carried the pre-reword diagnostics claim
+// (D3.5-06). Adding the missing word to the old string would have taken it to
+// 146 code points against a 140 ceiling, so it was rewritten rather than
+// patched. 133 code points, call at code point 44.
+$torin_desc  = 'ТОРИН КОМПЮТЪРС — софийска фирма от 1993 г. Обадете се за безплатна първоначална диагностика: сервиз за лаптопи, компютри и монитори.';
 
 // Assigned ONCE and read twice: the renderer draws the visible chain and
 // jsonld.php emits the matching BreadcrumbList from the same array.
@@ -54,7 +69,13 @@ $torin_about_page = array(
 
 	'crumbs' => $torin_crumbs,
 
-	'intro'  => 'ТОРИН КОМПЮТЪРС работи от 1993 г. и днес е сервиз за преносими и настолни компютри в София. Ремонтираме на ниво чип — там, където повечето сервизи спират и препращат клиента към нов лаптоп. Диагностиката е безплатна и ви казваме честно какво виждаме, включително когато отговорът е, че ремонтът не си струва.',
+	// Second sentence REPLACED by plan 03.5-05. The old one positioned the shop
+	// on a capability that is withdrawn (D3.5-01). The replacement is the
+	// positioning that SURVIVES under D3.5-02 — work on the board itself rather
+	// than by catalogue number — and it is not newly written: it reuses wording
+	// already published on src/problem-stari.html, a page this same plan owns.
+	// Third sentence keeps its meaning and takes the D3.5-06 reword.
+	'intro'  => 'ТОРИН КОМПЮТЪРС работи от 1993 г. и днес е сервиз за преносими и настолни компютри в София. Работим по самата платка, а не по каталожния номер на модела: ремонтът е на ниво компонент — възстановяваме захранващи вериги и подменяме отделни дефектирали елементи. Първоначалната диагностика е безплатна и ви казваме честно какво виждаме, включително когато отговорът е, че ремонтът не си струва.',
 
 	'blocks' => array(
 
@@ -67,43 +88,74 @@ $torin_about_page = array(
 		// establishes credibility is exactly the wrong trade. The claim below
 		// is the one the source supports without a currency question — that
 		// the representation existed, in the past tense.
+		//
+		// AMENDED by plan 03.5-05. The third paragraph opened, in the PRESENT
+		// tense, on two product lines the shop has since discontinued (D3.5-01):
+		// supplying spare packs and regenerating them whole. Both clauses are
+		// gone. The rest of the paragraph — the 2006 shift into service work
+		// becoming the main business — is the page's actual history and stays,
+		// with the date it already carried. No date is asserted for when the
+		// discontinued lines ended, because no source states one.
 		array(
 			'kind'    => 'prose',
 			'heading' => 'От 1993 г. до днес',
 			'items'   => array(
 				'Фирмата е създадена през 1993 г. с предмет на дейност асемблиране на компютърни конфигурации. За кратко време става предпочитан доставчик на компютърна техника за домашни потребители, за фирми и за държавни организации — работа, която ни научи да гледаме машината като съвкупност от компоненти, а не като модел с каталожен номер. Точно този навик стои в основата на сервизната работа днес.',
-				'През 1996 г. дейността се разширява с внос на компютърни компоненти и разпространението им в търговската мрежа. Изградена е дистрибуторска мрежа в цялата страна, а фирмата става представител за България на един от водещите световни производители на дънни платки и лаптопи. Дългите години работа с дънни платки на едро са причината по-късно ремонтът им на ниво чип да е естествено продължение, а не нова посока.',
-				'От 2006 г. предлагаме резервни батерии за лаптопи, камери и фотоапарати, както и цялостно регенериране на батерии за преносими компютри. По същото време, на фона на стагнацията на търговските пазари и световната икономическа криза, започваме да развиваме и сервизната дейност — ремонт на преносими компютри от всички марки, на LCD монитори и на настолни компютри. Оттогава сервизът е основната ни работа.',
+				'През 1996 г. дейността се разширява с внос на компютърни компоненти и разпространението им в търговската мрежа. Изградена е дистрибуторска мрежа в цялата страна, а фирмата става представител за България на един от водещите световни производители на дънни платки и лаптопи. Дългите години работа с дънни платки на едро са причината по-късно ремонтът им на ниво компонент да е естествено продължение, а не нова посока.',
+				'От 2006 г., на фона на стагнацията на търговските пазари и световната икономическа криза, започваме да развиваме сервизната дейност — ремонт на преносими компютри от всички марки, на LCD монитори и на настолни компютри. Оттогава сервизът е основната ни работа.',
 			),
 		),
 
+		// REWORKED by plan 03.5-05, and the heading changed with it.
+		//
+		// The SECOND paragraph is DELETED outright, not edited down. Its whole
+		// subject was the equipment for the withdrawn service (D3.5-01) — the
+		// heat station, what it was used for, and a pointer to a page that
+		// described both. The ultrasonic cleaning inside it is still real and
+		// is still described on the category-4 page, but a paragraph whose
+		// subject is gone does not survive being trimmed to one surviving
+		// clause. Nothing replaces it: no source describes the bench as it
+		// stands today, and inventing one would be exactly the fabrication
+		// D3.5-08 forbids. The heading therefore drops its second noun.
+		//
+		// The FIRST paragraph is restructured rather than deleted. Its argument
+		// was that the withdrawn service needs daily practice; the surviving
+		// component-level work (D3.5-02) carries the same argument. The closing
+		// clause about machines refused elsewhere is NOT newly written and is
+		// NOT re-attached to the withdrawn capability: it reuses wording already
+		// published on src/problem-stari.html, where it is attached to
+		// component-level board work, which is a page this same plan owns.
+		//
+		// The block link survives with a NEW LABEL. The old label promised the
+		// equipment detail, which no longer exists on the destination. The
+		// destination page itself is a live service page owned by a sibling
+		// plan in this wave, so the label now names only what that page is.
 		array(
 			'kind'    => 'prose',
-			'heading' => 'Хора и оборудване',
+			'heading' => 'Хората зад ремонта',
 			'items'   => array(
-				'Ремонтът на ниво чип не е въпрос само на желание — той изисква и хора, които го правят всеки ден, и техника, която не всеки сервиз има. Нашите сервизни специалисти работят с дънни платки от години и това е причината да приемаме машини, за които другаде вече е казано, че не подлежат на ремонт.',
-				'В сервиза работим с инфрачервена станция с компютърно управление за реболинг и подмяна на BGA чипове, с ултразвуково почистване на платки и с увеличение, което позволява възстановяване на прекъснати пътечки. Описали сме оборудването и какво точно се прави с него на отделна страница.',
+				'Нашите сервизни специалисти работят с дънни платки от години. Ремонтът на ниво компонент — възстановяване на захранващи вериги и подмяна на отделни дефектирали елементи по платката — не е въпрос само на желание, а на хора, които го правят всеки ден. Затова в част от случаите има какво да се направи и след като другаде са отказали.',
 			),
 			'link'    => array(
-				'text' => 'Вижте оборудването и как протича профилактиката',
+				'text' => 'Как протича профилактиката на лаптоп',
 				'href' => 'profilaktika-laptop.html',
 			),
 		),
 
-		// CONTENT-02, the relocation half. ONE short paragraph and a link.
-		// It must not grow into a retelling of the project: covid.html carries
-		// the detail, stays live and stays linked from the footer. The link
-		// label is the project number, which is the same string the
-		// disclosure page uses as its own title.
+		// CONTENT-02, the relocation half. ONE short paragraph, and now no
+		// link: see the amendment note at the top of this file. The disclosure
+		// text below is the CONTENT-02 content Phase 3 relocated here and is
+		// untouched except for the removal of its final clause, which promised
+		// the detail on a page that no longer exists. The clause and the anchor
+		// went together: the anchor resolved to this very page through the new
+		// 301, so it invited the reader to click back to where they already
+		// were. Subtraction, not substitution — nothing is written in their
+		// place, and the disclosure itself is unchanged.
 		array(
 			'kind'    => 'prose',
 			'heading' => 'Европейски проекти',
 			'items'   => array(
-				'ТОРИН КЪМПАНИ ООД е бенефициент по проект BG16RFOP002-2.073 по Оперативна програма «Иновации и конкурентоспособност», съфинансирана от Европейския съюз чрез Европейския фонд за регионално развитие. Подробностите по проекта са публикувани на отделна страница.',
-			),
-			'link'    => array(
-				'text' => 'Проект BG16RFOP002-2.073',
-				'href' => 'covid.html',
+				'ТОРИН КЪМПАНИ ООД е бенефициент по проект BG16RFOP002-2.073 по Оперативна програма «Иновации и конкурентоспособност», съфинансирана от Европейския съюз чрез Европейския фонд за регионално развитие.',
 			),
 		),
 	),
@@ -117,10 +169,16 @@ $torin_about_page = array(
 	'faq'     => array(
 		array(
 			'q' => 'Каква техника приемате?',
-			'a' => 'Преносими компютри от всички марки, LCD монитори и настолни компютри. Работим и по машини, които други сервизи са отказали — отказът другаде най-често означава, че там не се прави ремонт на ниво чип, а не че платката е негодна.',
+			// Second sentence AMENDED by plan 03.5-05. The old one explained a
+			// refusal elsewhere by the absence of the withdrawn service, which
+			// is both untrue of this shop now and a differentiator claim. No
+			// new differentiator is written in its place: the replacement
+			// clause is wording already published on src/problem-stari.html.
+			'a' => 'Преносими компютри от всички марки, LCD монитори и настолни компютри. Работим и по машини, които други сервизи са отказали — в част от случаите има какво да се направи по самата платка.',
 		),
 		array(
-			'q' => 'Диагностиката наистина ли е безплатна?',
+			// D3.5-06 reword, carried in the question itself.
+			'q' => 'Първоначалната диагностика наистина ли е безплатна?',
 			'a' => 'Да. Преглеждаме машината и ви казваме какво е повредено и колко ще струва ремонтът, преди да започнем каквото и да било. Ако решите да не продължите, не дължите нищо за прегледа. Не започваме платен ремонт без вашето съгласие.',
 		),
 		array(

@@ -25,7 +25,10 @@ require_once(dirname(__FILE__) . '/includes/category-page.php');
 $torin_title = 'Ремонт след токов удар и повреден адаптер · Торин';
 // Reordered by plan 03-09: the call was at code point 106, past the 95-point
 // mobile truncation budget.
-$torin_desc  = 'Ремонт след токов удар, фазова разлика или повреден адаптер в София. Обадете се за безплатна оценка — работа по дънни платки на ниво чип.';
+// REWRITTEN WHOLE by plan 03.5-05: the old string ended on a capability the
+// shop no longer offers (D3.5-01) and carried the pre-reword assessment claim
+// (D3.5-06). 131 code points, call at code point 69.
+$torin_desc  = 'Ремонт след токов удар, фазова разлика или повреден адаптер в София. Обадете се за безплатна първоначална оценка на дънната платка.';
 
 // Assigned ONCE and read twice: the renderer draws the visible chain and
 // jsonld.php emits the matching BreadcrumbList from the same array.
@@ -53,7 +56,7 @@ $torin_tok_page = array(
 
 	'crumbs'   => $torin_crumbs,
 
-	'intro'    => 'Повечето повреди от този тип не идват от драматична гръмотевица, а от малка разлика в потенциала между два уреда, включени едновременно. Лаптоп и телевизор в различни контакти, колони с усилвател, мрежов кабел от незаземена инсталация — достатъчно е интерфейсният кабел да се включи, докато двете устройства работят. Токът, който протича в този момент, е кратък и висок, а следата от него остава по дънната платка. Ремонтираме точно такива повреди на ниво чип и диагностиката е безплатна.',
+	'intro'    => 'Повечето повреди от този тип не идват от драматична гръмотевица, а от малка разлика в потенциала между два уреда, включени едновременно. Лаптоп и телевизор в различни контакти, колони с усилвател, мрежов кабел от незаземена инсталация — достатъчно е интерфейсният кабел да се включи, докато двете устройства работят. Токът, който протича в този момент, е кратък и висок, а следата от него остава по дънната платка. Ремонтираме точно такива повреди на ниво компонент, а първоначалната диагностика е безплатна.',
 
 	'fixes'    => array(
 		array('text' => 'Ремонт на захранващи вериги след пренапрежение'),
@@ -68,11 +71,29 @@ $torin_tok_page = array(
 		// PORTED from site-current/tokov-udar.html:108-145, condensed. The
 		// bridge-level consequences are kept because they are the part a
 		// reader cannot get from any competitor page.
+		//
+		// AMENDED by plan 03.5-05. Naming which part dies is a CAUSE, and a
+		// cause survives the withdrawal of the repair (D3.5-02); what did not
+		// survive is the implication, produced by where the sentence sat, that
+		// the shop reattaches those packages. It sat immediately before this
+		// page's repair promise, so it read as a capability claim. A sentence
+		// is ADDED at the end of the first paragraph stating the honest
+		// outcome — at that level of damage the board is replaced rather than
+		// repaired — instead of deleting the diagnosis, which would have
+		// thrown away the most specific thing on the page.
+		//
+		// NOTE for the post-merge audit (03.5-07), recorded here because it is
+		// a property of the gate rather than of this file: truth-gate.js
+		// carries the two bridge names as Class-A literals in their BASE form
+		// only. Every occurrence on this page is in the definite declined form,
+		// which the literal does not match, so the gate is silent on all three.
+		// That silence is a token-set limitation, not evidence of absence. The
+		// occurrences are retained deliberately, per the paragraph above.
 		array(
 			'kind'    => 'prose',
 			'heading' => 'Откъде идва повредата',
 			'items'   => array(
-				'Най-честият случай е свързване на лаптоп към телевизор през HDMI или VGA. Голяма част от контактите, в които са включени двата уреда, не са заземени, освен ако някой не ги е измерил и заземил лично. Наземните кабелни телевизии също не са занулени и няма как да бъдат. Така между лаптопа и телевизора се получава разлика в потенциала. Ако интерфейсният кабел се включи, докато и двата уреда работят, през него протича ток, който в тежките случаи буквално възпламенява чипове и участъци от платката. При такава повреда почти винаги дефектира поне северният мост, а при машините с отделен видеочип — и той.',
+				'Най-честият случай е свързване на лаптоп към телевизор през HDMI или VGA. Голяма част от контактите, в които са включени двата уреда, не са заземени, освен ако някой не ги е измерил и заземил лично. Наземните кабелни телевизии също не са занулени и няма как да бъдат. Така между лаптопа и телевизора се получава разлика в потенциала. Ако интерфейсният кабел се включи, докато и двата уреда работят, през него протича ток, който в тежките случаи буквално възпламенява чипове и участъци от платката. При такава повреда почти винаги дефектира поне северният мост, а при машините с отделен видеочип — и той. Когато повредата е стигнала до тези големи корпуси, платката обикновено се подменя, а не се ремонтира.',
 				'Външните тонколони с усилвател работят по същия механизъм. Причината обикновено е, че колоните и лаптопът са включени в различни или в незанулени контакти, а повредата се проявява в момента, в който интерфейсният кабел се свърже между два работещи уреда. Тук най-често дефектира южният мост.',
 				'Токовите и гръмотевичните удари са другата група и над тях имаме най-малко влияние. При кабелен интернет пренапрежението стига до машината през мрежовата платка; при безжичен този път просто не съществува. Дефектната периферия по USB е третият вход — устройство с късо съединение по захранващата шина поврежда контролера, който я управлява. И в двата случая южният мост е първото, което проверяваме.',
 			),
@@ -107,7 +128,10 @@ $torin_tok_page = array(
 		'Разглобяваме и оглеждаме платката под увеличение. При пренапрежение следата често е локална и се вижда около входа, през който токът е влязъл.',
 		'Измерваме захранващите вериги и проверяваме мостовете и контролерите, които съответстват на входа — видео, мрежов или USB.',
 		'Обаждаме се с диагнозата и цената, преди да продължим. Не започваме платен ремонт, без да сте се съгласили.',
-		'Ремонтираме на ниво чип, тестваме машината в реален работен режим и я връщаме с гаранционна карта.',
+		// Vocabulary corrected by plan 03.5-05: the work described is power
+		// circuits, connectors and discrete parts, which D3.5-02 keeps. Only
+		// the label changed.
+		'Ремонтираме на ниво компонент, тестваме машината в реален работен режим и я връщаме с гаранционна карта.',
 	),
 
 	'faq'      => array(
@@ -129,10 +153,14 @@ $torin_tok_page = array(
 		),
 	),
 
+	// The third entry pointed at a page retired in plan 03.5-01 (SEO-05) and
+	// named a service the shop no longer offers (D3.5-01). It is REMOVED, not
+	// replaced: the list is deliberately one entry shorter rather than
+	// back-filled, because substituting a link to preserve the length would
+	// smuggle in a recommendation no source asked for.
 	'related'  => array(
 		array('text' => 'Заливане и ремонт на дънни платки', 'href' => 'zalivane-technosti.html'),
 		array('text' => 'Стара и нестандартна техника', 'href' => 'problem-stari.html'),
-		array('text' => 'Батерии и регенериране', 'href' => 'za-bateriite.html'),
 	),
 
 	// 'prices' is deliberately NOT set (D3-06, PRICE-01 is v2).
