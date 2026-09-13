@@ -9,9 +9,15 @@
 // What Phase 3 owed DIFF-01 was never a new tool — the homepage feature block
 // shipped in Phase 2 (D-12) and the copy below already existed on the live
 // site at real length. What was missing is that the page DEAD-ENDED: it named
-// the likely fault and then left the visitor with nowhere to go. Every symptom
-// group below therefore closes with a link into the service that fixes that
-// class of fault.
+// the likely fault and then left the visitor with nowhere to go. THREE of the
+// four symptom groups below therefore close with a link into the service that
+// fixes that class of fault.
+//
+// The fourth — the power-and-pack group — closed with a service line the owner
+// discontinued (D3.5-01), whose page is retired behind a 301 (D3.5-09). Plan
+// 03.5-06 removed that exit and did NOT choose a replacement destination; the
+// reasoning sits on the block itself. Stated here too because «three of four»
+// looks like an oversight to anyone reading only this comment, and it is not.
 //
 // NO PAGE FILENAME IS HAND-TYPED for a category. Every category route resolves
 // through torin_category_href(), which is the D-23 publish gate: an
@@ -50,7 +56,11 @@
 require_once(dirname(__FILE__) . '/includes/category-page.php');
 
 $torin_title = 'Тествай сам лаптопа си — диагностика · Торин';
-$torin_desc  = 'Тествай сам лаптопа си: кратки стъпки, с които да опишете проблема точно. Обадете се — диагностиката е безплатна. Заповядайте.';
+// 126 code points, call at 74. Reworded by plan 03.5-06 to the D3.5-06 form of
+// the claim; the trailing second call-to-action was dropped to pay for it,
+// since one call verb before the mobile truncation point is what the gate asks
+// for and two add nothing.
+$torin_desc  = 'Тествай сам лаптопа си: кратки стъпки, с които да опишете проблема точно. Обадете се — първоначалната диагностика е безплатна.';
 
 $torin_crumbs = array(
 	array('text' => 'Начало', 'href' => 'index.html'),
@@ -85,7 +95,7 @@ $torin_test_page = array(
 
 	'crumbs' => $torin_crumbs,
 
-	'intro'  => 'Това е кратка проверка, която можете да направите сами за няколко минути. Тя не заменя диагностиката, но ви дава думите, с които да опишете точно какво прави лаптопът — а колкото по-точно го опишете, толкова по-бързо ще ви кажем какво е и колко струва. Диагностиката при нас е безплатна във всички случаи, включително когато накрая ви кажем, че ремонтът не си струва.',
+	'intro'  => 'Това е кратка проверка, която можете да направите сами за няколко минути. Тя не заменя диагностиката, но ви дава думите, с които да опишете точно какво прави лаптопът — а колкото по-точно го опишете, толкова по-бързо ще ви кажем какво е и колко струва. Първоначалната диагностика при нас е безплатна, включително когато накрая ви кажем, че ремонтът не си струва.',
 
 	'blocks' => array(
 
@@ -128,7 +138,7 @@ $torin_test_page = array(
 			'heading' => 'Звук, WiFi или USB не работят',
 			'items'   => array(
 				'Стартирайте отново от USB флашката с Ubuntu и проверете работят ли звукът, безжичната мрежа и USB портовете там.',
-				'Ако не работят и под Ubuntu, повредата почти сигурно е в южния мост на дънната платка, а не в драйверите.',
+				'Ако не работят и под Ubuntu, повредата почти сигурно е в самата дънна платка, а не в драйверите.',
 				'Ако работят под Ubuntu, а не работят под Windows, проблемът е софтуерен и се решава без разглобяване на машината.',
 				'Проверете и механично: разклатена букса за слушалки или микрофон и разхлабен USB порт се усещат с пръст и се виждат с просто око.',
 			),
@@ -144,14 +154,23 @@ $torin_test_page = array(
 			'items'   => array(
 				'Ако лаптопът работи само на батерия, проверете адаптера, кабела му и буксата на захранването — това са трите най-чести причини.',
 				'Ако лаптопът работи само на адаптер и не зарежда батерията, запишете си модела. При част от моделите на DELL и HP с трипинова букса причината е самата букса или кабелът на адаптера.',
-				'Ако лаптопът работи само няколко минути на батерия, клетките са износени и пакетът подлежи на регенерация или на подмяна.',
+				'Ако лаптопът работи само няколко минути на батерия, клетките са износени. Кажете ни го — проверяваме дали причината е самият пакет, зарядното, кабелът или буксата.',
 				'Не оставяйте изтощена батерия месеци наред в изключен лаптоп. При повторно включване тя може да поеме по-висок от нормалния заряден ток и да повреди зарядните вериги на платката.',
 				'Ако ползвате универсален адаптер с превключвател за различни напрежения, проверете на кое положение стои — превключвателят се измества дори в чантата, а по-високото напрежение обикновено е фатално за платката.',
 			),
-			'link'    => array(
-				'text' => 'Регенерация на батерии за лаптоп',
-				'href' => 'za-bateriite.html',
-			),
+			// NO 'link' ON THIS BLOCK, and it is the only one of the four without
+			// one. It used to close with the battery-service page, which D3.5-01
+			// discontinued and D3.5-09 retired behind a 301. Plan 03.5-06 removed
+			// the entry rather than repointing it, on the plan's own instruction:
+			// this is a subtraction phase and a substitute chosen by an executor
+			// would be a routing decision nobody made. The block still ends on
+			// usable advice — what to check and what to tell us — so it informs
+			// even though it no longer routes.
+			//
+			// The head comment's promise that EVERY group closes with a link is
+			// corrected there to match. If the owner later rules where a worn-pack
+			// symptom should route, that ruling restores a link here and nothing
+			// else on the page has to move.
 		),
 	),
 
@@ -160,7 +179,7 @@ $torin_test_page = array(
 	'faq' => array(
 		array(
 			'q' => 'Диагностиката плаща ли се?',
-			'a' => 'Не. Диагностиката е безплатна, включително когато накрая ви кажем, че ремонтът не си струва и е по-разумно да вземете друга машина. Предпочитаме да загубим един ремонт, отколкото да ви вземем пари за платка, която няма да издържи.',
+			'a' => 'Не. Първоначалната диагностика е безплатна, включително когато накрая ви кажем, че ремонтът не си струва и е по-разумно да вземете друга машина. Предпочитаме да загубим един ремонт, отколкото да ви вземем пари за платка, която няма да издържи.',
 		),
 		array(
 			'q' => 'Може ли този тест да влоши състоянието на лаптопа?',

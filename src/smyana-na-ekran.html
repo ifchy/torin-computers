@@ -26,10 +26,25 @@
 //
 // NO PRICE ON THIS PAGE, BY DESIGN. The strongest argument for a screen page is
 // normally a number, because competitors publish one. PRICE-01 is v2 (D3-06),
-// so this page leans on the «Екран или видеочип?» diagnostic instead: helping a
-// visitor identify the fault is worth more than quoting them blind. This is a
-// knowingly accepted gap recorded in CONTEXT, not an omission to be filled in
-// by inventing a figure.
+// so this page leans on the external-monitor DIAGNOSTIC in the callout block
+// instead: helping a visitor identify the fault is worth more than quoting them
+// blind. This is a knowingly accepted gap recorded in CONTEXT, not an omission
+// to be filled in by inventing a figure.
+//
+// That callout's heading is NOT quoted in this comment, and the omission is
+// load-bearing rather than stylistic. Phase 3.5's gate (scripts/truth-gate.js)
+// scans comments as well as copy, and the heading contains a gated component
+// noun; quoting it here would add a comment-borne hit to this file's survivor
+// report and make the count disagree with the page. 03-07 established the rule
+// after a head comment inflated a heading count from 1 to 2 the same way.
+//
+// PHASE 3.5 RULING ON THAT BLOCK, so it is not re-litigated by a later pass.
+// The block tells a visitor how to tell TWO faults apart using a monitor they
+// already own. It is a diagnostic observation and a cause statement, and it
+// stops at the cause — it offers no repair of what it names, here or anywhere
+// else on the page. It therefore SURVIVES D3.5-01 intact under the phase's
+// Class-B rule. Deleting it to make a grep read zero would cost a visitor real
+// help and buy no truth; read the block before touching it.
 require_once(dirname(__FILE__) . '/includes/category-page.php');
 require_once(dirname(__FILE__) . '/includes/services.php');
 
