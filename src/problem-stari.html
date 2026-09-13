@@ -17,9 +17,27 @@
 // about non-standard equipment anywhere on the current site, so nothing about
 // what this category actually covers can be inferred. Every claim below is
 // therefore restricted to what is PROVABLE from existing site content: the
-// board-level and power-circuit capability the shop already advertises, the
-// free assessment it already promises, and the old-battery/adapter material
-// this URL itself already carried. Nothing about equipment types, example
+// board-level and power-circuit capability the shop already advertises and
+// the old-battery/adapter material this URL itself already carried.
+//
+// AMENDED by plan 03.5-05 (CONTEXT D3.5-06, from OWNER-QUESTIONS #23 and #24).
+// TWO of the three provable claims above changed, because the owner has since
+// carved this category out of both site-wide promises:
+//   - the free initial assessment applies to categories 1-5 ONLY. Every
+//     promise of it on this page is gone, and the exclusion is now stated in
+//     the intro. NOTHING is written about what applies instead — the owner
+//     ruled what does not apply and did not say what does, and a fee, a rate
+//     or a condition invented into that gap would be a term a customer holds
+//     the shop to at the counter. Filed as an open question instead.
+//   - the standard one-month warranty does not apply either, so warranty_key
+//     below selects the carve-out entry rather than the default one. Same
+//     rule: the entry states only the exclusion.
+// The category's own subject is now NAMED — medical and industrial equipment
+// — which is not an inference: it is the owner's own wording for what this
+// category covers, and site-config.php already publishes that exact phrase in
+// the shared warranty summary on every service page.
+//
+// Nothing about equipment types beyond that, example
 // jobs, out-of-scope limits, pricing or turnaround is written here, because
 // none of it exists in any source — see 03-05-SUMMARY.md, which lists each
 // gap against #3a-#3f so the copy can be dropped in without re-deriving what
@@ -57,7 +75,11 @@ $torin_cat = torin_category_by_id('kat-6');
 $torin_title = 'Ремонт на стара и нестандартна техника · Торин';
 // Reordered by plan 03-09: the call was at code point 105, past the 95-point
 // mobile truncation budget.
-$torin_desc  = 'Ремонт на стара и нестандартна техника в София. Обадете се за безплатна оценка — работа по дънни платки и захранващи вериги на ниво чип.';
+// REWRITTEN WHOLE by plan 03.5-05. The old string named a withdrawn capability
+// AND promised the free assessment that D3.5-06 carves this category out of —
+// a description is a promise a searcher acts on before ever reaching the page,
+// so it must not survive the carve-out. 133 code points, call at code point 60.
+$torin_desc  = 'Ремонт на стара, медицинска и индустриална техника в София. Обадете се — работим по платката и захранващите вериги на ниво компонент.';
 
 // Assigned ONCE and read twice: the renderer draws the visible chain and
 // jsonld.php emits the matching BreadcrumbList from the same array.
@@ -76,24 +98,38 @@ $torin_cat_page = array(
 
 	'crumbs' => $torin_crumbs,
 
-	// Provable content only: the board-level capability and the free
-	// assessment are both already stated elsewhere on the site. The intro
-	// deliberately does NOT name device classes — see the scope note above.
-	'intro'  => 'Техника, която е на години, вече не се произвежда или просто не е масова, често се връща от сервиз с отговора, че за нея няма части. Ние работим по самата платка, а не по каталожния номер на модела: ремонтираме захранващи вериги и подменяме отделни дефектирали компоненти на ниво чип. Затова в част от случаите има какво да се направи и след като другаде са отказали. Оценката е безплатна и ви казваме честно какво виждаме.',
+	// Provable content only: the board-level capability is already stated
+	// elsewhere on the site, and the equipment class is the owner's own
+	// wording (D3.5-06). The VOCABULARY of the second sentence is corrected,
+	// not its content — the work it describes, power circuits and individual
+	// failed components, is precisely what D3.5-02 KEEPS. Deleting it would
+	// have destroyed a surviving capability to remove a withdrawn label.
+	// The closing sentence no longer promises the free assessment; it states
+	// the exclusion and stops there.
+	'intro'  => 'Техника, която е на години, вече не се произвежда или просто не е масова — включително медицинска и индустриална апаратура — често се връща от сервиз с отговора, че за нея няма части. Ние работим по самата платка, а не по каталожния номер на модела: ремонтираме захранващи вериги и подменяме отделни дефектирали компоненти на ниво компонент. Затова в част от случаите има какво да се направи и след като другаде са отказали. Безплатната първоначална диагностика не обхваща нестандартната техника, но каквото видим, ви го казваме честно.',
 
 	// [ASSUMED] — OWNER-QUESTIONS #3b. Each capability below is PROVABLE for
 	// the equipment the site already describes; what is ASSUMED is that the
-	// same work is offered on the equipment class this category names, since
-	// the shop has not yet described that class at all. This list is DRAFTED,
+	// same work is offered on the equipment class this category names. The
+	// owner has since NAMED that class (D3.5-06) but still has not described
+	// what is done to it, so #3b is narrowed and not closed: the assumption
+	// is no longer about which class, only about which work. This list is DRAFTED,
 	// not confirmed, and must not be quoted back to anyone as a description
 	// the shop itself gave of its services. It is deliberately short: the
 	// longer draft in the plan named capabilities no source supports, and
 	// those were omitted rather than guessed.
+	//
+	// Plan 03.5-05 changed two entries and added none. The third takes the
+	// component-level label for the reason given at the intro. The fourth no
+	// longer calls the assessment free (D3.5-06) — only that word went; the
+	// shop does still look at machines refused elsewhere, and dropping the
+	// whole entry would have understated what it does rather than correcting
+	// what it charges.
 	'fixes'  => array(
 		array('text' => 'Ремонт на захранващи вериги'),
 		array('text' => 'Подмяна на дефектирали компоненти по платката'),
-		array('text' => 'Ремонт на ниво чип по дънни платки'),
-		array('text' => 'Безплатна оценка на техника, за която другаде са отказали'),
+		array('text' => 'Ремонт на ниво компонент по дънни платки'),
+		array('text' => 'Преглед на техника, за която другаде са отказали'),
 	),
 
 	'blocks' => array(
@@ -128,20 +164,37 @@ $torin_cat_page = array(
 	),
 
 	// A KEY, never a literal — the term lives once, in site-config.php.
-	// [ASSUMED] that the shared term applies to this category on the same
-	// conditions: OWNER-QUESTIONS #23 explicitly asks whether warranty terms
-	// vary by type of work, and #3e asks the same question for this category
-	// specifically. Both are open.
-	'warranty_key' => 'default',
+	//
+	// The [ASSUMED] marker that stood here is GONE because the question behind
+	// it was ANSWERED, not because a marker was tidied away: OWNER-QUESTIONS
+	// #23 asked whether warranty terms vary by type of work, and the owner
+	// ruled on 2026-09-11 that the standard month does not apply to this
+	// category (CONTEXT D3.5-06). Selecting the default entry here was
+	// therefore a factual error — this page rendered the one-month term on the
+	// one category the owner excluded from it.
+	//
+	// The carve-out entry states ONLY the exclusion and carries no detail key,
+	// because the owner did not say what applies instead. #3e stays open and a
+	// rider on #23 is filed by this same plan. Do not author a term into that
+	// gap; it is the single most expensive sentence this phase could ship.
+	'warranty_key' => 'nonstandard',
 
 	// Only steps the site already promises are described here. Nothing about
 	// sourcing obsolete parts or turnaround appears, because those are #3b
 	// and #3e and neither has an answer.
+	//
+	// Plan 03.5-05 removed the two clauses that priced the assessment at zero
+	// (steps 2 and 4). Neither was caught by truth-gate.js — step 2 used a
+	// verb form the matcher's subject stem does not reach, and step 4 said it
+	// without the adjective at all. Found by reading the page rather than by
+	// grepping it, which is the whole reason the phase requires both. What
+	// each step DOES is unchanged; only the price claim is gone, and nothing
+	// is stated in its place.
 	'process' => array(
 		'Донасяте техниката и ни описвате какво прави и какво се е случило преди това. Ако някой вече я е гледал, кажете и това — спестява повторна работа.',
-		'Оценяваме я безплатно. Разглобяваме и гледаме платката под увеличение, включително захранващата ѝ част, където повредите не се виждат отвън.',
+		'Разглобяваме и гледаме платката под увеличение, включително захранващата ѝ част, където повредите не се виждат отвън.',
 		'Обаждаме се с това, което сме намерили, и с цената, преди да продължим. Не започваме платен ремонт, без да сте се съгласили.',
-		'Ако прегледът покаже, че ремонтът не си струва, ви го казваме направо и обясняваме защо. Оценката остава безплатна и в този случай.',
+		'Ако прегледът покаже, че ремонтът не си струва, ви го казваме направо и обясняваме защо.',
 		'Ремонтираме, тестваме в реален работен режим и ви връщаме техниката.',
 	),
 
@@ -156,11 +209,17 @@ $torin_cat_page = array(
 		),
 		array(
 			'q' => 'Може ли да се ремонтира техника, за която вече не се произвеждат части?',
-			'a' => 'Понякога да. Работата на ниво чип най-често означава да бъде възстановен съществуващият възел, а не да бъде подменен с нов — а точно подмяната е тази, която опира до наличност на части. Когато все пак е нужен конкретен компонент и той не се намира, ви го казваме след прегледа, а не след като сме започнали.',
+			// Vocabulary corrected by plan 03.5-05. The answer's substance —
+			// restoring the existing assembly rather than swapping it — is the
+			// surviving work under D3.5-02; only the label changed.
+			'a' => 'Понякога да. Работата на ниво компонент най-често означава да бъде възстановен съществуващият възел, а не да бъде подменен с нов — а точно подмяната е тази, която опира до наличност на части. Когато все пак е нужен конкретен компонент и той не се намира, ви го казваме след прегледа, а не след като сме започнали.',
 		),
 		array(
 			'q' => 'Какво става, ако техниката не подлежи на ремонт?',
-			'a' => 'Казваме ви го и обясняваме какво точно е повредено. Не плащате за преглед, който е завършил с отказ — предпочитаме да загубим един ремонт, отколкото да вземем пари за нещо, което няма да издържи.',
+			// Middle clause REMOVED by plan 03.5-05: it priced the assessment
+			// at zero on the one category D3.5-06 excludes from that promise.
+			// The surrounding answer is unchanged.
+			'a' => 'Казваме ви го и обясняваме какво точно е повредено. Предпочитаме да загубим един ремонт, отколкото да вземем пари за нещо, което няма да издържи.',
 		),
 		array(
 			'q' => 'Как определяте цената?',
@@ -168,10 +227,12 @@ $torin_cat_page = array(
 		),
 	),
 
+	// The third entry pointed at a page retired in plan 03.5-01 (SEO-05) and
+	// named a service the shop no longer offers (D3.5-01). REMOVED, not
+	// replaced — the list is one entry shorter rather than back-filled.
 	'related' => array(
 		array('text' => 'Заливане и ремонт на дънни платки', 'href' => 'zalivane-technosti.html'),
 		array('text' => 'Повреди от токов удар', 'href' => 'tokov-udar.html'),
-		array('text' => 'Батерии и регенериране', 'href' => 'za-bateriite.html'),
 	),
 
 	// 'evidence' is deliberately NOT set. src/img/repairs/ carries stari1-3,
