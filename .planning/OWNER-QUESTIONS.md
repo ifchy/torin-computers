@@ -9,7 +9,11 @@
 **Note on numbering:** Item numbers are stable IDs referenced from phase CONTEXT.md files — they are grouped by category, not sequential. Never renumber existing items; new questions take the next unused number.
 
 *Created: 2026-08-05 (during Phase 2 discussion)*
-*Last updated: 2026-08-19 (Phase 3 execution — #3 expanded into a full brief; #25–#27 added; every
+*Last updated: 2026-09-13 (Phase 3.5 execution, plan 03.5-05 — #32–#35 appended, all four recording
+gaps the content-truth revision opened and could not honestly fill. Purely additive: no existing
+entry was edited, re-opened or renumbered.)*
+
+*Previously: 2026-08-19 (Phase 3 execution — #3 expanded into a full brief; #25–#27 added; every
 open item reviewed and given the specifics it was missing)*
 
 ---
@@ -1029,6 +1033,87 @@ intent — is **301 redirect, never 404**. Redirect targets still to be chosen.
 That reverses D-16, which made chat an equal-weight primary action, and retires the cutover gate
 tracked in `.planning/todos/pending/verify-viber-button-before-launch.md`.
 **Answer:** Recorded. Requires a requirements revision before any content work — see STATE.md.
+
+---
+
+### 32. Category 6 warranty — the exclusion is now published, but nothing else is
+**Status:** OPEN
+**Question:** #23 established that the standard one-month warranty does **not** apply to
+non-standard technics — medical and industrial equipment. What **does** apply? A shorter term? A
+per-job term agreed before work starts? No warranty at all, stated plainly?
+**Why it matters:** `problem-stari.html` now selects the `nonstandard` warranty entry, and that
+entry states only the exclusion, because that is the entirety of what the owner ruled. A customer
+reading the page learns what they do *not* get and is given nothing in its place. That is honest,
+but it is a worse answer than a short term plainly stated would be, and it is the kind of gap that
+gets filled at the counter by whoever is standing there — differently each time.
+**Do not answer this by guessing.** A warranty term is the single most expensive sentence on this
+site: it is a promise a customer holds the shop to, and an invented one creates a liability the
+shop never agreed to. The gap is published as a gap deliberately (CONTEXT D3.5-08).
+**Blocks:** ROADMAP SC-7 is met as ruled, but category 6 cannot be *published* with a complete
+warranty statement until this is answered. Rides alongside **#3e**.
+**Raised:** Phase 3.5 execution, plan 03.5-05, 2026-09-13. A named rider on the already-answered
+**#23** — it does **not** re-open #23, whose own answer stands.
+**Answer:**
+
+---
+
+### 33. Category 6 diagnostics — same shape as #32
+**Status:** OPEN
+**Question:** #24 established that free initial diagnostics applies to categories 1–5 **only**. For
+category 6, is there a diagnostic fee? A flat call-out charge? Is it quoted case by case on the
+phone? Or is assessment simply not offered without a commitment to the repair?
+**Why it matters:** `problem-stari.html` previously promised a free assessment in six places — the
+meta description, the intro, the services list, two steps of the process and an FAQ answer. All six
+are now gone and the intro states the exclusion instead. As with #32, the page says what does not
+apply and says nothing about what does, because the owner did not rule on it. Note that two of
+those six were invisible to the automated token gate and were found by reading the page — so if the
+answer to this changes, the change has to be made by reading too, not only by grepping.
+**Blocks:** Same as #32 — not a blocker on ROADMAP SC-7, which is satisfied by stating the
+exclusion, but a blocker on category 6 reading as a finished service page. Rides alongside **#3e**.
+**Raised:** Phase 3.5 execution, plan 03.5-05, 2026-09-13. A named rider on the already-answered
+**#24**; #24's own answer stands.
+**Answer:**
+
+---
+
+### 34. Does the shop still **replace** laptop batteries, as distinct from regenerating them?
+**Status:** OPEN
+**Question:** #31 discontinued battery **regeneration** and the spare-parts **sales** line. Neither
+of those is the same thing as fitting a replacement pack a customer brings, or one the shop sources
+for a specific job. Does the shop do that? If yes, on what terms — customer-supplied packs only, or
+does the shop source them?
+**Why it matters:** «Батерията не издържа» is one of the commonest reasons anyone calls a laptop
+repair shop at all. Following #31 the site now routes that symptom to charging-circuit and
+power-rail diagnosis and **deliberately promises no replacement anywhere**, because no source
+supports one. If the shop does in fact fit packs, that is a live service which is currently
+invisible on its own website — a lost enquiry every time someone searches for it. If the shop does
+not, the site is already correct and this closes as a confirmation.
+**Blocks:** Nothing structurally. It is a potential *content gap*, which is why it is filed rather
+than written: **DIFF-02** is retired and will not be revived on a guess.
+**Raised:** Phase 3.5 execution, plan 03.5-05, 2026-09-13.
+**Answer:**
+
+---
+
+### 35. The site no longer describes the workshop or its equipment anywhere
+**Status:** OPEN
+**Question:** Is there anything true that can be said today about the bench — tools, instruments,
+working conditions — and about why a customer should bring a machine here rather than to the shop
+next door?
+**Why it matters:** `about.html` carried a paragraph describing the equipment, and the paragraph's
+entire subject was the withdrawn service (#31). It was deleted outright rather than trimmed, and
+**nothing was written in its place**, because no source describes the bench as it stands now. The
+neighbouring paragraph about the technicians was restructured around component-level work using
+wording already published on `problem-stari.html`, so the page has not been left with a hole — but
+the shop's "why us" is now noticeably thinner than it was, and the site says nothing at all about
+equipment. It also no longer links anywhere for that detail, because the page that held it is gone.
+What is needed is either a few sentences the owner confirms, or a photograph or two of the actual
+workbench (which overlaps **#12** and **#13**).
+**Blocks:** No requirement directly. It is the honest record of a slot this phase emptied and
+could not refill from any source (CONTEXT D3.5-08), so that the gap exists somewhere other than in
+an executor's memory.
+**Raised:** Phase 3.5 execution, plan 03.5-05, 2026-09-13.
+**Answer:**
 
 ---
 
