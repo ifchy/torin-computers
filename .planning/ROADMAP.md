@@ -160,7 +160,10 @@ Plans:
 **Requirements**: DIFF-04, CONTENT-01, SEO-05, TRUST-01 (correction), TRUST-02 (enable)
 **Success Criteria** (what must be TRUE):
 
-  1. No page makes a **battery-regeneration** claim, and no page makes a **BGA / reballing / chip-level** claim — 57 chip-level instances across 9 files and battery content across 8 files, all removed.
+  1. No page makes a **battery-regeneration** claim, and no page makes a **BGA / reballing / chip-level** claim.
+     > **Figure corrected 2026-09-13 (03.5-TRUTH-AUDIT.md).** The bare "57 instances across 9 files" that stood here carried no token set and no method — the exact defect this phase exists to fix. Reproducible forms: **57 in 9 files** with `grep -roiE 'BGA|реболинг|ребол|чипсет|видеочип|инфрачервен|AMTECH|дозапояване|северен мост|южен мост' --include='*.html'` over `src/` at `98994e3`; **95 in 11 files** adding `|ниво чип|регенерац`; **165 in 21 files** from `node scripts/truth-gate.js`, whose wider token set and 42-file scope are printed on every run. All three are correct for their token set **and method** — case folding alone moves the 95 to 83.
+
+
   2. **Category 4** («Заливане и ремонт на дънни платки») describes what the shop still does: liquid cleaning, corrosion removal, non-BGA component-level soldering, and board replacement where the case calls for it — and reads as a complete service page, not a page with holes where claims were cut.
   3. The three **reballing photographs** (`profilaktika17.jpg` infrared station, `profilaktika7.jpg` pads before new balls, `profilaktika15.jpg` hot-air-gun damage) no longer appear on any page, and no evidence strip renders short or empty as a result.
   4. `za-bateriite.html`, `laptopi.html` and `rezervni-chasti.html` each return a **301 redirect** to a relevant destination — never a 404 — and no internal link still points at them.
@@ -193,7 +196,12 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 03.5-07-PLAN.md — Tree-wide truth audit, the full live deploy and verification sweep, and `03.5-TRUTH-AUDIT.md`
+- [~] 03.5-07-PLAN.md — Tree-wide truth audit, the full live deploy and verification sweep, and `03.5-TRUTH-AUDIT.md`
+  - **Task 1 COMPLETE** — every tree-wide static assertion run; `03.5-TRUTH-AUDIT.md` written.
+  - **Task 2 OPEN — blocking human checkpoint.** The deploy is denied to subagents *and* to the orchestrator; the user runs it. **Every live measurement is NOT RUN.**
+  - **Task 3 PARTIAL** — records reconciled to what is provable today; the nine verdicts cannot close until Task 2 runs.
+
+> **⚠ PHASE 3.5 IS NOT COMPLETE.** Four of the nine success criteria are **PARTIAL** (1, 3, 8, 9) pending the live sweep, and one **OPEN DEFECT** is unresolved: `src/remont-na-portove.html:103` publishes a claim to chip replacement — a service discontinued under D3.5-01 — on a page no plan owned and that `truth-gate.js` reports zero on. See `03.5-TRUTH-AUDIT.md` for the full evidence record and the ten findings routed to gap closure.
 
 ### Phase 4: Hardening & Cutover
 
@@ -223,5 +231,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 3.5 → 4
 | 1. Migration Safety Net & Foundation | 5/5 | Complete    | 2026-08-05 |
 | 2. Design System & Information Architecture | 9/9 | Complete    | 2026-08-09 |
 | 3. Content & Trust-Signal Build-Out | 9/9 | Built — partly superseded | 2026-08-26 |
-| 3.5. Content Truth Revision | 6/7 | In Progress|  |
+| 3.5. Content Truth Revision | 6.5/7 | In Progress — audit delivered; live sweep + 1 open defect outstanding |  |
 | 4. Hardening & Cutover | 0/TBD | Not started | - |

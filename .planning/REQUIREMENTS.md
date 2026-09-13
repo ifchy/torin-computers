@@ -19,8 +19,8 @@ Requirements for the redesign launch. Each maps to roadmap phases.
 
 ### Trust Signals
 
-- [x] **TRUST-01**: User sees an "all brands serviced" row — **Apple and Chromebook excluded** by the owner 2026-09-11 (OWNER-QUESTIONS #22); still ships `Apple` in `site-config.php` and must be corrected
-- [ ] **TRUST-02**: User sees a Google rating badge linking to the shop's Google Business Profile reviews
+- [x] **TRUST-01**: User sees an "all brands serviced" row — **Apple and Chromebook excluded** by the owner 2026-09-11 (OWNER-QUESTIONS #22). **CORRECTED AND LIVE-VERIFIED 2026-09-12** (Phase 3.5): brand row is six names plus the closer; `brandItemCount: 7`, `brandDuplicates: []` at both viewports; zero occurrences of either excluded manufacturer anywhere in `src/`, comments included
+- [x] **TRUST-02**: User sees a Google rating badge linking to the shop's Google Business Profile reviews — **LIVE-VERIFIED 2026-09-12** (Phase 3.5): `ratingBadgePresent: true`, `ratingBadgeHeight: 44` at both viewports, on the homepage and a service page, from one config source. First execution of this render path anywhere. Values: 4,7 · `150+` (deliberately rounded per D3.5-07 — do **not** "correct" to 157) · verified profile URL
 - [x] **TRUST-03**: User sees warranty terms summarized directly on relevant service pages, not only buried in a separate warranty page
 
 ### Differentiators
@@ -28,7 +28,7 @@ Requirements for the redesign launch. Each maps to roadmap phases.
 - [x] **DIFF-01**: User sees the self-diagnostic tool ("Тествай сам своя лаптоп") surfaced as a homepage-level feature, not buried in nav
 - ~~**DIFF-02**~~: **RETIRED 2026-09-11** — battery regeneration is discontinued by the business (OWNER-QUESTIONS #31). Was built and verified Complete 2026-08-26; the service no longer exists, so the requirement is withdrawn rather than failed.
 - ~~**DIFF-03**~~: **RETIRED 2026-09-11** — BGA/reballing/chip-level repair is discontinued by the business (OWNER-QUESTIONS #31). Same status: built, verified, then withdrawn with the service.
-- [ ] **DIFF-04**: User sees that the shop services **medical and industrial equipment** — work no competitor in the researched set offers — presented as a distinct capability rather than a line in a list
+- [ ] **DIFF-04**: User sees that the shop services **medical and industrial equipment** — work no competitor in the researched set offers — presented as a distinct capability rather than a line in a list — **ADVANCED, NOT MET** (Phase 3.5): the page describes work the shop actually does, in vocabulary promising nothing withdrawn, carrying both category-6 carve-outs. **It is not promoted:** `kat-6` remains `'published' => false`. **Blocker: OWNER-QUESTIONS #3a–#3f**, plus riders #32 and #33
 
 > **Why DIFF-04 exists.** Retiring DIFF-02 and DIFF-03 left DIFF-01 as the only differentiator, which
 > does not carry the phase goal ("assets no competitor currently offers"). Category 6 was confirmed as
@@ -38,7 +38,7 @@ Requirements for the redesign launch. Each maps to roadmap phases.
 
 ### Content
 
-- [ ] **CONTENT-01**: User sees dedicated content for **medical and industrial equipment** servicing as one of the six headline categories — scope answered 2026-09-11 (OWNER-QUESTIONS #3); page is authored and gated, still awaiting the 3a-3f specifics before publication
+- [ ] **CONTENT-01**: User sees dedicated content for **medical and industrial equipment** servicing as one of the six headline categories — scope answered 2026-09-11 (OWNER-QUESTIONS #3); page is authored and gated, still awaiting the 3a-3f specifics before publication — **ADVANCED, NOT MET** (Phase 3.5): same page, same state, same blocker as DIFF-04. The page is authored and gated; it is not published
 - [x] **CONTENT-02**: User no longer sees EU-project/COVID content competing for attention on the homepage (moved to About page)
 
 ### Contact & Conversion
@@ -64,7 +64,7 @@ Requirements for the redesign launch. Each maps to roadmap phases.
 - [x] **SEO-01**: Every page has a unique `<title>` and `<meta name="description">` (currently identical/empty across all 16 pages)
 - [x] **SEO-02**: Every page declares `lang="bg"` instead of the current `lang="en"`
 - [ ] **SEO-03**: Site has a `robots.txt` and `sitemap.xml`, submitted to Search Console
-- [ ] **SEO-05**: Every **retired** page URL returns a **301 redirect to a relevant destination, never a 404** — covers `za-bateriite.html`, `laptopi.html`, `rezervni-chasti.html` and `covid.html` (OWNER-QUESTIONS #31/#4)
+- [x] **SEO-05**: Every **retired** page URL returns a **301 redirect to a relevant destination, never a 404** — covers `za-bateriite.html`, `laptopi.html`, `rezervni-chasti.html` and `covid.html` (OWNER-QUESTIONS #31/#4). **LIVE-VERIFIED 2026-09-12** (Phase 3.5): all four 301 in **one hop to a 200**; zero internal links to any retired filename tree-wide. Required a `RewriteBase` fix (`82deb04`) — the first deploy 301'd all four to a 404 with the server filesystem path in the `Location`. ⚠ **The `.htaccess` block is CUTOVER-BLOCKING and needs TWO edits at Phase 4** (canonicalisation target *and* `RewriteBase`); without promotion, four indexed URLs 404 silently
 - [x] **SEO-04**: All existing page URLs are preserved unchanged through the redesign (no slug/filename changes)
 
 ### Migration Safety
@@ -109,13 +109,13 @@ Which phases cover which requirements. Populated during roadmap creation.
 | DESIGN-02 | Phase 4 | Pending |
 | IA-01 | Phase 2 | Complete |
 | IA-02 | Phase 2 | Complete |
-| TRUST-01 | Phase 3 | Complete — brand list needs Apple removed |
-| TRUST-02 | Phase 3 | Pending — gated: badge built and wired, OFF by default pending OWNER-QUESTIONS #7 (rating, review count, profile URL) |
+| TRUST-01 | Phase 3 → corrected 3.5 | Complete — live-verified 2026-09-12 |
+| TRUST-02 | Phase 3 → enabled 3.5 | Complete — live-verified 2026-09-12 |
 | TRUST-03 | Phase 3 | Complete |
 | DIFF-01 | Phase 3 | Complete |
 | DIFF-02 | Phase 3 | RETIRED 2026-09-11 — service discontinued |
 | DIFF-03 | Phase 3 | RETIRED 2026-09-11 — service discontinued |
-| CONTENT-01 | Phase 3.5 | Pending — scope answered (medical/industrial); awaiting #3a-#3f specifics |
+| CONTENT-01 | Phase 3.5 | Advanced, NOT met — blocked on OWNER-QUESTIONS #3a-#3f; `kat-6` still unpublished |
 | CONTENT-02 | Phase 3 | Complete |
 | CONTACT-01 | Phase 4 | Pending |
 | CONTACT-02 | Phase 4 | RETIRED 2026-09-11 — Viber dropped for the form |
@@ -125,8 +125,8 @@ Which phases cover which requirements. Populated during roadmap creation.
 | SEO-02 | Phase 2 | Complete |
 | SEO-03 | Phase 4 | Pending |
 | SEO-04 | Phase 1 | Complete |
-| SEO-05 | Phase 3.5 | Pending |
-| DIFF-04 | Phase 3.5 | Pending |
+| SEO-05 | Phase 3.5 | Complete — all four URLs live-verified 2026-09-12; ⚠ `.htaccess` promotion is CUTOVER-BLOCKING (two edits) |
+| DIFF-04 | Phase 3.5 | Advanced, NOT met — blocked on OWNER-QUESTIONS #3a-#3f; `kat-6` still unpublished |
 | CONTACT-05 | Phase 4 | Pending |
 | CONTACT-06 | Phase 4 | Pending |
 | OWNER-01 | Phase 4 | Pending |
