@@ -19,8 +19,8 @@ Requirements for the redesign launch. Each maps to roadmap phases.
 
 ### Trust Signals
 
-- [x] **TRUST-01**: User sees an "all brands serviced" row — **Apple and Chromebook excluded** by the owner 2026-09-11 (OWNER-QUESTIONS #22). **CORRECTED AND LIVE-VERIFIED 2026-09-12** (Phase 3.5): brand row is six names plus the closer; `brandItemCount: 7`, `brandDuplicates: []` at both viewports; zero occurrences of either excluded manufacturer anywhere in `src/`, comments included
-- [x] **TRUST-02**: User sees a Google rating badge linking to the shop's Google Business Profile reviews — **LIVE-VERIFIED 2026-09-12** (Phase 3.5): `ratingBadgePresent: true`, `ratingBadgeHeight: 44` at both viewports, on the homepage and a service page, from one config source. First execution of this render path anywhere. Values: 4,7 · `150+` (deliberately rounded per D3.5-07 — do **not** "correct" to 157) · verified profile URL
+- [x] **TRUST-01**: User sees an "all brands serviced" row — **Apple and Chromebook excluded** by the owner 2026-09-11 (OWNER-QUESTIONS #22). **CORRECTED AND LIVE-VERIFIED 2026-09-12, RE-VERIFIED 2026-09-15** (Phase 3.5): brand row is six names plus the closer; `brandItemCount: 7`, `brandDuplicates: []` at both viewports; **served element count 7 and `excluded=0` on `index`, `zalivane-technosti` and `optimizatsiq`** (2026-09-15); zero occurrences of either excluded manufacturer anywhere in `src/`, comments included. ⚠ **The obvious check is wrong:** `grep -o 'brand-row__item' | wc -l` returns **8**, because the closer carries a modifier class and matches the substring twice — count elements, not substrings (audit finding F12)
+- [x] **TRUST-02**: User sees a Google rating badge linking to the shop's Google Business Profile reviews — **LIVE-VERIFIED 2026-09-12, coverage broadened 2026-09-15** (Phase 3.5): `ratingBadgePresent: true`, `ratingBadgeHeight: 44` at both viewports, on the homepage and a service page, from one config source. First execution of this render path anywhere. **2026-09-15: `badge=1` on three served pages, and all 19 pages return `200 warn=0` — including the 13 that had never been parsed by PHP — so the «a page that fatals renders no badge» exposure is measured absent tree-wide.** A per-page badge count on the remaining 16 was **not** run; their coverage is a stated inference from one renderer, not a measurement. ⚠ **A `PASS` from `trust-signals.js` is NOT evidence the badge rendered** — `scripts/probes/trust-signals.js:39-41` exempts it from the verdict; read `ratingBadgePresent` out of the JSON. Values: 4,7 · `150+` (deliberately rounded per D3.5-07 — do **not** "correct" to 157) · verified profile URL
 - [x] **TRUST-03**: User sees warranty terms summarized directly on relevant service pages, not only buried in a separate warranty page
 
 ### Differentiators
@@ -64,7 +64,7 @@ Requirements for the redesign launch. Each maps to roadmap phases.
 - [x] **SEO-01**: Every page has a unique `<title>` and `<meta name="description">` (currently identical/empty across all 16 pages)
 - [x] **SEO-02**: Every page declares `lang="bg"` instead of the current `lang="en"`
 - [ ] **SEO-03**: Site has a `robots.txt` and `sitemap.xml`, submitted to Search Console
-- [x] **SEO-05**: Every **retired** page URL returns a **301 redirect to a relevant destination, never a 404** — covers `za-bateriite.html`, `laptopi.html`, `rezervni-chasti.html` and `covid.html` (OWNER-QUESTIONS #31/#4). **LIVE-VERIFIED 2026-09-12** (Phase 3.5): all four 301 in **one hop to a 200**; zero internal links to any retired filename tree-wide. Required a `RewriteBase` fix (`82deb04`) — the first deploy 301'd all four to a 404 with the server filesystem path in the `Location`. ⚠ **The `.htaccess` block is CUTOVER-BLOCKING and needs TWO edits at Phase 4** (canonicalisation target *and* `RewriteBase`); without promotion, four indexed URLs 404 silently
+- [x] **SEO-05**: Every **retired** page URL returns a **301 redirect to a relevant destination, never a 404** — covers `za-bateriite.html`, `laptopi.html`, `rezervni-chasti.html` and `covid.html` (OWNER-QUESTIONS #31/#4). **LIVE-VERIFIED 2026-09-12 AND RE-MEASURED 2026-09-15** (Phase 3.5): all four 301 in **one hop to a 200**, every redirect followed rather than header-grepped, at both dates and across a redeploy of `.htaccess`; zero internal links to any retired filename tree-wide. Required a `RewriteBase` fix (`82deb04`) — the first deploy 301'd all four to a 404 with the server filesystem path in the `Location`. ⚠ **The `.htaccess` block is CUTOVER-BLOCKING and needs TWO edits at Phase 4** (canonicalisation target *and* `RewriteBase`); without promotion, four indexed URLs 404 silently
 - [x] **SEO-04**: All existing page URLs are preserved unchanged through the redesign (no slug/filename changes)
 
 ### Migration Safety
@@ -109,8 +109,8 @@ Which phases cover which requirements. Populated during roadmap creation.
 | DESIGN-02 | Phase 4 | Pending |
 | IA-01 | Phase 2 | Complete |
 | IA-02 | Phase 2 | Complete |
-| TRUST-01 | Phase 3 → corrected 3.5 | Complete — live-verified 2026-09-12 |
-| TRUST-02 | Phase 3 → enabled 3.5 | Complete — live-verified 2026-09-12 |
+| TRUST-01 | Phase 3 → corrected 3.5 | Complete — live-verified 2026-09-12 **and re-verified 2026-09-15 by two independent methods** (DOM `brandItemCount: 7`; served element count 7 on three pages, `excluded=0`) |
+| TRUST-02 | Phase 3 → enabled 3.5 | Complete — live-verified 2026-09-12; **2026-09-15 `badge=1` on three served pages, and all 19 pages parse at `200 warn=0` so no page fatals before the badge injects** |
 | TRUST-03 | Phase 3 | Complete |
 | DIFF-01 | Phase 3 | Complete |
 | DIFF-02 | Phase 3 | RETIRED 2026-09-11 — service discontinued |
@@ -125,7 +125,7 @@ Which phases cover which requirements. Populated during roadmap creation.
 | SEO-02 | Phase 2 | Complete |
 | SEO-03 | Phase 4 | Pending |
 | SEO-04 | Phase 1 | Complete |
-| SEO-05 | Phase 3.5 | Complete — all four URLs live-verified 2026-09-12; ⚠ `.htaccess` promotion is CUTOVER-BLOCKING (two edits) |
+| SEO-05 | Phase 3.5 | Complete — all four URLs live-verified 2026-09-12 **and re-measured 2026-09-15 against the redeployed tree: 301 → 200 in one hop, every redirect followed**; ⚠ `.htaccess` promotion is CUTOVER-BLOCKING (two edits) |
 | DIFF-04 | Phase 3.5 | Advanced, NOT met — blocked on OWNER-QUESTIONS #3a-#3f; `kat-6` still unpublished |
 | CONTACT-05 | Phase 4 | Pending |
 | CONTACT-06 | Phase 4 | Pending |

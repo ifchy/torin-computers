@@ -179,7 +179,7 @@ Plans:
 - **Invent nothing.** Where a cut leaves a page thin, either restructure honestly or record the gap against OWNER-QUESTIONS — do not fill it with plausible-sounding replacement copy. This is the rule Category 6 was built under and it holds here.
 - The **live deploy is the only PHP check** — no local interpreter exists. A page returning 200 proves nothing on its own.
 
-**Plans**: 6/7 plans executed
+**Plans**: 7/7 plans executed — **the phase is still NOT complete; see the note below**
 
 Plans:
 **Wave 1**
@@ -198,10 +198,16 @@ Plans:
 
 - [~] 03.5-07-PLAN.md — Tree-wide truth audit, the full live deploy and verification sweep, and `03.5-TRUTH-AUDIT.md`
   - **Task 1 COMPLETE** — every tree-wide static assertion run; `03.5-TRUTH-AUDIT.md` written.
-  - **Task 2 OPEN — blocking human checkpoint.** The deploy is denied to subagents *and* to the orchestrator; the user runs it. **Every live measurement is NOT RUN.**
-  - **Task 3 PARTIAL** — records reconciled to what is provable today; the nine verdicts cannot close until Task 2 runs.
+  - **Task 2 COMPLETE — the blocking human checkpoint is CLOSED (2026-09-15).** The deploy is denied to subagents *and* to the orchestrator, so **the user ran it** (24 files); the orchestrator ran all eight live measurements. 19/19 pages at `200 warn=0`; served Class-A tokens **0** on all 19; all four redirects **301 → 200 in one hop**; every evidence strip correct; badge and brand row live on three pages; the keyed category-6 warranty carve-out rendering; all six rendered probes at expectation.
+  - **Task 3 COMPLETE** — `03.5-TRUTH-AUDIT.md`, `REQUIREMENTS.md`, `ROADMAP.md` and `STATE.md` all reconciled to the measured evidence.
 
-> **⚠ PHASE 3.5 IS NOT COMPLETE.** Four of the nine success criteria are **PARTIAL** (1, 3, 8, 9) pending the live sweep, and one **OPEN DEFECT** is unresolved: `src/remont-na-portove.html:103` publishes a claim to chip replacement — a service discontinued under D3.5-01 — on a page no plan owned and that `truth-gate.js` reports zero on. See `03.5-TRUTH-AUDIT.md` for the full evidence record and the ten findings routed to gap closure.
+> **⚠ PHASE 3.5 IS STILL NOT COMPLETE — and the live sweep is no longer the reason.**
+> **Eight of the nine success criteria are now MET** (SC-3, SC-7, SC-8 and SC-9 were promoted from PARTIAL on measurement). Two things keep the phase open, neither of which a measurement can close:
+>
+> 1. 🔴 **OPEN DEFECT, now LIVE-CONFIRMED.** `src/remont-na-portove.html:103` publishes a claim to chip replacement — a service discontinued under D3.5-01 — on a page no plan owned and that `truth-gate.js` reports zero on. The served body returns **2** on the declined bridge-chip sweep: it is being served to visitors. **SC-1's chip-level half is NOT MET.**
+> 2. **DIFF-04 and CONTENT-01 remain ADVANCED, NOT MET.** `kat-6` is still `'published' => false`, blocked on OWNER-QUESTIONS #3a–#3f plus riders #32 and #33. The page renders correctly live; a page that renders perfectly and is not published is still not published.
+>
+> See `03.5-TRUTH-AUDIT.md` for the full evidence record — every figure with the exact command that emitted it — and the **thirteen** findings routed to gap closure (F1–F13). **Seven of the thirteen are defects in verification commands rather than in the site**, and four of those fabricate a defect on a page that is correct.
 
 ### Phase 4: Hardening & Cutover
 
