@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Migration Safety Net & Foundation** - Lock down URL/ranking continuity and rollback discipline, and prove the PHP-include foundation on the real host, before any rebuild work touches the live site. (completed 2026-08-05)
 - [x] **Phase 2: Design System & Information Architecture** - Replace the dated jQuery/parallax theme with a modern, mobile-responsive design organized around the six owner-priority service categories. (completed 2026-08-09)
 - [x] **Phase 3: Content & Trust-Signal Build-Out** - Rebuild all sixteen pages with correct SEO metadata and surface the shop's genuine trust signals and differentiators that no competitor has. (delivered 2026-08-26; DIFF-02/DIFF-03 superseded 2026-09-11 — see Phase 3.5)
-- [ ] **Phase 3.5: Content Truth Revision** - Remove every claim describing a discontinued service, retire three URLs by redirect, and correct the category boundaries so the site describes the business that exists today.
+- [x] **Phase 3.5: Content Truth Revision** - Remove every claim describing a discontinued service, retire four URLs by redirect (three at planning time; D3.5-09 added covid.html before execution), and correct the category boundaries so the site describes the business that exists today. (delivered 2026-09-15)
 - [ ] **Phase 4: Hardening & Cutover** - Harden the contact path, tighten performance and SEO plumbing, and cut over the live site with verified URL/ranking continuity.
 
 ## Phase Details
@@ -155,7 +155,7 @@ Plans:
 
 ### Phase 3.5: Content Truth Revision
 
-**Goal**: Every factual claim on the site describes a service the shop actually offers today. No page advertises battery regeneration, BGA/reballing or product sales; the three retired URLs redirect rather than 404; and the category boundaries match how the shop actually divides the work.
+**Goal**: Every factual claim on the site describes a service the shop actually offers today. No page advertises battery regeneration, BGA/reballing or product sales; the four retired URLs redirect rather than 404 (three at planning time; D3.5-09 added covid.html before execution); and the category boundaries match how the shop actually divides the work.
 **Depends on**: Phase 3
 **Requirements**: DIFF-04, CONTENT-01, SEO-05, TRUST-01 (correction), TRUST-02 (enable)
 **Success Criteria** (what must be TRUE):
@@ -175,7 +175,7 @@ Plans:
 
 **Cross-cutting constraints:**
 
-- Retirement is **301, never deletion** — all three URLs are among the original 16 indexed pages (SEO-04's intent).
+- Retirement is **301, never deletion** — all four URLs are among the original 16 indexed pages (SEO-04's intent). D3.5-09 raised the count from three to four before execution; REQUIREMENTS.md:67 names all four.
 - **Invent nothing.** Where a cut leaves a page thin, either restructure honestly or record the gap against OWNER-QUESTIONS — do not fill it with plausible-sounding replacement copy. This is the rule Category 6 was built under and it holds here.
 - The **live deploy is the only PHP check** — no local interpreter exists. A page returning 200 proves nothing on its own.
 
@@ -237,5 +237,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 3.5 → 4
 | 1. Migration Safety Net & Foundation | 5/5 | Complete    | 2026-08-05 |
 | 2. Design System & Information Architecture | 9/9 | Complete    | 2026-08-09 |
 | 3. Content & Trust-Signal Build-Out | 9/9 | Built — partly superseded | 2026-08-26 |
-| 3.5. Content Truth Revision | 6.5/7 | In Progress — audit delivered; live sweep + 1 open defect outstanding |  |
+| 3.5. Content Truth Revision | 8/8 | Complete — live-verified; 9/9 success criteria | 2026-09-15 |
 | 4. Hardening & Cutover | 0/TBD | Not started | - |

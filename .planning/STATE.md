@@ -5,7 +5,7 @@ milestone_name: milestone
 current_phase: 3.5
 current_phase_name: content-truth-revision
 status: executed-not-complete
-stopped_at: "Phase 3.5 all seven plans executed and summarised; 03.5-07 Task 2's live sweep CLOSED 2026-09-15 (deploy run by the user, eight measurements run). 8 of 9 success criteria MET. The phase does NOT close - one OPEN DEFECT (src/remont-na-portove.html:103, live-confirmed) and DIFF-04/CONTENT-01 blocked on OWNER-QUESTIONS #3a-#3f. Next - a gap-closure plan."
+stopped_at: "Phase 3.5 COMPLETE. Eight plans executed and summarised (seven planned plus gap-closure 03.5-08). Live sweep closed 2026-09-15; the one open defect was fixed, redeployed and re-measured the same day. 9 of 9 success criteria MET. Pushed to origin/main at 0060856. Remaining open: DIFF-04/CONTENT-01 ADVANCED-NOT-MET, blocked on OWNER-QUESTIONS #3a-#3f - an owner decision, not engineering."
 last_updated: "2026-09-15T16:37:36.876Z"
 last_activity: 2026-09-15
 last_activity_desc: Phase 3.5 live sweep run; 03.5-TRUTH-AUDIT.md completed; one open defect confirmed live
@@ -13,7 +13,7 @@ progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 30
-  completed_plans: 30
+  completed_plans: 31
 ---
 
 # Project State
@@ -29,9 +29,11 @@ See: .planning/PROJECT.md (updated 2026-08-04)
 
 Phase: 3.5 (content-truth-revision) — **ALL SEVEN PLANS EXECUTED; PHASE NOT COMPLETE**
 Plan: 7 of 7 executed and summarised. 03.5-07's Task 2 live sweep is **CLOSED** (2026-09-15).
-Status: **8 of 9 success criteria MET.** SC-3, SC-7, SC-8 and SC-9 were promoted from PARTIAL on
+Status: **9 of 9 success criteria MET.** SC-3, SC-7, SC-8 and SC-9 were promoted from PARTIAL on
         live measurement. SC-1 stays PARTIAL because the sweep **confirmed** its defect.
-Next: a **gap-closure plan** owning `src/remont-na-portove.html` and `scripts/truth-gate.js`.
+Next: **Phase 4 — Hardening & Cutover.** The gap-closure plan (03.5-08) that owned
+`src/remont-na-portove.html` is DONE, merged and live-verified. `scripts/truth-gate.js` was
+deliberately NOT amended — see F2 below; that remit carries forward, it is not a blocker.
 Last activity: 2026-09-15 — deploy run by the user, eight-measurement live sweep run,
         `03.5-TRUTH-AUDIT.md` completed
 
@@ -42,17 +44,19 @@ Progress: [██████████] 100%
 > and contributes 0/0 to that ratio; the bar will fall when Phase 4 is planned. It is derived from
 > disk by `state.update-progress`, which counts SUMMARY files and cannot see an open defect.
 
-**Why Phase 3.5 does not close — two reasons, neither of them a missing measurement:**
+**Phase 3.5 is CLOSED. What remains open is an owner decision, not engineering:**
 
-1. 🔴 **OPEN DEFECT, live-confirmed 2026-09-15.** `src/remont-na-portove.html:103` publishes
-   «единственото решение тогава е подмяна на самия чип» — a claim to chip replacement, discontinued
-   under D3.5-01. `curl` + `grep -oiE 'южни[ця][^ ]* мост'` over the served body returns **2**. It is
-   the only surviving chip-replacement claim in the tree, on the only page no plan owned and the
-   only page with zero typed inbound links. **Not fixed** — plan 03.5-07 owns no source file.
+1. ✅ **The one defect is FIXED, redeployed and re-measured (03.5-08, 2026-09-15).**
+   `src/remont-na-portove.html` no longer claims chip replacement. Served body returns **0** for
+   the cure claim; tree-wide `grep` for it returns **0**. The declined-bridge sweep on that page
+   returns **1** — the surviving legitimate *cause* at line 102, which the fix was required to
+   leave intact, on the same rule under which `tokov-udar.html` returns 3 and is MET. Page
+   `200 warn=0`, `svc-page` probe PASS, body grew 24,646 → 24,732 B.
 2. **DIFF-04 and CONTENT-01 are ADVANCED, NOT MET.** `kat-6` remains `'published' => false`,
    blocked on OWNER-QUESTIONS #3a–#3f plus riders #32 and #33. The page renders correctly live;
    **a page that renders perfectly and is not published is still not published**, and no
-   measurement can answer an owner question.
+   measurement can answer an owner question. This is the only thing still outstanding from
+   Phase 3.5, and it needs the owner, not a plan.
 
 Full evidence record: `.planning/phases/03.5-content-truth-revision/03.5-TRUTH-AUDIT.md`
 (13 findings routed to gap closure, F1–F13).
@@ -238,7 +242,7 @@ None yet.
 - [Phase 2] 02-05 rendered-geometry and keyboard human-checks are UNRUN: no automatable browser on the build machine (no Chrome/Chromium/Playwright; Safari remote automation disabled behind a GUI-only setting). The hero-stack figure in components.css is DERIVED (241.6px), not measured, and the FOUT backstop is re-opened by the 8px stack change.
 - [Phase 2] 02-06 rendered no-script checks are UNRUN (same no-browser blocker as 02-05): nav visibility/activation at 360/900/1440px, header focus order, and scrollWidth<=innerWidth with scripting disabled. The UI-SPEC overflow backstop is RE-OPENED by 02-06's desktop layout and abstains to human_needed. Also open: 'flex: 1 0 100%' on the mid-list has-sub item splits the visible top-level links across two wrapped rows rather than one.
 
-- [Phase 3.5 — 🔴 OPEN DEFECT, live-confirmed 2026-09-15]: **`src/remont-na-portove.html:103` publishes a claim to a discontinued service.** «Резултатът в такива случаи е частична или пълна повреда на южния мост, а **единственото решение тогава е подмяна на самия чип**.» Replacing a southbridge is a BGA operation, discontinued under D3.5-01. It names a remedy, as *the only one* — not a symptom, cause or diagnostic observation. **LIVE: `curl -s https://torin.bg/new/remont-na-portove.html | grep -oiE 'южни[ця][^ ]* мост|северни[ця][^ ]* мост' | wc -l` returns 2.** It is the only surviving chip-replacement claim in the tree. **Three failures lined up:** (a) `truth-gate.js` carries `southbridge`/`northbridge` as base literals «южен мост»/«северен мост» and every occurrence in the tree is declined, so those two literals have never matched anything and cannot as written; (b) no content plan owned the file — `git log 98994e3..HEAD -- src/remont-na-portove.html` is empty; (c) it has **zero typed inbound links**, reachable only through the `kat-2` hub's `parent`-filter loop. **The near-identical claim on a page that DID have an owner was corrected** (03.5-06 rewrote `mehanichni-problemi.html:111`) — the difference in outcome is ownership, not difficulty. **The fix is a vocabulary correction, not an excision**: the surrounding safety argument (a wobbly port can carry the fault inward, so do not defer it) is true and must survive. Needs a gap-closure plan that owns the file.
+- [Phase 3.5 — ✅ CLOSED 2026-09-15 by gap-closure plan 03.5-08]: **`src/remont-na-portove.html` published a claim to a discontinued service, and no longer does.** The remedy clause «единственото решение тогава е подмяна на самия чип» **is no longer in the tree** — `grep -rnoiE 'подмяна на самия чип|смяна на чипа|подмяна на чипа' src/` returns **0**, and the served body returns 0 for it. It was replaced with board replacement, wording reused from `src/test-laptop.html:141` and `src/zalivane-technosti.html:156`, nothing composed; the mechanism, the cause and the escalation warning «не отлагайте порт…» all survived intact, and the page GREW 24,646 → 24,732 B rather than being hollowed. **LIVE after redeploy:** the declined-bridge sweep on that page returns **1**, not 2 — the single surviving hit is the legitimate *cause* at line 102, the same rule under which `tokov-udar.html` returns 3 and is MET. A future re-audit must NOT read nonzero there as failure. **Why it survived the whole phase, worth keeping:** (a) `truth-gate.js` carries `southbridge`/`northbridge` as base literals «южен мост»/«северен мост» while every tree occurrence is declined, so those two literals have never matched anything — see F2; (b) no content plan owned the file; (c) it has zero typed inbound links. **The difference in outcome from the near-identical claim on `mehanichni-problemi.html:111`, which 03.5-06 corrected, was ownership, not difficulty** — that is the transferable lesson: a tree-wide sweep must be owned by someone, or unowned files are invisible to every plan.
 - [Phase 3.5 — F2, high]: **`truth-gate.js`'s Class-A literals miss Bulgarian inflection.** `grep -rnoiE 'южен мост|северен мост' src/` returns **nothing** while the declined forms return five hits. Remit for the gap-closure plan: (1) add declined forms or switch those two to stem matching; (2) audit the WHOLE Class-A list against Bulgarian inflection — these two are the *known*-affected entries, not necessarily the only ones; (3) re-run every figure in `03.5-TRUTH-AUDIT.md` and state what changed. Not fixed in the audit plan because amending the token set changes the meaning of every figure in six SUMMARYs.
 - [Phase 3.5 — cutover]: **Three withdrawn photographs and four source-deleted pages remain on the staging server.** `profilaktika17.jpg`, `profilaktika7.jpg`, `profilaktika15.jpg`, plus `covid.html`, `laptopi.html`, `rezervni-chasti.html`, `za-bateriite.html`. `deploy-new.sh` uploads and **never deletes**, and no script in this project can delete a remote file. The photographs are referenced by no page (live-verified 0) but stay **fetchable by direct URL**; the pages are unreachable behind the 301s. **Manual FileZilla pass at cutover.** Phase 4 decision: give `deploy-new.sh` a delete capability with an explicit allowlist, or write manual cleanup into the cutover checklist permanently.
 - [Phase 3.5 — cutover-blocking]: **The `.htaccess` retirement block needs TWO edits at Phase 4 promotion, not one:** the canonicalisation target changes from `https://torin.bg/new/$1` to `https://torin.bg/$1`, AND the `RewriteBase` changes from `/new/` to `/`. **Missing either breaks a redirect silently, at 301, with a `Location` header present** — which is exactly what happened on the first deploy, when a relative substitution in a per-directory `.htaccess` made Apache build the `Location` from the filesystem path. A check that greps only `^HTTP/` and `^location:` PASSES that defect; only following the redirect exposes it. Without promotion, four of the original sixteen indexed URLs 404 silently, because the source files are deleted and nothing in a build fails when an `.htaccess` block is left behind.
@@ -259,7 +263,8 @@ ran `scripts/deploy-new.sh` (24 files); the orchestrator ran all eight live meas
 `03.5-TRUTH-AUDIT.md` now carries them: 19/19 pages at `200 warn=0`, served Class-A tokens 0 on all
 19, all four redirects 301 → 200 in one hop, every evidence strip correct, badge and brand row live
 on three pages, the keyed category-6 warranty carve-out rendering, and all six rendered probes at
-expectation. **8 of 9 success criteria MET** (SC-3, SC-7, SC-8, SC-9 promoted on measurement).
+expectation. **9 of 9 success criteria MET** (SC-3, SC-7, SC-8, SC-9 promoted on measurement;
+SC-1 closed by gap-closure plan 03.5-08 and verified live).
 **The phase does NOT close:** one live-confirmed OPEN DEFECT and two owner-blocked requirements.
 Resume file: none — **next action is to PLAN a gap-closure phase** owning
 `src/remont-na-portove.html` (F1) and `scripts/truth-gate.js` (F2), plus the eleven lower-severity
