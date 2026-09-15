@@ -201,13 +201,13 @@ Plans:
   - **Task 2 COMPLETE — the blocking human checkpoint is CLOSED (2026-09-15).** The deploy is denied to subagents *and* to the orchestrator, so **the user ran it** (24 files); the orchestrator ran all eight live measurements. 19/19 pages at `200 warn=0`; served Class-A tokens **0** on all 19; all four redirects **301 → 200 in one hop**; every evidence strip correct; badge and brand row live on three pages; the keyed category-6 warranty carve-out rendering; all six rendered probes at expectation.
   - **Task 3 COMPLETE** — `03.5-TRUTH-AUDIT.md`, `REQUIREMENTS.md`, `ROADMAP.md` and `STATE.md` all reconciled to the measured evidence.
 
-> **⚠ PHASE 3.5 IS STILL NOT COMPLETE — and the live sweep is no longer the reason.**
-> **Eight of the nine success criteria are now MET** (SC-3, SC-7, SC-8 and SC-9 were promoted from PARTIAL on measurement). Two things keep the phase open, neither of which a measurement can close:
+> **⚠ PHASE 3.5: NINE OF NINE SUCCESS CRITERIA MET. One requirement pair remains open.**
+> SC-3, SC-7, SC-8 and SC-9 were promoted from PARTIAL on measurement. **SC-1 was closed by gap-closure plan 03.5-08** (see below). What still keeps the phase from closing is not a measurement:
 >
-> 1. 🔴 **OPEN DEFECT, now LIVE-CONFIRMED.** `src/remont-na-portove.html:103` publishes a claim to chip replacement — a service discontinued under D3.5-01 — on a page no plan owned and that `truth-gate.js` reports zero on. The served body returns **2** on the declined bridge-chip sweep: it is being served to visitors. **SC-1's chip-level half is NOT MET.**
-> 2. **DIFF-04 and CONTENT-01 remain ADVANCED, NOT MET.** `kat-6` is still `'published' => false`, blocked on OWNER-QUESTIONS #3a–#3f plus riders #32 and #33. The page renders correctly live; a page that renders perfectly and is not published is still not published.
+> 1. ✅ **CLOSED — the open defect is fixed and live-verified (03.5-08, 2026-09-15).** `src/remont-na-portove.html:103` had published a claim to chip replacement, discontinued under D3.5-01, on a page no plan owned and that `truth-gate.js` reports zero on. The remedy clause was replaced with board replacement — wording reused from `test-laptop.html` and `zalivane-technosti.html`, nothing composed — while the mechanism, the cause and the escalation warning survived intact. **Live after redeploy: cure-claim served = 0, page `200 warn=0`, `svc-page` probe PASS, tree-wide chip-replacement claims = 0.** The declined-bridge sweep reads **1**, not 0: that is the surviving legitimate *cause*, the same rule under which `tokov-udar.html` reads 3 and is MET. **SC-1 is MET.**
+> 2. **DIFF-04 and CONTENT-01 remain ADVANCED, NOT MET.** `kat-6` is still `'published' => false`, blocked on OWNER-QUESTIONS #3a–#3f plus riders #32 and #33. The page renders correctly live; a page that renders perfectly and is not published is still not published. **This is an owner decision, not engineering work.**
 >
-> See `03.5-TRUTH-AUDIT.md` for the full evidence record — every figure with the exact command that emitted it — and the **thirteen** findings routed to gap closure (F1–F13). **Seven of the thirteen are defects in verification commands rather than in the site**, and four of those fabricate a defect on a page that is correct.
+> See `03.5-TRUTH-AUDIT.md` for the full evidence record — every figure with the exact command that emitted it — and the **thirteen** findings (F1–F13; the one live-published defect among them is closed by 03.5-08). **Seven of the thirteen are defects in verification commands rather than in the site**, and four of those fabricate a defect on a page that is correct.
 
 ### Phase 4: Hardening & Cutover
 
