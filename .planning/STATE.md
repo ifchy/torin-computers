@@ -2,18 +2,18 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_phase: 03
-current_phase_name: content-trust-signal-build-out
-status: verifying
-stopped_at: Phase 3.5 fully planned and verified (7 plans, 3 waves, 0 blockers, checkpoint pre-answered). Ready to execute; nothing waits on the user.
-last_updated: "2026-09-11T00:00:00.000Z"
-last_activity: 2026-09-12
-last_activity_desc: Phase 3.5 planned, revised, verified PASS; redirect targets locked
+current_phase: 3.5
+current_phase_name: content-truth-revision
+status: executed-not-complete
+stopped_at: "Phase 3.5 all seven plans executed and summarised; 03.5-07 Task 2's live sweep CLOSED 2026-09-15 (deploy run by the user, eight measurements run). 8 of 9 success criteria MET. The phase does NOT close - one OPEN DEFECT (src/remont-na-portove.html:103, live-confirmed) and DIFF-04/CONTENT-01 blocked on OWNER-QUESTIONS #3a-#3f. Next - a gap-closure plan."
+last_updated: "2026-09-15T16:37:36.876Z"
+last_activity: 2026-09-15
+last_activity_desc: Phase 3.5 live sweep run; 03.5-TRUTH-AUDIT.md completed; one open defect confirmed live
 progress:
-  total_phases: 3
+  total_phases: 4
   completed_phases: 2
-  total_plans: 23
-  completed_plans: 23
+  total_plans: 30
+  completed_plans: 30
 ---
 
 # Project State
@@ -23,17 +23,39 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-04)
 
 **Core value:** A visitor with a specific repair problem must immediately see that Torin fixes exactly that, and find a clear path to contact the shop.
-**Current focus:** Phase 03 — content-trust-signal-build-out
+**Current focus:** Phase 03.5 — content-truth-revision (executed, NOT complete)
 
 ## Current Position
 
-Phase: 3.5 (content-truth-revision) — PLANNED, NOT STARTED
-Plan: 0 of 7. Seven plans, three waves, plan-checker verdict: Execute.
-Status: Ready. Plan 01's checkpoint is pre-answered (CONTEXT D3.5-09).
-Next: /gsd-execute-phase 3.5
-Last activity: 2026-09-12 — planning loop closed
+Phase: 3.5 (content-truth-revision) — **ALL SEVEN PLANS EXECUTED; PHASE NOT COMPLETE**
+Plan: 7 of 7 executed and summarised. 03.5-07's Task 2 live sweep is **CLOSED** (2026-09-15).
+Status: **8 of 9 success criteria MET.** SC-3, SC-7, SC-8 and SC-9 were promoted from PARTIAL on
+        live measurement. SC-1 stays PARTIAL because the sweep **confirmed** its defect.
+Next: a **gap-closure plan** owning `src/remont-na-portove.html` and `scripts/truth-gate.js`.
+Last activity: 2026-09-15 — deploy run by the user, eight-measurement live sweep run,
+        `03.5-TRUTH-AUDIT.md` completed
 
-Progress: [██████░░░░] 65%
+Progress: [██████████] 100%
+
+> ⚠ **The 100% is plan completion over plans that EXIST — it is not project completion, and it is
+> not phase completion.** 30 of 30 written plans have SUMMARYs. Phase 4 has no plans authored yet
+> and contributes 0/0 to that ratio; the bar will fall when Phase 4 is planned. It is derived from
+> disk by `state.update-progress`, which counts SUMMARY files and cannot see an open defect.
+
+**Why Phase 3.5 does not close — two reasons, neither of them a missing measurement:**
+
+1. 🔴 **OPEN DEFECT, live-confirmed 2026-09-15.** `src/remont-na-portove.html:103` publishes
+   «единственото решение тогава е подмяна на самия чип» — a claim to chip replacement, discontinued
+   under D3.5-01. `curl` + `grep -oiE 'южни[ця][^ ]* мост'` over the served body returns **2**. It is
+   the only surviving chip-replacement claim in the tree, on the only page no plan owned and the
+   only page with zero typed inbound links. **Not fixed** — plan 03.5-07 owns no source file.
+2. **DIFF-04 and CONTENT-01 are ADVANCED, NOT MET.** `kat-6` remains `'published' => false`,
+   blocked on OWNER-QUESTIONS #3a–#3f plus riders #32 and #33. The page renders correctly live;
+   **a page that renders perfectly and is not published is still not published**, and no
+   measurement can answer an owner question.
+
+Full evidence record: `.planning/phases/03.5-content-truth-revision/03.5-TRUTH-AUDIT.md`
+(13 findings routed to gap closure, F1–F13).
 
 ## Performance Metrics
 
@@ -184,6 +206,18 @@ Recent decisions affecting current work:
 
 - [Phase 4 / SEO]: **GSC 16-month window shows ONLY the homepage in Performance → Pages.** None of the 22 other pages appears — including the four retiring URLs, which is what made the redirect decision low-risk. Two candidate explanations and they matter very differently: (a) the identical/empty titles and descriptions across all 16 legacy pages (the exact defect SEO-01 existed to fix) suppressed the whole site, so Google only ever surfaced the homepage; or (b) the GSC property is URL-prefix scoped to one host and the other three un-canonicalised variants hold the rest. **Do not conclude (a) without ruling out (b)** — check whether the property is Domain or URL-prefix. If (a) holds, Phase 3's SEO-01 closure (23 distinct titles and descriptions, verified live) is the single highest-value change made so far, and post-cutover indexing is the test. Worth watching deliberately rather than discovering by accident.
 
+- [Phase 3.5]: **The blast-radius figure has no single true value, and the missing ingredient was METHOD, not token set.** All three historical figures reproduce exactly and all three are correct: **57 in 9 files** (`grep -roiE 'BGA|реболинг|ребол|чипсет|видеочип|инфрачервен|AMTECH|дозапояване|северен мост|южен мост' --include='*.html'` over `src/` at `98994e3`), **95 in 11 files** (same command, `|ниво чип|регенерац` added), **165 in 21 files across 42 scanned** (`node scripts/truth-gate.js`, wider token set and wider scope). With the token set held exactly constant, method alone moves SET-95 across a 51% spread: 95 case-insensitive occurrences, 83 case-sensitive, 63 lines, 87 per-token sum. **Rule: no figure may be published without its token set AND the exact command that produced it** — the command carries the method implicitly; a prose citation does not.
+- [Phase 3.5]: **`scripts/truth-gate.js` is the phase's single token-set owner — it is CALLED, never re-derived**, and it prints its own Class-A and Class-B token lists on every run. That is the pattern: a gate that publishes its own bound. Post-wave-2 it reports `class-A hits: 0 in 0 files, 38 scanned, exit 0` — real, reproducible, **and bounded by a token set that is measurably incomplete for Bulgarian inflection** (see the blocker on F2). Published with its bound, never bare.
+- [Phase 3.5]: **The vocabulary ruling: component-level survives, chip-level does not.** A Class-B token may survive only where it describes a SYMPTOM, a DIAGNOSTIC OBSERVATION or a CAUSE — never work Torin performs, equipment Torin owns, or an outcome Torin achieves. 44 survivors across 12 files were each placed in one of the three; **exactly one could not be placed**, and it is the open defect. The honest replacement for a withdrawn chip-level remedy is the one `zalivane-technosti.html` already uses: at that level of damage **the board is replaced, not the chip**. Fixes of this kind are vocabulary corrections, never excisions — the surrounding safety argument is true and must survive.
+- [Phase 3.5]: **The four retired URLs and their locked 301 targets** (D3.5-09; SEO-05 named four all along, not three): `covid.html` → `about.html`, `laptopi.html` → `index.html`, `rezervni-chasti.html` → `ekran-klaviatura-portove.html`, `za-bateriite.html` → `zalivane-technosti.html`. All four live-verified 301 → 200 in **one hop**, twice: 2026-09-12 and again 2026-09-15 against the redeployed tree. `laptopi → index` is flagged, not clean — «Употребявани лаптопи» has no surviving equivalent and Google treats an irrelevant 301 as a soft 404; accepted because GSC's 16-month window shows none of the four in Performance → Pages, so no measurable ranking equity is at stake.
+- [Phase 3.5]: **`TRUST_EXPECT_EVIDENCE` was added as an OPT-IN flag to `scripts/probes/trust-signals.js`** (03.5-02) because the homepage legitimately has no evidence strip once the two retired differentiator sections were removed — a gate asserting a strip must exist would fail on the correct page. **Proven in both directions live 2026-09-15:** flag absent → `evidenceStrips: 0` → `PASS`; flag present → the same `evidenceStrips: 0` → `INCONCLUSIVE` with the absence named in the `inconclusive` array. A gate that cannot fail proves nothing; this one demonstrably can.
+- [Phase 3.5]: **⚠ A `PASS` from `trust-signals.js` is NOT evidence the rating badge rendered.** `scripts/probes/trust-signals.js:39-41` exempts the badge from the verdict expression — written when the badge's absence was the specified, shipped state. This phase inverted that state and the exemption did not move with it. **Always read `ratingBadgePresent` and `brandItemCount` out of the JSON explicitly.** The exemption itself is not yet fixed.
+- [Phase 3.5]: **`150+` in the rating badge is deliberate and must never be "corrected" to 157** (D3.5-07). The live count on 2026-09-11 was 157; the rounded floor is the owner's explicit request so the figure stays true as the count climbs without a redeploy. Changing it to an exact number is a regression, not a fix.
+- [Phase 3.5]: **The live deploy is the ONLY PHP check this project has** — no local interpreter exists — and HTTP 200 does not settle it. The `$torin_page` collision once served 200 on four pages while rendering the single letter «s» where prose belonged, and passed every local gate across five plans. **The Cyrillic token count of the served body is the real tell.** The 2026-09-15 sweep is the first PHP execution ever for twelve page files plus `includes/categories.php`; all 19 pages returned `200 warn=0` with substantive bodies.
+- [Phase 3.5]: **RENDERED figures run ABOVE SOURCE and the two are never conflated.** Measured 2026-09-15: `zalivane-technosti` 1066 SOURCE / 1260 RENDERED, `profilaktika-laptop` 555 / 736, `index` 235 / **414** (the ~308 rendered figure that stood in the record was an estimate and is now replaced by its measurement). Every page draws text at render time from `categories.php`, `brand-row.php`, `site-config.php` and `rating-badge.php`. Likewise `sectionCount: 6` RENDERED is the documented SOURCE+1 — the brand row injects at render time and carries no section literal — **not a discrepancy**.
+- [Phase 3.5]: **SEVEN defective check commands were found in this phase, every one by RUNNING it rather than reading it**, and five of them sit in the live-verification chain: a deploy command missing three image files (would have emptied an evidence strip at HTTP 200), a `strips=1` expectation on two pages that declare no strip by design, a photo regex whose character class excludes the hyphen (`photos=1` against a true 3), a brand-row count matching substrings rather than elements (8 against a true 7), and a line-oriented `sed` over a multiline JSON-LD block (reported malformed; it is valid). **Four of the five fabricate a defect on a correct page; the fifth manufactures a real one. Not one fails toward a missed defect.** Amended rule: **no command may be trusted until it has been run against a case whose answer is known independently of the command.**
+- [Phase 3.5]: **An audit plan owns no source file.** A fix discovered at audit time is ROUTED to a gap-closure plan with its own gate, never committed alongside the audit — a commit that both fixes and audits cannot be trusted to have done either. `truth-gate.js` was likewise **not** amended: changing its token set would change the meaning of every figure in six SUMMARYs.
+
 ### Pending Todos
 
 None yet.
@@ -204,6 +238,11 @@ None yet.
 - [Phase 2] 02-05 rendered-geometry and keyboard human-checks are UNRUN: no automatable browser on the build machine (no Chrome/Chromium/Playwright; Safari remote automation disabled behind a GUI-only setting). The hero-stack figure in components.css is DERIVED (241.6px), not measured, and the FOUT backstop is re-opened by the 8px stack change.
 - [Phase 2] 02-06 rendered no-script checks are UNRUN (same no-browser blocker as 02-05): nav visibility/activation at 360/900/1440px, header focus order, and scrollWidth<=innerWidth with scripting disabled. The UI-SPEC overflow backstop is RE-OPENED by 02-06's desktop layout and abstains to human_needed. Also open: 'flex: 1 0 100%' on the mid-list has-sub item splits the visible top-level links across two wrapped rows rather than one.
 
+- [Phase 3.5 — 🔴 OPEN DEFECT, live-confirmed 2026-09-15]: **`src/remont-na-portove.html:103` publishes a claim to a discontinued service.** «Резултатът в такива случаи е частична или пълна повреда на южния мост, а **единственото решение тогава е подмяна на самия чип**.» Replacing a southbridge is a BGA operation, discontinued under D3.5-01. It names a remedy, as *the only one* — not a symptom, cause or diagnostic observation. **LIVE: `curl -s https://torin.bg/new/remont-na-portove.html | grep -oiE 'южни[ця][^ ]* мост|северни[ця][^ ]* мост' | wc -l` returns 2.** It is the only surviving chip-replacement claim in the tree. **Three failures lined up:** (a) `truth-gate.js` carries `southbridge`/`northbridge` as base literals «южен мост»/«северен мост» and every occurrence in the tree is declined, so those two literals have never matched anything and cannot as written; (b) no content plan owned the file — `git log 98994e3..HEAD -- src/remont-na-portove.html` is empty; (c) it has **zero typed inbound links**, reachable only through the `kat-2` hub's `parent`-filter loop. **The near-identical claim on a page that DID have an owner was corrected** (03.5-06 rewrote `mehanichni-problemi.html:111`) — the difference in outcome is ownership, not difficulty. **The fix is a vocabulary correction, not an excision**: the surrounding safety argument (a wobbly port can carry the fault inward, so do not defer it) is true and must survive. Needs a gap-closure plan that owns the file.
+- [Phase 3.5 — F2, high]: **`truth-gate.js`'s Class-A literals miss Bulgarian inflection.** `grep -rnoiE 'южен мост|северен мост' src/` returns **nothing** while the declined forms return five hits. Remit for the gap-closure plan: (1) add declined forms or switch those two to stem matching; (2) audit the WHOLE Class-A list against Bulgarian inflection — these two are the *known*-affected entries, not necessarily the only ones; (3) re-run every figure in `03.5-TRUTH-AUDIT.md` and state what changed. Not fixed in the audit plan because amending the token set changes the meaning of every figure in six SUMMARYs.
+- [Phase 3.5 — cutover]: **Three withdrawn photographs and four source-deleted pages remain on the staging server.** `profilaktika17.jpg`, `profilaktika7.jpg`, `profilaktika15.jpg`, plus `covid.html`, `laptopi.html`, `rezervni-chasti.html`, `za-bateriite.html`. `deploy-new.sh` uploads and **never deletes**, and no script in this project can delete a remote file. The photographs are referenced by no page (live-verified 0) but stay **fetchable by direct URL**; the pages are unreachable behind the 301s. **Manual FileZilla pass at cutover.** Phase 4 decision: give `deploy-new.sh` a delete capability with an explicit allowlist, or write manual cleanup into the cutover checklist permanently.
+- [Phase 3.5 — cutover-blocking]: **The `.htaccess` retirement block needs TWO edits at Phase 4 promotion, not one:** the canonicalisation target changes from `https://torin.bg/new/$1` to `https://torin.bg/$1`, AND the `RewriteBase` changes from `/new/` to `/`. **Missing either breaks a redirect silently, at 301, with a `Location` header present** — which is exactly what happened on the first deploy, when a relative substitution in a per-directory `.htaccess` made Apache build the `Location` from the filesystem path. A check that greps only `^HTTP/` and `^location:` PASSES that defect; only following the redirect exposes it. Without promotion, four of the original sixteen indexed URLs 404 silently, because the source files are deleted and nothing in a build fails when an `.htaccess` block is left behind.
+
 ## Deferred Items
 
 Items acknowledged and carried forward from previous milestone close:
@@ -214,6 +253,14 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-18
-Stopped at: Phase 03 Wave 1 complete and verified (03-01 merged at 53b421e; deploy authorized and run, live verification PASSED at both viewports). Resuming at Wave 2 (03-02).
-Resume file: .planning/phases/03-content-trust-signal-build-out/03-02-PLAN.md
+Last session: 2026-09-15
+Stopped at: **Phase 3.5 fully executed; 03.5-07 Task 2's blocking live checkpoint CLOSED.** The user
+ran `scripts/deploy-new.sh` (24 files); the orchestrator ran all eight live measurements.
+`03.5-TRUTH-AUDIT.md` now carries them: 19/19 pages at `200 warn=0`, served Class-A tokens 0 on all
+19, all four redirects 301 → 200 in one hop, every evidence strip correct, badge and brand row live
+on three pages, the keyed category-6 warranty carve-out rendering, and all six rendered probes at
+expectation. **8 of 9 success criteria MET** (SC-3, SC-7, SC-8, SC-9 promoted on measurement).
+**The phase does NOT close:** one live-confirmed OPEN DEFECT and two owner-blocked requirements.
+Resume file: none — **next action is to PLAN a gap-closure phase** owning
+`src/remont-na-portove.html` (F1) and `scripts/truth-gate.js` (F2), plus the eleven lower-severity
+findings F3–F13 recorded in `03.5-TRUTH-AUDIT.md`.
