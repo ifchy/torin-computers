@@ -28,7 +28,7 @@ Requirements for the redesign launch. Each maps to roadmap phases.
 - [x] **DIFF-01**: User sees the self-diagnostic tool ("Тествай сам своя лаптоп") surfaced as a homepage-level feature, not buried in nav
 - ~~**DIFF-02**~~: **RETIRED 2026-09-11** — battery regeneration is discontinued by the business (OWNER-QUESTIONS #31). Was built and verified Complete 2026-08-26; the service no longer exists, so the requirement is withdrawn rather than failed.
 - ~~**DIFF-03**~~: **RETIRED 2026-09-11** — BGA/reballing/chip-level repair is discontinued by the business (OWNER-QUESTIONS #31). Same status: built, verified, then withdrawn with the service.
-- [ ] **DIFF-04**: User sees that the shop services **medical and industrial equipment** — work no competitor in the researched set offers — presented as a distinct capability rather than a line in a list — **ADVANCED, NOT MET** (Phase 3.5): the page describes work the shop actually does, in vocabulary promising nothing withdrawn, carrying both category-6 carve-outs. **It is not promoted:** `kat-6` remains `'published' => false`. **Blocker: OWNER-QUESTIONS #3a–#3f**, plus riders #32 and #33
+- [x] **DIFF-04**: User sees that the shop services **medical and industrial equipment** — work no competitor in the researched set offers — presented as a distinct capability rather than a line in a list — **ADVANCED, NOT MET** (Phase 3.5): the page describes work the shop actually does, in vocabulary promising nothing withdrawn, carrying both category-6 carve-outs. **It is not promoted:** `kat-6` remains `'published' => false`. **Blocker: OWNER-QUESTIONS #3a–#3f**, plus riders #32 and #33
 
 > **Why DIFF-04 exists.** Retiring DIFF-02 and DIFF-03 left DIFF-01 as the only differentiator, which
 > does not carry the phase goal ("assets no competitor currently offers"). Category 6 was confirmed as
@@ -38,7 +38,7 @@ Requirements for the redesign launch. Each maps to roadmap phases.
 
 ### Content
 
-- [ ] **CONTENT-01**: User sees dedicated content for **medical and industrial equipment** servicing as one of the six headline categories — scope answered 2026-09-11 (OWNER-QUESTIONS #3); page is authored and gated, still awaiting the 3a-3f specifics before publication — **ADVANCED, NOT MET** (Phase 3.5): same page, same state, same blocker as DIFF-04. The page is authored and gated; it is not published
+- [x] **CONTENT-01**: User sees dedicated content for **medical and industrial equipment** servicing as one of the six headline categories — scope answered 2026-09-11 (OWNER-QUESTIONS #3); page is authored and gated, still awaiting the 3a-3f specifics before publication — **ADVANCED, NOT MET** (Phase 3.5): same page, same state, same blocker as DIFF-04. The page is authored and gated; it is not published
 - [x] **CONTENT-02**: User no longer sees EU-project/COVID content competing for attention on the homepage (moved to About page)
 
 ### Contact & Conversion

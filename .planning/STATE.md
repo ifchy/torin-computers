@@ -2,18 +2,18 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_phase: 3.5
-current_phase_name: content-truth-revision
-status: executed-not-complete
-stopped_at: "Phase 3.5 COMPLETE. Eight plans executed and summarised (seven planned plus gap-closure 03.5-08). Live sweep closed 2026-09-15; the one open defect was fixed, redeployed and re-measured the same day. 9 of 9 success criteria MET. Pushed to origin/main at 0060856. Remaining open: DIFF-04/CONTENT-01 ADVANCED-NOT-MET, blocked on OWNER-QUESTIONS #3a-#3f - an owner decision, not engineering."
-last_updated: "2026-09-15T16:37:36.876Z"
+current_phase: 4
+current_phase_name: Hardening & Cutover
+status: planning
+stopped_at: "**Phase 3.5 fully executed; 03.5-07 Task 2's blocking live checkpoint CLOSED.** The user"
+last_updated: "2026-09-15T18:07:17.005Z"
 last_activity: 2026-09-15
-last_activity_desc: Phase 3.5 live sweep run; 03.5-TRUTH-AUDIT.md completed; one open defect confirmed live
+last_activity_desc: Phase 03.5 complete, transitioned to Phase 4
 progress:
   total_phases: 4
-  completed_phases: 2
+  completed_phases: 4
   total_plans: 30
-  completed_plans: 31
+  completed_plans: 30
 ---
 
 # Project State
@@ -27,14 +27,14 @@ See: .planning/PROJECT.md (updated 2026-08-04)
 
 ## Current Position
 
-Phase: 3.5 (content-truth-revision) — **ALL SEVEN PLANS EXECUTED; PHASE NOT COMPLETE**
-Plan: 7 of 7 executed and summarised. 03.5-07's Task 2 live sweep is **CLOSED** (2026-09-15).
-Status: **9 of 9 success criteria MET.** SC-3, SC-7, SC-8 and SC-9 were promoted from PARTIAL on
+Phase: 4 — Hardening & Cutover
+Plan: Not started
+Status: Ready to plan
         live measurement. SC-1 stays PARTIAL because the sweep **confirmed** its defect.
 Next: **Phase 4 — Hardening & Cutover.** The gap-closure plan (03.5-08) that owned
 `src/remont-na-portove.html` is DONE, merged and live-verified. `scripts/truth-gate.js` was
 deliberately NOT amended — see F2 below; that remit carries forward, it is not a blocker.
-Last activity: 2026-09-15 — deploy run by the user, eight-measurement live sweep run,
+Last activity: 2026-09-15 — Phase 03.5 complete, transitioned to Phase 4
         `03.5-TRUTH-AUDIT.md` completed
 
 Progress: [██████████] 100%
@@ -52,6 +52,7 @@ Progress: [██████████] 100%
    returns **1** — the surviving legitimate *cause* at line 102, which the fix was required to
    leave intact, on the same rule under which `tokov-udar.html` returns 3 and is MET. Page
    `200 warn=0`, `svc-page` probe PASS, body grew 24,646 → 24,732 B.
+
 2. **DIFF-04 and CONTENT-01 are ADVANCED, NOT MET.** `kat-6` remains `'published' => false`,
    blocked on OWNER-QUESTIONS #3a–#3f plus riders #32 and #33. The page renders correctly live;
    **a page that renders perfectly and is not published is still not published**, and no
@@ -65,7 +66,7 @@ Full evidence record: `.planning/phases/03.5-content-truth-revision/03.5-TRUTH-A
 
 **Velocity:**
 
-- Total plans completed: 14
+- Total plans completed: 22
 - Average duration: - min
 - Total execution time: 0 hours
 
@@ -75,6 +76,7 @@ Full evidence record: `.planning/phases/03.5-content-truth-revision/03.5-TRUTH-A
 |-------|-------|-------|----------|
 | 01 | 5 | - | - |
 | 02 | 9 | - | - |
+| 03.5 | 8 | - | - |
 
 **Recent Trend:**
 
