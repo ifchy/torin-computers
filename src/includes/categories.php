@@ -140,7 +140,22 @@ $torin_categories = array(
 		// one day nobody would be looking for a routing bug.
 		'page'      => 'problem-stari.html',
 		'icon'      => 'cat-6',
-		'published' => false,
+		// Published 2026-09-16 on the owner's instruction. The page renders 845
+		// Cyrillic tokens - longer than about.html, ekran-klaviatura-portove.html
+		// and index.html, all of which were already published - and every claim on
+		// it traces to an owner answer (category 6 is medical and industrial
+		// equipment, #3; warranty and diagnostics carve-outs, #23 and #24).
+		// Publishing also retires the orphan: while this was false,
+		// torin_category_href() routed every card and nav entry to index.html#kat-6
+		// and nothing pointed at the page, so it would have become indexable and
+		// still unreachable the moment cutover stripped the noindex header.
+		// Reversible: this flag is the only thing that changes, and the page stays
+		// live at its URL either way.
+		// STILL OPEN, and now VISIBLE on the homepage card: the symptoms line below
+		// is developer-written, not owner-confirmed - OWNER-QUESTIONS #3f and #16.
+		// Gaps #3c (what is refused), #32 and #33 (what warranty and diagnostics DO
+		// apply) remain unanswered and must not be filled with invented copy.
+		'published' => true,
 	),
 );
 
