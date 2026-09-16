@@ -213,6 +213,68 @@ explicitly refused (the highest-cost gap - the page generates enquiries with not
 ones away), 3d photographs and war stories, 3e pricing and turnaround specifics, 3f whether
 «Нестандартна техника» is the right name.
 
+---
+
+**RECOMMENDATION recorded 2026-09-16 (developer assessment, not an owner answer). Status of
+`kat-6`: `'published' => false`, and the recommendation is to LEAVE IT THAT WAY for now — but
+the reason is narrower than "the questions are unanswered", and the unblock is cheap.**
+
+**What was actually measured.** `problem-stari.html` is live and renders correctly. Its intro
+already states the answered scope — «техника, която е на години, вече не се произвежда или
+просто не е масова — включително медицинска и индустриална апаратура». «Какво ремонтираме»
+lists power-circuit repair, replacement of failed board components, component-level board work,
+and inspection of equipment others refused. The warranty block correctly selects the
+`nonstandard` entry and states the category-6 exclusion.
+
+**So the page is not false, and it is not empty. It is honest but generic.** Every claim on it
+traces to an owner answer (#3's headline ruling, #23, #24, #31). Nothing on it was invented.
+What it lacks is specificity, not truth.
+
+**Therefore the blocker is not "the page would lie". It is these three, in cost order:**
+
+1. **#3c — what is explicitly REFUSED. This is the expensive one and it is the reason to hold.**
+   The page invites enquiries about medical and industrial equipment and contains nothing that
+   steers the wrong ones away. For this category that is not a tidiness issue: it covers
+   safety and legal limits, equipment needing a licensed electrician, regulatory constraints on
+   medical devices, and the shop's own size/weight limits. Publishing without it converts the
+   page into unfiltered phone traffic the shop has to triage by hand, every time.
+2. **#32 and #33 — what warranty and what diagnostics DO apply.** As published, a customer
+   learns only what they do *not* get, on both counts. That is honest and was the correct call
+   (D3.5-08 forbids inventing a warranty term — the single most expensive sentence on the
+   site), but it is a worse page than two short sentences from the owner would produce, and in
+   practice the gap gets filled at the counter, differently each time.
+3. **#3a / #3b / #3d — specificity and proof.** These make the page *good* rather than
+   publishable. 3d in particular: one photograph of a real non-standard job, or one war story
+   about a device another shop refused, would outperform any amount of description. Not
+   blocking, but this is where the category's credibility actually comes from.
+
+**Minimum set to publish `kat-6` honestly: #3c, #32, #33.** Three short answers. 3a/3b/3d can
+follow and improve the page afterwards without re-opening anything. 3f (naming) is cosmetic and
+can ride along with any of them.
+
+**Two structural notes that will outlive these questions:**
+
+- **The #3(a)/(b)/(c) complication from 2026-08-19 is still unresolved and has changed shape.**
+  `problem-stari.html` is now a hybrid: category-6 framing and scope on top, with the original
+  power-circuit / universal-adapter article still forming the body («Защо старите захранващи
+  вериги отказват», «Универсалните адаптори с превключвател»). That article is good, credible
+  writing, and it is genuinely relevant to component-level work — so the hybrid reads better
+  than a stub would. But the owner has still never ruled on whether category 6 belongs on this
+  URL at all, or whether that article should move to category 4. Answering #3c/#32/#33 does not
+  settle this; it can be decided independently, and should be before cutover.
+- **Cutover consequence, for Phase 4.** `kat-6` being unpublished means `torin_category_href()`
+  routes every card and nav entry to `index.html#kat-6`; the page itself is live but has no
+  typed inbound link. Staging carries `X-Robots-Tag: noindex`, which is stripped at cutover —
+  at which point this page becomes indexable while still unreachable from navigation. That is
+  the same shape as the defect that hid on `remont-na-portove.html` for a whole phase: an
+  orphaned page nobody routes to and therefore nobody re-reads. Decide it at cutover, do not
+  let it default.
+
+**What must NOT happen:** none of these gaps may be closed by writing plausible copy. CONTEXT
+D3.5-08 governs, and it outranks every word-count floor in the project. A thin honest page on a
+headline category is a known, accepted cost; an invented capability or an invented warranty term
+is a liability the shop never agreed to.
+
 
 ---
 
