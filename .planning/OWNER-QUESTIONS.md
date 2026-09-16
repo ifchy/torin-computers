@@ -275,6 +275,47 @@ D3.5-08 governs, and it outranks every word-count floor in the project. A thin h
 headline category is a known, accepted cost; an invented capability or an invented warranty term
 is a liability the shop never agreed to.
 
+---
+
+**AMENDED 2026-09-16, same day, after challenge. The recommendation above was miscalibrated and
+is superseded by this. Left in place rather than rewritten, so the correction is visible.**
+
+Three things were re-measured, and each weakens the hold:
+
+1. **«Thin page» is obsolete reasoning.** `problem-stari.html` renders **845 Cyrillic tokens** —
+   longer than `about.html` (583), `ekran-klaviatura-portove.html` (534) and `index.html` (414),
+   all of which are published. The "a thin page on a headline category damages rankings for the
+   whole site" argument in the body of #3 was written in Phase 3, when this page would have
+   shipped with nothing on it. Plan 03.5-05 rebuilt it. The premise stopped being true and the
+   conclusion was carried forward anyway.
+2. **On staging, publishing costs nothing at all.** `https://torin.bg/new/` serves
+   `X-Robots-Tag: noindex, nofollow`. No indexing, no enquiries, therefore no #3c cost. The
+   decision does not bite until the Phase 4 cutover strips that header.
+3. **It is not a one-way door.** `'published' => true` and back is the same single boolean, and
+   `problem-stari.html` stays live at its URL in both states — only nav routing changes. Nothing
+   accumulates that has to be unwound. This is categorically unlike the four 301s, where
+   consolidating an indexed URL onto a target genuinely is irreversible and the caution was
+   warranted.
+
+**Amended recommendation:**
+
+- **Flip `kat-6` to `published => true` whenever convenient, including now.** On staging it is
+  free and it is informative — it is the only way to see the page in its real navigational
+  context, with cards and nav routing to it instead of to `index.html#kat-6`. It also retires
+  the orphaned-page trap listed as Phase 4 cutover item 3, rather than carrying it to the
+  riskiest moment in the project.
+- **The decision that actually matters is at cutover, and publishing is defensible there too.**
+  The page is honest, on-scope and normal-length. #3c's absence costs phone time triaging
+  enquiries the page cannot filter — real, recurring, and the owner's time, but recoverable and
+  reversible.
+- **#3c is still worth getting, because it is cheap, not because it blocks.** Same for #32/#33.
+  They turn a defensible page into a good one.
+
+**Unchanged and not subject to this amendment:** nothing here may be closed by writing plausible
+copy. D3.5-08 governs. Publishing a page that is honest-but-generic is a normal editorial
+trade-off; inventing a warranty term or a capability to fill the gap is not, and remains
+forbidden regardless of how the publish decision goes.
+
 
 ---
 
