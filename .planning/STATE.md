@@ -5,12 +5,12 @@ milestone_name: milestone
 current_phase: 4
 current_phase_name: Hardening & Cutover
 status: planning
-stopped_at: "**Phase 3.5 fully executed; 03.5-07 Task 2's blocking live checkpoint CLOSED.** The user"
-last_updated: "2026-09-15T18:07:17.005Z"
+stopped_at: Phase 4 context gathered
+last_updated: "2026-09-17T13:53:25.442Z"
 last_activity: 2026-09-15
 last_activity_desc: Phase 03.5 complete, transitioned to Phase 4
 progress:
-  total_phases: 4
+  total_phases: 5
   completed_phases: 4
   total_plans: 30
   completed_plans: 30
@@ -259,8 +259,8 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-09-15
-Stopped at: **Phase 3.5 fully executed; 03.5-07 Task 2's blocking live checkpoint CLOSED.** The user
+Last session: 2026-09-17T13:53:25.417Z
+Stopped at: Phase 4 context gathered
 ran `scripts/deploy-new.sh` (24 files); the orchestrator ran all eight live measurements.
 `03.5-TRUTH-AUDIT.md` now carries them: 19/19 pages at `200 warn=0`, served Class-A tokens 0 on all
 19, all four redirects 301 → 200 in one hop, every evidence strip correct, badge and brand row live
@@ -268,6 +268,6 @@ on three pages, the keyed category-6 warranty carve-out rendering, and all six r
 expectation. **9 of 9 success criteria MET** (SC-3, SC-7, SC-8, SC-9 promoted on measurement;
 SC-1 closed by gap-closure plan 03.5-08 and verified live).
 **The phase does NOT close:** one live-confirmed OPEN DEFECT and two owner-blocked requirements.
-Resume file: none — **next action is to PLAN a gap-closure phase** owning
+Resume file: .planning/phases/04-hardening-cutover/04-CONTEXT.md
 `src/remont-na-portove.html` (F1) and `scripts/truth-gate.js` (F2), plus the eleven lower-severity
 findings F3–F13 recorded in `03.5-TRUTH-AUDIT.md`.
