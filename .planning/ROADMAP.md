@@ -230,7 +230,19 @@ Plans:
   4. `robots.txt` and `sitemap.xml` exist on the live site and have been submitted to Search Console.
   5. The redesigned site is live at torin.bg on `bell.host.bg` at the same URLs, with `.htaccess`, the Search Console verification file, favicon, and `robots.txt` all confirmed intact post-cutover, and Search Console shows no new 404s or ranking drops in the days following launch.
 
-**Plans**: TBD
+**Plans**: 10 plans, 9 waves (sequential by construction — the phase spine is a single dependency chain, and every parallel pairing was ruled out by a shared file)
+
+Plans:
+- [ ] 04-01-PLAN.md — Host capability probe and PHP runtime upgrade, tested on `/new/` first (wave 1)
+- [ ] 04-02-PLAN.md — **TRACER:** one enquiry wired end to end — contact page → handler → notification (wave 2)
+- [ ] 04-03-PLAN.md — Upload pipeline, photo delivery and the browser-side downscale (wave 3)
+- [ ] 04-04-PLAN.md — CTA slot swap (5 slots, not 4), Viber retirement and the privacy/terms text (wave 4)
+- [ ] 04-05-PLAN.md — Spam guard, the email leg and every failure state a visitor sees (wave 4)
+- [ ] 04-06-PLAN.md — Owner-editable settings, the auto-expiring holiday banner, one hours source (wave 5)
+- [ ] 04-07-PLAN.md — Analytics instrumentation and design-system cleanup (wave 6)
+- [ ] 04-08-PLAN.md — WebP siblings, cache lifetimes, `robots.txt` and `sitemap.xml` (wave 7)
+- [ ] 04-09-PLAN.md — Cutover prep: canonical-host decision, `.htaccess` promotion diff, go/no-go sweep (wave 8)
+- [ ] 04-10-PLAN.md — Cutover execution, the sweep against the real domain, and launch verification (wave 9)
 
 ## Progress
 
@@ -243,4 +255,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 3.5 → 4
 | 2. Design System & Information Architecture | 9/9 | Complete    | 2026-08-09 |
 | 3. Content & Trust-Signal Build-Out | 9/9 | Built — partly superseded | 2026-08-26 |
 | 3.5. Content Truth Revision | 8/7 | Complete    | 2026-09-15 |
-| 4. Hardening & Cutover | 0/TBD | Not started | - |
+| 4. Hardening & Cutover | 0/10 | Planned | - |
