@@ -4,15 +4,15 @@ milestone: v1.0
 milestone_name: milestone
 current_phase: 4
 current_phase_name: Hardening & Cutover
-status: planning
+status: executing
 stopped_at: Phase 4 UI-SPEC approved
-last_updated: "2026-09-17T15:10:56.426Z"
+last_updated: "2026-09-17T17:47:00.122Z"
 last_activity: 2026-09-15
 last_activity_desc: Phase 03.5 complete, transitioned to Phase 4
 progress:
   total_phases: 5
   completed_phases: 4
-  total_plans: 30
+  total_plans: 40
   completed_plans: 30
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-08-04)
 
 Phase: 4 — Hardening & Cutover
 Plan: Not started
-Status: Ready to plan
+Status: Ready to execute
         live measurement. SC-1 stays PARTIAL because the sweep **confirmed** its defect.
 Next: **Phase 4 — Hardening & Cutover.** The gap-closure plan (03.5-08) that owned
 `src/remont-na-portove.html` is DONE, merged and live-verified. `scripts/truth-gate.js` was

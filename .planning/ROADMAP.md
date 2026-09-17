@@ -230,18 +230,44 @@ Plans:
   4. `robots.txt` and `sitemap.xml` exist on the live site and have been submitted to Search Console.
   5. The redesigned site is live at torin.bg on `bell.host.bg` at the same URLs, with `.htaccess`, the Search Console verification file, favicon, and `robots.txt` all confirmed intact post-cutover, and Search Console shows no new 404s or ranking drops in the days following launch.
 
-**Plans**: 10 plans, 9 waves (sequential by construction — the phase spine is a single dependency chain, and every parallel pairing was ruled out by a shared file)
+**Plans**: 10 plans, 9 waves (near-sequential by construction — the phase spine is a single dependency chain with exactly one parallel pair, 04-04 ∥ 04-05 in wave 4, which share no file; every other pairing was ruled out by a shared file, and that one pair is why the wave count is 9 rather than 10)
 
 Plans:
+**Wave 1**
+
 - [ ] 04-01-PLAN.md — Host capability probe and PHP runtime upgrade, tested on `/new/` first (wave 1)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 04-02-PLAN.md — **TRACER:** one enquiry wired end to end — contact page → handler → notification (wave 2)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 04-03-PLAN.md — Upload pipeline, photo delivery and the browser-side downscale (wave 3)
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
 - [ ] 04-04-PLAN.md — CTA slot swap (5 slots, not 4), Viber retirement and the privacy/terms text (wave 4)
 - [ ] 04-05-PLAN.md — Spam guard, the email leg and every failure state a visitor sees (wave 4)
+
+**Wave 5** *(blocked on Wave 4 completion)*
+
 - [ ] 04-06-PLAN.md — Owner-editable settings, the auto-expiring holiday banner, one hours source (wave 5)
+
+**Wave 6** *(blocked on Wave 5 completion)*
+
 - [ ] 04-07-PLAN.md — Analytics instrumentation and design-system cleanup (wave 6)
+
+**Wave 7** *(blocked on Wave 6 completion)*
+
 - [ ] 04-08-PLAN.md — WebP siblings, cache lifetimes, `robots.txt` and `sitemap.xml` (wave 7)
+
+**Wave 8** *(blocked on Wave 7 completion)*
+
 - [ ] 04-09-PLAN.md — Cutover prep: canonical-host decision, `.htaccess` promotion diff, go/no-go sweep (wave 8)
+
+**Wave 9** *(blocked on Wave 8 completion)*
+
 - [ ] 04-10-PLAN.md — Cutover execution, the sweep against the real domain, and launch verification (wave 9)
 
 ## Progress
