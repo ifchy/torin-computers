@@ -1,10 +1,11 @@
 ---
 phase: 4
 slug: hardening-cutover
-status: draft
+status: approved
 shadcn_initialized: false
 preset: none
 created: 2026-09-17
+reviewed_at: 2026-09-17
 inherits: .planning/phases/02-design-system-information-architecture/02-UI-SPEC.md
 ---
 
@@ -871,10 +872,19 @@ optional:
 
 ## UI Considerations
 
-Applicable state considerations resolved: **11 covered, 3 backstop, 1 unresolved**
+Applicable state considerations resolved: **15 covered, 6 backstop, 0 unresolved**
 
 > Empty-state and error-state **copy** lives in §Copywriting Contract. This section covers
 > state **coverage** and references those rows rather than restating them.
+>
+> **Provenance.** The 12 surfaces of §Surfaces In Scope were run through the
+> `ui-consideration-probe` taxonomy sweep after checker approval. The sweep proposed **70**
+> candidate considerations; 21 are resolved below and the remaining 49 are dismissed in
+> bulk under *Swept and dismissed*, each with a stated reason. Two probe classifications
+> were corrected by hand: the sweep under-covered the holiday banner (it saw only
+> `overflow`/`long-text` and missed the disabled state, which is the **shipped default**),
+> and it missed `partial` on the `<picture>` element, which is the entire purpose of that
+> element. Three rows carry a user decision recorded 2026-09-17.
 
 | Category | Element(s) | Status | Resolution / Reason |
 |----------|------------|--------|---------------------|
@@ -887,12 +897,44 @@ Applicable state considerations resolved: **11 covered, 3 backstop, 1 unresolved
 | loading | photo downscale in progress at submit | ✅ covered | Button label «Подготвяме снимките…», submit deferred, **10-second ceiling** then submit the originals. Never an indefinite wait, never a silently dropped photo |
 | loading | form submitting | ✅ covered | Button `disabled` + «Изпраща се…» (101.9px — narrower than the resting label, so the button cannot grow). With JS off there is no such state; the server-side rate limiter is the double-submit guard |
 | populated | photo list, 1–5 files | ✅ covered | One `.filelist` row per file; preview drawn from the **already-downscaled** bitmap (no second decode); name truncated with `min-width: 0` on the flex child so it actually shrinks |
+| populated | `kontakti.html` first paint — focal point | ✅ covered | **User decision 2026-09-17** (closes checker Dimension-2 FLAG): the **form's first field** is the primary anchor. A visitor who tapped «Пишете ни» has already declined to call, so the page opens on the thing they came to do. The phone list stays above the fold as the faster alternative but is not the focal element — it must not out-weight the form in size, colour or position |
 | zero-one-many | Telegram photo count | ✅ covered | 0 → `sendMessage`; 1 → `sendPhoto` with caption; 2–5 → `sendMessage` + `sendMediaGroup`. **`sendMediaGroup` refuses fewer than 2 items**, and "one photo of the cracked screen" is the single most likely submission — a handler that always calls `sendMediaGroup` fails on exactly the common case |
 | zero-one-many | contact page phone list | ✅ covered | Loops `$site['phones']` exactly as the footer does; renders identically for 1 or 5 numbers |
+| partial | WebP unsupported by the browser | ✅ covered | The entire point of `<picture>`: the browser selects `image/webp` or falls through to the retained JPEG. No script, no detection, no flash — the fallback is the same `<img>` that ships today, so a browser without WebP support sees exactly the current site. **Probe classification corrected by hand** — the sweep did not raise `partial` on this surface |
+| partial | JS enabled but `photo-resize.js` fails to load | ✅ covered | **User decision 2026-09-17: accepted as a documented residual.** The native file input still works and the server enforces every limit unconditionally, so nothing breaks; a 9 MB photo hits the 10 MB ceiling with no client-side warning and a 5-photo submission may exceed `post_max_size`, but the explicit oversized-POST row above names the corrective step, so the visitor is never left staring at a blank form. **No load-guard JS is to be added** — JS weight is itself a DESIGN-02 constraint this phase. The planner records this as an accepted assumption, not an open gap |
+| partial | `msg.html` reached without a submission | ✅ covered | The page is a static confirmation and is reachable directly. It must read as a confirmation without asserting that *this* visitor just submitted anything, and it carries `noindex` (D4 §S9) so it cannot be entered from search |
 | long-text | holiday banner message | 🧪 backstop | Capped at **120 code points** (counted in code points, not `strlen` bytes). Measured worst case at 360px: **5 lines / 172px**, which pushes homepage category card 1 below the fold. Accepted deliberately — a closure outranks the fold — but **the executor must re-measure with `scripts/render-check.sh` at 360 × 640 with a full-length message and record the number.** > 180px is a defect |
-| long-text | «Пишете ни» in the `.callbar` | 🧪 backstop | Computed to fit at every width 320–899px with ≥45px of slack, against the shipping «Пишете във Viber» which **overflows at ≤376px** (§Conflicts C-2). Advance-width arithmetic is not a render — **measure at 360 × 640 before merging** |
+| long-text | «Пишете ни» in the `.callbar` | 🧪 backstop | **Label confirmed by user 2026-09-17** (see §Conflicts C-1). Computed to fit at every width 320–899px with ≥45px of slack, against the shipping «Пишете във Viber» which **overflows at ≤376px** (§Conflicts C-2). Advance-width arithmetic is not a render — **measure at 360 × 640 before merging**, in the footer grid column as well as the callbar |
 | overflow | any viewport ≥ 320px | 🧪 backstop | `document.documentElement.scrollWidth <= window.innerWidth` must still hold at 360/560/900/1440 **on `kontakti.html`** with a populated `.filelist` carrying a long filename. New page, new component, not yet asserted |
-| partial | JS enabled but `photo-resize.js` fails to load | ⚠ unresolved | The file input still works and the server still enforces every limit, so nothing breaks — but a 9 MB phone photo then hits a 10 MB per-file ceiling with no client-side warning, and a 5-photo submission may exceed `post_max_size`. Mitigated by the explicit oversized-POST message above; **not** solved. Planner should treat as an explicit assumption, in the same family as Phase 2's "scripting enabled but `site.js` throws" residual |
+| partial | honeypot or time-trap fires on a genuine visitor | 🧪 backstop | A false positive silently discards a real enquiry — the one failure mode this component can produce that nobody would ever see. The trap must be exercised against a **real submission completed at human speed with autofill active** before merging; `autocomplete="off"` on the decoy is load-bearing precisely here. If the discard path cannot be made observable, log the rejection server-side so a lost enquiry leaves a trace |
+| partial | `tel:` instrumentation must not alter activation | 🧪 backstop | S10's seven anchors are shipping and correct; only instrumentation is added. `data-umami-event` is **forbidden** on `tel:`/`mailto:` (it `preventDefault()`s and re-navigates in `.finally()`, opening the dialer outside the user gesture). **The trap: a desktop manual test passes the defect** — verification must be on a real handset, or by asserting no `preventDefault` is registered on these anchors |
+| error | WebP sibling missing for a given JPEG | 🧪 backstop | 43 images gain siblings; a `<source>` pointing at a file that was never generated yields a browser that falls back correctly on some engines and shows nothing on others. Assert every `<source srcset>` resolves 200 across the built tree before cutover |
+
+### Swept and dismissed — 49 candidates
+
+The taxonomy sweep raises every category against every surface. These did not survive
+contact with the phase, each for a stated reason — recorded so a later reader can see they
+were considered rather than missed:
+
+- **`loading` on every server-rendered surface** (S2 page shell, S7, S9, S11, S12) — there
+  is no asynchronous fetch anywhere in this phase. Pages are rendered complete by PHP. The
+  only two moments that have a loading state are the photo downscale and the form submit,
+  and both are covered above.
+- **`empty` on S7, S11, S12** — the CTA slots, the terms blocks and the images are authored
+  content that always exists. An empty state there is a build defect, not a runtime state.
+- **`error` on S5, S7, S10** — consent refusal and CTA failure surface through the
+  field-level validation row; a `tel:` anchor has no error state the page can observe.
+- **`overflow` / `long-text` on S3, S5, S6, S9, S11** — governed by the single site-wide
+  overflow backstop above rather than restated per surface. S6 is invisible by contract and
+  cannot overflow anything.
+- **`zero-one-many` on S5, S7, S8** — singletons by construction: exactly one consent row,
+  exactly one result band rendered at a time, and five CTA slots that are authored in the
+  templates, not generated from data.
+- **`populated` on S2, S5, S8, S12** — the populated state *is* the resting state for these
+  surfaces and is fully specified by their component contracts (§C-2, §C-5, §C-8, §C-10).
+- **S10 returned `unclassified`** — the sweep could not classify seven bare anchors, which
+  is correct: they are not a component. Reviewed by hand and resolved as the
+  instrumentation backstop above.
 
 ---
 
@@ -901,7 +943,7 @@ Applicable state considerations resolved: **11 covered, 3 backstop, 1 unresolved
 Three measured departures. Each names what it departs from, the number that forced it, and
 what it would cost to go the other way.
 
-### C-1 — ⚠ **D4-17's CTA label does not fit, and D4-17's own stated rationale is what fails**
+### C-1 — ✅ **D4-17's CTA label does not fit, and D4-17's own stated rationale is what fails** — *resolved 2026-09-17*
 
 CONTEXT D4-17: *"«Изпратете запитване», linking to the contact page, replaces the Viber button
 in all four CTA slots… This preserves the call-first / write-second pairing the design is built
@@ -946,12 +988,14 @@ show it.
   `Изпратете запитване`"*. This resolution is more faithful to the inherited contract than
   D4-17 is.
 
-> **⚠ Requires owner/user sign-off.** D4-17 is a LOCKED decision and this changes the visible
-> string on five surfaces. The decision it rests on is preserved in full — the Viber button goes,
-> the CTA leads to the contact page, the pairing survives — but the label differs. **Confirm
-> before planning.** If the full label is insisted upon, the fallback is: «Изпратете запитване»
-> in the hero and category slots, «Пишете ни» in the callbar and footer, and the two-name
-> inconsistency accepted and recorded.
+> **✅ SIGNED OFF 2026-09-17 — «Пишете ни» in all five slots is approved.** D4-17 is a LOCKED
+> decision and this changes the visible string on five surfaces, so it was put to the user before
+> planning; the recorded fallback (split labels) was **not** taken. The decision D4-17 rests on is
+> preserved in full — the Viber button goes, the CTA leads to the contact page, the call-first /
+> write-second pairing survives — only the label differs. **This supersedes D4-17's label clause
+> and nothing else in D4-17.** `04-CONTEXT.md` remains canonical for the rest of that decision.
+>
+> The planner may now write the CTA swap plan. §C-6's dependency row for this item is closed.
 
 ### C-2 — Correction to `components.css:386` — the callbar sizing comment omits the icon
 
@@ -1018,7 +1062,7 @@ weekends, unstated on the page) is unaffected; this is only about the JSON.
 
 | Dependency | Blocks | Owner |
 |---|---|---|
-| **D4-17 label** (§Conflicts C-1) | the CTA swap plan | user / owner sign-off |
+| ~~**D4-17 label** (§Conflicts C-1)~~ **✅ RESOLVED 2026-09-17** | ~~the CTA swap plan~~ — unblocked | user signed off on «Пишете ни» in all 5 slots; «Изпратете запитване» retained as the `kontakti.html` h2 + submit label |
 | **Umami website ID and account** | the analytics tag, `data-website-id` | owner (D4-18 needs his sign-off — he asked for GA4) |
 | **`uslovia.html` new blocks** | CONTACT-06 | owner approval before launch — a public commitment |
 | **D4-06 host capability probe** | whether `mbstring` exists for the code-point cap in §C-1 | the phase's first plan |
@@ -1049,14 +1093,14 @@ recorded here so that "no third-party code" is not read as a stronger claim than
 
 ## Checker Sign-Off
 
-- [ ] Dimension 1 Copywriting: PASS
-- [ ] Dimension 2 Visuals: PASS
-- [ ] Dimension 3 Color: PASS
-- [ ] Dimension 4 Typography: PASS
-- [ ] Dimension 5 Spacing: PASS
-- [ ] Dimension 6 Registry Safety: PASS
+- [x] Dimension 1 Copywriting: PASS
+- [x] Dimension 2 Visuals: PASS
+- [x] Dimension 3 Color: PASS
+- [x] Dimension 4 Typography: PASS
+- [x] Dimension 5 Spacing: PASS
+- [x] Dimension 6 Registry Safety: PASS
 
-**Approval:** pending
+**Approval:** approved by gsd-ui-checker 2026-09-17 — 5 PASS, 1 FLAG (Dimension 2, closed by the focal-point decision recorded in §UI Considerations). 2 non-blocking recommendations, both resolved.
 
 ---
 
