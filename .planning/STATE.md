@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_phase: 4
-current_phase_name: Hardening & Cutover
+current_phase: 04
+current_phase_name: hardening-cutover
 status: executing
 stopped_at: Phase 4 UI-SPEC approved
-last_updated: "2026-09-17T17:47:00.122Z"
-last_activity: 2026-09-15
-last_activity_desc: Phase 03.5 complete, transitioned to Phase 4
+last_updated: "2026-09-17T19:18:48.651Z"
+last_activity: 2026-09-17
+last_activity_desc: Phase 04 execution started
 progress:
   total_phases: 5
   completed_phases: 4
@@ -23,18 +23,18 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-04)
 
 **Core value:** A visitor with a specific repair problem must immediately see that Torin fixes exactly that, and find a clear path to contact the shop.
-**Current focus:** Phase 03.5 — content-truth-revision (executed, NOT complete)
+**Current focus:** Phase 04 — hardening-cutover
 
 ## Current Position
 
-Phase: 4 — Hardening & Cutover
-Plan: Not started
-Status: Ready to execute
+Phase: 04 (hardening-cutover) — EXECUTING
+Plan: 1 of 10
+Status: Executing Phase 04
         live measurement. SC-1 stays PARTIAL because the sweep **confirmed** its defect.
 Next: **Phase 4 — Hardening & Cutover.** The gap-closure plan (03.5-08) that owned
 `src/remont-na-portove.html` is DONE, merged and live-verified. `scripts/truth-gate.js` was
 deliberately NOT amended — see F2 below; that remit carries forward, it is not a blocker.
-Last activity: 2026-09-15 — Phase 03.5 complete, transitioned to Phase 4
+Last activity: 2026-09-17 — Phase 04 execution started
         `03.5-TRUTH-AUDIT.md` completed
 
 Progress: [██████████] 100%
