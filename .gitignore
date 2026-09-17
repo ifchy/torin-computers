@@ -5,3 +5,12 @@ backups/
 
 # GSD executor worktrees — transient, created and removed per wave
 .claude/worktrees/
+
+# Phase 4 host-capability probe (D4-06). scripts/host-probe/run-probe.sh
+# materialises the token-substituted probe here for exactly as long as the
+# upload takes, then deletes it. The template it is generated FROM lives under
+# scripts/ and is committed; this instance carries a live access token and a
+# body that reports ini values, the extension list and filesystem paths, so it
+# must never reach a commit. Belt to the template's braces — P-10's real
+# mitigation is keeping the source out of src/ entirely.
+/src/hc-*.php
