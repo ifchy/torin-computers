@@ -557,8 +557,85 @@ rather than assumed. 04-02, 04-05 and 04-08 still depend on the 8.5 extension se
 needs the deploy first.
 
 ---
+
+# Stage A executed — mechanism proved, Step B disqualified (2026-09-19)
+
+The orchestrator ran Stage A. **The handler mechanism works:** `mod_fcgid` is present,
+`FcgidWrapper` is permitted in `.htaccess` on this host, the absolute wrapper path is
+correct, `.php` answers `x-powered-by: PHP/8.5.10`, and all 19 `.html` pages stayed on the
+known-good 5.2 handler with no 500s and no raw source. Staging the deploy did exactly what
+it was designed to do.
+
+**Then the probe disqualified Step B.** Six of nine extensions are absent on the 8.5 build
+— `gd`, `exif`, `fileinfo`, `curl`, `mbstring`, `ctype`. Only `openssl`, `hash` and
+`filter` survive. Selecting a PHP version and enabling its extensions are two separate
+panel operations; only the first was done.
+
+**Hard blocks:** `curl` -> 04-02 (tracer) and 04-05 (Telegram, D4-05); `gd` and `exif` ->
+04-03's photo pipeline; `fileinfo` -> upload MIME validation, which is a security control
+rather than a nicety. `ctype` is low (its uses are covered by `filter`, present).
+
+**Correction issued to the working assumption about `mbstring`.** It was proposed as the
+reason Step B was unsafe on its own. Measured instead of argued: **no file in `src/` calls
+any `mb_*` function**, and the tree's one escaping function, `htmlspecialchars()`, lives in
+`ext-standard`. The Bulgarian pages do not depend on mbstring. The hold is still correct —
+but `curl`/`gd`/`exif`/`fileinfo` are the reason, and getting that right matters, because
+holding 19 pages on an unpatched-since-2011 interpreter to wait for an extension nothing
+uses would be the wrong trade.
+
+## Second measured gate weakness — a scope failure, not a blind spot
+
+The `x-powered-by` finding was a gate that could not *see* a bad state. This one is
+different, and the distinction is the lesson.
+
+`handler-sweep.sh` is **not** blind here: a page calling a missing function would fatal,
+and with `display_errors = On` check 3 catches it. But its **scope** only ever asks "do
+today's pages still render?" — and since no current page touches the six missing
+extensions, it would have returned a clean `PASS 19/19` on a runtime that cannot resize an
+image, read EXIF, sniff a MIME type or open an HTTPS connection. The loss would have
+surfaced inside 04-02's tracer, which is precisely the failure RESEARCH §Summary says this
+plan exists to prevent.
+
+The correction is a second gate with a different scope, not more assertions bolted onto the
+first: `assert-capabilities.sh` checks capability, `handler-sweep.sh` checks rendering.
+Neither can answer the other's question.
+
+**The new checker shipped with a defect of its own, caught only by running it against the
+real body before trusting it.** Probe keys contain colons, so splitting on the first one
+parsed `ext:openssl          : yes` as the value `openssl : yes` — and every *present*
+extension was reported as a blocker. Its first run announced that `openssl`, `hash` and
+`filter` were missing while the body plainly said otherwise. A checker that invents
+failures is no more useful than one that misses them.
+
+## Probe defect fixed: D4-06 was silently un-answered
+
+`outbound:curl443 : FAIL ext-curl not loaded` is not a measurement of the network, it is
+the absence of one. Tying D4-06 to a single extension let a missing extension convert the
+phase's notification-channel decision from measured back to unknown. The probe now carries
+an independent `outbound:fopen443` test over the `https://` stream wrapper, needing only
+`allow_url_fopen` (`1`) and `openssl` (present on both builds), so D4-06 is answerable even
+if cURL never returns.
+
+## Confirmed good on 8.5
+
+`upload_max_filesize` `250M` and `post_max_size` `200M` **measured in effect**, not inferred
+— D4-13's 2M ceiling is genuinely gone and 04-03 needs no `.user.ini` work.
+`user_ini.filename` is now populated (`.user.ini`, ttl 300). `smtp:localhost:25` still
+refused, unchanged, so D4-11's mail leg needs the sendmail binary or an external relay.
+
+## Current state
+
+The server rests in Stage A: `.php` on 8.5, 19 `.html` pages on 5.2, stable and serving
+correctly. `src/.htaccess` in the working tree matches that Stage-A state and is
+deliberately left uncommitted; its **committed** state is the Step B payload, reached with
+`git checkout -- src/.htaccess`.
+
+Step B proceeds only when `scripts/host-probe/assert-capabilities.sh` exits `0` against a
+fresh probe body. Against the 2026-09-19 body: `FAIL — 7 blocker(s)`.
+
+---
 *Phase: 04-hardening-cutover*
-*Plan: 01 — INCOMPLETE. Repo-side complete; blocked on a deploy the executor cannot run.*
+*Plan: 01 — INCOMPLETE. Handler mechanism proved; Step B gated on the 8.5 extension set.*
 *Date: 2026-09-19*
 
 ## Self-Check: PASSED
