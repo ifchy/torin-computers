@@ -623,6 +623,29 @@ if cURL never returns.
 `user_ini.filename` is now populated (`.user.ini`, ttl 300). `smtp:localhost:25` still
 refused, unchanged, so D4-11's mail leg needs the sendmail binary or an external relay.
 
+## A committed claim was wrong, and the fix was structural
+
+An earlier revision of `04-HOST-CAPABILITIES.md` stated the 8.5 probe predated the
+self-deleting build. It did not. The body reached me through a relay that dropped its
+trailing `selfdelete : OK` line; I reasoned correctly from an incomplete input and landed
+on a false conclusion.
+
+What makes it worth recording is what the file already contained. `run-probe.sh --read`
+had **already written the complete body into `04-HOST-CAPABILITIES.md` at the moment of
+measurement**, with nothing in the copying path. So the file held two copies of one run —
+one machine-written and correct, one hand-transcribed and truncated — and they disagreed
+within a day of each other.
+
+The transcribed copy is deleted, the machine-written block is marked AUTHORITATIVE, and
+the analysis refers to it rather than restating it. **A transcription is a new observation
+with its own failure modes, not a reproduction of the original.** The rule in that file is
+now one machine-written record per run, analysis pointing at it, never a second copy.
+
+`assert-capabilities.sh` keeps its WARN-on-absent-`selfdelete` behaviour, but the
+justification was rewritten — it had been reasoned from the false premise. The real reason
+is the one this incident produced: an absent line means an older build **or a truncated
+body**, and the second is now measured rather than hypothetical.
+
 ## Current state
 
 The server rests in Stage A: `.php` on 8.5, 19 `.html` pages on 5.2, stable and serving
