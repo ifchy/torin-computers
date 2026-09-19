@@ -287,3 +287,29 @@ makes "renders correctly" and "was upgraded" genuinely different claims.
 `https://torin.bg/new/kontakti.html` returning 404 is CORRECT and is not a regression —
 `src/kontakti.html` does not exist yet; plan 04-02 creates it. It is excluded from the
 sweep for that reason, not overlooked.
+
+### The gate was run against a known-bad state BEFORE it was trusted — 2026-09-19
+
+`scripts/host-probe/handler-sweep.sh` was executed against the live subtree while it was
+still, definitionally, in the failed state (edit committed, not deployed, everything on
+5.2.17). A gate that has only ever been run against the state it is supposed to bless has
+not been tested; 03.5 spent a phase on exactly that lesson.
+
+```
+bash scripts/host-probe/handler-sweep.sh
+  -> FAIL  about                     PHP/5.2.17   STILL-ON-5.2
+     FAIL  ekran-klaviatura-portove  PHP/5.2.17   STILL-ON-5.2
+     ... (all 19)
+     FAIL — 19 of 19 page(s) failed at least one assertion.   EXIT=1
+```
+
+**The important detail is which assertion fired.** Every one of the 19 pages returned
+`200`, with zero literal PHP open tags and zero warning/fatal strings in the body. Checks
+1, 2 and 3 — the three the plan specified — **all passed on all 19 pages, in a state where
+the upgrade had not happened at all.** Only check 4, the `x-powered-by` runtime assertion
+added because of the `!mod_fcgid` fail-safe, distinguished it.
+
+Had the sweep shipped with only the plan's three assertions, it would have reported a
+clean 19/19 PASS against a completely unchanged server. That is not a hypothetical
+weakness in the gate; it is a measured one, recorded here with the command that produced
+it.
