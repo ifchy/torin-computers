@@ -230,12 +230,12 @@ Plans:
   4. `robots.txt` and `sitemap.xml` exist on the live site and have been submitted to Search Console.
   5. The redesigned site is live at torin.bg on `bell.host.bg` at the same URLs, with `.htaccess`, the Search Console verification file, favicon, and `robots.txt` all confirmed intact post-cutover, and Search Console shows no new 404s or ranking drops in the days following launch.
 
-**Plans**: 10 plans, 9 waves (near-sequential by construction — the phase spine is a single dependency chain with exactly one parallel pair, 04-04 ∥ 04-05 in wave 4, which share no file; every other pairing was ruled out by a shared file, and that one pair is why the wave count is 9 rather than 10)
+**Plans**: 1/10 plans executed
 
 Plans:
 **Wave 1**
 
-- [ ] 04-01-PLAN.md — Host capability probe and PHP runtime upgrade, tested on `/new/` first (wave 1)
+- [x] 04-01-PLAN.md — Host capability probe and PHP runtime upgrade, tested on `/new/` first (wave 1)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -281,4 +281,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 3.5 → 4
 | 2. Design System & Information Architecture | 9/9 | Complete    | 2026-08-09 |
 | 3. Content & Trust-Signal Build-Out | 9/9 | Built — partly superseded | 2026-08-26 |
 | 3.5. Content Truth Revision | 8/7 | Complete    | 2026-09-15 |
-| 4. Hardening & Cutover | 0/10 | Planned | - |
+| 4. Hardening & Cutover | 1/10 | In Progress|  |
