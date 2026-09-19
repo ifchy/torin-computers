@@ -83,7 +83,76 @@ RewriteRule ^za-bateriite\.html$ zalivane-technosti.html [R=301,L]
 	Header set X-Robots-Tag "noindex, nofollow"
 </IfModule>
 
-AddHandler application/x-httpd-php52 .html .htm
+# ── PHP runtime handler (D4-01, D4-02 · plan 04-01 Task 3) ─────────────────
+#
+# THIS BLOCK IS THE ONLY REASON THE 19 .html PAGES IN THIS SUBTREE EXECUTE.
+# Every page here is PHP wearing a .html extension - a Phase 1 decision that kept
+# the legacy URLs intact - so the mapping below is not an optimisation. It is the
+# difference between a rendered site and 19 pages of readable source.
+#
+# WHERE THE WRAPPER PATH COMES FROM. cPanel -> Select PHP Version, set to 8.5 for
+# the directory public_html/new/ ONLY (root deliberately untouched, D4-03),
+# performed 2026-09-17. That action generated php.fcgi and php85-fcgi.ini in this
+# directory. php.fcgi execs /opt/cpanel/ea-php85/root/usr/bin/php-cgi with -c
+# pointing at php85-fcgi.ini, which makes that ini - not .user.ini, not php_value
+# - the lever for every limit in this subtree.
+#
+# THE PATH IS ABSOLUTE, SO A DIRECTORY MOVE SILENTLY INVALIDATES IT. At the Phase
+# 4 root cutover it becomes /home/torin/public_html/php.fcgi, and the panel has to
+# be pointed at the root directory first so that wrapper exists at all. That is a
+# NAMED STEP in the cutover checklist, not a discovery for whoever runs it: a
+# stale wrapper path does not warn, it 500s the entire subtree.
+#
+# WHY THE EXTENSION LIST IS WIDER THAN THE PANEL'S. SuperHosting's PHP manager
+# does not write a handler block itself - it hands you one and asks you to paste
+# it in. What it hands you covers .php and nothing else:
+#
+#     AddHandler fcgid-script .php
+#     FcgidWrapper /home/torin/public_html/new/php.fcgi .php
+#
+# Paste that verbatim, then follow the host's other instruction - "remove any
+# existing AddHandler line for a PHP version" - and every .html page in this
+# directory is left matching NO handler and is served as source (RESEARCH P-3).
+# The panel hands you the shape of the failure and trusts you to notice the
+# extension list. Hence .html and .htm below, and hence the fallback after it.
+#
+# FcgidWrapper TAKES ONE SUFFIX PER DIRECTIVE - there is no list form - so three
+# extensions need three directives even though they share one wrapper.
+#
+# php_value is FORBIDDEN anywhere in this file. Under FastCGI it is not merely
+# ineffective, it is a 500 for the whole subtree (04-PATTERNS, T-02-02). Limits
+# are changed in php85-fcgi.ini instead.
+<IfModule mod_fcgid.c>
+	AddHandler fcgid-script .php .html .htm
+	FcgidWrapper /home/torin/public_html/new/php.fcgi .php
+	FcgidWrapper /home/torin/public_html/new/php.fcgi .html
+	FcgidWrapper /home/torin/public_html/new/php.fcgi .htm
+</IfModule>
+
+# FAIL-SAFE. This is a deliberate deviation from this task's own acceptance
+# criterion ("zero non-comment occurrences of x-httpd-php52"), and the reason is
+# worth more than the criterion.
+#
+# The criterion's intent is to get off PHP 5.2, and this does not fight it: the
+# line fires ONLY when mod_fcgid is absent, which is a broken-config state rather
+# than a runtime anyone selected. Without it, an absent mod_fcgid means the block
+# above is skipped entirely, .html matches no handler, and 19 pages are served as
+# PHP source to the public - the highest-severity outcome in this plan's register
+# (T-04-03). With it, that outcome is structurally impossible: the worst case
+# becomes "still on 5.2", which is exactly where we already were.
+#
+# THIS MUST NEVER BE ALLOWED TO PASS AS SUCCESS. A fallback that quietly keeps
+# 5.2 alive is precisely the sort of green check this project has already shipped
+# once. Verification for this change therefore asserts the RUNTIME and not merely
+# that pages render: x-powered-by must not report 5.2. That header is present and
+# load-bearing because expose_php = On in php85-fcgi.ini (line 286, read
+# 2026-09-17).
+#
+# Delete this block at the root cutover (04-10) once 8.5 is proven in production.
+# It is a transition guard, not a permanent feature.
+<IfModule !mod_fcgid.c>
+	AddHandler application/x-httpd-php52 .html .htm
+</IfModule>
 
 # ── Phase 2 (plan 02-01): compression + caching spike (DESIGN-02, RESEARCH N-6) ──
 #

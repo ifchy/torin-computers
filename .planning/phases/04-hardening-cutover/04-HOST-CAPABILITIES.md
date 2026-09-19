@@ -164,8 +164,19 @@ exec /opt/cpanel/ea-php85/root/usr/bin/php-cgi -c ${DEFAULTPHPINI}
 That discloses the account home path, the panel's ini-scan directory and the exact PHP
 build path. `php85-fcgi.ini` is a full 44 KB configuration dump. Neither is catastrophic
 alone, but both are gratuitous and neither is anything the panel asked for — it created
-them without an access rule. Task 3 adds a `<Files>` denial for both in the same commit
-as the handler block (deviation Rule 2).
+them without an access rule, and the panel regenerates them on every version change.
+
+**DEFERRED, deliberately — not fixed in Task 3.** The obvious fix is a `<FilesMatch>`
+denial in `src/.htaccess`, and it was written and then pulled back out. Both available
+authorization syntaxes (`Require all denied` on 2.4, `Order`/`Deny` on 2.2) need an
+`AllowOverride` grant this host has not been observed to give: the file's existing
+directives only prove `FileInfo`, not `AuthConfig` or `Limit`. An `<IfModule>` guard does
+NOT protect against that — the module is present; it is the override permission that would
+be missing — so a wrong guess is a 500 for the whole subtree, which is the exact failure
+class (T-02-02) the handler change itself has to be verified against. Bundling an untested
+authz directive into the one commit that decides whether 19 pages execute would make a
+failure ambiguous between two causes. One concern per change: the denial ships separately,
+after the handler cutover is proven. Logged in `deferred-items.md`.
 
 ### FINDING 4 — the 8.5 ini is already far more generous than 5.2's, and D4-13's ceiling is gone
 
@@ -233,3 +244,46 @@ grep -rnE 'create_function|\beach\s*\(|\bereg[i]?\s*\(|\bsplit\s*\(|mysql_[a-z]+
 Zero occurrences, including the 8.0-only removals D4-01's original grep predates
 (`create_function`, `money_format`, curly-brace string offsets). `short_open_tag = On` in
 the 8.5 ini, so even the short-tag rule the tree already follows is not load-bearing.
+
+---
+
+## Handler cutover — repo-side edit landed, NOT YET DEPLOYED, NOT YET VERIFIED
+
+**Status as of 2026-09-19: `src/.htaccess` carries the new handler block. The server does
+not. Nothing below has been measured.** This section exists so that the gap is legible;
+it is replaced by measured output once the deploy runs.
+
+Live state, re-confirmed immediately before the edit was committed:
+
+```
+curl -sS -D - -o /dev/null https://torin.bg/new/index.html
+  -> HTTP/2 200 · x-powered-by: PHP/5.2.17
+curl -sS -D - -o /dev/null https://torin.bg/new/includes/site-config.php
+  -> HTTP/2 200 · x-powered-by: PHP/5.2.17
+```
+
+The executor cannot deploy: `scripts/deploy-new.sh` is refused by the permission
+classifier on any real upload. (It is NOT refused outright — it runs as far as credential
+resolution and the upload loop, and is denied at the upload itself. The Phase 3 note that
+records it as flatly "denied to subagents" is imprecise; both observations are recorded in
+`run-probe.sh`'s header rather than one being overwritten.)
+
+### What must be asserted after the deploy, and why status codes are not enough
+
+The gate is the **runtime**, not the rendering. Three separate failures all produce pages
+that look fine to a status-code check:
+
+| Failure | What a status check sees | What catches it |
+|---|---|---|
+| `mod_fcgid` absent → the `!mod_fcgid` fallback fires | 19x `200`, pages render perfectly | `x-powered-by` still reports `5.2.17` |
+| handler maps but source is served | `200` with a full body | literal `<?php` present in the body |
+| PHP fatals with `display_errors = On` | `200` with a body | `Fatal error` / `Warning` present in the body |
+
+So the sweep asserts, per page: status `200`, **zero** literal PHP open tags in the body,
+**zero** `Warning:`/`Fatal error:` strings, and `x-powered-by` **not** matching `PHP/5.2`.
+The first three were in the plan; the fourth is added here because the fail-safe fallback
+makes "renders correctly" and "was upgraded" genuinely different claims.
+
+`https://torin.bg/new/kontakti.html` returning 404 is CORRECT and is not a regression —
+`src/kontakti.html` does not exist yet; plan 04-02 creates it. It is excluded from the
+sweep for that reason, not overlooked.
