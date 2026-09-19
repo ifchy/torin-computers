@@ -112,6 +112,12 @@ check_ext mbstring "multibyte string handling — NO current caller in src/ (mea
 check_ext hash     "spam-guard timestamp signing (04-05)"
 check_ext ctype    "validation helpers — low: filter/preg cover its uses, restore for completeness"
 check_ext filter   "filter_var email validation (04-05)"
+# The only extension the CURRENT 19 pages actually depend on: jsonld.php calls
+# json_encode() on every page for the LocalBusiness/BreadcrumbList payloads.
+# Compiled in and undisablable on PHP 8, so this should never fail — it is here
+# because the original list was built from what future plans need, and nobody
+# checked what the site already uses.
+check_ext json     "jsonld.php structured data on EVERY page — local SEO payload"
 
 echo
 

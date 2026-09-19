@@ -66,7 +66,15 @@ echo "version              : " . phpversion()    . "\n";
 // ONLY under CGI/FastCGI (04-RESEARCH.md P-5).
 echo "sapi                 : " . php_sapi_name() . "\n";
 
-$torin_exts = array('gd', 'exif', 'fileinfo', 'curl', 'openssl', 'mbstring', 'hash', 'ctype', 'filter');
+// 'json' is here because jsonld.php calls json_encode() on EVERY page to emit
+// the LocalBusiness and BreadcrumbList payloads — it is the only extension the
+// CURRENT pages depend on, and the original list omitted it. That list was
+// derived from what 04-02/04-03/04-05 will need and nobody asked what the site
+// already uses. (On PHP 8 json is compiled in and cannot be disabled, so this
+// should always pass; a gate that only checks the things you remembered to
+// worry about is how the 8.5 extension collapse went unnoticed until a probe
+// happened to look.)
+$torin_exts = array('gd', 'exif', 'fileinfo', 'curl', 'openssl', 'mbstring', 'hash', 'ctype', 'filter', 'json');
 foreach ($torin_exts as $torin_ext) {
 	echo str_pad("ext:" . $torin_ext, 21) . ": " . (extension_loaded($torin_ext) ? 'yes' : 'NO') . "\n";
 }
@@ -78,7 +86,13 @@ $torin_inis = array(
 	'upload_max_filesize', 'post_max_size', 'max_file_uploads',
 	'max_input_vars', 'memory_limit', 'max_execution_time',
 	'allow_url_fopen', 'user_ini.filename', 'user_ini.cache_ttl',
-	'sendmail_path', 'SMTP', 'smtp_port'
+	'sendmail_path', 'SMTP', 'smtp_port',
+	// display_errors decides whether a PHP warning is rendered INTO the page for
+	// a visitor. On the live root that is not cosmetic: mailer.php reads
+	// $_POST keys with no isset() and then calls header("Location: msg.html"),
+	// so any rendered warning means "headers already sent" and the redirect —
+	// the shop's lead confirmation — breaks. Measured, never assumed.
+	'display_errors', 'error_reporting'
 );
 foreach ($torin_inis as $torin_ini) {
 	echo str_pad("ini:" . $torin_ini, 21) . ": " . var_export(ini_get($torin_ini), true) . "\n";

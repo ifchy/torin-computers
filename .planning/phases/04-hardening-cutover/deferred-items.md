@@ -24,3 +24,35 @@ two causes.
 **When:** after the handler cutover is verified, as its own deploy. Also applies at the
 root cutover (04-10), where the same two files will be generated in `public_html/`.
 
+## LIVE VULNERABILITY — email header injection in the production `mailer.php`
+
+**Found:** 2026-09-19, plan 04-01, while reading `site-current/mailer.php` to assess whether
+it survives a PHP 8.5 account-default switch.
+**Severity:** high. **Live on the production site right now**, independent of PHP version.
+**Not introduced by this phase, and not fixable from this phase** — `deploy-new.sh` writes
+only to `public_html/new/` and refuses everything else, by design.
+
+`site-current/mailer.php:83-84`:
+
+```php
+$headers =  "From: <$email>\r\n";
+$headers .= "Content-type: text/html; charset=utf-8\r\n";
+mail("office@torin.bg", "...", $m2, $headers);
+```
+
+`$email` is `htmlentities($_POST['mail'], ENT_QUOTES, 'UTF-8')`. **`htmlentities()` does not
+strip CR or LF** — it encodes `< > & " '` and nothing else. A submitted address containing
+`\r\nBcc: ...` is therefore concatenated straight into the additional-headers argument of
+`mail()`, which PHP does not sanitise (its injection guards cover `to` and `subject`, not
+`additional_headers`). The shop's contact form is usable as a mail relay, and any resulting
+spam is sent from the shop's own domain and IP.
+
+**Why it is recorded here rather than fixed:** the live root is outside every deploy path
+this project has, and changing it is a deliberate act with its own rollback story. It is
+recorded because (a) it is a genuine live finding, (b) it is an argument for not letting the
+cutover slip indefinitely, and (c) 04-05 replaces this endpoint entirely with a hardened one
+— the fix already exists in the plan; what matters is that the exposure window is a known
+quantity rather than a surprise.
+
+**Whoever ships the cutover should treat retiring this file as security work, not cleanup.**
+

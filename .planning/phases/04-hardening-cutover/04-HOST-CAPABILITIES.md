@@ -577,3 +577,149 @@ FAIL — 7 blocker(s). Step B must NOT proceed.
 
 Six missing extensions plus the unanswered outbound check. That is the current state, and
 it is the number that has to become zero.
+
+---
+
+## Account-default PHP switch — verification of the proposed ordering (2026-09-19)
+
+The host constraint: cPanel exposes extension management only for the **account-default**
+PHP version, currently 5.2, so the apparent route to the six missing extensions is to make
+8.5 the account default. The concern raised was that doing so could stop
+`AddHandler application/x-httpd-php52 .html .htm` resolving and serve 19 pages of source.
+The proposal was to invert: land Step B first, so `/new/` no longer depends on that handler.
+
+### Claim 1 — is `FcgidWrapper` independent of the account-default version? **YES. Verified.**
+
+```
+curl -sS https://torin.bg/new/php.fcgi
+```
+```
+#!/bin/bash
+
+PHP_INI_SCAN_DIR=/home/torin/.sh.phpmanager/php85.d
+export PHP_INI_SCAN_DIR
+
+DEFAULTPHPINI=/home/torin/public_html/new/php85-fcgi.ini
+exec /opt/cpanel/ea-php85/root/usr/bin/php-cgi -c ${DEFAULTPHPINI}
+```
+
+The wrapper **hardcodes an absolute path to the 8.5 binary**
+(`/opt/cpanel/ea-php85/root/usr/bin/php-cgi`) and an absolute path to its ini. It performs
+no lookup of "the account's PHP", reads no version variable, and consults nothing the panel
+could repoint. After Step B, `/new/` executes 8.5 because that path is baked into a file on
+disk. The account-default setting cannot reach it.
+
+This is the single fact the whole inversion rests on, and it is read out of the wrapper
+itself rather than inferred from cPanel's documented behaviour.
+
+### Claim 2 — is the `x-httpd-php52` line inert once `mod_fcgid` is present? **YES.**
+
+The one non-comment occurrence sits inside `<IfModule !mod_fcgid.c>`. Stage A proved
+`mod_fcgid` **is** present on this host (`.php` answered `PHP/8.5.10` through the wrapper),
+so the guard evaluates false and Apache never reads the directive.
+
+What happens to it when the account default changes: **nothing.** `<IfModule>` tests whether
+an Apache *module* is loaded, which is a function of the server's Apache build, not of which
+PHP version cPanel has nominated for the account. Changing the default cannot load or unload
+`mod_fcgid`, so the guard's result does not move. The line stays dead.
+
+It is worth being exact about what it protects against after Step B: if `mod_fcgid` ever
+disappeared, `.html` would fall back to the php52 handler, and if *that* had also stopped
+resolving (because the default moved to 8.5) the result is a **500 or an unhandled type —
+not source disclosure**, because a handler that is configured-but-unresolvable does not
+degrade to "serve the file as text". The dangerous state remains the one the fallback
+exists to prevent: no handler matching `.html` at all.
+
+### Claim 3 — does Step B need any of the six missing extensions? **NO. Verified exhaustively.**
+
+Rather than re-grep for the six, every function call in `src/` was enumerated:
+
+```
+grep -rhoE '\b[a-z_][a-z0-9_]*\s*\(' src/ --include='*.php' --include='*.html' | sort -u
+```
+
+After discarding prose words from comment blocks, the complete set of PHP functions this
+site calls is:
+
+`array` · `array_merge` · `array_slice` · `basename` · `count` · `date` · `dirname` ·
+`echo` · `empty` · `file_exists` · `filemtime` · `htmlspecialchars` · `in_array` ·
+`is_array` · `isset` · `json_encode` · `number_format` · `rawurlencode` · `require_once` ·
+`setcookie` · `str_replace` · `trim`
+
+Every one is core/`ext-standard`. **Step B is extension-independent**, so the handler
+cutover and the extension problem are genuinely separable.
+
+**One thing this enumeration caught that the targeted grep did not:** `json_encode()`, in
+`includes/jsonld.php`, called on **every page** to emit the `LocalBusiness` and
+`BreadcrumbList` structured data. `json` is the only extension the *current* site depends on
+— and the probe never checked it, because the extension list was built from what 04-02,
+04-03 and 04-05 will need. Nobody asked what the site already uses. `json` is compiled into
+PHP 8 and cannot be disabled, so this was never going to fail; the point is that a gate
+which only checks the things someone remembered to worry about is precisely how six
+extensions went missing without anything objecting. `json` is now in the probe and in
+`assert-capabilities.sh`, along with `display_errors` and `error_reporting`.
+
+### Scope of `php85-fcgi.ini` — `/new/` ONLY. Verified.
+
+The wrapper passes `-c /home/torin/public_html/new/php85-fcgi.ini`, and that wrapper is
+invoked only by the `FcgidWrapper` directive in `/new/.htaccess`. Nothing else on the
+account routes through it. Confirmed by absence at the root:
+
+```
+curl -o /dev/null -w '%{http_code}' https://torin.bg/php.fcgi        -> 404
+curl -o /dev/null -w '%{http_code}' https://torin.bg/php85-fcgi.ini  -> 404
+```
+
+So the `display_errors = On` recorded in FINDING 4 is a `/new/` fact and does **not**
+currently touch the live root.
+
+**What root would use after an account-default switch is NOT KNOWN and must not be guessed.**
+It would fall to whatever ini cPanel's default handler uses for ea-php85 — plausibly the
+system `/opt/cpanel/ea-php85/root/etc/php.ini`, where `display_errors` is usually `Off`,
+but "usually" is not a measurement and this file does not record those.
+
+### Why that unknown matters: `site-current/mailer.php` on 8.5
+
+Read in full. On the **normal path it is 8.5-safe**: no `ereg*`, `split`, `mysql_*`,
+`create_function`, `each`, `$HTTP_*_VARS`, `money_format` or curly-brace string offsets. It
+calls `htmlentities`, `date`, `mail`, `header` — all present in 8.5.
+
+The conditional risk is real but narrower than feared. `mailer.php:3-6` reads
+`$_POST['name']`, `['mail']`, `['mobile']`, `['message']` with no `isset()`. On PHP 8 a
+missing key is `E_WARNING` (it was `E_NOTICE` on 5.2, suppressed by default). If
+`display_errors` is On at the root, that warning is printed at line 3 — **before**
+`header("Location: msg.html")` at line 95 — producing "headers already sent" and a broken
+redirect.
+
+But a real browser submission of that form sends all four fields, as empty strings if blank,
+so the keys exist and no warning fires. The failure mode is confined to requests that omit
+fields: bots, scanners, direct GETs. Those already trigger a junk `mail()` call today on 5.2;
+on 8.5 with `display_errors` On they would additionally render a warning instead of
+redirecting. **That is a degradation of an already-degenerate path, not a loss of the lead
+channel.** It should still be measured rather than tolerated on faith.
+
+**Separately, and more seriously: reading this file surfaced a live email-header-injection
+vulnerability in it** — `$headers = "From: <$email>\r\n"` where `$email` is only
+`htmlentities()`-escaped, which does not strip CR/LF. That is live on production now,
+independent of any PHP version, and is logged in `deferred-items.md`. It is not in scope to
+fix from this phase (no deploy path reaches the live root) but it is an argument against
+letting the cutover drift.
+
+### Verdict
+
+**The inversion is mechanically sound and is adopted: Step B goes first.** All three of its
+load-bearing claims verified. Step B is extension-independent, removes `/new/`'s dependence
+on `x-httpd-php52` entirely, and is worth doing on its own merits regardless of what happens
+to the account default.
+
+**The account-default switch is NOT endorsed as the following step.** It is the one action
+in this sequence whose blast radius is the live site's only lead channel, and it would be
+taken to fix a problem confined to a staging subtree — inverting D4-02's founding principle
+that the risky change is proven on `/new/` first. The unexplored option should be tried
+first: **ask SuperHosting to enable `curl`, `gd`, `exif`, `fileinfo`, `mbstring` and `ctype`
+for `ea-php85` without changing the account default.** These are EasyApache packages the
+provider installs server-side; the account-level selector only toggles what is already
+installed, which is consistent with the observation that `curl`, `exif` and `ctype` do not
+appear in the 5.2 list at all while the 5.2 probe reports all three loaded — the selector
+lists optional modules, not compiled-in ones. A support ticket has zero blast radius and
+costs a day.
