@@ -12,6 +12,54 @@ longer exists, but writing a live credential into a committed artefact is a
 habit worth not having.
 
 
+## ⛔ CUTOVER BLOCKERS — read before promoting anything to the root
+
+Two measured facts that must be acted on before `/new/` becomes the live root (04-09/04-10).
+They are at the top of this file on purpose: both were found by measurement, both are easy
+to carry into production unnoticed, and neither announces itself when it goes wrong.
+
+### BLOCKER 1 — `display_errors` is On in `php85-fcgi.ini`
+
+Measured on the final post-switch probe: `ini:display_errors : '1'` (with
+`error_reporting : '22519'`, which includes `E_WARNING`). **This is the only known-bad value
+in the entire measured set.**
+
+Any PHP warning is rendered INTO the page, for a visitor, filesystem paths included. It is
+deliberately left On for now because it is what lets `handler-sweep.sh` see a broken page
+rather than a silently empty one — but that trade stops being worth it the moment real
+customers are on the other end.
+
+**Action at cutover:** set `display_errors = Off` in the root's `php*-fcgi.ini` (and in
+`/new/`'s, if that directory survives). Verify by re-probing, not by reading the file.
+
+Note the near miss this already produced: the live root's `mailer.php` reads four `$_POST`
+keys with no `isset()`, then calls `header("Location: msg.html")`. On PHP 8 a missing key is
+`E_WARNING`, so with `display_errors` On that output would precede the redirect and break it
+with "headers already sent". The account-default switch to 8.5 did **not** trigger this —
+root's ini is separate from `/new/`'s and kept errors out of the body (measured below) — but
+the same file behind the `/new/` ini would behave differently. Do not let those two configs
+converge without turning this off.
+
+### BLOCKER 2 — there is no local MTA, on either PHP build
+
+`smtp:localhost:25 : FAIL Connection refused` on 5.2.17 AND on 8.5.10. Unchanged by the
+runtime upgrade because it was never a PHP problem.
+
+**04-05's email leg cannot use a local relay.** It needs the `sendmail` binary
+(`/usr/sbin/sendmail -t -i`, confirmed present) or authenticated remote SMTP. D4-11 should
+be resolved in favour of authenticated SMTP against a real mailbox — which is also what
+gives SPF/DKIM alignment, the thing CLAUDE.md flags as the reason raw `mail()` gets dropped.
+
+### Also live, and not fixable from this phase
+
+`site-current/mailer.php` carries a CRLF **email header injection** (`From: <$email>` with
+only `htmlentities()` escaping, which does not strip CR/LF). The production contact form is
+usable as a mail relay, sending from the shop's own domain and IP — a domain-reputation
+risk, not just a spam nuisance. Full write-up in `deferred-items.md`. 04-05 retires this
+endpoint; until then the exposure is live.
+
+---
+
 ## Probe run — 2026-09-17 — PRE-SWITCH (PHP 5.2.17)
 
 Command:
@@ -247,7 +295,22 @@ the 8.5 ini, so even the short-tag rule the tree already follows is not load-bea
 
 ---
 
-## Handler cutover — repo-side edit landed, NOT YET DEPLOYED, NOT YET VERIFIED
+## Handler cutover — DEPLOYED AND VERIFIED (superseded status, kept for the record)
+
+**RESOLVED 2026-09-19.** Step B is deployed and swept: `PASS — 19/19 pages: 200, no source
+leak, no PHP errors, not on 5.2`, every page reporting `PHP/8.5.10`. Re-run independently by
+the executor rather than accepted on report, since the sweep is Task 3's actual acceptance
+criterion.
+
+The original text of this section is kept below rather than deleted. It recorded a gap
+between a committed edit and an unchanged server, and the discipline that mattered was
+naming that gap instead of implying the commit had changed anything. Deleting the record of
+a correctly-declared unknown teaches nothing; superseding it in place shows the gap opening
+and closing.
+
+---
+
+*Original status, now superseded:*
 
 **Status as of 2026-09-19: `src/.htaccess` carries the new handler block. The server does
 not. Nothing below has been measured.** This section exists so that the gap is legible;
@@ -723,3 +786,152 @@ installed, which is consistent with the observation that `curl`, `exif` and `cty
 appear in the 5.2 list at all while the 5.2 probe reports all three loaded — the selector
 lists optional modules, not compiled-in ones. A support ticket has zero blast radius and
 costs a day.
+
+## Probe run — 2026-09-19 — FINAL, POST-ACCOUNT-DEFAULT-SWITCH (PHP 8.5.10) — AUTHORITATIVE
+
+The closing measurement for plan 04-01: account default moved to 8.5 and all six missing
+extensions enabled. Written by `run-probe.sh --read` straight from the response — not
+transcribed. **This is the record of record for the Phase 4 runtime.** Where anything else
+in this file or in any summary quotes the post-switch host, this block wins.
+
+Command:
+
+```
+curl -s 'https://torin.bg/new/hc-bd11d80ac76c46e4506b28d7291100d6.php?k=<32-hex-token>'
+```
+
+Response body, verbatim:
+
+```
+version              : 8.5.10
+sapi                 : cgi-fcgi
+ext:gd               : yes
+ext:exif             : yes
+ext:fileinfo         : yes
+ext:curl             : yes
+ext:openssl          : yes
+ext:mbstring         : yes
+ext:hash             : yes
+ext:ctype            : yes
+ext:filter           : yes
+ext:json             : yes
+ini:upload_max_filesize: '250M'
+ini:post_max_size    : '200M'
+ini:max_file_uploads : '20'
+ini:max_input_vars   : '5000'
+ini:memory_limit     : '256M'
+ini:max_execution_time: '600'
+ini:allow_url_fopen  : '1'
+ini:user_ini.filename: '.user.ini'
+ini:user_ini.cache_ttl: '300'
+ini:sendmail_path    : '/usr/sbin/sendmail -t -i'
+ini:SMTP             : 'localhost'
+ini:smtp_port        : '25'
+ini:display_errors   : '1'
+ini:error_reporting  : '22519'
+outbound:curl443     : OK http=401
+outbound:fopen443    : OK HTTP/1.1 401 Unauthorized
+sendmail binary      : yes
+smtp:localhost:25    : FAIL Connection refused
+selfdelete           : OK
+
+```
+
+## Probe cleanup — 2026-09-19 — final probe, self-deleted
+
+Fetched WITH the valid token, because a tokenless 404 is what a LIVE
+probe returns too and would prove nothing:
+
+```
+curl -s -o /dev/null -w '%{http_code}' 'https://torin.bg/new/hc-bd11d80ac76c46e4506b28d7291100d6.php?k=<32-hex-token>'
+404
+```
+
+---
+
+## Account-default switch to PHP 8.5 — executed 2026-09-19
+
+The executor verified the Step-B-first inversion and then recommended **against** the
+account-default switch, proposing a host support ticket instead (zero blast radius). The
+developer was given both options with the unknown-root-ini risk stated, judged the switch
+reversible, and chose it. Recorded as their call, made with the facts in hand — the
+recommendation is preserved above rather than rewritten to match the outcome, because a
+recommendation edited after the fact to agree with what happened is worth nothing next time.
+
+All six missing extensions were enabled in the same visit.
+
+### Order of operations, and why it was safe
+
+Step B landed **first**, while 5.2 was still the account default. After it, `/new/` routes
+`.html`/`.htm` through `FcgidWrapper /home/torin/public_html/new/php.fcgi`, whose script
+`exec`s a hardcoded `/opt/cpanel/ea-php85/root/usr/bin/php-cgi`. The staging subtree
+therefore stopped depending on `application/x-httpd-php52` entirely **before** anything
+touched the account default, so the switch could not strand it. That ordering was the whole
+point of the inversion and it held.
+
+### Live-site blast radius — baselined before, re-measured after
+
+Relayed by the orchestrator, who ran the two `mailer.php` POSTs. Recorded as **relayed, not
+executor-measured**: the executor deliberately did not exercise `mailer.php`, because
+`mail()` is called unconditionally at top level in that file and a bare request sends a real
+email to the shop.
+
+| Check | Before (5.2) | After (8.5) |
+|---|---|---|
+| `/`, `/index.html`, `/uslovia.html`, `/msg.html` | 200 | 200 |
+| `mailer.php` status | 302 | 302 |
+| `location` | `msg.html` | `msg.html` |
+| `content-length` | 0 | **0** |
+| `x-powered-by` | PHP/5.2.17 | PHP/8.5.10 |
+
+**`content-length: 0` holding across the switch is the answer to the question this file
+previously refused to guess at.** It is direct evidence that the root is NOT running with
+`display_errors` leaking into output: had it been, the undefined-array-key warnings from
+`mailer.php:3-6` would have appeared in the body and broken the redirect. Instead the
+redirect survives with an empty body on both runtimes. **Root's ini is separate from
+`/new/`'s, and it keeps errors out of the response.** That closes the unknown; it does not
+retire BLOCKER 1, which is about the `/new/` ini that would follow the site to the root if
+the two configs are ever merged.
+
+Independently re-confirmed by the executor after the switch (read-only, no side effects):
+
+```
+curl -sS -o /dev/null -w '%{http_code}' https://torin.bg/             -> 200
+curl -sS -o /dev/null -w '%{http_code}' https://torin.bg/uslovia.html -> 200
+curl -sS -o /dev/null -w '%{http_code}' https://torin.bg/msg.html     -> 200
+
+bash scripts/host-probe/handler-sweep.sh
+  -> PASS — 19/19 pages: 200, no source leak, no PHP errors, not on 5.2.
+```
+
+### `outbound:fopen443` earned itself on its first run
+
+The final probe answers D4-06 through **two independent mechanisms**:
+
+```
+outbound:curl443     : OK http=401
+outbound:fopen443    : OK HTTP/1.1 401 Unauthorized
+```
+
+The second test was added precisely because the previous run had reported
+`FAIL ext-curl not loaded` — an extension fact masquerading as a network result. D4-06 is
+now answered in a way that survives any single extension going missing again, which on this
+host is not a hypothetical. **D4-05 (Telegram as the primary notification channel) is
+cleared to proceed.**
+
+### Final measured state — every Phase 4 gate answered
+
+| Question | Answer | Gates |
+|---|---|---|
+| PHP version / SAPI | `8.5.10` / `cgi-fcgi` | D4-01, D4-02 |
+| `gd`, `exif`, `fileinfo` | all `yes` | 04-03 photo pipeline |
+| `curl`, `openssl` | both `yes` | 04-02, 04-05, D4-11 |
+| `mbstring`, `ctype`, `hash`, `filter`, `json` | all `yes` | 04-05 validation, current pages |
+| Outbound 443 | `OK` via **both** curl and fopen | D4-05, D4-06 |
+| Upload ceiling | `250M` / `200M`, 20 files | D4-13 — ceiling gone, no `.user.ini` needed |
+| `user_ini.filename` | `.user.ini`, ttl `300` | available, not required |
+| Mail transport | `sendmail` binary yes; localhost:25 **refused** | D4-11 → authenticated SMTP, **BLOCKER 2** |
+| `display_errors` | `1` in `/new/` — **BLOCKER 1** | 04-09 / 04-10 |
+
+Every row RESEARCH marked "probe" now has a measured value, and the staging tree runs a
+supported PHP with no page serving source.

@@ -19,9 +19,9 @@ provides:
 affects: [04-02, 04-03, 04-05, 04-08, 04-10]
 
 actuals:
-  tokens: 37000
+  tokens: 96000
   tasks: 3
-  commits: 5
+  commits: 12
 
 tech-stack:
   added: []
@@ -110,25 +110,63 @@ coverage:
     human_judgment: false
   - id: D6
     description: "Task 3 DEPLOYED and verified — 19 pages executing on PHP 8.5 with no source leakage"
-    verification: []
-    human_judgment: true
-    rationale: "NOT DONE. scripts/deploy-new.sh is refused by the permission classifier on any real upload, so the committed .htaccess is not on the server and the subtree is still on 5.2.17. Recorded as an unmeasured gap in 04-HOST-CAPABILITIES.md rather than claimed. Returned as a checkpoint with the exact staged deploy, assertions and rollback."
+    requirement: CONTACT-03
+    verification:
+      - kind: integration
+        ref: "handler-sweep.sh, re-run independently by the executor after deploy: PASS — 19/19 pages: 200, no source leak, no PHP errors, not on 5.2. Every page x-powered-by PHP/8.5.10."
+        status: pass
+      - kind: integration
+        ref: "Stage A proved the mechanism on .php alone before any .html page was moved: site-config.php -> x-powered-by PHP/8.5.10 while all 19 .html stayed on the 5.2 handler."
+        status: pass
+    human_judgment: false
   - id: D7
     description: "Post-switch re-measurement of extensions and ini values on the 8.5 runtime"
-    verification: []
-    human_judgment: true
-    rationale: "NOT DONE, and blocked behind D6 — a probe deployed before the handler cutover would itself be measuring 5.2. Tooling is ready and now self-cleaning: the probe unlinks itself after one request (feac63b), so the re-measure no longer ends on a human remembering to delete a live file. The 8.5 ini values were read out of the publicly-readable php85-fcgi.ini in the meantime and are labelled CONFIGURED, not in effect."
+    verification:
+      - kind: integration
+        ref: "Final probe, machine-written into 04-HOST-CAPABILITIES.md: all ten of gd/exif/fileinfo/curl/openssl/mbstring/hash/ctype/filter/json report yes; outbound 443 OK via BOTH curl443 and fopen443; selfdelete OK; probe 404 asserted with a valid token."
+        status: pass
+      - kind: other
+        ref: "assert-capabilities.sh -> PASS — Step B may proceed (twelve rows ok)"
+        status: pass
+    human_judgment: false
+  - id: D8
+    description: "Account-default PHP switch executed without harming the live site's lead channel"
+    verification:
+      - kind: integration
+        ref: "Live root baselined before and re-measured after: /, index, uslovia, msg all 200 on both; mailer.php 302 -> msg.html with content-length 0 on BOTH runtimes. The empty body across the switch is direct evidence root does not leak display_errors into output. Relayed by orchestrator (the executor deliberately did not exercise mailer.php — mail() is unconditional at top level)."
+        status: pass
+      - kind: integration
+        ref: "Executor re-confirmed read-only after the switch: root/, uslovia.html, msg.html all 200."
+        status: pass
+    human_judgment: false
 
-duration: 25min + 45min (continuation)
+duration: 25min + ~2h (continuation, incl. 3 human/orchestrator round-trips)
 completed: 2026-09-19
-status: in-progress
+status: complete
 ---
 
 # Phase 04 Plan 01: Host Capability Probe & PHP Runtime Upgrade — Summary
 
-**All three tasks are authored, verified as far as they can be without a deploy, and committed: the host is measured on 5.2, the cPanel 8.5 switch is recorded and independently verified, and `src/.htaccess` now carries the fcgid handler block with a fail-safe that makes raw-source disclosure structurally impossible — but the edit is NOT on the server, so the subtree is still running PHP 5.2.17.**
+**All 19 staging pages now execute on PHP 8.5.10 with no source leakage, no PHP errors and every host unknown the phase was gated on answered by a live measurement — reached through a staged cutover that proved the handler mechanism on `.php` alone before betting a single `.html` page on it.**
 
-## Status: INCOMPLETE — repo-side complete, blocked on a deploy
+## Status: COMPLETE
+
+`PASS — 19/19 pages: 200, no source leak, no PHP errors, not on 5.2.` Re-run independently
+by the executor rather than accepted on report, because that sweep is Task 3's actual
+acceptance criterion and this plan has twice found gates that passed on broken states.
+
+The site moved off an interpreter unpatched since 2011, and every row RESEARCH marked
+"probe" now carries a measured value with the command that produced it.
+
+### Earlier status, superseded
+
+The sections below were written while the plan was blocked and are kept in sequence rather
+than rewritten. They record two gaps that were correctly declared as gaps — an undeployed
+edit, and an unmeasured runtime — and the discipline that mattered was naming them instead
+of implying otherwise. Editing that history to look like a straight line would delete the
+only evidence that the unknowns were handled honestly.
+
+## Historical status: INCOMPLETE — repo-side complete, blocked on a deploy
 
 **Continuation run, 2026-09-19.** Tasks 2 and 3 were executed in this session on top of
 the prior executor's Task 1. Task 1's original narrative is preserved below unchanged.
@@ -656,10 +694,6 @@ deliberately left uncommitted; its **committed** state is the Step B payload, re
 Step B proceeds only when `scripts/host-probe/assert-capabilities.sh` exits `0` against a
 fresh probe body. Against the 2026-09-19 body: `FAIL — 7 blocker(s)`.
 
----
-*Phase: 04-hardening-cutover*
-*Plan: 01 — INCOMPLETE. Handler mechanism proved; Step B gated on the 8.5 extension set.*
-*Date: 2026-09-19*
 
 ## Self-Check: PASSED
 
@@ -679,3 +713,156 @@ b876790 332960f d17c851 feac63b 0c74370 5d2b7e6   all resolve
 Note what this self-check does NOT assert: that any of it is deployed. `src/.htaccess`
 existing and being committed is not the same claim as the server running it, and this
 plan's remaining work is entirely on the far side of that distinction.
+
+---
+
+# Plan closed — 2026-09-19
+
+## Step B deployed: 19/19 on PHP 8.5.10
+
+```
+bash scripts/host-probe/handler-sweep.sh
+  -> PASS — 19/19 pages: 200, no source leak, no PHP errors, not on 5.2.
+```
+
+Every page reports `PHP/8.5.10`. Re-run by the executor after deploy rather than accepted on
+report — this plan found two gates that passed on broken states, so its own closing evidence
+is not taken second-hand.
+
+## The staged cutover was the thing that worked
+
+Stage A put `.php` on the 8.5 wrapper while all 19 `.html` pages stayed on the known-good 5.2
+handler. It cost one extra round-trip and returned three things a one-shot deploy would not
+have:
+
+1. **Proof of the mechanism** — `mod_fcgid` present, `FcgidWrapper` permitted in `.htaccess`,
+   absolute wrapper path correct — with a blast radius of files no visitor fetches.
+2. **The extension collapse**, found *before* 19 pages were on the new runtime.
+3. **The safe ordering for the account-default switch**, which depended on facts only Stage A
+   could establish.
+
+Had Step B gone out in one shot, it would have passed its sweep and the phase would have
+carried a runtime that could not resize an image or open an HTTPS connection into 04-02's
+tracer.
+
+## Account-default switch to 8.5
+
+The executor recommended **against** it and proposed a host support ticket instead (zero blast
+radius). The developer weighed both with the unknown-root-ini risk stated, judged it
+reversible, and chose the switch; all six extensions were enabled. **The recommendation is
+preserved unedited in `04-HOST-CAPABILITIES.md`** rather than rewritten to agree with the
+outcome — a recommendation revised after the fact to match what happened is worth nothing the
+next time one is needed.
+
+**Ordering held.** Step B landed first, while 5.2 was still the default, so `/new/` had
+already stopped depending on `application/x-httpd-php52` before anything touched the account
+default. That was the whole point of the inversion.
+
+### Live site, baselined before and re-measured after
+
+| Check | Before (5.2) | After (8.5) |
+|---|---|---|
+| `/`, `/index.html`, `/uslovia.html`, `/msg.html` | 200 | 200 |
+| `mailer.php` status / location | 302 → `msg.html` | 302 → `msg.html` |
+| `content-length` | 0 | **0** |
+| `x-powered-by` | PHP/5.2.17 | PHP/8.5.10 |
+
+`content-length: 0` holding across the switch **answers the question this plan refused to
+guess at**. Had root been leaking `display_errors`, the undefined-array-key warnings from
+`mailer.php:3-6` would have appeared in the body and broken the redirect. Root's ini is
+separate from `/new/`'s and keeps errors out of the response.
+
+The `mailer.php` rows are **relayed, not executor-measured** — deliberately. `mail()` is
+called unconditionally at top level in that file, so a bare request sends a real email to the
+shop. The executor's own post-switch checks were read-only.
+
+## Final measured state — every phase gate answered
+
+| Question | Answer | Gates |
+|---|---|---|
+| PHP / SAPI | `8.5.10` / `cgi-fcgi` | D4-01, D4-02 |
+| `gd` `exif` `fileinfo` | all `yes` | 04-03 |
+| `curl` `openssl` | both `yes` | 04-02, 04-05, D4-11 |
+| `mbstring` `ctype` `hash` `filter` `json` | all `yes` | 04-05, current pages |
+| Outbound 443 | `OK` via **both** curl and fopen | D4-05, D4-06 |
+| Uploads | `250M` / `200M`, 20 files | D4-13 — ceiling gone |
+| Mail transport | sendmail yes; localhost:25 **refused** | D4-11 |
+| `display_errors` | `1` in `/new/` | **blocker for 04-10** |
+
+`outbound:fopen443` earned itself on its first run: D4-06 is now answered by two independent
+mechanisms, so a single extension going missing can no longer turn a measured answer back
+into an unknown. **D4-05 is cleared.**
+
+## Carried forward — surfaced at the TOP of `04-HOST-CAPABILITIES.md`, not buried
+
+A `⛔ CUTOVER BLOCKERS` section now opens that file, positioned so it cannot be missed:
+
+1. **`display_errors = On`** in `php85-fcgi.ini` — the only known-bad value in the measured
+   set. Left on deliberately (it is what lets the sweep see a broken page), and that trade
+   expires the moment real customers are behind it. Fix at 04-09/04-10; verify by re-probing,
+   not by reading the file.
+2. **No local MTA on either build** — `smtp:localhost:25` refused on 5.2 *and* 8.5. 04-05's
+   email leg needs the `sendmail` binary or authenticated remote SMTP; D4-11 should resolve to
+   authenticated SMTP, which is also what buys SPF/DKIM alignment.
+3. **Live CRLF header injection in `site-current/mailer.php`** — `From: <$email>` with only
+   `htmlentities()` escaping, which does not strip CR/LF. The production form is usable as a
+   mail relay, sending from the shop's own domain and IP. Logged in `deferred-items.md`; 04-05
+   retires the endpoint, and until then the exposure is live.
+
+## What this plan learned about its own gates
+
+Three times a check passed, or would have passed, on a broken state. Each is recorded with
+the measurement that exposed it:
+
+1. **The sweep could not see a failed upgrade.** All 19 pages returned 200 with no source and
+   no warnings while still on 5.2.17 — the plan's three assertions all passed on an unchanged
+   server. Fixed by asserting the runtime (`x-powered-by`), and proven by running the gate
+   against a known-bad state before trusting it.
+2. **The sweep's *scope* was wrong** — a different defect, not the same one. It only asks "do
+   today's pages render?", and no current page calls any of the six missing extensions, so it
+   would have returned `PASS 19/19` on a crippled runtime. Fixed with a **second gate at a
+   different scope** (`assert-capabilities.sh`), not more assertions on the first.
+3. **`assert-capabilities.sh` itself shipped broken**, and only a real body exposed it: probe
+   keys contain colons, so splitting on the first one made every *present* extension read as
+   missing. It announced `openssl`, `hash` and `filter` absent while the body said otherwise.
+
+The through-line: **a gate is not trusted until it has been run against a case it should
+fail.** Enumerating every function in `src/` instead of grepping for the six also caught
+`json_encode` — used on every page by `jsonld.php`, the one extension the current site
+depends on, and absent from a probe list built entirely around what *future* plans need.
+
+And one evidence-chain lesson with a structural fix: a relayed probe body lost its trailing
+line, and the executor reasoned correctly to a false conclusion from an incomplete input. The
+machine-written record had been correct all along. **One machine-written record per run,
+analysis referring to it, never a second copy** — a transcription is a new observation with
+its own failure modes, not a reproduction.
+
+## Next phase readiness
+
+**Ready.** Every dependency 04-02, 04-03, 04-05 and 04-08 were gated on is measured and
+green. 04-03's hardest open question (the 2M upload ceiling) dissolved entirely — no
+`.user.ini` work needed. 04-02's tracer can be written against a runtime that is known, not
+assumed, which is precisely what RESEARCH §Summary said this plan had to deliver first.
+
+---
+*Phase: 04-hardening-cutover*
+*Plan: 01 — COMPLETE. 19/19 on PHP 8.5.10; every probe row measured.*
+*Date: 2026-09-19*
+
+## Self-Check: PASSED
+
+All nine claimed artefacts exist on disk; all commits resolve. The closing evidence was
+re-run by the executor, not quoted:
+
+```
+bash scripts/host-probe/handler-sweep.sh   -> PASS 19/19, EXIT=0
+curl https://torin.bg/                      -> 200
+curl https://torin.bg/uslovia.html          -> 200
+curl https://torin.bg/msg.html              -> 200
+git diff --stat src/.htaccess               -> (empty; at committed Step B state)
+```
+
+One claim in this summary is explicitly NOT executor-verified and is labelled as relayed
+wherever it appears: the `mailer.php` before/after rows. `mail()` is unconditional at top
+level in that file, so exercising it sends a real email to the shop. Not verifying it was
+the correct call, and saying so is part of the record.
