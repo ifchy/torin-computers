@@ -182,6 +182,13 @@ a:hover { color: var(--c-link-hover); }
 	--gutter: clamp(1rem, 4vw, 2rem);
 	--section-y: clamp(2.5rem, 6vw, 4.5rem);
 	--measure: 66ch;
+	/* Phase 4 (UI-SPEC §Spacing exception 4). --measure is a READING measure
+	   and is far too wide for a single-column form: an input stretched to 66ch
+	   makes the eye travel across empty space between a label and its own
+	   error text. 34rem keeps label → input → error scannable. It belongs in
+	   this group and not on .form, because it is a formula of the same class
+	   as the three above it and must never be hand-substituted as a px value. */
+	--form-measure: 34rem;
 
 	/* Shape */
 	--r-sm: 6px;

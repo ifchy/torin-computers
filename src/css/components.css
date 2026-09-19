@@ -711,6 +711,157 @@ body:not(:has(.callbar)) {
 	color: var(--c-success-ink);
 }
 
+/* --- Contact form (CONTACT-03/05/06) ------------------------------------
+   UI-SPEC C-3 (form, field anatomy, control styling), C-5 (consent row),
+   C-6 (honeypot). Rendered by includes/contact-form.php, which is the one
+   copy of this markup and has two callers.
+
+   NOTHING HERE RESTATES `font` OR `color` ON A CONTROL. base.css:129 already
+   sets `font: inherit; color: inherit` on button/input/select/textarea, so
+   the inputs are correct before this file is reached; restating them is how
+   a second writer of the type scale appears.
+
+   NO NEW COLOUR, NO NEW SIZE, NO NEW SPACING STEP. Every value below is an
+   existing token or one of UI-SPEC's four declared exceptions (48px control
+   height, 8rem textarea, 44px hit area, --form-measure).               */
+.form {
+	max-width: var(--form-measure);
+}
+
+.field {
+	margin-block-end: var(--sp-lg);
+}
+
+/* Bold is the ONLY differentiator available for a label — this system has
+   exactly two weights and deliberately no small size, so a label cannot be
+   set apart by shrinking it. Over a 48px filled input, bold is enough.    */
+.field__label {
+	display: block;
+	margin-block-end: var(--sp-xs);
+	font-weight: var(--fw-bold);
+}
+
+/* The asterisk is aria-hidden in the markup: requiredness reaches assistive
+   technology through the `required` attribute, never through a red glyph.
+   This rule only makes it findable for people reading the page.          */
+.field__req {
+	color: var(--c-danger);
+}
+
+.field__control {
+	width: 100%;
+	min-height: 48px;
+	padding: 0 var(--sp-md);
+	background: var(--c-surface-3);
+	border: 1px solid var(--c-border-strong);
+	border-radius: var(--r-sm);
+	/* background-color ONLY. The inherited motion contract permits exactly
+	   transform, opacity and background-color — border-color may not animate,
+	   and animating it here would make the invalid state fade in rather than
+	   assert itself. */
+	transition: background-color var(--dur-fast) var(--ease);
+}
+
+/* 8rem ≈ 5 rows: a 3-row box invites a one-line answer, and the fault
+   description is the one field the owner actually needs prose in.
+   resize is capped to the vertical axis because a user-widened textarea is a
+   horizontal scrollbar on a 360px viewport, which this design system treats
+   as a defect rather than as the user's choice.                           */
+textarea.field__control {
+	min-height: 8rem;
+	padding: var(--sp-sm) var(--sp-md);
+	resize: vertical;
+}
+
+/* The invalid treatment hangs off aria-invalid, not off .field--invalid, so
+   the announced state and the rendered state read from the SAME attribute
+   and cannot disagree. 2px against --c-danger, never colour alone — the
+   alert icon in .field__error carries the non-colour half (WCAG 1.4.1).   */
+.field__control[aria-invalid="true"] {
+	border-width: 2px;
+	border-color: var(--c-danger);
+}
+
+/* .field--invalid is a WRAPPER HOOK WITH NO DECLARATIONS, and that is
+   deliberate rather than unfinished. The whole visible invalid treatment is
+   already carried by the two rules above plus the un-hidden error node; the
+   class exists so the 04-04 client-side validator has one element to toggle
+   instead of three, and so a future variant (a consent row, which has no
+   bordered control to redden) has somewhere to hang. An empty ruleset is NOT
+   written out for it — a rule that declares nothing is a rule that someone
+   later deletes as dead, taking the markup hook's documentation with it.  */
+
+/* Helper text is differentiated by COLOUR, never by size (Phase-2 C-2, and
+   there is no --fs-small to reach for). Sofia Sans has a 488/1000 x-height;
+   a 15px helper line would read like ~13.4px of Inter to this site's
+   mobile-heavy, not-young Bulgarian audience.                            */
+.field__help {
+	margin-block-start: var(--sp-xs);
+	color: var(--c-ink-muted);
+}
+
+.field__error {
+	display: flex;
+	gap: var(--sp-sm);
+	align-items: flex-start;
+	margin-block-start: var(--sp-xs);
+	color: var(--c-danger);
+}
+
+.field__error > svg {
+	flex: none;
+	width: 1.25em;
+	height: 1.25em;
+	margin-block-start: .2em;
+}
+
+/* The row is the hit area: tapping the label text toggles the box, and the
+   44px floor is what makes that reliable with a thumb. The link inside the
+   label navigates instead of toggling, which is specified behaviour — the
+   HTML specification excludes interactive content descendants from a label's
+   activation behaviour — and is why the sentence can stay whole.          */
+.consent {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--sp-md);
+	align-items: flex-start;
+	min-height: 44px;
+}
+
+/* A NATIVE checkbox, enlarged and tinted. Do not re-implement it with
+   appearance: none — a custom box loses forced-colors support and the
+   indeterminate state, and buys nothing this form needs.                  */
+.consent__box {
+	flex: none;
+	width: 24px;
+	height: 24px;
+	accent-color: var(--c-ink-deep);
+}
+
+.consent__label {
+	flex: 1 1 0;
+	min-width: 0;
+}
+
+/* The consent error belongs under the whole row, not beside the label. */
+.consent .field__error {
+	flex: 1 0 100%;
+}
+
+/* The honeypot (UI-SPEC C-6). OFF-VIEWPORT, never display:none and never
+   inline — an inline style="display:none" on a form field is the single most
+   recognisable trap signature in served markup, and this rule living in a
+   stylesheet is the only reason the decoy is worth having.
+
+   Negative offsets specifically: in a left-to-right document, overflow past
+   the top-left does not extend the scrollable area, so the field cannot
+   introduce the horizontal scroll this design system treats as a defect.  */
+.hp {
+	position: absolute;
+	top: -100vh;
+	left: -100vw;
+}
+
 /* --- Category page template (D-24) ---------------------------------------
    The three published category pages render through includes/category-page.php:
    a required spine (title, intro, «Какво ремонтираме», symptom line, гаранция,

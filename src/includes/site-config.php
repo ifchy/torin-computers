@@ -283,6 +283,39 @@ $site = array(
 	// (RESEARCH OQ-5): it is a Phase 4 decision for the same reason.
 	'base_url' => 'https://torin.bg/new/',
 
+	// The ABSOLUTE server path of the credentials file, provisioned by hand in
+	// cPanel File Manager on 2026-09-19 (plan 04-02 Task 1) and confirmed by the
+	// developer as chmod 600. It sits ONE LEVEL ABOVE public_html, so it is
+	// outside the document root, outside src/, and therefore outside every
+	// deploy path this project has — a no-argument scripts/deploy-new.sh run
+	// uploads everything under src/ (RESEARCH P-10) and still cannot reach it.
+	//
+	// THE PATH IS NOT THE SECRET AND IS DELIBERATELY RECORDED HERE. The file it
+	// names returns array('telegram_bot_token' => …, 'telegram_chat_id' => …);
+	// neither value is in this repository, in any shell history or on any
+	// command line, and neither may ever be written into a file under src/.
+	// That handling is the one scripts/deploy-new.sh:10-17 established for the
+	// FTPS password, applied to a second credential (T-04-08).
+	//
+	// Corroboration for "outside the document root", so this is not taken on
+	// trust: the account home is /home/torin/ and the document root is
+	// /home/torin/public_html/ — both disclosed by the panel-generated
+	// php.fcgi (04-01 Task 3, recorded in deferred-items.md).
+	//
+	// ONLY contact-send.php reads this key, and it is the only file in the tree
+	// that may. notify.php takes the secrets array as an ARGUMENT and never
+	// touches the filesystem, which is what stops any include chain from
+	// header.php or footer.php reaching a credential.
+	//
+	// ###########################################################
+	// ## CUTOVER GATE — this path is tied to the cPanel account, ##
+	// ## not to the document root, so the 04-10 root cutover    ##
+	// ## does NOT change it. Re-confirm the file still exists   ##
+	// ## and still reads 600 after the swap; do not move it     ##
+	// ## into public_html to "keep things together".            ##
+	// ###########################################################
+	'secrets_path' => '/home/torin/torin-secrets.php',
+
 	// [ASSUMED] OWNER-QUESTIONS #8 asks whether the legacy otpuska.js
 	// holiday/hours banner should survive at all. It carried genuine content
 	// rather than decoration, so the safe default preserves an equivalent as

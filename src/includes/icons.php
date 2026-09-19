@@ -3,11 +3,11 @@
 // include; torin_icon($name) RETURNS markup so no path is ever pasted twice.
 // Replaces the Font Awesome / liquid-icon webfonts (~75 KB uncompressed to draw
 // a handful of glyphs) that the legacy header referenced without ever loading.
-// All 16 are hand-authored original geometry on a 24x24 grid, decorative, and
+// All 17 are hand-authored original geometry on a 24x24 grid, decorative, and
 // inherit colour via currentColor. An unknown name returns an empty string
 // rather than emitting broken markup.
 //
-// 15 of the 16 are stroke-only (`fill="none" stroke="currentColor"`). 'star' is
+// 16 of the 17 are stroke-only (`fill="none" stroke="currentColor"`). 'star' is
 // the single deliberate exception and says why at its own case.
 function torin_icon($name) {
 	switch ($name) {
@@ -24,7 +24,12 @@ function torin_icon($name) {
 		return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M10 20.5a7 7 0 1 1 0-14 7 7 0 0 1 0 14ZM10 13.5v.01M10 13.5 6.2 11.3M10 13.5l3.8-2.2M10 13.5v4.4M17.5 3.2c1.1 1.2 1.1 2.4 0 3.6M20.8 2.4c1.6 1.8 1.6 3.6 0 5.4"/></svg>';
 	case 'cat-6':   // wrench crossing an unusual instrument outline
 		return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3.5 12.5h8v8h-8zM6 18.2a3 3 0 0 1 4-2.9M21 4.2a3.6 3.6 0 0 1-4.8 4.8l-6 6-2-2 6-6A3.6 3.6 0 0 1 19 2.2l-2.4 2.4 1.8 1.8Z"/></svg>';
-	// --- Nine utility icons
+	// --- Eleven utility icons
+	//
+	// This header said «Nine» while listing ten, from before 'star' was added.
+	// Corrected on the way past rather than left to rot: a count comment that
+	// disagrees with the code beneath it teaches the next reader to stop
+	// trusting the counts, and then the counts stop being worth writing.
 	case 'phone':
 		return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.5 3.5 9 8l-2 1.5a12 12 0 0 0 5.5 5.5L14 13l4.5 2.5-1 3a2 2 0 0 1-2.2 1.1A16 16 0 0 1 2.4 6.7a2 2 0 0 1 1.1-2.2Z"/></svg>';
 	case 'chat':
@@ -43,6 +48,15 @@ function torin_icon($name) {
 		return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m6 6 12 12M18 6 6 18"/></svg>';
 	case 'check':
 		return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m4.5 12.5 5 5 10-11"/></svg>';
+	case 'alert':  // warning triangle for .notice--error and every .field__error
+		// The 17th glyph, added in Phase 4 (UI-SPEC C-8). The set already had
+		// 'check' for success, 'clock' for hours and 'close' for a dismiss
+		// affordance, but nothing that reads as a warning — and 'close' in an
+		// error band reads as «close this», which is an instruction rather
+		// than a diagnosis. Stroke-only, so it stays inside the house style;
+		// the exclamation dot is a zero-length segment with a round cap, the
+		// same idiom 'cat-5' uses for its hub.
+		return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.6 21.6 20H2.4ZM12 9.8v4.3M12 17.2v.01"/></svg>';
 	case 'star':   // filled five-point star for the Google rating badge (TRUST-02)
 		// The ONE deliberate exception to this file's stroke-only house style.
 		// Every other glyph is `fill="none" stroke="currentColor"`; a stroked
