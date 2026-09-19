@@ -17,12 +17,27 @@
 // plan 03-09 for exactly this reason (STATE.md, Phase 3). This template is the
 // structural fix rather than a second cleanup.
 //
-// LIFECYCLE — all four steps, in order, or the disclosure stays live:
+// LIFECYCLE — three steps, and the disclosure closes itself:
 //   1. scripts/host-probe/run-probe.sh --prepare
-//   2. scripts/deploy-new.sh <generated-filename>        (developer runs this)
+//   2. scripts/deploy-new.sh <generated-filename>
 //   3. scripts/host-probe/run-probe.sh --read <file> <token>
-//   4. delete the file on the server, then
-//      scripts/host-probe/run-probe.sh --verify-gone <file> <token>
+//        -> this single request is also the LAST one the probe ever answers:
+//           its final act is to unlink itself (see the bottom of this file),
+//           and --read then asserts the 404 automatically.
+//
+// SELF-DELETION, AND WHY IT IS THE MECHANISM RATHER THAN A CONVENIENCE.
+// The first version of this lifecycle ended with "delete it from the server by
+// hand, then run --verify-gone". Nothing in this repo can delete a remote file:
+// deploy-new.sh only uploads, and reimplementing the FTPS credential handling
+// here to issue a DELE would duplicate the one piece of secret handling this
+// project has deliberately centralised. So the cleanup step depended on a human
+// remembering — for the single file in this phase whose continued existence is
+// a live environment disclosure (T-04-01). A disclosure whose closure depends on
+// someone remembering is not mitigated, it is scheduled. The probe therefore
+// removes itself after answering exactly once, which bounds the exposure window
+// to one request no matter what anyone forgets. The unlink result is REPORTED in
+// the body rather than assumed, so a failure is legible instead of silent, and
+// --read still asserts the 404 independently afterwards.
 //
 // DIALECT: PHP 5.2-safe, deliberately. This probe has to run BOTH before and
 // after the runtime change of plan 04-01 — measuring the old runtime is half
@@ -51,7 +66,15 @@ echo "version              : " . phpversion()    . "\n";
 // ONLY under CGI/FastCGI (04-RESEARCH.md P-5).
 echo "sapi                 : " . php_sapi_name() . "\n";
 
-$torin_exts = array('gd', 'exif', 'fileinfo', 'curl', 'openssl', 'mbstring', 'hash', 'ctype', 'filter');
+// 'json' is here because jsonld.php calls json_encode() on EVERY page to emit
+// the LocalBusiness and BreadcrumbList payloads — it is the only extension the
+// CURRENT pages depend on, and the original list omitted it. That list was
+// derived from what 04-02/04-03/04-05 will need and nobody asked what the site
+// already uses. (On PHP 8 json is compiled in and cannot be disabled, so this
+// should always pass; a gate that only checks the things you remembered to
+// worry about is how the 8.5 extension collapse went unnoticed until a probe
+// happened to look.)
+$torin_exts = array('gd', 'exif', 'fileinfo', 'curl', 'openssl', 'mbstring', 'hash', 'ctype', 'filter', 'json');
 foreach ($torin_exts as $torin_ext) {
 	echo str_pad("ext:" . $torin_ext, 21) . ": " . (extension_loaded($torin_ext) ? 'yes' : 'NO') . "\n";
 }
@@ -63,7 +86,13 @@ $torin_inis = array(
 	'upload_max_filesize', 'post_max_size', 'max_file_uploads',
 	'max_input_vars', 'memory_limit', 'max_execution_time',
 	'allow_url_fopen', 'user_ini.filename', 'user_ini.cache_ttl',
-	'sendmail_path', 'SMTP', 'smtp_port'
+	'sendmail_path', 'SMTP', 'smtp_port',
+	// display_errors decides whether a PHP warning is rendered INTO the page for
+	// a visitor. On the live root that is not cosmetic: mailer.php reads
+	// $_POST keys with no isset() and then calls header("Location: msg.html"),
+	// so any rendered warning means "headers already sent" and the redirect —
+	// the shop's lead confirmation — breaks. Measured, never assumed.
+	'display_errors', 'error_reporting'
 );
 foreach ($torin_inis as $torin_ini) {
 	echo str_pad("ini:" . $torin_ini, 21) . ": " . var_export(ini_get($torin_ini), true) . "\n";
@@ -90,6 +119,35 @@ if (function_exists('curl_init')) {
 	echo "outbound:curl443     : FAIL ext-curl not loaded\n";
 }
 
+// SECOND, INDEPENDENT outbound test — added after the 8.5 run returned
+// "outbound:curl443 : FAIL ext-curl not loaded", which is not an answer to
+// D4-06, it is the absence of one. D4-06 asks whether this host can reach the
+// internet on 443 at all; tying that question to a single extension means a
+// missing extension silently converts the phase's notification-channel decision
+// from "measured" back to "unknown", which is exactly the state this probe
+// exists to eliminate.
+//
+// allow_url_fopen is 1 and ext-openssl is present (both measured on 5.2 AND on
+// 8.5), so the https:// stream wrapper can answer it with no cURL at all. A 401
+// is a PASS for the same reason as above: it proves the request reached
+// Telegram. ignore_errors keeps a 401 from being reported as a transport
+// failure. Both directives predate 5.2.17, so this stays 5.2-safe.
+$torin_ctx = stream_context_create(array('http' => array(
+	'timeout'       => 10,
+	'ignore_errors' => true
+)));
+$torin_http_resp = @file_get_contents('https://api.telegram.org/bot0:0/getMe', false, $torin_ctx);
+if ($torin_http_resp === false) {
+	$torin_last = error_get_last();
+	echo "outbound:fopen443    : FAIL " . (isset($torin_last['message']) ? $torin_last['message'] : 'unknown') . "\n";
+} else {
+	$torin_status = 'unknown';
+	if (isset($http_response_header) && isset($http_response_header[0])) {
+		$torin_status = $http_response_header[0];
+	}
+	echo "outbound:fopen443    : OK " . $torin_status . "\n";
+}
+
 echo "sendmail binary      : " . (is_executable('/usr/sbin/sendmail') ? 'yes' : 'NO') . "\n";
 
 // Local MTA reachability for the PHPMailer SMTP leg (D4-11).
@@ -100,3 +158,16 @@ echo "smtp:localhost:25    : " . ($torin_fp ? 'OPEN' : 'FAIL ' . $torin_errstr) 
 if ($torin_fp) {
 	fclose($torin_fp);
 }
+
+// Last act: delete this file. See the SELF-DELETION note in the header — this is
+// what bounds the disclosure window to a single request rather than to however
+// long it takes someone to open FileZilla.
+//
+// The result is echoed, not swallowed. If the unlink fails (ownership, a
+// read-only mount) the body says so in the same breath as the measurement, so
+// the failure arrives with the data instead of being discovered later by
+// --read's 404 assertion with no explanation attached.
+$torin_unlinked = @unlink(__FILE__);
+echo "selfdelete           : " . ($torin_unlinked
+	? 'OK'
+	: 'FAILED — delete this file from public_html/new/ BY HAND, now') . "\n";

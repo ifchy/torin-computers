@@ -14,12 +14,21 @@
 # from the dev machine at all. One request to a throwaway file answers all six.
 #
 # WHY IT DOES NOT RUN THE DEPLOY ITSELF.
-# scripts/deploy-new.sh is denied to subagents by the permission classifier
-# (STATE.md, Phase 3 note, plan 03-01); the developer runs it. This script
-# therefore PRINTS the exact command rather than invoking it. It is not being
-# polite — an agent that shells out to the deploy gets denied mid-run and leaves
-# a materialised probe sitting in src/, which is the disclosure this whole
-# design exists to prevent.
+# This script PRINTS the deploy command rather than invoking it, and keeps doing
+# so even though the denial that originally forced that shape turned out not to
+# be universal. Measured 2026-09-17, plan 04-01 Task 3: scripts/deploy-new.sh
+# DID run from an agent context, reaching credential resolution and the upload
+# loop. The earlier note (STATE.md, Phase 3 / plan 03-01) recorded it as denied
+# to subagents. Both observations are real; the classifier's behaviour evidently
+# depends on invocation form or context, which means it cannot be relied upon in
+# either direction.
+#
+# The hand-off therefore stays, for the reason that does not depend on the
+# classifier at all: between --prepare and the upload there is a live, ungated
+# window in which a materialised probe sits in src/. If a deploy is denied
+# MID-RUN, that file is left behind — which is the exact disclosure this design
+# exists to prevent. Printing the command keeps the window explicitly owned by
+# whoever is driving, rather than hidden inside a call that might not return.
 #
 # WHY THE PROBE SOURCE LIVES UNDER scripts/ AND NOT UNDER src/.
 # `deploy-new.sh` with no arguments uploads EVERY file under src/
@@ -44,18 +53,25 @@
 #       into src/, and print the two commands to run next.
 #
 #   scripts/host-probe/run-probe.sh --read <filename> <token>
-#       Fetch the deployed probe, append its body plus the command and date to
-#       .planning/phases/04-hardening-cutover/04-HOST-CAPABILITIES.md, and
-#       remove the local copy from src/.
+#       Fetch the deployed probe ONCE, append its body plus the command and date
+#       to .planning/phases/04-hardening-cutover/04-HOST-CAPABILITIES.md, remove
+#       the local copy from src/, and then assert the remote file is gone.
 #
 #   scripts/host-probe/run-probe.sh --verify-gone <filename> <token>
 #       Fetch the probe URL WITH its token and assert 404. Appends the result
 #       and the command to 04-HOST-CAPABILITIES.md. Exits non-zero on anything
 #       other than 404 — the probe is still reachable and must be deleted.
+#       --read runs this for you; the standalone mode is for re-checking after a
+#       manual deletion when self-deletion reported FAILED.
 #
-# Deleting the remote file is a manual step: deploy-new.sh uploads and never
-# deletes, and no script in this project can delete a remote file (STATE.md,
-# Phase 3.5 cutover note). Use cPanel File Manager or FileZilla.
+# REMOTE DELETION IS NO LONGER A MANUAL STEP, AND --read FETCHES EXACTLY ONCE.
+# The probe unlinks itself as its final act (see probe.php.tpl's SELF-DELETION
+# note). That makes the single request --read issues the last one the file ever
+# answers — so this script must NOT fetch twice. It used to: once for the status
+# code, once for the body. Against a self-deleting probe the second fetch gets a
+# 404 and the measurement is lost. Status and body now come out of one request
+# via curl's -w, which is also simply more honest: two fetches were always two
+# different observations being reported as one.
 
 set -euo pipefail
 
@@ -80,12 +96,12 @@ run-probe.sh — Phase 4 host-capability probe (D4-06)
   --read <filename> <token>          fetch it, record the body, delete the local copy
   --verify-gone <filename> <token>   assert the deployed probe now 404s
 
-Between --prepare and --read the developer runs, by hand:
+Between --prepare and --read, run the deploy:
 
   scripts/deploy-new.sh <filename>
 
-That step is not automated: deploy-new.sh is denied to subagents by the
-permission classifier (STATE.md, Phase 3).
+The probe deletes itself after answering --read's single request, so there is
+no manual server-side cleanup step and no window that depends on remembering.
 EOF
 	exit 64
 }
@@ -150,10 +166,14 @@ EOF
 	URL="${BASE_URL}/${NAME}?k=${TOKEN}"
 	echo "Fetching ${BASE_URL}/${NAME}?k=<token> ..."
 
-	HTTP_CODE="$(curl -s -o /dev/null -w '%{http_code}' --max-time 30 "$URL" || echo "000")"
+	# ONE request. The probe self-deletes after answering, so a second fetch would
+	# 404 and throw the measurement away (see the header note). Body and status
+	# code therefore come out of the SAME response: curl appends the code on a
+	# final line, which is split back off below.
+	RESP="$(curl -s -w $'\n%{http_code}' --max-time 30 "$URL" || printf '\n000')"
+	HTTP_CODE="${RESP##*$'\n'}"
+	BODY="${RESP%$'\n'*}"
 	[ "$HTTP_CODE" = "200" ] || die "probe returned HTTP ${HTTP_CODE}, not 200 — deployed? token correct?"
-
-	BODY="$(curl -s --max-time 30 "$URL")"
 
 	# The body must look like the probe's own output and not like a PHP source
 	# listing. On a host that serves .php as text (the exact failure mode plan
@@ -204,23 +224,26 @@ EOF
 
 	echo "Recorded in ${CAPABILITIES#${REPO_ROOT}/}"
 
-	# Last act: remove the local copy, closing the no-argument-deploy window.
+	# Remove the local copy, closing the no-argument-deploy window.
 	rm -f "${SRC_ROOT}/${NAME}"
 	echo "Removed local src/${NAME}"
 
-	cat <<EOF
+	# Report what the probe said about its own deletion BEFORE asserting it. If
+	# the unlink failed, the assertion below fails too — and this line is the
+	# difference between "cleanup failed" and "cleanup failed, here is why".
+	if printf '%s' "$BODY" | grep -q '^selfdelete *: OK'; then
+		echo "Probe reported: selfdelete OK"
+	else
+		echo "WARNING: probe did NOT report a successful self-delete." >&2
+		printf '%s\n' "$BODY" | grep '^selfdelete' >&2 || echo "  (no selfdelete line at all)" >&2
+	fi
 
-NOW DELETE IT FROM THE SERVER. This is manual — deploy-new.sh uploads and never
-deletes, and nothing in this repo can delete a remote file.
-
-  cPanel -> File Manager -> public_html/new/ -> ${NAME} -> Delete
-  (or FileZilla: connect, open public_html/new/, delete ${NAME})
-
-Then prove it:
-
-  scripts/host-probe/run-probe.sh --verify-gone ${NAME} ${TOKEN}
-
-EOF
+	# Assert it independently rather than trusting the probe's own account of its
+	# own death. This re-enters the single implementation of the authenticated 404
+	# check instead of copying it, so the token rationale lives in exactly one
+	# place and cannot drift between two versions of the same assertion.
+	echo "Asserting the probe is gone ..."
+	exec "$0" --verify-gone "$NAME" "$TOKEN"
 	;;
 
 --verify-gone)

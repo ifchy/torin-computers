@@ -1,3 +1,37 @@
+# ============================================================================
+# htaccess-stage-a — REHEARSAL CONFIG. Not a second source of truth.
+#
+# src/.htaccess is the source of truth and is what ships. This file exists for
+# ONE purpose: to prove, without risking a single public page, that mod_fcgid is
+# present on this host and that the panel-generated wrapper path actually works.
+#
+# It differs from src/.htaccess in exactly two ways:
+#   1. fcgid is mapped to .php ONLY  (src/.htaccess also maps .html and .htm)
+#   2. the php52 handler is UNCONDITIONAL for .html/.htm
+#      (src/.htaccess has it inside <IfModule !mod_fcgid.c>)
+#
+# Difference 2 is the one that matters and it is easy to get backwards. During
+# the rehearsal mod_fcgid is expected to be PRESENT, which means an
+# <IfModule !mod_fcgid.c> fallback would be SKIPPED — leaving .html with no
+# handler and serving 19 pages of source. The guard has to come off for the
+# rehearsal precisely because the rehearsal is the moment it would not fire.
+#
+# So while this config is live: .php runs on PHP 8.5, every .html page stays on
+# the known-good 5.2 handler, and no public page in this subtree is .php. A
+# wrong wrapper path costs a 500 on include files nobody fetches directly.
+#
+# USE:
+#   cp scripts/host-probe/htaccess-stage-a src/.htaccess
+#   scripts/deploy-new.sh .htaccess
+#   ... verify ...
+#   git checkout -- src/.htaccess        # back to the real config
+#   scripts/deploy-new.sh .htaccess      # the actual cutover
+#
+# The absolute wrapper path below is the /new/ one. At the root cutover (04-10)
+# it becomes /home/torin/public_html/php.fcgi and this file needs regenerating
+# or deleting — it is a rehearsal aid for one directory, not a permanent config.
+# ============================================================================
+
 # public_html/new/.htaccess — Phase 1 rehearsal file, scoped to the /new/ staging subtree only.
 # At Phase 4 cutover, this file (or its rules) is promoted to the root .htaccess. TWO edits are
 # required there, not one:
@@ -123,10 +157,8 @@ RewriteRule ^za-bateriite\.html$ zalivane-technosti.html [R=301,L]
 # ineffective, it is a 500 for the whole subtree (04-PATTERNS, T-02-02). Limits
 # are changed in php85-fcgi.ini instead.
 <IfModule mod_fcgid.c>
-	AddHandler fcgid-script .php .html .htm
+	AddHandler fcgid-script .php
 	FcgidWrapper /home/torin/public_html/new/php.fcgi .php
-	FcgidWrapper /home/torin/public_html/new/php.fcgi .html
-	FcgidWrapper /home/torin/public_html/new/php.fcgi .htm
 </IfModule>
 
 # FAIL-SAFE. This is a deliberate deviation from this task's own acceptance
@@ -150,9 +182,10 @@ RewriteRule ^za-bateriite\.html$ zalivane-technosti.html [R=301,L]
 #
 # Delete this block at the root cutover (04-10) once 8.5 is proven in production.
 # It is a transition guard, not a permanent feature.
-<IfModule !mod_fcgid.c>
-	AddHandler application/x-httpd-php52 .html .htm
-</IfModule>
+# UNCONDITIONAL during the rehearsal — see the header. mod_fcgid is expected to
+# be present, so an !mod_fcgid guard would be skipped and .html would match no
+# handler at all.
+AddHandler application/x-httpd-php52 .html .htm
 
 # ── Phase 2 (plan 02-01): compression + caching spike (DESIGN-02, RESEARCH N-6) ──
 #
