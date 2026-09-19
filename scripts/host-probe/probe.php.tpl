@@ -105,6 +105,35 @@ if (function_exists('curl_init')) {
 	echo "outbound:curl443     : FAIL ext-curl not loaded\n";
 }
 
+// SECOND, INDEPENDENT outbound test — added after the 8.5 run returned
+// "outbound:curl443 : FAIL ext-curl not loaded", which is not an answer to
+// D4-06, it is the absence of one. D4-06 asks whether this host can reach the
+// internet on 443 at all; tying that question to a single extension means a
+// missing extension silently converts the phase's notification-channel decision
+// from "measured" back to "unknown", which is exactly the state this probe
+// exists to eliminate.
+//
+// allow_url_fopen is 1 and ext-openssl is present (both measured on 5.2 AND on
+// 8.5), so the https:// stream wrapper can answer it with no cURL at all. A 401
+// is a PASS for the same reason as above: it proves the request reached
+// Telegram. ignore_errors keeps a 401 from being reported as a transport
+// failure. Both directives predate 5.2.17, so this stays 5.2-safe.
+$torin_ctx = stream_context_create(array('http' => array(
+	'timeout'       => 10,
+	'ignore_errors' => true
+)));
+$torin_http_resp = @file_get_contents('https://api.telegram.org/bot0:0/getMe', false, $torin_ctx);
+if ($torin_http_resp === false) {
+	$torin_last = error_get_last();
+	echo "outbound:fopen443    : FAIL " . (isset($torin_last['message']) ? $torin_last['message'] : 'unknown') . "\n";
+} else {
+	$torin_status = 'unknown';
+	if (isset($http_response_header) && isset($http_response_header[0])) {
+		$torin_status = $http_response_header[0];
+	}
+	echo "outbound:fopen443    : OK " . $torin_status . "\n";
+}
+
 echo "sendmail binary      : " . (is_executable('/usr/sbin/sendmail') ? 'yes' : 'NO') . "\n";
 
 // Local MTA reachability for the PHPMailer SMTP leg (D4-11).

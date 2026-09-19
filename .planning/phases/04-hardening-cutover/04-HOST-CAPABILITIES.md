@@ -313,3 +313,256 @@ Had the sweep shipped with only the plan's three assertions, it would have repor
 clean 19/19 PASS against a completely unchanged server. That is not a hypothetical
 weakness in the gate; it is a measured one, recorded here with the command that produced
 it.
+
+## Probe run — 2026-09-19
+
+Command:
+
+```
+curl -s 'https://torin.bg/new/hc-33183d7b433062f082cf479d5f83a75f.php?k=<32-hex-token>'
+```
+
+Response body, verbatim:
+
+```
+version              : 8.5.10
+sapi                 : cgi-fcgi
+ext:gd               : NO
+ext:exif             : NO
+ext:fileinfo         : NO
+ext:curl             : NO
+ext:openssl          : yes
+ext:mbstring         : NO
+ext:hash             : yes
+ext:ctype            : NO
+ext:filter           : yes
+ini:upload_max_filesize: '250M'
+ini:post_max_size    : '200M'
+ini:max_file_uploads : '20'
+ini:max_input_vars   : '5000'
+ini:memory_limit     : '256M'
+ini:max_execution_time: '600'
+ini:allow_url_fopen  : '1'
+ini:user_ini.filename: '.user.ini'
+ini:user_ini.cache_ttl: '300'
+ini:sendmail_path    : '/usr/sbin/sendmail -t -i'
+ini:SMTP             : 'localhost'
+ini:smtp_port        : '25'
+outbound:curl443     : FAIL ext-curl not loaded
+sendmail binary      : yes
+smtp:localhost:25    : FAIL Connection refused
+selfdelete           : OK
+
+```
+
+## Probe cleanup — 2026-09-19
+
+Fetched WITH the valid token, because a tokenless 404 is what a LIVE
+probe returns too and would prove nothing:
+
+```
+curl -s -o /dev/null -w '%{http_code}' 'https://torin.bg/new/hc-33183d7b433062f082cf479d5f83a75f.php?k=<32-hex-token>'
+404
+```
+
+---
+
+## Probe run — 2026-09-19 — POST-SWITCH, STAGE A (PHP 8.5.10)
+
+Taken during the Stage-A rehearsal, in which `.php` runs on the 8.5 fcgid wrapper while
+all 19 `.html` pages remain on the known-good 5.2 handler. That is the only window in
+which the 8.5 runtime can be measured without having already bet 19 pages on it, and it is
+the reason the deploy was staged.
+
+Mechanism confirmed first:
+
+```
+curl -sS -D - -o /dev/null https://torin.bg/new/includes/site-config.php
+  -> HTTP/2 200 · x-powered-by: PHP/8.5.10 · content-type: text/html; charset=UTF-8
+
+bash scripts/host-probe/handler-sweep.sh
+  -> FAIL — 19 of 19 ... STILL-ON-5.2   (expected and correct during Stage A)
+```
+
+`mod_fcgid` is present, `FcgidWrapper` is permitted in `.htaccess` here, and the absolute
+wrapper path is right. **The handler mechanism is proved.** No 500s, no raw source.
+
+Probe body, verbatim:
+
+```
+version              : 8.5.10
+sapi                 : cgi-fcgi
+ext:gd               : NO
+ext:exif             : NO
+ext:fileinfo         : NO
+ext:curl             : NO
+ext:openssl          : yes
+ext:mbstring         : NO
+ext:hash             : yes
+ext:ctype            : NO
+ext:filter           : yes
+ini:upload_max_filesize: '250M'
+ini:post_max_size    : '200M'
+ini:max_file_uploads : '20'
+ini:max_input_vars   : '5000'
+ini:memory_limit     : '256M'
+ini:max_execution_time: '600'
+ini:allow_url_fopen  : '1'
+ini:user_ini.filename: '.user.ini'
+ini:user_ini.cache_ttl: '300'
+ini:sendmail_path    : '/usr/sbin/sendmail -t -i'
+ini:SMTP             : 'localhost'
+ini:smtp_port        : '25'
+outbound:curl443     : FAIL ext-curl not loaded
+sendmail binary      : yes
+smtp:localhost:25    : FAIL Connection refused
+```
+
+### The extension set collapsed: 5.2 vs 8.5, measured
+
+| Extension | 5.2.17 | 8.5.10 | What its absence blocks |
+|---|---|---|---|
+| `gd` | yes | **NO** | 04-03 photo resizing (D4-13) |
+| `exif` | yes | **NO** | 04-03 EXIF orientation (EA-07) |
+| `fileinfo` | yes | **NO** | 04-03 / 04-05 upload MIME validation — a security control, not a nicety |
+| `curl` | yes | **NO** | 04-02 tracer, 04-05 Telegram (D4-05), and D4-06's own measurement |
+| `mbstring` | yes | **NO** | multibyte-safe string handling |
+| `ctype` | yes | **NO** | validation helpers (04-05) |
+| `openssl` | yes | yes | — |
+| `hash` | yes | yes | — |
+| `filter` | yes | yes | — |
+
+Six of nine lost. **Inference, not measured:** the three survivors are the ones compiled
+into cPanel's base `ea-php85` build, while the six absentees ship as separate
+`ea-php85-php-*` packages that have to be enabled per-version in the panel. Selecting a PHP
+version and selecting its extensions are two different panel operations, and doing only the
+first is what produced this. Recorded as the likely explanation, not as a reading.
+
+### `outbound:curl443` is now UNANSWERED, not answered "no"
+
+The 5.2 run recorded `OK http=401`. That was a fact about the 5.2 build and does not carry
+over. The 8.5 run says `FAIL ext-curl not loaded`, which is **not a measurement of the
+network** — it is the absence of one. D4-06's question ("can this host reach the internet
+on 443 at all?") is therefore reopened, and D4-05 (Telegram as primary channel) cannot be
+committed to until it is answered again.
+
+**Probe defect, fixed (deviation Rule 2).** Tying the phase's notification-channel decision
+to a single extension means a missing extension silently converts a measured answer back
+into an unknown. The probe now carries a second, independent outbound test —
+`outbound:fopen443` — using the `https://` stream wrapper, which needs only
+`allow_url_fopen` (`1`) and `ext-openssl` (present on **both** builds). It answers D4-06
+even if cURL never comes back. It is absent from the body above because it did not exist
+when that probe was deployed.
+
+### SECOND MEASURED GATE WEAKNESS — and it is a scope failure, not a blind spot
+
+The `x-powered-by` finding was a gate that could not *see* a bad state. This one is
+different and worth stating precisely rather than dramatically, because the distinction
+changes what it teaches.
+
+**Measured, this session:** `grep -rloE '\bmb_|\bctype_|\biconv|\bexif_|\bfinfo|\bcurl_' src/`
+returns **zero files**. No page, include or helper in this tree calls a single function from
+any of the six missing extensions. The tree uses `htmlspecialchars()` (21 occurrences) and
+core string functions only.
+
+Two consequences, and they pull in opposite directions:
+
+1. **`handler-sweep.sh` is not blind here.** If the 19 pages *did* call a missing function,
+   PHP 8 raises `Error: Call to undefined function ...`, and with `display_errors = On` that
+   renders into the body where the sweep's check 3 catches it. The gate would have fired.
+2. **But the sweep's SCOPE is wrong, and that is the real defect.** It only ever asks
+   "do the pages that exist today still render?" Six extensions that no current page touches
+   — but that 04-02, 04-03 and 04-05 are entirely built on — can vanish and the sweep
+   reports a clean `PASS 19/19`. Step B would have been declared a success on a runtime that
+   cannot resize an image, read EXIF, sniff a MIME type, or open an HTTPS connection. The
+   loss would have surfaced inside 04-02's tracer, which is **exactly** the failure
+   RESEARCH §Summary says this plan exists to prevent.
+
+The correction is a separate gate with a separate scope, not more assertions bolted onto
+the sweep: `scripts/host-probe/assert-capabilities.sh` checks capability, `handler-sweep.sh`
+checks rendering. Neither can answer the other's question.
+
+**The checker itself shipped with a defect that only a real body exposed.** Its first
+implementation extracted values by stripping up to the first colon — but probe keys contain
+colons (`ext:openssl`), so every present extension parsed as `openssl : yes`, compared
+unequal to `yes`, and was reported as a BLOCKER. Run against the body above it announced
+that `openssl`, `hash` and `filter` were missing while the body plainly said otherwise. A
+checker that invents failures is no more useful than one that misses them, and it was caught
+only because the script was run against real data before being trusted rather than after.
+
+### Provenance note on this run
+
+The pasted body contains no `selfdelete` line, so the probe that executed predates the
+self-deleting build (`feac63b`) — those commits live in the plan's worktree, not the
+primary checkout. Cleanup is still confirmed: `--read` asserted 404 with a valid token.
+Recorded because "which build of the probe produced this body" is exactly the kind of
+detail that is obvious today and unreconstructable in a month. `assert-capabilities.sh`
+treats an absent `selfdelete` line as a warning rather than a failure for the same reason.
+
+### Confirmed on 8.5 (the good news)
+
+- `upload_max_filesize` `250M`, `post_max_size` `200M` — **measured in effect now**, not
+  inferred from the ini file. D4-13's 2M ceiling is genuinely gone; 04-03 needs no
+  `.user.ini` work and no panel round-trip for limits.
+- `user_ini.filename` is now `.user.ini` with `cache_ttl` `300` — populated, as predicted.
+  Available if ever needed, though per the row above it should not be.
+- `sendmail` binary present; `smtp:localhost:25` still refused, unchanged from 5.2. The
+  mail leg (D4-11) must use the sendmail binary or an external authenticated relay, not a
+  local MTA on port 25.
+- `Content-Type` now carries `charset=UTF-8` (PHP 8's `default_charset`), where 5.2 sent a
+  bare `text/html`. A small improvement for Bulgarian content, and a real behavioural
+  difference between the two runtimes worth having on record.
+
+### What is blocked while each extension is missing
+
+| Extension | Blocks | Severity | Notes |
+|---|---|---|---|
+| `curl` | **04-02** (phase tracer), **04-05** (notification layer) | **hard block** | D4-05 makes Telegram the primary channel and it is one HTTPS POST. Also blocks D4-06's own measurement. A `file_get_contents` fallback over the `https://` wrapper exists (`allow_url_fopen=1`, `openssl` present) and is worth knowing about, but it is a fallback, not the plan. |
+| `gd` | **04-03** (photo pipeline) | **hard block** | D4-13's server-side resize has no other implementation. |
+| `exif` | **04-03** | **hard block** | EA-07: orientation is discarded by both transforms without it. |
+| `fileinfo` | **04-03**, **04-05** | **hard block, security-relevant** | Upload MIME validation. Without it, type checking falls back to the client-supplied extension, which is the weakest possible control on a public upload endpoint. |
+| `mbstring` | *nothing currently* | **not a blocker today** | See the correction below. |
+| `ctype` | *nothing currently* | **low** | 04-05 validation helpers can be written with `filter` / `preg_*`, both present. Worth restoring; not worth blocking on. |
+
+**Correction to the working assumption that `mbstring` makes Step B unsafe on its own.**
+Measured, not argued: **no file in `src/` calls any `mb_*` function.** The site is Bulgarian,
+but Bulgarian content in UTF-8 HTML does not require mbstring — the bytes pass through PHP
+untouched. The one escaping function the tree actually uses, `htmlspecialchars()`, lives in
+`ext-standard`, not mbstring, and handles UTF-8 natively via `default_charset`.
+
+So the 19 pages would almost certainly render correctly on 8.5 today with `mbstring`
+absent. **The hold is still right — but `curl`, `gd`, `exif` and `fileinfo` are the reason,
+not `mbstring`.** Those four are hard blocks on 04-02, 04-03 and 04-05, the human is going
+into the panel regardless, and enabling all six in one visit is strictly cheaper than
+cutting over now and returning later. Getting the reason right matters: if `mbstring` alone
+were the only gap, holding 19 pages on an unpatched-since-2011 interpreter to wait for it
+would be the wrong trade.
+
+*(Related and NOT a blocker, but worth knowing before cutover: PHP 8.1 changed
+`htmlspecialchars()`'s default flags to include `ENT_SUBSTITUTE`, so invalid UTF-8 is
+replaced rather than returning an empty string as it did on 5.2. For a Cyrillic site that
+is a strict improvement. Documented behaviour, not measured here — the 19-page sweep is
+what would actually catch any regression.)*
+
+### Step B precondition — runnable, not assumed
+
+Step B (widening the handler to `.html`/`.htm` and removing the 5.2 fallback path) proceeds
+only when a **fresh** probe body passes:
+
+```
+scripts/host-probe/assert-capabilities.sh <file-containing-the-probe-body>
+```
+
+Exit `0` is the gate. It asserts: `version` is 8.x; `sapi` is `cgi-fcgi`; all nine of
+`gd exif fileinfo curl openssl mbstring hash ctype filter` report `yes`; outbound 443
+answers `OK` on **either** `curl443` or `fopen443`; and the probe reported a successful
+self-delete (absent line warns rather than fails — see the provenance note above).
+
+Run against the 2026-09-19 body it reports:
+
+```
+FAIL — 7 blocker(s). Step B must NOT proceed.
+```
+
+Six missing extensions plus the unanswered outbound check. That is the current state, and
+it is the number that has to become zero.
