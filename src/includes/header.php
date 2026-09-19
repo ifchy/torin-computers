@@ -245,9 +245,23 @@ if (file_exists($torin_dev_switcher)) { torin_render_theme_switcher($torin_theme
 					      // subtraction inside IA-02's flat-nav decision, not a redesign:
 					      // the four survivors keep their order, labels and weighting. ?>
 					<li><a class="nav__link" href="test-laptop.html"<?php echo ($torin_nav_current === 'test-laptop.html' ? ' aria-current="page"' : ''); ?>>Тествай сам</a></li>
-					<?php // D-21: Запитване folds into Контакти, which targets the
-					      // homepage CTA block rather than a page of its own. ?>
-					<li><a class="nav__link" href="index.html#contact-us">Контакти</a></li>
+					<?php // D-21 folded Запитване into Контакти; through Phase 3 that
+					      // item targeted the homepage CTA block rather than a page
+					      // of its own. D4-16 gives it a real page, and this href is
+					      // the whole nav half of that change.
+					      //
+					      // It gains the aria-current ternary the other three items
+					      // carry. It had none before — not an oversight, but a
+					      // consequence: SCRIPT_NAME never equals a fragment, so
+					      // there was no state for the ternary to detect. Now there
+					      // is a page to be on.
+					      //
+					      // index.html#contact-us IS NOT RETIRED. The id="contact-us"
+					      // sections on the homepage and the category pages stay
+					      // exactly where they are, so every existing bookmark and
+					      // every external link to that fragment keeps resolving.
+					      // Only this href moves. ?>
+					<li><a class="nav__link" href="kontakti.html"<?php echo ($torin_nav_current === 'kontakti.html' ? ' aria-current="page"' : ''); ?>>Контакти</a></li>
 				</ul>
 			</nav>
 		</div>

@@ -1,0 +1,155 @@
+<?php
+// kontakti.html — the contact page (D4-16, CONTACT-03/05/06). PHP 5.2-safe,
+// shaped exactly like msg.html: two page-scope variables assigned before the
+// header require, dirname(__FILE__) as the mandated idiom, and the footer
+// required at the bottom.
+//
+// WHY A PAGE OF ITS OWN, when «Контакти» pointed at index.html#contact-us for
+// three phases. D4-16: a fragment on the homepage cannot rank for «контакти
+// торин», cannot carry its own title and description, and cannot send its own
+// cache header — and the third one turns out to be load-bearing (see below).
+// The existing id="contact-us" sections on index.html and the category pages
+// STAY EXACTLY WHERE THEY ARE. Only the nav href moves, so every bookmark and
+// every external link to index.html#contact-us keeps resolving.
+//
+// THE SLUG IS LOCKED. kontakti.html is transliterated Latin, matching
+// zalivane-technosti and pregryavane-ohlazhdane. Once 04-04 points five CTA
+// slots at it and it is indexed, renaming it costs a 301 — so it does not get
+// renamed.
+//
+// NOT ONE CONTACT LITERAL IS TYPED ON THIS PAGE. Every phone number, the
+// email, the address, the map URL and the working hours are read from $site
+// and escaped at output, exactly as footer.php:34-60 does. A page ABOUT the
+// contact details is the single most tempting place in this project to type
+// them in by hand, and it is also the page where a stale copy would be most
+// embarrassing.
+$torin_title = 'Контакти — ремонт на лаптопи в София · Торин';
+$torin_desc  = 'Телефони, адрес и работно време на сервиза в София. Изпратете запитване със снимки на повредата и ще получите отговор с цена.';
+
+// CACHE-CONTROL: NO-STORE, AND IT IS NOT HOUSEKEEPING (RESEARCH P-11).
+// D4-34 raises HTML caching for this site from zero seconds to minutes. This
+// page carries a hidden render timestamp that 04-05 signs and verifies inside
+// a time window, and a cached contact page hands every visitor who receives it
+// the SAME stale timestamp. The window then has to be either wide enough to be
+// useless or narrow enough to reject real people — and «the form silently
+// rejects real customers» is the failure this project can least afford to
+// ship, because the rejected customer simply goes elsewhere and nobody here
+// ever learns it happened.
+//
+// Sent BEFORE the header require, because that file is the first thing in the
+// request that writes a byte of output.
+header('Cache-Control: no-store');
+
+// category-page.php owns torin_esc() and torin_render_breadcrumbs(); both are
+// reused, neither is re-authored. contact-form.php owns the form markup and,
+// like every include here except header/footer, emits nothing on include.
+require_once(dirname(__FILE__) . '/includes/category-page.php');
+require_once(dirname(__FILE__) . '/includes/contact-form.php');
+
+// Assigned ONCE and read twice — torin_render_breadcrumbs() draws the visible
+// chain below and jsonld.php emits the matching BreadcrumbList from this same
+// array after footer.php includes it, so the two cannot disagree about the
+// site's hierarchy.
+//
+// THE LAST CRUMB CARRIES AN href EVEN THOUGH IT RENDERS AS A SPAN. The visible
+// renderer decides link-versus-span by POSITION (category-page.php:160), not
+// by the presence of the key, so the attribute changes nothing a visitor sees.
+// jsonld.php:125 reads $crumb['href'] unconditionally to build an absolute
+// item URL — on PHP 8 a missing key there is an E_WARNING, and with
+// display_errors still On in this subtree (04-HOST-CAPABILITIES BLOCKER 1)
+// that warning renders INTO the page. Every other page in the tree supplies
+// the key for the same reason. Do not «tidy» it away.
+$torin_crumbs = array(
+	array('text' => 'Начало', 'href' => 'index.html'),
+	array('text' => 'Контакти', 'href' => 'kontakti.html'),
+);
+
+require_once(dirname(__FILE__) . '/includes/header.php');
+?>
+
+<main>
+	<section class="section">
+		<div class="container">
+<?php		torin_render_breadcrumbs($torin_crumbs); ?>
+			<h1>Контакти</h1>
+			<p class="svc__intro">Обадете се, или ни пишете и приложете снимки на повредата — ще се свържем с вас с ориентировъчна цена и срок.</p>
+
+			<?php // THE PHONE NUMBERS SIT HERE, ABOVE THE FORM, AND THAT IS THE
+			      // POINT. The form must never present itself as the faster or
+			      // more certain route: a phone call gets an answer inside the
+			      // working day, and a written enquiry is for people who cannot
+			      // or would rather not call. Putting the numbers first is what
+			      // keeps that honest at 360px, where the fold falls between the
+			      // lede and the form's first field.
+			      //
+			      // DELIBERATE DEPARTURE FROM UI-SPEC C-2's section table, which
+			      // lists the phones inside «Къде да ни намерите» below. Rendered
+			      // there, they would be below the fold on a handset — which
+			      // contradicts this plan's own backstop truth that the phone
+			      // list stays above the fold as the faster alternative.
+			      // Rendering the loop in BOTH places was the other option and is
+			      // worse: footer.php already renders the same three numbers at
+			      // the bottom of this page, so the spec's placement would put
+			      // them on screen three times. Moved, not duplicated. Both
+			      // renderings read $site['phones'], so no drift is possible in
+			      // either arrangement — this is purely a question of weight.
+			      //
+			      // .btn--secondary, never .btn--primary: outline against the
+			      // page rather than amber. The one amber element on this page is
+			      // the form's submit button, which is what keeps the form the
+			      // primary visual anchor while the numbers stay genuinely
+			      // tappable at 48px.
+			      //
+			      // .cta-block__actions is reused verbatim for the wrapping flex
+			      // row — no new class, no new rule, nothing spent from this
+			      // phase's 1.5 KB CSS budget. ?>
+			<div class="cta-block__actions">
+<?php			foreach ($site['phones'] as $torin_phone) { ?>
+				<a class="btn btn--secondary" href="tel:<?php echo torin_esc(str_replace(' ', '', $torin_phone)); ?>"><?php echo torin_icon('phone'); ?><?php echo torin_esc($torin_phone); ?></a>
+<?php			} ?>
+			</div>
+		</div>
+	</section>
+
+	<section class="section">
+		<div class="container">
+			<span class="eyebrow" aria-hidden="true"></span>
+			<h2>Изпратете запитване</h2>
+<?php		// ONE partial, TWO callers (UI-SPEC C-3). This is the empty-state
+			// call; contact-send.php re-renders the populated error state from
+			// the same function in 04-05. Called with no arguments, which the
+			// partial's defaults handle — there is nothing to repopulate on a
+			// first render and nothing to report.
+			torin_render_contact_form(); ?>
+		</div>
+	</section>
+
+	<?php // Tinted, so the page alternates plain → plain → tint. Alternated BY
+	      // HAND rather than through torin_next_tint(): that helper exists for
+	      // the service-page spine, whose section count varies with which
+	      // optional blocks carry content. Three fixed sections have nothing to
+	      // toggle, and a running toggle here would be indirection with no
+	      // variability behind it. ?>
+	<section class="section section--tint">
+		<div class="container">
+			<span class="eyebrow" aria-hidden="true"></span>
+			<h2>Къде да ни намерите</h2>
+
+			<?php // A TEXT LINK TO GOOGLE MAPS, NEVER AN EMBEDDED IFRAME (D-34).
+			      // An embed is several hundred kilobytes of third-party
+			      // JavaScript and a set of third-party cookies — it would be the
+			      // single heaviest thing on this site, on the page a worried
+			      // customer reaches last, and it would re-create exactly the
+			      // consent-banner problem D4-18 was chosen to avoid. The link
+			      // costs nothing, and jsonld.php already publishes geo and
+			      // hasMap so local search still gets the location. ?>
+			<p><?php echo torin_icon('pin'); ?> <a href="<?php echo torin_esc($site['maps_url']); ?>" rel="noopener"><?php echo torin_esc($site['address']); ?></a></p>
+
+			<p><?php echo torin_icon('mail'); ?> <a href="mailto:<?php echo torin_esc($site['email']); ?>"><?php echo torin_esc($site['email']); ?></a></p>
+
+			<p><?php echo torin_icon('clock'); ?> <?php echo torin_esc($site['hours']); ?></p>
+		</div>
+	</section>
+</main>
+
+<?php require_once(dirname(__FILE__) . '/includes/footer.php'); ?>
