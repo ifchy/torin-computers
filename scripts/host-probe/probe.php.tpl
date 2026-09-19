@@ -17,12 +17,27 @@
 // plan 03-09 for exactly this reason (STATE.md, Phase 3). This template is the
 // structural fix rather than a second cleanup.
 //
-// LIFECYCLE — all four steps, in order, or the disclosure stays live:
+// LIFECYCLE — three steps, and the disclosure closes itself:
 //   1. scripts/host-probe/run-probe.sh --prepare
-//   2. scripts/deploy-new.sh <generated-filename>        (developer runs this)
+//   2. scripts/deploy-new.sh <generated-filename>
 //   3. scripts/host-probe/run-probe.sh --read <file> <token>
-//   4. delete the file on the server, then
-//      scripts/host-probe/run-probe.sh --verify-gone <file> <token>
+//        -> this single request is also the LAST one the probe ever answers:
+//           its final act is to unlink itself (see the bottom of this file),
+//           and --read then asserts the 404 automatically.
+//
+// SELF-DELETION, AND WHY IT IS THE MECHANISM RATHER THAN A CONVENIENCE.
+// The first version of this lifecycle ended with "delete it from the server by
+// hand, then run --verify-gone". Nothing in this repo can delete a remote file:
+// deploy-new.sh only uploads, and reimplementing the FTPS credential handling
+// here to issue a DELE would duplicate the one piece of secret handling this
+// project has deliberately centralised. So the cleanup step depended on a human
+// remembering — for the single file in this phase whose continued existence is
+// a live environment disclosure (T-04-01). A disclosure whose closure depends on
+// someone remembering is not mitigated, it is scheduled. The probe therefore
+// removes itself after answering exactly once, which bounds the exposure window
+// to one request no matter what anyone forgets. The unlink result is REPORTED in
+// the body rather than assumed, so a failure is legible instead of silent, and
+// --read still asserts the 404 independently afterwards.
 //
 // DIALECT: PHP 5.2-safe, deliberately. This probe has to run BOTH before and
 // after the runtime change of plan 04-01 — measuring the old runtime is half
@@ -100,3 +115,16 @@ echo "smtp:localhost:25    : " . ($torin_fp ? 'OPEN' : 'FAIL ' . $torin_errstr) 
 if ($torin_fp) {
 	fclose($torin_fp);
 }
+
+// Last act: delete this file. See the SELF-DELETION note in the header — this is
+// what bounds the disclosure window to a single request rather than to however
+// long it takes someone to open FileZilla.
+//
+// The result is echoed, not swallowed. If the unlink fails (ownership, a
+// read-only mount) the body says so in the same breath as the measurement, so
+// the failure arrives with the data instead of being discovered later by
+// --read's 404 assertion with no explanation attached.
+$torin_unlinked = @unlink(__FILE__);
+echo "selfdelete           : " . ($torin_unlinked
+	? 'OK'
+	: 'FAILED — delete this file from public_html/new/ BY HAND, now') . "\n";
