@@ -1,0 +1,261 @@
+# ============================================================================
+# htaccess-stage-a — REHEARSAL CONFIG. Not a second source of truth.
+#
+# src/.htaccess is the source of truth and is what ships. This file exists for
+# ONE purpose: to prove, without risking a single public page, that mod_fcgid is
+# present on this host and that the panel-generated wrapper path actually works.
+#
+# It differs from src/.htaccess in exactly two ways:
+#   1. fcgid is mapped to .php ONLY  (src/.htaccess also maps .html and .htm)
+#   2. the php52 handler is UNCONDITIONAL for .html/.htm
+#      (src/.htaccess has it inside <IfModule !mod_fcgid.c>)
+#
+# Difference 2 is the one that matters and it is easy to get backwards. During
+# the rehearsal mod_fcgid is expected to be PRESENT, which means an
+# <IfModule !mod_fcgid.c> fallback would be SKIPPED — leaving .html with no
+# handler and serving 19 pages of source. The guard has to come off for the
+# rehearsal precisely because the rehearsal is the moment it would not fire.
+#
+# So while this config is live: .php runs on PHP 8.5, every .html page stays on
+# the known-good 5.2 handler, and no public page in this subtree is .php. A
+# wrong wrapper path costs a 500 on include files nobody fetches directly.
+#
+# USE:
+#   cp scripts/host-probe/htaccess-stage-a src/.htaccess
+#   scripts/deploy-new.sh .htaccess
+#   ... verify ...
+#   git checkout -- src/.htaccess        # back to the real config
+#   scripts/deploy-new.sh .htaccess      # the actual cutover
+#
+# The absolute wrapper path below is the /new/ one. At the root cutover (04-10)
+# it becomes /home/torin/public_html/php.fcgi and this file needs regenerating
+# or deleting — it is a rehearsal aid for one directory, not a permanent config.
+# ============================================================================
+
+# public_html/new/.htaccess — Phase 1 rehearsal file, scoped to the /new/ staging subtree only.
+# At Phase 4 cutover, this file (or its rules) is promoted to the root .htaccess. TWO edits are
+# required there, not one:
+#   1. the canonicalisation target changes from https://torin.bg/new/$1 to https://torin.bg/$1
+#   2. the RewriteBase directly below changes from /new/ to /
+# Missing either one breaks a redirect silently, at 301, with no build failure.
+
+RewriteEngine On
+
+# RewriteBase is REQUIRED, and its absence is not a style question — it was a live defect.
+# In a per-directory .htaccess a relative substitution has no URL-space base to resolve
+# against, so when a rule forces an external redirect Apache builds the Location from the
+# DIRECTORY'S FILESYSTEM PATH. Measured on this host with the base missing, all four
+# retirement rules below answered 301 with a Location of
+# https://torin.bg/home/torin/public_html/new/<target> — a server path leaked into a public
+# URL, and every one of them 404'd on the follow. The 301 itself looked correct, which is
+# why only following the redirect caught it.
+RewriteBase /new/
+
+# Canonicalize all 4 protocol/host variants to https://torin.bg/new/... in exactly 1 hop.
+# Target is a hardcoded literal, never %{HTTP_HOST} reflection — reflecting the client-supplied
+# Host header into a redirect Location is a host-header-injection/open-redirect vector (T-01-03).
+RewriteCond %{HTTPS} off [OR]
+RewriteCond %{HTTP_HOST} ^www\.torin\.bg$ [NC]
+RewriteRule ^(.*)$ https://torin.bg/new/$1 [R=301,L]
+
+# ── SEO-05 retirements (plan 03.5-01 · CONTEXT D3.5-03, D3.5-09) ─────────────
+#
+# ###########################################################
+# ## CUTOVER-BLOCKING. These rules must be promoted to the ##
+# ## root .htaccess at Phase 4 cutover, together with the  ##
+# ## canonicalisation rule directly above them.            ##
+# ###########################################################
+#
+# Four of the original sixteen indexed URLs name services the shop no longer
+# offers (CONTEXT D3.5-01) or an obligation that has expired (D3.5-09). Their
+# source files are DELETED from src/ in the same plan, so these rules are the
+# only thing standing between those URLs and a 404. Stated without euphemism:
+# IF THIS BLOCK IS NOT CARRIED TO PRODUCTION AT CUTOVER, FOUR INDEXED URLS
+# RETURN 404 — and it happens silently, because nothing in a build fails when
+# an .htaccess block is left behind.
+#
+# Each pattern is ANCHORED and its dot ESCAPED. An unanchored pattern would
+# also catch a longer filename ending the same way.
+#
+# Each substitution is RELATIVE, never an absolute URL — which is safe ONLY
+# because RewriteBase is set at the top of this file. Relative substitutions
+# resolve against that base; without it they resolve against the filesystem
+# path and leak it into the Location. That is not a hypothetical: it is what
+# this block actually did on its first deploy. Keep the two together.
+#
+# The staging segment therefore appears in exactly two places in this file —
+# the canonicalisation target and the RewriteBase — and both are listed in the
+# cutover note at the top. No individual rule below carries it.
+#
+# Each rule carries the permanent-redirect flag paired with the last-rule flag.
+# NOT the bare redirect flag, which defaults to 302 and passes no ranking
+# signal, and NOT RedirectPermanent — mod_alias matches from the document root
+# and would force the staging segment to be spelled out here. The flag pair is
+# deliberately described rather than quoted: a gate counts occurrences of that
+# literal to assert the rule count, and a comment reproducing it would inflate
+# the count by one. Read the rules below for the exact form.
+#
+# No RewriteCond -f guard: these fire on the URL whether or not the file is
+# present on the server. That is what makes deleting the source files safe,
+# and it is the whole of what makes it safe.
+#
+# The targets are the owner's, recorded 2026-09-12 with their basis in
+# CONTEXT D3.5-09. Search Console over a 16-month window shows NONE of the
+# four URLs with any impressions, so no measurable ranking equity is at stake
+# on any of them — the absence is the evidence, not a missing measurement.
+# laptopi.html is the weak target and is recorded as such: the sales line has
+# no surviving equivalent, so Google may read it as a soft 404. It is flagged
+# in the phase audit rather than recorded as clean.
+RewriteRule ^covid\.html$ about.html [R=301,L]
+RewriteRule ^laptopi\.html$ index.html [R=301,L]
+RewriteRule ^rezervni-chasti\.html$ ekran-klaviatura-portove.html [R=301,L]
+RewriteRule ^za-bateriite\.html$ zalivane-technosti.html [R=301,L]
+
+# Keep this staging subtree out of Google's index — robots.txt is ignored outside the true
+# domain root, so X-Robots-Tag via HTTP header is the correct mechanism here (RESEARCH.md Pitfall C).
+<IfModule mod_headers.c>
+	Header set X-Robots-Tag "noindex, nofollow"
+</IfModule>
+
+# ── PHP runtime handler (D4-01, D4-02 · plan 04-01 Task 3) ─────────────────
+#
+# THIS BLOCK IS THE ONLY REASON THE 19 .html PAGES IN THIS SUBTREE EXECUTE.
+# Every page here is PHP wearing a .html extension - a Phase 1 decision that kept
+# the legacy URLs intact - so the mapping below is not an optimisation. It is the
+# difference between a rendered site and 19 pages of readable source.
+#
+# WHERE THE WRAPPER PATH COMES FROM. cPanel -> Select PHP Version, set to 8.5 for
+# the directory public_html/new/ ONLY (root deliberately untouched, D4-03),
+# performed 2026-09-17. That action generated php.fcgi and php85-fcgi.ini in this
+# directory. php.fcgi execs /opt/cpanel/ea-php85/root/usr/bin/php-cgi with -c
+# pointing at php85-fcgi.ini, which makes that ini - not .user.ini, not php_value
+# - the lever for every limit in this subtree.
+#
+# THE PATH IS ABSOLUTE, SO A DIRECTORY MOVE SILENTLY INVALIDATES IT. At the Phase
+# 4 root cutover it becomes /home/torin/public_html/php.fcgi, and the panel has to
+# be pointed at the root directory first so that wrapper exists at all. That is a
+# NAMED STEP in the cutover checklist, not a discovery for whoever runs it: a
+# stale wrapper path does not warn, it 500s the entire subtree.
+#
+# WHY THE EXTENSION LIST IS WIDER THAN THE PANEL'S. SuperHosting's PHP manager
+# does not write a handler block itself - it hands you one and asks you to paste
+# it in. What it hands you covers .php and nothing else:
+#
+#     AddHandler fcgid-script .php
+#     FcgidWrapper /home/torin/public_html/new/php.fcgi .php
+#
+# Paste that verbatim, then follow the host's other instruction - "remove any
+# existing AddHandler line for a PHP version" - and every .html page in this
+# directory is left matching NO handler and is served as source (RESEARCH P-3).
+# The panel hands you the shape of the failure and trusts you to notice the
+# extension list. Hence .html and .htm below, and hence the fallback after it.
+#
+# FcgidWrapper TAKES ONE SUFFIX PER DIRECTIVE - there is no list form - so three
+# extensions need three directives even though they share one wrapper.
+#
+# php_value is FORBIDDEN anywhere in this file. Under FastCGI it is not merely
+# ineffective, it is a 500 for the whole subtree (04-PATTERNS, T-02-02). Limits
+# are changed in php85-fcgi.ini instead.
+<IfModule mod_fcgid.c>
+	AddHandler fcgid-script .php
+	FcgidWrapper /home/torin/public_html/new/php.fcgi .php
+</IfModule>
+
+# FAIL-SAFE. This is a deliberate deviation from this task's own acceptance
+# criterion ("zero non-comment occurrences of x-httpd-php52"), and the reason is
+# worth more than the criterion.
+#
+# The criterion's intent is to get off PHP 5.2, and this does not fight it: the
+# line fires ONLY when mod_fcgid is absent, which is a broken-config state rather
+# than a runtime anyone selected. Without it, an absent mod_fcgid means the block
+# above is skipped entirely, .html matches no handler, and 19 pages are served as
+# PHP source to the public - the highest-severity outcome in this plan's register
+# (T-04-03). With it, that outcome is structurally impossible: the worst case
+# becomes "still on 5.2", which is exactly where we already were.
+#
+# THIS MUST NEVER BE ALLOWED TO PASS AS SUCCESS. A fallback that quietly keeps
+# 5.2 alive is precisely the sort of green check this project has already shipped
+# once. Verification for this change therefore asserts the RUNTIME and not merely
+# that pages render: x-powered-by must not report 5.2. That header is present and
+# load-bearing because expose_php = On in php85-fcgi.ini (line 286, read
+# 2026-09-17).
+#
+# Delete this block at the root cutover (04-10) once 8.5 is proven in production.
+# It is a transition guard, not a permanent feature.
+# UNCONDITIONAL during the rehearsal — see the header. mod_fcgid is expected to
+# be present, so an !mod_fcgid guard would be skipped and .html would match no
+# handler at all.
+AddHandler application/x-httpd-php52 .html .htm
+
+# ── Phase 2 (plan 02-01): compression + caching spike (DESIGN-02, RESEARCH N-6) ──
+#
+# CORRECTED 2026-08-18 (plan 03-02, UI-SPEC C3-2). This comment used to assert
+# that the host returns no Content-Encoding on any asset. That was true when it
+# was written on 2026-08-05 and was made FALSE later the same phase by the
+# mod_deflate block below, which plan 02-01 added underneath it. The stale text
+# survived and is exactly how a later phase re-derives a wrong budget, so it is
+# replaced by the measured figure rather than deleted.
+#
+# MEASURED, live origin: `content-encoding: gzip` is returned on CSS
+# (02-VERIFICATION.md:287). The shipped stylesheet set is 51,917 B raw and
+# 18,302 B gzipped. Phase 3 therefore budgets TRANSFER, not raw bytes:
+# <= 20 KB gzipped for base + layout + components + no-js together.
+#
+# Caching: assets DO now carry Expires/Cache-Control via the mod_expires block
+# below. HTML is deliberately held at zero seconds while /new/ is a staging
+# preview.
+#
+# mod_deflate and mod_expires availability on bell.host.bg is UNVERIFIED. Each
+# block below is therefore individually module-guarded: an unguarded directive for
+# an absent module returns 500 for the entire /new/ subtree (T-02-02), which would
+# take down every page here at once.
+
+# Serve woff2 with its registered media type. Some budget shared hosts still map
+# .woff2 to application/octet-stream, which suppresses compression negotiation and
+# can confuse `as="font"` preload matching (D-06a's two self-hosted subsets).
+<IfModule mod_mime.c>
+	AddType font/woff2 .woff2
+</IfModule>
+
+<IfModule mod_deflate.c>
+	AddOutputFilterByType DEFLATE text/html text/plain text/css text/xml
+	AddOutputFilterByType DEFLATE application/javascript application/x-javascript
+	AddOutputFilterByType DEFLATE application/json image/svg+xml
+	# woff2 is already Brotli-compressed internally — re-deflating it wastes CPU
+	# for no byte saving, so it is deliberately absent from the list above.
+</IfModule>
+
+<IfModule mod_expires.c>
+	ExpiresActive On
+	# HTML must stay uncached while /new/ is a live staging preview being reviewed;
+	# tuning for the real cutover is Phase 4's job (DESIGN-02).
+	ExpiresByType text/html "access plus 0 seconds"
+	# CSS and JS lifetimes are bounded to MINUTES for the staging window, down
+	# from the 7 days that produced gap G-02-1 (a reviewer stuck on a stylesheet
+	# from an earlier state of the design system, with no remote way to flush
+	# it). This is the SECOND line of defence, not the first: the ?v=<filemtime>
+	# stamp that header.php now puts on every one of these URLs is the primary
+	# mechanism, and both must fail before the condition recurs. If the stamp
+	# ever fails (asset-version.php emits a ?v=0 sentinel when a stat fails) a
+	# returning visitor is stale for 5 minutes instead of a week.
+	# js/site.js previously matched NO expiry rule at all and therefore fell to
+	# heuristic caching derived from Last-Modified — undeclared behaviour for
+	# the file that owns the navigation. Both registered JavaScript media types
+	# are listed because this host's mapping for .js is not verified.
+	# Phase 4 raises these once the stamp is proven in production (DESIGN-02),
+	# and must NOT raise them before: /new/ is a reviewed staging preview whose
+	# CSS changes several times a day.
+	ExpiresByType text/css "access plus 5 minutes"
+	ExpiresByType application/javascript "access plus 5 minutes"
+	ExpiresByType text/javascript "access plus 5 minutes"
+	ExpiresByType font/woff2 "access plus 1 year"
+	ExpiresByType image/png "access plus 30 days"
+	# Added with the ~40 first-party repair photographs in src/img/repairs/
+	# (plan 03-02). Without this line every one of them matches NO expiry rule
+	# and falls to undeclared heuristic caching derived from Last-Modified —
+	# the same defect js/site.js had before Phase 2 named it. The photographs
+	# are content, not code: they change when the shop reshoots them, which is
+	# to say almost never, so they take the same 30 days as the PNGs.
+	ExpiresByType image/jpeg "access plus 30 days"
+	ExpiresByType image/svg+xml "access plus 30 days"
+</IfModule>
