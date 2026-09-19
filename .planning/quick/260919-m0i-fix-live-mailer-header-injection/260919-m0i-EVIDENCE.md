@@ -2,13 +2,21 @@
 
 Live email header-injection patch for `public_html/mailer.php` on torin.bg.
 
-**Status of this file: PARTIAL.** The source-level gates are complete and measured.
-The four live-host steps (backup, pre-patch control POST, deploy, post-patch POSTs)
-were NOT run by the executor — they require the FTP credentials and a live-root
-write, both of which are the developer's to perform. Their sections below carry the
-exact commands and empty result slots. **Nothing in those slots is predicted,
-inferred, or filled in advance.** An empty slot means the measurement has not
-happened.
+**Status of this file: the patch is LIVE and UNVERIFIED.**
+
+Sections 1 through 4 are complete and measured: the source gates pass, a fresh
+backup was taken and hash-matched, the pre-patch control POST was sent, the patched
+file was uploaded to `public_html/`, and both post-patch measurements came back
+clean.
+
+**Section 5 — the mailbox inspection — has NOT happened.** The developer has no
+mailbox access until **Monday**. Section 5 is the only place in this entire task
+where the fix is actually proven, so until it is filled in, the correct description
+of this work is *"the injection sink is gone from the deployed source, and nobody
+has yet observed the injected header's absence in a delivered message."*
+
+Nothing below is predicted or inferred. A `PENDING` slot means the measurement has
+not happened.
 
 ---
 
@@ -104,20 +112,29 @@ have shipped anything.
 | D13 | `mailer.php.bak` | 3 | refused — a prefix/glob match would have let this through; exact equality does not |
 | D14 | `mailer.php` | 4 | refused — allowlisted, but the confirm variable was absent |
 
-### Not verified: does the patched PHP parse?
+### The patch went live unparsed — verification AFTER exposure, not before
 
-No `php` binary is installed on this machine and the Docker daemon is not running,
-so `php -l` could not be run. The patch uses no syntax newer than PHP 5.2 (G9), but
-**"it should parse" is not "it parses."** Two mitigations, in order:
+`php -l` was **never run**. No `php` binary exists on the executor's machine or on
+the developer's, and the Docker daemon was down on both. The patch uses no syntax
+newer than PHP 5.2 and gate G9 confirms none was introduced, but that is a
+source-level argument, not an execution.
 
-1. Run `php -l` before deploying if any PHP is reachable (section 3, step 0).
-2. If not: the normal-submission measurement in section 4 is a runtime parse proof.
-   A parse error returns `500` with a non-empty body, which is not `302` with a
-   zero-byte body. Rollback is one command (section 6).
+**What actually happened: unparsed PHP was uploaded to the live production root,
+and the first thing that executed it was a real HTTP request.** Section 4a's clean
+`302` with a zero-byte body is genuine parse evidence — a parse error returns `500`
+with a non-empty body — but it was obtained *after* the file was already serving
+public traffic, not before. Had it failed, the contact form would have been broken
+for real visitors for the seconds between upload and measurement.
+
+This is the weakest link in the task. It is recorded as such rather than folded
+into the run of green results above. The exposure window was small and the rollback
+is one command (section 6), but the ordering was wrong and would be worth fixing
+before the next live PHP change — a parse check is cheap and belongs before an
+upload, not after it.
 
 ---
 
-## 2. Live backup — NOT RUN (developer step)
+## 2. Live backup — DONE
 
 `scripts/backup-live-site.sh` reads the gitignored credentials file and has no
 `TORIN_CRED_FILE` override, so it must run from the primary checkout.
@@ -152,19 +169,41 @@ was reviewed?" without depending on whether the patch has been merged into the
 primary checkout yet. **A different hash means the live file drifted — HALT, do not
 deploy,** because the patch would then be overwriting bytes nobody reviewed.
 
-### Result — PENDING
+### Result — MEASURED 2026-09-19
 
 ```
-snapshot path:
-mailer.php non-empty:
-.html count:
-G1 against snapshot:
-git hash-object:
+snapshot path:         backups/20260919T131139Z/
+.html pages verified:  16/16   (raw ls count 17 — see note)
+must-carry root files: 7/7
+must-carry dirs:       .well-known/ cgi-bin/ covid-19/ assets1/
+assets1/ size:         12228KB (baseline ~14000KB, abort threshold 10000KB)
+G1 against snapshot:   1
+git hash-object:       fd4deb874f2a4cf2de134fd6db732d8db7f5d8de
 ```
+
+**All four pass conditions met.**
+
+- `G1 = 1` — the bytes pulled off the live host are the known-vulnerable ones. The
+  backup is a real snapshot of the broken file, not a stale or truncated pull.
+- The hash is an **exact** match for the pre-patch blob. `site-current/` had not
+  drifted from live; the patch was applied to the same bytes that were running in
+  production.
+
+Two figures that look like discrepancies and are not, recorded so nobody
+re-investigates them later:
+
+- **`ls` counts 17 `.html` files, the script verifies 16.** The 17th is
+  `google1718743335455f1c.html`, a Search Console verification token. It is carried
+  as one of the 7 must-carry root files, not as one of the 16 content pages, so it
+  is counted once in the correct bucket rather than twice.
+- **`assets1/` is 12228KB against a ~14000KB baseline.** Under the baseline but well
+  clear of the 10000KB truncation-abort threshold, so the script accepted it. The
+  baseline was recorded in a Phase 1 snapshot; some delta is expected after a year of
+  edits. Worth a glance if a future snapshot drops further, not worth acting on now.
 
 ---
 
-## 3. Pre-patch runtime control POST — NOT RUN (developer step)
+## 3. Pre-patch runtime control POST — DONE
 
 This send is what makes the whole verification chain falsifiable. It must happen
 **before** the deploy in section 3b. It sends one email to office@torin.bg and
@@ -195,19 +234,27 @@ wc -c < /tmp/m0i-pre-body.txt
 Expected: status `302`, a `location` header of `msg.html`, a `content-length` of
 zero, and `wc -c` printing `0`.
 
-### Result — PENDING
+### Result — MEASURED
 
 ```
-UTC timestamp:
-status line:
-location header:
-content-length header:
-body bytes (wc -c):
+UTC timestamp:   2026-09-19T13:14:58Z
+HTTP/2 302
+x-powered-by: PHP/8.5.10
+location: msg.html
+content-length: 0
+body bytes (wc -c): 0
 ```
+
+The control send happened at **13:14:58Z**, which is **before** the 13:15-ish
+deploy. That ordering is what makes the whole chain falsifiable, and it held.
+
+Note this response and both post-patch responses in section 4 are **identical in
+every field**. That is the expected result, not a warning sign — it is the reason
+this task cannot be verified over HTTP and needs section 5.
 
 ---
 
-## 3b. Deploy — NOT RUN (developer step)
+## 3b. Deploy — DONE
 
 **Step 0 — optional but preferred: confirm the patched file parses.**
 
@@ -241,16 +288,23 @@ Expected output: one `uploading ... bytes -> ftp://.../public_html/mailer.php` l
 then `Deploy complete: mailer.php -> public_html/ (LIVE)` and a rollback reminder.
 A non-zero exit means nothing shipped.
 
-### Result — PENDING
+### Result — MEASURED 2026-09-19
 
 ```
-uploaded bytes:
-exit status:
+uploading .../site-current/mailer.php (4943 bytes) -> ftp://bell.host.bg/public_html/mailer.php
+Deploy complete: mailer.php -> public_html/ (LIVE)
+exit status: 0
 ```
+
+4943 bytes matches the patched file on disk exactly. One file, the allowlisted one,
+to the live root. `php -l` (step 0) was **not** run — see section 1.
+
+Live static pages re-checked after the upload: `/`, `/index.html`, `/uslovia.html`
+and `/msg.html` all returned `200`. Nothing else on the site was disturbed.
 
 ---
 
-## 4. Post-patch measurements — NOT RUN (developer step)
+## 4. Post-patch measurements — DONE
 
 Both run **after** the deploy. Two sends, two emails.
 
@@ -289,73 +343,141 @@ body. This asserts the form still *works* for hostile input rather than breaking
 a patch that returned `500` on malformed input would also stop the injection and
 would be a regression.
 
-### Results — PENDING
+### Results — MEASURED 2026-09-19
+
+**4a — normal submission, `2026-09-19T13:15:26Z`**
 
 ```
-4a UTC timestamp:
-4a status line:
-4a location header:
-4a content-length header:
-4a body bytes:
-
-4b UTC timestamp:
-4b status line:
-4b location header:
-4b content-length header:
-4b body bytes:
+HTTP/2 302
+x-powered-by: PHP/8.5.10
+location: msg.html
+content-length: 0
+body bytes (wc -c): 0
 ```
+
+**4b — injection attempt, `2026-09-19T13:15:36Z`**
+
+```
+HTTP/2 302
+x-powered-by: PHP/8.5.10
+location: msg.html
+content-length: 0
+body bytes (wc -c): 0
+```
+
+Both pass. 4a proves the patched file parses and runs to the redirect; 4b proves
+the form still works under hostile input rather than erroring — a `500` on
+malformed input would also have stopped the injection and would have been a
+regression.
+
+**What these do NOT show.** Compare them to the pre-patch control in section 3:
+every field is identical — same status, same PHP version banner, same location,
+same zero length. The vulnerable file and the patched file are indistinguishable
+over HTTP. Three matching green measurements here are worth exactly nothing as
+evidence that the injection is dead. Only section 5 can establish that.
 
 ---
 
-## 5. The three messages the human must inspect
+## 5. Mailbox inspection — PENDING, BLOCKED UNTIL MONDAY
 
-All three land at **office@torin.bg**. View **raw source / full headers** for each —
-Gmail "Show original", Outlook File > Properties > Internet headers, Thunderbird
-Ctrl+U. The rendered message does not show what matters.
+**This section is the only place in this task where the fix is proven.** It has not
+been done. The developer has no mailbox access until Monday.
 
-| # | Marker / identity | Sent | Must contain | Must NOT contain |
-|---|-------------------|------|--------------|------------------|
-| 1 | `X-Torin-Injection-Test: PRE-PATCH-260919` | section 3, **before** deploy | the marker header **PRESENT** | — |
-| 2 | normal, `torin-m0i-test@example.com` | section 4a, after deploy | `From: TORIN.bg Message Form <office@torin.bg>`; a `Reply-To:` holding the submitted address; the blue/orange table with Име / E-mail / Телефонен номер / Съобщение and the Bulgarian heading | any header beginning `X-Torin-` |
-| 3 | `X-Torin-Injection-Test: POST-PATCH-260919` | section 4b, after deploy | `From: TORIN.bg Message Form <office@torin.bg>`; the body table rendering the submitted values as text | **any** `X-Torin` header; **any** `Reply-To:` header |
+This section is written to be self-contained: whoever picks it up needs nothing from
+the conversation that produced it.
 
-Two of these deserve emphasis:
+### Situation as of 2026-09-19
 
-- **Message 1's marker must be PRESENT.** If it is absent, the injection was never
-  demonstrated, so its absence from message 3 proves nothing and the entire
-  verification is void — regardless of how green section 1 looks. Report it rather
-  than treating it as good news.
-- **Message 3 must have NO `Reply-To:` at all.** Its absence is the intended
-  behaviour: the submitted value was not a valid address, so no such header was
-  emitted. A `Reply-To:` present here would mean the validation is being bypassed.
+The patched `mailer.php` is **live** on `public_html/`. All source gates pass and all
+three HTTP measurements are clean. None of that establishes that the injected header
+is gone from a delivered message — sections 3 and 4 returned byte-identical responses
+before and after the patch, which is exactly why this step exists.
 
-Also on message 2: **press Reply.** The `To:` field must populate with
-`torin-m0i-test@example.com`, not with office@torin.bg. That is the shop owner's
-existing workflow and the thing this change was most likely to break.
+### The three messages
 
-Delete all three once inspected so they are not mistaken for real enquiries.
+All three are already sitting in **office@torin.bg**. They were sent on
+**2026-09-19** and are identified by UTC timestamp. All three are labelled as
+automated tests in both their name and message fields.
 
-### Findings — PENDING
+For each one, view the **raw source / full headers** — Gmail: "..." menu > "Show
+original"; Outlook: File > Properties > Internet headers; Thunderbird: Ctrl+U. The
+rendered message does not show what matters here.
+
+| # | Sent (UTC) | What it is | Marker |
+|---|-----------|------------|--------|
+| 1 | **13:14:58Z** | pre-patch control, sent BEFORE the deploy | `X-Torin-Injection-Test: PRE-PATCH-260919` |
+| 2 | **13:15:26Z** | post-patch normal submission | none; `mail` field was `torin-m0i-test@example.com` |
+| 3 | **13:15:36Z** | post-patch injection attempt | `X-Torin-Injection-Test: POST-PATCH-260919` |
+
+The deploy landed between 13:14:58Z and 13:15:26Z. Message 1 is the only one that
+hit the vulnerable file.
+
+### Message 1 — 13:14:58Z — pass criteria
+
+- `X-Torin-Injection-Test: PRE-PATCH-260919` **MUST BE PRESENT** in the raw headers.
+
+**If it is ABSENT, stop and report that.** It means the injection was never actually
+demonstrated against the live host, so its absence from message 3 proves nothing and
+the entire verification chain is void — no matter how green sections 1 through 4
+look. This is the negative control. A negative control that does not fire
+invalidates the positive result. Do not read a missing marker as good news.
+
+### Message 2 — 13:15:26Z — pass criteria
+
+- `From:` reads exactly `TORIN.bg Message Form <office@torin.bg>`
+- a `Reply-To:` header is **present** and holds `torin-m0i-test@example.com`
+- **no** header beginning `X-Torin-` appears anywhere
+- the body still shows the blue-and-orange table with Име / E-mail / Телефонен
+  номер / Съобщение and the submitted values, under the Bulgarian heading line
+- **press Reply.** The `To:` field must populate with `torin-m0i-test@example.com`,
+  not with office@torin.bg. This is the shop owner's actual workflow and the single
+  thing this change was most likely to have broken.
+
+### Message 3 — 13:15:36Z — pass criteria
+
+- search the full raw headers for `X-Torin` — **zero hits**. The marker MUST BE
+  ABSENT.
+- `From:` reads `TORIN.bg Message Form <office@torin.bg>` — not the attacker-supplied
+  value
+- **no `Reply-To:` header at all.** Its absence is correct and intended: the
+  submitted value was not a valid address, so none was emitted. A `Reply-To:`
+  present in this message would mean the validation is being bypassed and the fix is
+  incomplete.
+- the body table still renders and shows the submitted values as text
+
+### If anything fails
+
+If message 3 carries the marker, or message 2's Reply does not address the visitor,
+**do not approve** — report it and roll back using section 6. Rolling back re-opens
+the vulnerability, so it is the right call only if the form is genuinely broken for
+real visitors.
+
+Delete all three test messages once inspected, so they are not later mistaken for
+real customer enquiries.
+
+### Findings — PENDING (blocked until Monday)
 
 ```
-message 1 found:            marker present:
-message 2 found:            From:                    Reply-To:            X-Torin absent:   Reply populates:
-message 3 found:            X-Torin absent:          From:                Reply-To absent:
+message 1 (13:14:58Z)  found: ____  marker PRESENT: ____
+message 2 (13:15:26Z)  found: ____  From: ____  Reply-To: ____  no X-Torin: ____  Reply populates visitor: ____
+message 3 (13:15:36Z)  found: ____  no X-Torin: ____  From: ____  no Reply-To: ____
 ```
 
 ---
 
 ## 6. Rollback
 
-The pre-patch bytes are on disk from section 2 and their content hash is known
-(`fd4deb874f2a4cf2de134fd6db732d8db7f5d8de`), so a restore is verifiable rather than
-hopeful.
+The pre-patch bytes are on disk at **`backups/20260919T131139Z/public_html/`** and
+their content hash is known (`fd4deb874f2a4cf2de134fd6db732d8db7f5d8de`), so a
+restore is verifiable rather than hopeful. The real snapshot path is written out
+below rather than left as a placeholder — whoever needs this is probably in a
+hurry.
 
 ```bash
 cd /Users/alabala/Documents/projects/torin
-SNAP=$(ls -1dt backups/*/ | head -1)
-git hash-object "${SNAP}public_html/mailer.php"   # must print fd4deb87...
-cp "${SNAP}public_html/mailer.php" site-current/mailer.php
+git hash-object backups/20260919T131139Z/public_html/mailer.php
+# must print fd4deb874f2a4cf2de134fd6db732d8db7f5d8de before you proceed
+cp backups/20260919T131139Z/public_html/mailer.php site-current/mailer.php
 TORIN_LIVE_DEPLOY_CONFIRM=1 scripts/deploy-live.sh mailer.php
 ```
 

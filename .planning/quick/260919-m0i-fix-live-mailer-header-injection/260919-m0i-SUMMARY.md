@@ -2,16 +2,17 @@
 phase: quick-260919-m0i
 plan: 01
 subsystem: contact-form / live-deploy
-tags: [security, header-injection, php, ftps, live-production]
-status: blocked-on-checkpoint
+tags: [security, header-injection, php, ftps, live-production, unverified]
+status: incomplete
+blocked_on: "Task 3 — mailbox raw-header inspection at office@torin.bg. No mailbox access until Monday."
 requires:
-  - live FTP credentials (primary checkout only, gitignored)
-  - developer-run backup, deploy, and mailbox inspection
+  - "human inspection of three test messages sent 2026-09-19 13:14:58Z / 13:15:26Z / 13:15:36Z"
 provides:
-  - site-current/mailer.php with no path from POST data to a mail header
-  - scripts/deploy-live.sh — allowlisted single-file live-root uploader
+  - "site-current/mailer.php with no path from POST data to a mail header — DEPLOYED"
+  - "scripts/deploy-live.sh — allowlisted single-file live-root uploader"
+  - "backups/20260919T131139Z/ — pre-patch snapshot, hash-verified rollback anchor"
 affects:
-  - public_html/mailer.php on torin.bg (NOT YET — deploy is pending)
+  - "public_html/mailer.php on torin.bg — LIVE as of 2026-09-19 ~13:15Z"
 tech-stack:
   added: []
   patterns:
@@ -31,151 +32,208 @@ decisions:
   - "new deployer rather than parameterising deploy-new.sh, whose no-argument branch uploads a whole tree"
   - "mirror-drift check re-expressed as a content hash (fd4deb87...) so it holds regardless of merge order"
 metrics:
-  duration: ~40m
-  completed: 2026-09-19
-  tasks_completed: 1.5
+  duration: ~55m
+  completed: null
+  tasks_completed: 2
   tasks_total: 3
 actuals:
-  tokens: 11000
-  tasks: 1
-  commits: 3
+  tokens: 13000
+  tasks: 2
+  commits: 4
 ---
 
 # Quick 260919-m0i: Fix Live Mailer Header Injection — Summary
 
-The injection sink is gone from the source and the live-root deploy tool exists and
-is gated; the patch is **not yet on the live host** and the fix is **not yet
-proven** — both remaining steps require credentials and a mailbox, which are the
-developer's.
+## Status: the patch is LIVE and its runtime behaviour is UNVERIFIED
 
-## What Is Done
+Read this before anything else in this file.
 
-**`site-current/mailer.php`** no longer has any path from posted data to a mail
-header. `From:` became a fixed literal on the shop's own domain with zero
-interpolation. `Reply-To:` is emitted only after the submitted address has had every
-CR, LF and NUL byte removed *and* then passed PHP's address validator — strip first,
-so the bytes that get approved are byte-for-byte the bytes written into the header.
-All four POST reads carry `isset` + `is_string` guards, which is not decoration: on
-PHP 8.5 a bracketed field name arrives as an array and makes `htmlentities()` throw,
-and anything that error printed would be output sent before `header()`, breaking the
-redirect. The guards are what preserve the measured `content-length: 0` baseline
-under hostile input.
+**What is true right now:** the injection sink is gone from the source that is
+deployed to `public_html/mailer.php`, every source gate passes with a firing
+negative control, and the live endpoint answers correctly. **Nobody has yet observed
+the injected header's absence in a delivered message.**
+
+Those are two different claims and only the first is established. The second is the
+one the task exists to prove, and it cannot be proven from anything in this
+repository — an injection POST returns `302` / `location: msg.html` / a zero-length
+body **identically before and after the patch**, which the pre-patch control at
+13:14:58Z and the post-patch attempt at 13:15:36Z demonstrate side by side in the
+evidence file. Three matching green HTTP measurements are worth nothing as evidence
+here.
+
+**Blocked on:** a human opening office@torin.bg and reading the raw headers of three
+test messages. No mailbox access until **Monday**. Full self-contained instructions,
+including the per-message pass criteria and the UTC timestamps that identify them,
+are in section 5 of
+`.planning/quick/260919-m0i-fix-live-mailer-header-injection/260919-m0i-EVIDENCE.md`.
+
+**Do not close this task on the gate battery.** A green section 1 is not a fix.
+
+---
+
+## Rollback — copy-pasteable
+
+If the contact form turns out to be broken for real visitors:
+
+```bash
+cd /Users/alabala/Documents/projects/torin
+git hash-object backups/20260919T131139Z/public_html/mailer.php
+# must print fd4deb874f2a4cf2de134fd6db732d8db7f5d8de before you proceed
+cp backups/20260919T131139Z/public_html/mailer.php site-current/mailer.php
+TORIN_LIVE_DEPLOY_CONFIRM=1 scripts/deploy-live.sh mailer.php
+```
+
+Then re-run the normal-submission measurement (evidence §4a) and confirm `302` /
+`location: msg.html` / zero-byte body.
+
+**Rolling back re-opens the vulnerability.** Correct only if the form is genuinely
+broken — §4a's clean result says it is not.
+
+---
+
+## What Shipped
+
+**`site-current/mailer.php`** — live since ~13:15Z, 4943 bytes. No path remains from
+posted data to a mail header. `From:` is a fixed literal on the shop's own domain
+with zero interpolation. `Reply-To:` is emitted only after the submitted address has
+had every CR, LF and NUL byte removed *and* then passed PHP's address validator —
+stripping first, so the bytes that get approved are byte-for-byte the bytes written
+into the header. All four POST reads carry `isset` + `is_string` guards, which is
+not decoration: on PHP 8.5 a bracketed field name arrives as an array and makes
+`htmlentities()` throw, and anything that error printed would be output sent before
+`header()`, breaking the redirect. The guards are what preserved the measured
+`content-length: 0` baseline under the hostile input at 13:15:36Z.
 
 The HTML body, the Bulgarian subject and the `msg.html` redirect are byte-identical
-— the diff has three hunks and none of them touches lines 13–70.
+— the diff has three hunks and none touches lines 13–70.
 
-**`scripts/deploy-live.sh`** uploads one allowlisted file to `public_html/`. Its
-safety is structural, not advisory: there is no source-tree enumeration code in the
-file at all, so an accidental whole-directory upload is unexpressible rather than
-discouraged. The allowlist holds bare filenames matched by exact string equality, so
-an argument carrying a separator or a `..` cannot match any entry.
-`TORIN_LIVE_DEPLOY_CONFIRM=1` is required, and no flag is passed that would let curl
-create a remote directory. Credential handling is carried over from `deploy-new.sh`
-unchanged — password decoded inside a short-lived `python3` process straight into a
-chmod-600 netrc file, consumed via `--netrc-file`, removed by an exit trap, never in
-a shell variable or on a command line.
+**`scripts/deploy-live.sh`** — uploads one allowlisted file to `public_html/`. Safety
+is structural, not advisory: no source-tree enumeration code exists in the file, so
+an accidental whole-directory upload is unexpressible rather than discouraged. The
+allowlist holds bare filenames matched by exact string equality, so an argument
+carrying a separator or a `..` cannot match. `TORIN_LIVE_DEPLOY_CONFIRM=1` is
+required, and no flag is passed that would let curl create a remote directory.
+Credential handling is carried over from `deploy-new.sh` unchanged — password decoded
+inside a short-lived `python3` process straight into a chmod-600 netrc file, consumed
+via `--netrc-file`, removed by an exit trap, never in a shell variable or on a
+command line.
 
-All source gates, the deployer's structural gates and its six behavioural refusals
-pass, with the measured numbers recorded in `260919-m0i-EVIDENCE.md` section 1.
+**`backups/20260919T131139Z/`** — pre-patch snapshot. 16/16 pages, 7/7 must-carry root
+files, 4 directories mirrored. Its `mailer.php` hashes to
+`fd4deb874f2a4cf2de134fd6db732d8db7f5d8de`, an **exact** match for the reviewed
+pre-patch bytes, so `site-current/` had not drifted from live and the patch was
+applied to the same bytes production was running.
 
-## What Is NOT Done — and what that means
+## Measured Results
 
-| Step | Status | Why |
-|------|--------|-----|
-| Fresh live backup | not run | `backup-live-site.sh` needs the gitignored credentials; live-host operations are the developer's |
-| Mirror-drift check | not run | depends on the backup |
-| Pre-patch control POST | not run | live send |
-| Deploy to `public_html/` | not run | live-root write |
-| Post-patch measurements | not run | live sends |
-| Mailbox raw-header inspection | not run | human, and the only place the fix is actually proven |
+| Step | Result |
+|------|--------|
+| Source gates (11) | all pass |
+| Deployer structural gates (10) + behavioural refusals (6) | all pass |
+| Negative controls (5) | all fired against known-positive files |
+| Backup hash vs pre-patch blob | exact match, no drift |
+| Pre-patch control POST, 13:14:58Z | `302`, `location: msg.html`, `content-length: 0`, 0-byte body |
+| Deploy | 4943 bytes → `public_html/mailer.php`, exit 0 |
+| Post-patch normal, 13:15:26Z | `302`, `location: msg.html`, `content-length: 0`, 0-byte body |
+| Post-patch injection, 13:15:36Z | `302`, `location: msg.html`, `content-length: 0`, 0-byte body |
+| Live static pages after deploy | `/`, `/index.html`, `/uslovia.html`, `/msg.html` all `200` |
+| **Mailbox raw-header inspection** | **NOT DONE — blocked until Monday** |
 
-**The honest position on proof.** Every check that passed today is a source-level
-check. It proves the sink is gone from the code. It does not prove the injected
-header is absent from a delivered message, and no HTTP-level check can: an injection
-POST returns `302` / `location: msg.html` / a zero-length body identically before
-and after the patch. That is precisely why the plan front-loads a pre-patch control
-send. **This fix is unverified until a human reads the raw headers of the three
-messages.** Section 5 of the evidence file is that checklist.
+## The Weakest Link: unparsed PHP went live
+
+`php -l` was **never run** — no `php` binary on the executor's machine or the
+developer's, Docker daemon down on both. The patch introduces no syntax newer than
+PHP 5.2 and gate G9 confirms it, but that is a source-level argument, not an
+execution.
+
+So: **unparsed PHP was uploaded to the live production root, and the first thing to
+execute it was a real HTTP request.** The 13:15:26Z clean `302` with a zero-byte body
+is genuine parse evidence — a parse error returns `500` with a body — but it was
+obtained *after* the file was already serving public traffic. That is verification
+after exposure, not before. Had it failed, the contact form would have been broken
+for real visitors between upload and measurement.
+
+The window was small and rollback is one command, but the ordering was wrong. A parse
+check is cheap and belongs before an upload. Worth fixing before the next live PHP
+change.
 
 ## Deviations from Plan
 
-**1. [Rule 3 — Blocking] All live-host steps deferred to the developer.**
+**1. [Rule 3 — Blocking] All live-host steps performed by the developer, not the executor.**
 - **Found during:** Task 1, before any command ran.
 - **Issue:** `backup-live-site.sh` and `deploy-live.sh` both read the gitignored
-  credentials file and write to / send from the live host. The orchestrator holds
-  that boundary and the permission classifier denies these to subagents.
-- **Action:** Did not probe the boundary. Completed everything local, wrote the
-  exact commands and their pass/fail criteria into the evidence file, and halted at
-  a checkpoint. No live result is claimed or predicted anywhere.
+  credentials and write to / send from the live host — the coordinator's boundary,
+  and denied to subagents by the permission classifier.
+- **Action:** Did not probe the boundary. Completed all local work, wrote exact
+  commands with pass/fail criteria into the evidence file, halted at a checkpoint.
+  The developer ran them and returned output, which is recorded verbatim. No live
+  result was predicted or assumed at any point.
 
 **2. [Rule 3 — Blocking] Mirror-drift check re-expressed as a content hash.**
-- **Found during:** Task 1 planning, once step ordering was forced by deviation 1.
 - **Issue:** The plan diffs the snapshot against `site-current/mailer.php`. Because
-  the patch now lands before the backup, that comparison's answer depends on whether
-  this worktree has been merged into the primary checkout yet — it would report
-  false drift after a merge, and the correct answer only by luck before one.
-- **Fix:** The check is now `git hash-object` against the pinned pre-patch blob
-  `fd4deb874f2a4cf2de134fd6db732d8db7f5d8de`. Same question, same strictness, and
-  the answer no longer depends on merge state or which checkout it runs from.
+  the patch landed before the backup (forced by deviation 1), that comparison's
+  answer depends on whether the worktree had been merged — false drift after a
+  merge, correct only by luck before one.
+- **Fix:** Now `git hash-object` against the pinned pre-patch blob
+  `fd4deb874f2a4cf2de134fd6db732d8db7f5d8de`. Same question, same strictness,
+  independent of merge state and of which checkout runs it. It returned an exact
+  match.
 
 **3. [Rule 1 — Bug] The deployer's own gate was counting its comments.**
 - **Found during:** Task 2 Part C, first gate run.
 - **Issue:** The script explained in two comments that it deliberately omits the
   remote-dir-creation flag — and named the flag. The absence-gate counted those
-  comments and reported the flag **present** (measured 2, required 0). This is the
-  fourth time this project has shipped a check that counted prose.
-- **Fix:** Comments reworded to describe the flag without naming it, and the gate
-  additionally strips comment lines before counting. Both the comment-inclusive and
-  comment-stripped forms now measure 0.
+  comments and reported the flag **present** (measured 2, required 0). Fourth
+  instance in this project of a check counting prose.
+- **Fix:** Comments reworded to describe the flag without naming it; the gate also
+  strips comment lines before counting. Both comment-inclusive and comment-stripped
+  forms now measure 0.
 
 **4. [Rule 1 — Bug] Two gates in my own battery were measuring nothing.**
-- **Found during:** Task 2 Part C, first gate run.
-- **Issue:** G7 and G8 reported 0 against required 1 and 4. Not a regression in the
-  file — a quoting bug in my gate script put literal backslashes into the `grep -F`
-  patterns, so they matched text that cannot exist. Had those gates been written to
-  assert "absent" instead of "present", they would have passed while measuring
-  nothing at all.
-- **Fix:** Patterns moved into variables with correct quoting; both now measure the
-  expected 1 and 4. Prompted deviation 5.
+- **Issue:** G7 and G8 reported 0 against required 1 and 4 — not a regression in the
+  file, a quoting bug that put literal backslashes into the `grep -F` patterns so
+  they matched text that cannot exist. Written as absence-gates they would have
+  passed while matching nothing.
+- **Fix:** Patterns moved into correctly-quoted variables; both now measure the
+  expected 1 and 4.
 
-**5. [Rule 2 — Missing critical functionality] Negative controls added for every
-absence-gate.**
-- **Issue:** After deviations 3 and 4, two of my checks had been observed only in a
-  state that proved nothing. The plan mandated a negative control for G1 only.
+**5. [Rule 2 — Missing critical functionality] Negative controls added for every absence-gate.**
+- **Issue:** After deviations 3 and 4, two checks had been observed only in states
+  that proved nothing. The plan mandated a negative control for G1 alone.
 - **Fix:** Five now run, each against a file known to contain what the gate looks
-  for — G1 and the sink literal against the pre-patch `mailer.php`, and the
-  directory-walk, remote-dir-creation and staging-root gates against
-  `deploy-new.sh`, which genuinely contains all three. All five fired (NC1–NC5).
-  Also added D13, a near-miss allowlist argument (`mailer.php.bak`) that a prefix or
-  glob match would wrongly accept; exact equality rejects it.
+  for — G1 and the sink literal against pre-patch `mailer.php`; the directory-walk,
+  remote-dir-creation and staging-root gates against `deploy-new.sh`, which contains
+  all three. All fired. Also added D13, a near-miss allowlist argument
+  (`mailer.php.bak`) that prefix or glob matching would wrongly accept.
 
 ## Known Gaps
 
-**1. The patched PHP has not been parsed.** No `php` binary on this machine and the
-Docker daemon is not running, so `php -l` could not run. The patch uses no syntax
-newer than PHP 5.2 and gate G9 confirms no short arrays or null-coalescing were
-introduced, but "should parse" is not "parses". Mitigations, in order: run `php -l`
-before deploying if any PHP is reachable; otherwise the normal-submission
-measurement is a runtime parse proof, since a parse error returns `500` with a body
-rather than `302` with none. Rollback is one command and the pre-patch bytes are
-content-addressed.
+**1. Runtime absence of the injected header — UNPROVEN.** The blocking item. Monday.
+Evidence §5.
 
-**2. Two of the plan's evidence gates are weak and currently pass for the wrong
-reason.** `grep -qF 'POST-PATCH-260919'` is satisfied by the marker appearing in the
-documented curl command, so it passes now, before any send. Flagging it rather than
-leaning on it. The companion gates are honest: `grep -c 'HTTP/... 302'` and
-`grep -c '^content-length: 0'` both measure **0** against the evidence file right
-now and will stay 0 until real measurements are pasted in. Those two are the ones
-worth watching.
+**2. Live PHP was deployed unparsed.** See "The Weakest Link" above.
 
-**3. `mailer.php` remains unauthenticated and unthrottled.** Accepted in the plan
-(T-m0i-05) and owned by 04-05 along with the honeypot, PHPMailer/SMTP and the
-unaligned-SPF deliverability work. This patch neither creates nor worsens it.
+**3. One of the plan's evidence gates is weak by construction.**
+`grep -qF 'POST-PATCH-260919'` is satisfied by the marker appearing in a documented
+curl command, so it would have passed before any send. It happens to be backed by a
+real measurement now, but it was never a real gate. Its companions are honest:
+`grep -c 'HTTP/... 302'` measures 3 and `grep -c '^content-length: 0'` measures 3,
+and both were 0 until real output was pasted in.
+
+**4. `assets1/` snapshot is 12228KB against a ~14000KB baseline.** Above the
+10000KB truncation-abort threshold, so the backup was accepted. Some delta is
+expected after a year of edits. Worth a glance if a future snapshot drops further;
+not worth acting on now.
+
+**5. `mailer.php` remains unauthenticated and unthrottled.** Accepted in the plan
+(T-m0i-05), owned by 04-05 with the honeypot, PHPMailer/SMTP and the unaligned-SPF
+work. This patch neither creates nor worsens it.
 
 ## Scope
 
-`src/` and `.planning/phases/04-hardening-cutover/` were not touched — `git status`
-showed only `site-current/mailer.php` and `scripts/deploy-live.sh` throughout.
+`src/` and `.planning/phases/04-hardening-cutover/` untouched — `git status` showed
+only `site-current/mailer.php`, `scripts/deploy-live.sh` and the two quick-task docs
+throughout.
 
 ## Commits
 
@@ -183,15 +241,16 @@ showed only `site-current/mailer.php` and `scripts/deploy-live.sh` throughout.
 |--------|------|
 | `60fd501` | `fix(quick-260919-m0i)`: stop visitor input reaching mail headers |
 | `a30c0c2` | `feat(quick-260919-m0i)`: add single-file live-root deployer |
-| _(this)_ | `docs(quick-260919-m0i)`: evidence and summary |
+| `b6c64a2` | `docs(quick-260919-m0i)`: gate measurements, halt at deploy checkpoint |
+| _(this)_ | `docs(quick-260919-m0i)`: record live results, leave mailbox proof open |
 
 ## Self-Check: PASSED
 
-- `site-current/mailer.php` — FOUND, all 11 source gates pass, 5 negative controls fired
+- `site-current/mailer.php` — FOUND, 11 source gates pass, 5 negative controls fired
 - `scripts/deploy-live.sh` — FOUND, executable, 10 structural + 6 behavioural gates pass
-- `260919-m0i-EVIDENCE.md` — FOUND
-- `60fd501`, `a30c0c2` — both FOUND in `git log`
+- `260919-m0i-EVIDENCE.md` — FOUND, sections 1–4 measured, section 5 open
+- `60fd501`, `a30c0c2`, `b6c64a2` — all FOUND in `git log`
 
-No claim of a live deploy, a delivered message, or a runtime measurement appears
-anywhere in this summary or in the evidence file. Every such slot is explicitly
-marked PENDING.
+Every live figure in this summary was supplied by the developer from a real run and
+is reproduced without rounding. No claim is made anywhere that the injection has been
+observed to be absent from a delivered message, because it has not.
