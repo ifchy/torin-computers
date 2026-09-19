@@ -314,7 +314,10 @@ clean 19/19 PASS against a completely unchanged server. That is not a hypothetic
 weakness in the gate; it is a measured one, recorded here with the command that produced
 it.
 
-## Probe run — 2026-09-19
+## Probe run — 2026-09-19 — POST-SWITCH, STAGE A (PHP 8.5.10) — AUTHORITATIVE
+
+Written by `run-probe.sh --read` directly from the response, not transcribed. Where any
+other section of this file quotes this run, THIS block wins.
 
 Command:
 
@@ -355,7 +358,7 @@ selfdelete           : OK
 
 ```
 
-## Probe cleanup — 2026-09-19
+## Probe cleanup — 2026-09-19 — post-switch probe, self-deleted
 
 Fetched WITH the valid token, because a tokenless 404 is what a LIVE
 probe returns too and would prove nothing:
@@ -367,7 +370,12 @@ curl -s -o /dev/null -w '%{http_code}' 'https://torin.bg/new/hc-33183d7b433062f0
 
 ---
 
-## Probe run — 2026-09-19 — POST-SWITCH, STAGE A (PHP 8.5.10)
+## Stage A — analysis of the 2026-09-19 post-switch run
+
+Commentary on the authoritative block above. It deliberately holds NO second copy of the
+response body: the first draft of this section did, transcribed by hand, and the two
+copies had already drifted within a day (see the provenance note below). One machine-written
+record, one analysis, no transcription.
 
 Taken during the Stage-A rehearsal, in which `.php` runs on the 8.5 fcgid wrapper while
 all 19 `.html` pages remain on the known-good 5.2 handler. That is the only window in
@@ -387,36 +395,7 @@ bash scripts/host-probe/handler-sweep.sh
 `mod_fcgid` is present, `FcgidWrapper` is permitted in `.htaccess` here, and the absolute
 wrapper path is right. **The handler mechanism is proved.** No 500s, no raw source.
 
-Probe body, verbatim:
-
-```
-version              : 8.5.10
-sapi                 : cgi-fcgi
-ext:gd               : NO
-ext:exif             : NO
-ext:fileinfo         : NO
-ext:curl             : NO
-ext:openssl          : yes
-ext:mbstring         : NO
-ext:hash             : yes
-ext:ctype            : NO
-ext:filter           : yes
-ini:upload_max_filesize: '250M'
-ini:post_max_size    : '200M'
-ini:max_file_uploads : '20'
-ini:max_input_vars   : '5000'
-ini:memory_limit     : '256M'
-ini:max_execution_time: '600'
-ini:allow_url_fopen  : '1'
-ini:user_ini.filename: '.user.ini'
-ini:user_ini.cache_ttl: '300'
-ini:sendmail_path    : '/usr/sbin/sendmail -t -i'
-ini:SMTP             : 'localhost'
-ini:smtp_port        : '25'
-outbound:curl443     : FAIL ext-curl not loaded
-sendmail binary      : yes
-smtp:localhost:25    : FAIL Connection refused
-```
+The body itself is in the authoritative block above and is deliberately not repeated here.
 
 ### The extension set collapsed: 5.2 vs 8.5, measured
 
@@ -490,14 +469,46 @@ that `openssl`, `hash` and `filter` were missing while the body plainly said oth
 checker that invents failures is no more useful than one that misses them, and it was caught
 only because the script was run against real data before being trusted rather than after.
 
-### Provenance note on this run
+### Provenance note — a claim in this file was wrong, and how it got here
 
-The pasted body contains no `selfdelete` line, so the probe that executed predates the
-self-deleting build (`feac63b`) — those commits live in the plan's worktree, not the
-primary checkout. Cleanup is still confirmed: `--read` asserted 404 with a valid token.
-Recorded because "which build of the probe produced this body" is exactly the kind of
-detail that is obvious today and unreconstructable in a month. `assert-capabilities.sh`
-treats an absent `selfdelete` line as a warning rather than a failure for the same reason.
+**CORRECTED 2026-09-19.** An earlier revision of this section stated that the probe which
+produced the 8.5 run "predates the self-deleting build (`feac63b`)" and therefore ran from
+a checkout without the plan's tooling. **That was false**, and it is corrected here rather
+than quietly overwritten, because a file whose entire discipline is evidence provenance
+cannot carry a wrong claim about which build produced a measurement.
+
+What actually happened: the probe body reached the executor through a relay, and a single
+trailing line — `selfdelete : OK` — was dropped in the retransmission. The executor
+observed a real absence in the text it was given, reasoned correctly from it, and reached
+a conclusion that was wrong because the input was incomplete. The `--prepare`, deploy and
+`--read` were all run from the plan's worktree; `feac63b`'s self-deleting single-fetch
+probe is exactly what executed, it deleted itself, and `--read`'s authenticated 404
+assertion passed:
+
+```
+Probe reported: selfdelete OK
+Asserting the probe is gone ...
+OK: ... returns 404 with a valid token — the probe is gone.
+```
+
+**The structural lesson, which is worth more than the correction.** The truncation was
+survivable only because `run-probe.sh --read` writes the response body into this file
+directly, at the moment of measurement, with no human or agent in the copying path. That
+machine-written block is above and is marked AUTHORITATIVE. The corrupted copy was the
+*hand-transcribed* one — and the two disagreed within a day of being written.
+
+So this section no longer holds a second copy of the body at all. A transcription is a new
+observation with its own failure modes, not a reproduction of the original, and the way to
+be safe from transcription error is to not transcribe. That is now the rule in this file:
+**one machine-written record per run, analysis referring to it, never a second copy.**
+
+`assert-capabilities.sh` treats an absent `selfdelete` line as a WARNING rather than a
+failure, and that call happens to survive the correction — but its justification changes.
+It was originally reasoned from a premise that turned out to be false (an older probe
+build). The real justification is the one this incident demonstrated: an absent line means
+either an older build **or a truncated body**, the second of which is now a measured
+failure mode rather than a hypothetical, and neither is something a capability checker
+should convert into a hard blocker. The warning text names both causes.
 
 ### Confirmed on 8.5 (the good news)
 

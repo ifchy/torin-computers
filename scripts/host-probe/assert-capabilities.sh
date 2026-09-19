@@ -108,9 +108,9 @@ check_ext exif     "04-03 EXIF orientation (EA-07)"
 check_ext fileinfo "04-03/04-05 upload MIME validation — a security control"
 check_ext curl     "04-02 tracer + 04-05 Telegram (D4-05)"
 check_ext openssl  "HTTPS from PHP, and PHPMailer TLS (D4-11)"
-check_ext mbstring "multibyte-safe string handling for Bulgarian text"
+check_ext mbstring "multibyte string handling — NO current caller in src/ (measured); required so 04-05 can use it, not because pages need it"
 check_ext hash     "spam-guard timestamp signing (04-05)"
-check_ext ctype    "input validation helpers (04-05)"
+check_ext ctype    "validation helpers — low: filter/preg cover its uses, restore for completeness"
 check_ext filter   "filter_var email validation (04-05)"
 
 echo
@@ -140,18 +140,23 @@ fi
 #
 # This is CORROBORATION, not the gate. The gate is run-probe.sh --read's own
 # authenticated 404 assertion, which exits non-zero and lives outside this body.
-# So an ABSENT selfdelete line is a warning, not a failure: it means the probe
-# that ran predates the self-deleting build, which is a real and expected
-# situation whenever the probe is driven from a checkout that does not carry
-# these commits. Treating absence as failure would cry wolf; treating it as
-# success would defeat the check. A line that is PRESENT and not OK is a genuine
-# blocker — the probe tried to delete itself and could not.
+#
+# An ABSENT selfdelete line therefore warns rather than fails, because absence
+# has two causes and neither is a capability problem: an older probe build, or a
+# TRUNCATED BODY. The second is not hypothetical — on 2026-09-19 a probe body
+# lost exactly this trailing line in a relay, and the missing line was read as
+# evidence that older tooling had run. It had not. Treating absence as failure
+# would cry wolf; treating it as success would defeat the check; so it says
+# which two things it could mean and defers to the 404 assertion.
+#
+# A line that is PRESENT and not OK is a genuine blocker — the probe tried to
+# delete itself and could not, and a live probe is an environment disclosure.
 # ---------------------------------------------------------------------------
 SELFDEL="$(field selfdelete)"
 if [ "$SELFDEL" = "OK" ]; then
 	note "ok" "selfdelete" "probe removed itself"
 elif [ -z "$SELFDEL" ]; then
-	note "WARN" "selfdelete" "absent — probe build predates self-deletion; confirm --verify-gone returned 404"
+	note "WARN" "selfdelete" "absent — older probe build OR truncated body; confirm --verify-gone returned 404"
 else
 	note "FAIL" "selfdelete" "${SELFDEL} — a live probe is an environment disclosure (T-04-01)"
 	FAILED=$((FAILED + 1))
