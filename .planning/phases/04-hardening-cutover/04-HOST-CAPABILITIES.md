@@ -935,3 +935,70 @@ cleared to proceed.**
 
 Every row RESEARCH marked "probe" now has a measured value, and the staging tree runs a
 supported PHP with no page serving source.
+
+---
+
+## Post-`.user.ini` upload limits — measured 2026-09-20 (plan 04-03)
+
+`src/.user.ini` was deployed to `public_html/new/` on 2026-09-20 carrying
+`upload_max_filesize = 10M` and `post_max_size = 60M`. Both **tighten** the 8.5 ini's
+250M/200M rather than raising it: the ceiling D4-13 fought disappeared with the runtime
+upgrade, and what was left was an endpoint that would buffer a 200 MB body from any
+stranger (T-04-13). The per-file figure now matches the form's own copy exactly.
+
+**Measured behaviourally, not by probe.** The self-deleting probe from 04-01 is gone, and
+re-deploying one to read two integers is the liability P-10 describes. Instead the two
+values were read off the handler's own branching, which distinguishes them unambiguously:
+the SAPI and the application produce **different Bulgarian strings** for the same
+oversize condition, so the message identifies which layer refused the request.
+
+Both runs were made well past the measured `user_ini.cache_ttl` of 300 s.
+
+### `upload_max_filesize` — 10M, IN EFFECT
+
+```
+curl -X POST -F 'photos[]=@big.jpg' ... https://torin.bg/new/contact-send.php
+   (big.jpg = a valid JPEG padded to 11,124,811 bytes)
+  -> 422 · «Снимка 1: файлът е твърде голям.»
+```
+
+That string is `torin_upload_code_copy(UPLOAD_ERR_INI_SIZE)` — **PHP refused the file at
+the SAPI boundary before the handler saw it.** Had the ini not been in effect, the host's
+250M would have passed an 11 MB file through to `torin_collect_uploads()`, whose own
+ceiling emits the different string «файлът е по-голям от 10 MB.» The message that came
+back is the one only the ini can produce.
+
+### `post_max_size` — 60M, IN EFFECT
+
+```
+curl -X POST -F 'photos[]=@huge.bin;filename=huge.jpg' ...   (65,000,000 bytes)
+  -> 422 · uploaded=65001111
+     «Файловете са твърде големи и не стигнаха до сървъра. Намалете броя или размера
+      на снимките.»
+```
+
+PHP discarded the entire `$_POST`, `contact-send.php`'s `CONTENT_LENGTH > 0 && count($_POST) === 0`
+branch detected it, and the visitor was told the truth. At the host's unmodified 200M a
+65 MB body is comfortably inside the limit and would have reached validation instead.
+**This also exercises, for the first time, the oversized-POST branch 04-02 shipped and
+never ran** — the response body carries no warning, no path and no submitted value.
+
+### `.user.ini` is NOT served — and the deny is stronger than expected
+
+```
+curl -sI https://torin.bg/new/.user.ini            -> 403   (before AND after deploy)
+curl -sI https://torin.bg/new/.nonexistent-xyz     -> 404
+curl -sI https://torin.bg/new/nonexistent-xyz.txt  -> 404
+```
+
+The three together are the measurement, and the middle one is what makes it one. A 403 on
+a file that **did not yet exist**, next to a 404 on a different absent dotfile, shows the
+deny is keyed on the **name** `.user.ini` at server level and is evaluated *before* the
+existence check — so it necessarily also covers the real file, which the post-deploy
+re-probe confirms. Dotfiles in general are **not** denied here.
+
+**Consequence for 04-06:** the `<FilesMatch>` deny it owns for this filename is
+belt-and-braces rather than load-bearing, and T-04-16 is already mitigated by the host.
+It should still ship — a host-level rule is not ours and can change without notice — but
+04-03 is not blocked on it, and the "blocking dependency" note its plan asked for is not
+needed.
