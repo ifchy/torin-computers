@@ -83,6 +83,43 @@ RewriteRule ^za-bateriite\.html$ zalivane-technosti.html [R=301,L]
 	Header set X-Robots-Tag "noindex, nofollow"
 </IfModule>
 
+# ── Host-side files that live in the document root (D4-23 · plan 04-06) ────
+#
+# IF THIS BLOCK IS WRONG, THE OWNER'S SETTINGS FILE AND THE CONTROL PANEL'S
+# GENERATED ARTEFACTS ARE PUBLICLY FETCHABLE BY NAME.
+#
+# Four files sit inside this directory because they have to: settings.txt is
+# edited by the owner in the panel's file manager and is read by PHP at request
+# time, and php.fcgi / php85-fcgi.ini / .user.ini were generated here by the
+# panel when the PHP version was set for this directory. None of them is served
+# content, and none of them may be readable over HTTP. settings.txt is the one
+# that matters most day to day: it is the only file in this tree a non-developer
+# is expected to change, so it is also the one most likely to end up holding
+# something it should not.
+#
+# .txt is NOT covered by the handler block below, so settings.txt is served as
+# plain text by default — there is no accidental protection here to rely on.
+#
+# Both authorisation syntaxes are present and each is module-guarded, for the
+# same reason every other block in this file is: an unguarded directive for an
+# absent module returns 500 for the entire subtree (T-02-02), which would take
+# down every page here at once. The modern syntax is tried first; the legacy one
+# fires only where the modern module is genuinely absent, so the two can never
+# both apply.
+<IfModule mod_authz_core.c>
+	<FilesMatch "^(settings\.txt|\.user\.ini|php\.fcgi|php[0-9]*-fcgi\.ini)$">
+		Require all denied
+	</FilesMatch>
+</IfModule>
+<IfModule !mod_authz_core.c>
+	<IfModule mod_access_compat.c>
+		<FilesMatch "^(settings\.txt|\.user\.ini|php\.fcgi|php[0-9]*-fcgi\.ini)$">
+			Order allow,deny
+			Deny from all
+		</FilesMatch>
+	</IfModule>
+</IfModule>
+
 # ── PHP runtime handler (D4-01, D4-02 · plan 04-01 Task 3) ─────────────────
 #
 # THIS BLOCK IS THE ONLY REASON THE 19 .html PAGES IN THIS SUBTREE EXECUTE.
