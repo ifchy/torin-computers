@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 8
+open_count: 11
 waived_count: 0
 fixed_count: 5
-total_count: 13
-last_updated: 2026-08-26T08:07:31.628Z
+total_count: 16
+last_updated: 2026-09-20T10:55:25.672Z
 ---
 
 # Broken Windows Ledger
@@ -28,6 +28,9 @@ last_updated: 2026-08-26T08:07:31.628Z
 | 11 | 02 | deviation | src/css/no-js.css |  | 02-06 desktop no-script row shape: 'flex: 1 0 100%' on .nav__item--has-sub (plan-mandated, grep-asserted) splits the four visible top-level links across two wrapped rows rather than one, because the has-sub item sits mid-list. Navigable and in-flow, but the plan's human-check phrasing 'five top-level items still read as a horizontal row' is NOT satisfied as worded. Open. | open |  | 2026-08-06T14:09:24.636Z |  |
 | 12 | 02 | deviation | scripts/probes/contrast.js |  | contrast.js exports { HELPERS } and is not a runnable probe, but 02-09 Task 3 and the phase docs invoke it via render-check.sh (probe.run is not a function); the trust-badge 10.14:1 baseline has no committed probe that reproduces it | open |  | 2026-08-09T14:16:43.110Z |  |
 | 13 | 03 | unrun-verify | scripts/seo-metadata-check.js |  | 03-09 live gate NOT RUN: deploy unavailable in executor context, so the 11 tuned pages still serve pre-plan metadata. 'node scripts/seo-metadata-check.js --live' currently reports served-matches-source on exactly those 11. Deploy then re-run to close. | open |  | 2026-08-26T08:07:31.628Z |  |
+| 14 | 04 | unrun-verify | src/includes/contact-form.php |  | 04-02 Task 3: honeypot autofill false-positive UNCONFIRMED. The human's manual handset submission succeeded, but they did not state whether browser autofill/password-manager was active, which is the plan's named number-one honeypot false-positive source. A false positive silently discards a real enquiry and is invisible to both parties. Re-test with autofill explicitly on. | open |  | 2026-09-20T10:55:10.721Z |  |
+| 15 | 04 | unrun-verify | src/includes/notify.php |  | 04-02: the notification FAILURE path has never been exercised. Every live check drove the success branch; no check made api.telegram.org unreachable, so the visitor-facing 'every channel failed' page and the error_log correlation-id branch in contact-send.php are unproven at runtime. 04-05 adds a second driver and should exercise this while it is there. | open |  | 2026-09-20T10:55:16.705Z |  |
+| 16 | 04 | deviation | .planning/phases/04-hardening-cutover/04-02-PLAN.md |  | 04-02 verify V7 is NOT PORTABLE and reports a false failure on macOS: 'grep -L PATTERN FILE \| wc -l \| grep -qx 0' never matches on BSD wc, which pads its count to seven spaces then 0 (confirmed by od -c); GNU wc emits an unpadded 0 and the same check passes on Linux. The underlying condition was TRUE. Every later plan using the 'wc -l \| grep -qx N' idiom has the same defect; use N=$(... \| wc -l \| tr -d ' '); [ "$N" = "0" ] instead. | open |  | 2026-09-20T10:55:25.672Z |  |
 
 ````json
 [
@@ -185,6 +188,42 @@ last_updated: 2026-08-26T08:07:31.628Z
     "status": "open",
     "reason": "",
     "recorded_at": "2026-08-26T08:07:31.628Z",
+    "resolved_at": null
+  },
+  {
+    "id": 14,
+    "kind": "unrun-verify",
+    "phase": "04",
+    "file": "src/includes/contact-form.php",
+    "line": null,
+    "description": "04-02 Task 3: honeypot autofill false-positive UNCONFIRMED. The human's manual handset submission succeeded, but they did not state whether browser autofill/password-manager was active, which is the plan's named number-one honeypot false-positive source. A false positive silently discards a real enquiry and is invisible to both parties. Re-test with autofill explicitly on.",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-09-20T10:55:10.721Z",
+    "resolved_at": null
+  },
+  {
+    "id": 15,
+    "kind": "unrun-verify",
+    "phase": "04",
+    "file": "src/includes/notify.php",
+    "line": null,
+    "description": "04-02: the notification FAILURE path has never been exercised. Every live check drove the success branch; no check made api.telegram.org unreachable, so the visitor-facing 'every channel failed' page and the error_log correlation-id branch in contact-send.php are unproven at runtime. 04-05 adds a second driver and should exercise this while it is there.",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-09-20T10:55:16.705Z",
+    "resolved_at": null
+  },
+  {
+    "id": 16,
+    "kind": "deviation",
+    "phase": "04",
+    "file": ".planning/phases/04-hardening-cutover/04-02-PLAN.md",
+    "line": null,
+    "description": "04-02 verify V7 is NOT PORTABLE and reports a false failure on macOS: 'grep -L PATTERN FILE | wc -l | grep -qx 0' never matches on BSD wc, which pads its count to seven spaces then 0 (confirmed by od -c); GNU wc emits an unpadded 0 and the same check passes on Linux. The underlying condition was TRUE. Every later plan using the 'wc -l | grep -qx N' idiom has the same defect; use N=$(... | wc -l | tr -d ' '); [ \"$N\" = \"0\" ] instead.",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-09-20T10:55:25.672Z",
     "resolved_at": null
   }
 ]

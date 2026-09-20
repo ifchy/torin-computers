@@ -56,3 +56,62 @@ quantity rather than a surprise.
 
 **Whoever ships the cutover should treat retiring this file as security work, not cleanup.**
 
+## `wc -l | grep -qx N` is not portable — it reports a false FAILURE on macOS
+
+**Found:** 2026-09-20, plan 04-02 Task 3, while running Task 2's verify block.
+**Severity:** low as a defect, high as a trap — it fails in the direction that wastes time,
+and it will recur in five more plans in this phase.
+
+04-02's V7 check is written as:
+
+```sh
+bash -c 'grep -L "kontakti.html" src/includes/header.php' | wc -l | grep -qx 0
+```
+
+It reported failure. The condition it tests is **true** — `src/includes/header.php:264` does
+contain `kontakti.html`, and `grep -L` correctly printed nothing. The check is what is wrong.
+
+BSD `wc` (macOS, the build machine) **right-pads its count to a fixed width**: the byte stream
+is seven spaces, then `0`, then a newline — confirmed with `od -c`. `grep -qx 0` anchors both
+ends of the line, so it never matches the padded form. GNU `wc` (Linux, CI) emits `0\n`
+unpadded and the identical check passes. The same command therefore passes on one machine and
+fails on the other while the thing being measured is unchanged.
+
+**Fix, and the form later plans should use:**
+
+```sh
+N=$(grep -L "kontakti.html" src/includes/header.php | wc -l | tr -d ' '); [ "$N" = "0" ]
+```
+
+`tr -d ' '` costs nothing on GNU and makes the check mean the same thing on both. (`grep -c`
+is the better tool where the input is a file rather than a pipe, and needs no counting at all.)
+
+**Where it still bites:** seven occurrences of `wc -l | grep -qx N` across five plans —
+`04-01`, `04-02`, `04-04`, `04-05`, `04-07`. Four of those five are unexecuted. Anyone running
+them on macOS should expect a false failure and check the padding before believing it.
+Recorded in `.planning/WINDOWS.md` as entry 16.
+
+## What Task 3's live pass did *not* cover
+
+**Found:** 2026-09-20, plan 04-02 Task 3.
+
+Task 3 passed — see `04-02-SUMMARY.md` for exactly what the human reported and exactly what
+is inferred rather than observed. Two items from the plan's `<how-to-verify>` list remain
+genuinely unproven and are carried forward rather than quietly marked done:
+
+1. **Honeypot versus browser autofill** (`WINDOWS.md` entry 14). The plan names this as the
+   number-one honeypot false-positive source and the one failure mode nobody would ever see —
+   a real enquiry discarded silently, with the visitor shown a success page. The human's manual
+   submission arrived, but they did not state whether autofill was active, so the trap has not
+   been proven safe against it. Re-test with autofill explicitly on, ideally with a password
+   manager that fills aggressively.
+2. **The notification failure path** (`WINDOWS.md` entry 15). Every check so far drove the
+   success branch. Nothing has made `api.telegram.org` unreachable, so the visitor-facing
+   "every channel failed" page and the `error_log` correlation-id branch are unexercised at
+   runtime. 04-05 adds a second driver and is the natural place to exercise both.
+
+Items 5 and 6 of the checklist (phone numbers still tappable; the 360px weighting of form
+versus phone list) were not separately reported either. They are lower-stakes — a regression in
+either is visible to anyone who opens the page — but they were not confirmed, and 04-04 touches
+this page's CTAs, so they are worth a look then.
+
