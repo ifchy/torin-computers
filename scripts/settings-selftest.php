@@ -311,6 +311,91 @@ torin_t(
 	'interactive or scripted content found in the strip'
 );
 
+// ── The structured data (Task 3, D4-26, D4-27, research P-13) ───────────────
+//
+// The block is parsed AS A WHOLE BLOCK and never line by line. A previous audit
+// on this project reported this JSON malformed because it read it with a
+// line-oriented tool; the block is multiline and was valid the whole time.
+
+require_once dirname(dirname(__FILE__)) . '/src/includes/site-config.php';
+
+// Renders jsonld.php with the vacation keys set to the given pair and returns
+// the decoded LocalBusiness object. $site is reached through `global` so that
+// jsonld.php, which is written to run at file scope, sees the same array this
+// function edited.
+function torin_ld($from, $to) {
+	global $site;
+	$site['vacation_from'] = $from;
+	$site['vacation_to']   = $to;
+	ob_start();
+	include dirname(dirname(__FILE__)) . '/src/includes/jsonld.php';
+	$html = ob_get_clean();
+	$m = array();
+	if (!preg_match('#<script type="application/ld\+json">(.*?)</script>#s', $html, $m)) {
+		return null;
+	}
+	return json_decode($m[1], true);
+}
+
+$torin_ld_off = torin_ld('', '');
+torin_t(
+	'with no closure scheduled the block parses and carries exactly THREE entries',
+	is_array($torin_ld_off)
+		&& isset($torin_ld_off['openingHoursSpecification'])
+		&& count($torin_ld_off['openingHoursSpecification']) === 3,
+	'got ' . var_export($torin_ld_off, true)
+);
+
+torin_t(
+	'the weekend is STATED, not inferred: Saturday and Sunday at midnight/midnight',
+	is_array($torin_ld_off)
+		&& $torin_ld_off['openingHoursSpecification'][1]['dayOfWeek'] === 'Saturday'
+		&& $torin_ld_off['openingHoursSpecification'][1]['opens'] === '00:00'
+		&& $torin_ld_off['openingHoursSpecification'][1]['closes'] === '00:00'
+		&& $torin_ld_off['openingHoursSpecification'][2]['dayOfWeek'] === 'Sunday',
+	'weekend entries wrong'
+);
+
+$torin_ld_current = torin_ld($torin_lastweek, $torin_tomorrow);
+torin_t(
+	'with a current closure the block carries FOUR entries, the fourth seasonal',
+	is_array($torin_ld_current)
+		&& count($torin_ld_current['openingHoursSpecification']) === 4
+		&& $torin_ld_current['openingHoursSpecification'][3]['validFrom'] === $torin_lastweek
+		&& $torin_ld_current['openingHoursSpecification'][3]['validThrough'] === $torin_tomorrow
+		&& !isset($torin_ld_current['openingHoursSpecification'][3]['dayOfWeek']),
+	'got ' . var_export(isset($torin_ld_current['openingHoursSpecification']) ? $torin_ld_current['openingHoursSpecification'] : null, true)
+);
+
+$torin_ld_past = torin_ld($torin_lastweek, $torin_yesterday);
+torin_t(
+	'with a closure that has passed the block is back to THREE entries',
+	is_array($torin_ld_past) && count($torin_ld_past['openingHoursSpecification']) === 3,
+	'got ' . count($torin_ld_past['openingHoursSpecification']) . ' entries'
+);
+
+// The encoder's slash escaping is the T-02-11 control and is now a DEFAULT
+// rather than a structural property of the runtime (see jsonld.php's header).
+// A default is worth asserting; a structural property was not.
+$site['vacation_from'] = '';
+$site['vacation_to']   = '';
+ob_start();
+include dirname(dirname(__FILE__)) . '/src/includes/jsonld.php';
+$torin_ld_raw = ob_get_clean();
+torin_t(
+	'forward slashes are escaped in the emitted JSON (T-02-11 still closed)',
+	strpos($torin_ld_raw, '"https:\\/\\/schema.org"') !== false,
+	'bare slashes found — an encoding flag has been introduced somewhere'
+);
+
+torin_t(
+	'the three rendered hours consumers all read one composed value',
+	strpos($site['hours'], $site['hours_open_display']) !== false
+		&& strpos($site['notice'], $site['hours_open_display']) !== false
+		&& $torin_ld_off['openingHoursSpecification'][0]['opens'] === $site['hours_open'],
+	'hours: ' . $site['hours'] . ' / notice: ' . $site['notice']
+);
+
 // ── Result ──────────────────────────────────────────────────────────────────
 
 echo "\n" . ($torin_count - count($torin_fails)) . "/" . $torin_count . " passed\n";
