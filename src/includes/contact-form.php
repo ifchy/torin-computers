@@ -26,6 +26,11 @@
 require_once(dirname(__FILE__) . '/site-config.php');
 require_once(dirname(__FILE__) . '/icons.php');
 require_once(dirname(__FILE__) . '/category-page.php');
+// asset-version.php is required EXPLICITLY, not relied on from header.php.
+// This file's one guarantee is that it works for both its callers, and a
+// helper that happens to be loaded because some other include pulled it in is
+// a dependency that holds right up until the include order changes.
+require_once(dirname(__FILE__) . '/asset-version.php');
 
 // $values repopulates the controls on the error re-render; $errors maps a
 // field name to the Bulgarian message the SERVER produced for it. Both default
@@ -135,16 +140,30 @@ function torin_render_contact_form($values = array(), $errors = array()) {
 					      // explicit that the file input must sit on the PAGE
 					      // background and not on the --c-surface-3 input fill —
 					      // it is a button, not a text field, and a field fill
-					      // makes it read as an empty input. It therefore stays
-					      // NATIVE and unstyled in this tracer; the
-					      // ::file-selector-button styling and the .filelist
-					      // preview row are 04-03/04-04's, and neither needs this
-					      // markup to change. The alternative — a --file modifier
-					      // that spends CSS budget undoing the base rule it just
-					      // inherited — is how a component ends up with a variant
-					      // whose whole job is cancelling another variant. ?>
+					      // makes it read as an empty input. It stays NATIVE and
+					      // is styled through ::file-selector-button in
+					      // components.css (04-03); the visually-hidden-input
+					      // plus styled-label pattern is forbidden here because
+					      // it routinely loses the focus ring, which base.css
+					      // says is never suppressed. The alternative — a --file
+					      // modifier that spends CSS budget undoing the base rule
+					      // it just inherited — is how a component ends up with a
+					      // variant whose whole job is cancelling another. ?>
 					<input id="photos" name="photos[]" type="file" multiple accept="image/jpeg,image/png,image/webp" aria-describedby="photos-help photos-err"<?php echo ($torin_e_photos !== '' ? ' aria-invalid="true"' : ''); ?>>
 					<p class="field__help" id="photos-help">Не е задължително. До 5 снимки, всяка до 10 MB. Смаляваме ги автоматично преди изпращане.</p>
+					<?php // The remove glyph for the JS-rendered .filelist rows,
+					      // parked in an inert <template> so icons.php stays the
+					      // ONE writer of every glyph in this project. The
+					      // alternative is pasting the SVG path into
+					      // photo-resize.js, where it becomes the eighteenth icon
+					      // that nobody knows exists and the first one that does
+					      // not change when the set does.
+					      //
+					      // <template> renders nothing, so with scripting off it
+					      // costs a visitor the bytes and nothing else — and
+					      // .filelist never renders either, which is the whole
+					      // no-JS contract for this control. ?>
+					<template id="photos-icon"><?php echo torin_icon('close'); ?></template>
 					<p class="field__error" id="photos-err"<?php echo ($torin_e_photos !== '' ? '' : ' hidden'); ?>><?php echo torin_icon('alert'); ?><span><?php echo torin_esc($torin_e_photos !== '' ? $torin_e_photos : 'Може да прикачите най-много 5 снимки.'); ?></span></p>
 				</div>
 
@@ -243,6 +262,22 @@ function torin_render_contact_form($values = array(), $errors = array()) {
 				      // phase. ?>
 				<p class="field__help">Полетата със * са задължителни.</p>
 			</form>
+
+			<?php // THE PAGE-SCOPED SCRIPT, EMITTED FROM THE PARTIAL THAT OWNS
+			      // THE MARKUP IT DRIVES — not from header.php, which is shared
+			      // by twenty pages, and where one page's enhancement becomes
+			      // nineteen pages' dead download. Emitting it here means the
+			      // script and the DOM it needs cannot be deployed apart.
+			      //
+			      // In the body rather than the head, because the shared head is
+			      // not ours to extend from a page: header.php:50 resets
+			      // $torin_extra_head after a page could have assigned it, so
+			      // that variable is the dev switcher's and not a page hook. A
+			      // deferred script with a src is deferred wherever it sits.
+			      //
+			      // torin_asset_url() stamps it with the deployed file's mtime,
+			      // the same invalidation every other asset here gets. ?>
+			<script src="<?php echo torin_esc(torin_asset_url('js/photo-resize.js')); ?>" defer></script>
 <?php
 }
 ?>

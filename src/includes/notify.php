@@ -58,81 +58,101 @@ function torin_notify_compose($payload) {
 	// returns an error and the message is not «truncated», it is NOT SENT —
 	// so clamping here is what stops a long fault description from losing the
 	// whole enquiry rather than losing its tail.
-	//
-	// mb_substr counts CHARACTERS; substr counts BYTES, and every string above
-	// is Cyrillic at two bytes per character. Falling back to substr would cut
-	// a 4096-byte prefix mid-character and hand Telegram invalid UTF-8. The
-	// byte fallback therefore uses a third of the limit, which is safe for any
-	// UTF-8 this form can produce, and it only runs if mbstring disappears —
-	// it is measured present on this host (04-HOST-CAPABILITIES, final probe).
-	if (function_exists('mb_substr')) {
-		if (mb_strlen($torin_text, 'UTF-8') > 4096) {
-			$torin_text = mb_substr($torin_text, 0, 4090, 'UTF-8') . "\n…";
-		}
-	} else {
-		if (strlen($torin_text) > 4096) {
-			$torin_text = substr($torin_text, 0, 1360) . "\n…";
-		}
-	}
-	return $torin_text;
+	return torin_notify_clamp($torin_text, 4096);
 }
 
-// The Telegram driver. Returns true only when the API itself reported success;
-// anything else — no cURL, a timeout, a non-200, an `ok:false` body — is false.
+// Clamp to a CHARACTER budget, leaving a visible mark where the cut happened.
 //
-// A 200 IS NOT ENOUGH ON ITS OWN. Telegram answers a rejected sendMessage with
-// a JSON body carrying "ok":false, and on some error classes it does so under
-// a 200. Treating the HTTP status as the answer is the same defect as
+// THE MARKER IS THE POINT, not decoration. A silent cut at the API boundary
+// reads to the owner as a customer who stopped mid-sentence; an ellipsis on
+// its own line reads as text that was too long, which is a different thing to
+// ring back about. The clamp is deliberate truncation, never a rejection —
+// losing the tail of a fault description is survivable, losing the enquiry is
+// not.
+//
+// mb_substr counts CHARACTERS; substr counts BYTES, and every string this form
+// produces is Cyrillic at two bytes per character. Falling back to substr
+// would cut a prefix mid-character and hand Telegram invalid UTF-8. The byte
+// fallback therefore takes a third of the budget, which is safe for any UTF-8
+// this form can produce, and it only runs if mbstring disappears — it is
+// measured present on this host (04-HOST-CAPABILITIES, final probe), and it
+// has disappeared from this account once already.
+function torin_notify_clamp($text, $limit) {
+	if (function_exists('mb_substr')) {
+		if (mb_strlen($text, 'UTF-8') <= $limit) {
+			return $text;
+		}
+		return mb_substr($text, 0, $limit - 2, 'UTF-8') . "\n…";
+	}
+	if (strlen($text) <= $limit) {
+		return $text;
+	}
+	return substr($text, 0, (int) floor($limit / 3)) . "\n…";
+}
+
+// ONE OUTBOUND CALL, whatever the method. Returns true only when the API
+// itself reported success; anything else — no cURL, a timeout, a non-200, an
+// `ok:false` body — is false.
+//
+// A 200 IS NOT ENOUGH ON ITS OWN. Telegram answers a rejected call with a JSON
+// body carrying "ok":false, and on some error classes it does so under a 200.
+// Treating the HTTP status as the answer is the same defect as
 // site-current/mailer.php discarding mail()'s return value, one layer up.
-function torin_notify_telegram($payload, $photos, $secrets) {
-	// $photos is accepted and deliberately UNUSED in this tracer. 04-03 sends
-	// the photographs through sendPhoto/sendMediaGroup from inside this same
-	// function, with the composed text as the caption of the first one. The
-	// parameter ships now so that adding uploads is a change to this function's
-	// BODY and to nothing else — not a change to the interface, the fan-out,
-	// or the handler. A tracer stub that would force a signature change later
-	// is not a tracer stub, it is a placeholder.
+//
+// $useJson picks the encoding, and the two are NOT interchangeable. A call
+// carrying files has to be multipart, and setting a JSON content type on a
+// multipart body produces a request Telegram cannot parse and a failure that
+// looks like a network fault.
+function torin_notify_tg_call($secrets, $method, $fields, $useJson) {
 	if (!function_exists('curl_init')) {
 		error_log('torin notify: ext-curl missing');
-		return false;
-	}
-	if (!isset($secrets['telegram_bot_token']) || !isset($secrets['telegram_chat_id'])) {
-		error_log('torin notify: secrets incomplete');
-		return false;
-	}
-
-	$torin_body = array(
-		'chat_id' => $secrets['telegram_chat_id'],
-		'text'    => torin_notify_compose($payload),
-		'disable_web_page_preview' => true
-	);
-
-	// json_encode, never string concatenation. A hand-built body would need
-	// the same escaping argument the parse_mode note above rejects, and a
-	// newline in a fault description is enough to break a concatenated form.
-	$torin_json = json_encode($torin_body);
-	if ($torin_json === false) {
-		error_log('torin notify: payload not encodable');
 		return false;
 	}
 
 	// The token goes into the URL because that is the shape of Telegram's API.
 	// It is never logged and never echoed: every error_log call in this file
-	// carries a fixed literal and no interpolated value, so the token cannot
-	// reach the log through a diagnostic (T-04-08, P-14).
-	$torin_url = 'https://api.telegram.org/bot' . $secrets['telegram_bot_token'] . '/sendMessage';
+	// carries a fixed literal plus the method name, which is a
+	// developer-authored constant, so the token cannot reach the log through a
+	// diagnostic (T-04-08, P-14).
+	$torin_url = 'https://api.telegram.org/bot' . $secrets['telegram_bot_token'] . '/' . $method;
 
 	$torin_ch = curl_init($torin_url);
 	curl_setopt($torin_ch, CURLOPT_POST, true);
-	curl_setopt($torin_ch, CURLOPT_POSTFIELDS, $torin_json);
-	curl_setopt($torin_ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+
+	if ($useJson) {
+		// json_encode, never string concatenation — the house rule
+		// jsonld.php:14-27 argues for structured data. A hand-built body
+		// would need the same escaping argument the parse_mode note above
+		// rejects, and a newline in a fault description is enough to break a
+		// concatenated form.
+		$torin_json = json_encode($fields);
+		if ($torin_json === false) {
+			error_log('torin notify: payload not encodable (' . $method . ')');
+			curl_close($torin_ch);
+			return false;
+		}
+		curl_setopt($torin_ch, CURLOPT_POSTFIELDS, $torin_json);
+		curl_setopt($torin_ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+		curl_setopt($torin_ch, CURLOPT_TIMEOUT, 10);
+	} else {
+		// An array containing a CURLFile makes cURL build the multipart body
+		// itself, headers and boundaries included. No Content-Type is set by
+		// hand here: overriding it discards the boundary cURL generated.
+		curl_setopt($torin_ch, CURLOPT_POSTFIELDS, $fields);
+		// Wider than the JSON ceiling because this one carries megabytes, and
+		// still bounded, because a visitor is holding a submitted form open
+		// for the duration (T-04-11). Every photograph on this path has been
+		// through the re-encode in includes/upload.php, which caps the long
+		// edge at 1600px — so five of them is single-digit megabytes, not the
+		// fifty the raw limits would allow.
+		curl_setopt($torin_ch, CURLOPT_TIMEOUT, 30);
+	}
+
 	curl_setopt($torin_ch, CURLOPT_RETURNTRANSFER, true);
 	// BOTH timeouts, and both bounded. CURLOPT_TIMEOUT alone caps the whole
 	// transfer but lets a black-holed connection sit in connect() for the
-	// system default first. A visitor waiting on a form submission is the one
-	// paying for an unbounded wait here (T-04-11).
+	// system default first.
 	curl_setopt($torin_ch, CURLOPT_CONNECTTIMEOUT, 5);
-	curl_setopt($torin_ch, CURLOPT_TIMEOUT, 10);
 	// Certificate verification stays ON. It is the default, and it is written
 	// out anyway so that nobody «fixes» a future TLS error by turning it off:
 	// this request carries a credential to a fixed third-party host, and an
@@ -145,16 +165,152 @@ function torin_notify_telegram($payload, $photos, $secrets) {
 	curl_close($torin_ch);
 
 	if ($torin_resp === false || $torin_code !== 200) {
-		error_log('torin notify: telegram transport failed');
+		error_log('torin notify: telegram transport failed (' . $method . ')');
 		return false;
 	}
 
 	$torin_decoded = json_decode($torin_resp, true);
 	if (!is_array($torin_decoded) || !isset($torin_decoded['ok']) || $torin_decoded['ok'] !== true) {
-		error_log('torin notify: telegram rejected the message');
+		error_log('torin notify: telegram rejected the call (' . $method . ')');
 		return false;
 	}
 	return true;
+}
+
+// The plain text message. Factored out because four different places in the
+// driver below need exactly it, and four copies of one array literal is four
+// chances for one of them to lose a field.
+function torin_notify_tg_text($secrets, $text) {
+	return torin_notify_tg_call($secrets, 'sendMessage', array(
+		'chat_id' => $secrets['telegram_chat_id'],
+		'text'    => $text,
+		'disable_web_page_preview' => true
+	), true);
+}
+
+// One attachment. The name Telegram is given is GENERATED — the visitor's own
+// filename never travels, here or anywhere (it is not even an argument to the
+// upload pipeline).
+//
+// CURLFile, never the legacy @-prefixed path string. That syntax is gone from
+// modern PHP, and its failure mode is not an error: the path is posted as an
+// ordinary text field and the call «succeeds» having sent no photograph.
+function torin_notify_tg_file($path, $index) {
+	return new CURLFile($path, 'image/jpeg', 'torin-' . $index . '.jpg');
+}
+
+// The Telegram driver — THREE SHAPES, KEYED ON THE PHOTO COUNT.
+//
+// The obvious single call does not exist. The media-group method REFUSES a
+// media array with fewer than two items, and «one photo of the cracked
+// screen» is the single most likely submission this form will ever see — so a
+// driver that always reached for it would fail on exactly the common case and
+// work in every test written with two. That refusal rule is the whole reason
+// the one-photo branch exists, and it is the thing a later editor must not
+// «simplify» away.
+//
+// Zero  -> the text message, carrying every field.
+// One   -> the single-photo method, enquiry as the caption.
+// Two+  -> the text message FIRST, then the group. In that order, so that a
+//          group that fails still leaves the enquiry delivered.
+//
+// THE THREE LIMITS THIS FUNCTION DOES NOT RE-CHECK, and where they are
+// actually guaranteed: the 10 MB per-photo multipart ceiling, the 10000-pixel
+// combined-dimension rule, and the aspect ratio of 20. All three are
+// established by the re-encode in includes/upload.php — the long edge is
+// capped at 1600px, the ratio is rejected outright, and the re-encode is what
+// makes the byte count a consequence of the geometry rather than of whatever
+// arrived. Re-checking them here would be a second writer of the same rule.
+function torin_notify_telegram($payload, $photos, $secrets) {
+	if (!function_exists('curl_init')) {
+		error_log('torin notify: ext-curl missing');
+		return false;
+	}
+	if (!isset($secrets['telegram_bot_token']) || !isset($secrets['telegram_chat_id'])) {
+		error_log('torin notify: secrets incomplete');
+		return false;
+	}
+
+	$torin_photos = is_array($photos) ? array_values($photos) : array();
+	$torin_count = count($torin_photos);
+	$torin_text = torin_notify_compose($payload);
+
+	// ── ZERO ────────────────────────────────────────────────────────────────
+	// A complete, valid submission (D4-12). Plenty of faults have nothing to
+	// photograph, and «it will not power on» is the commonest of them.
+	if ($torin_count === 0) {
+		return torin_notify_tg_text($secrets, $torin_text);
+	}
+
+	// Multipart needs CURLFile. If it is ever absent the enquiry still goes —
+	// without its photographs, and saying so in the log. A lead delivered
+	// incompletely beats a lead not delivered.
+	if (!class_exists('CURLFile')) {
+		error_log('torin notify: CURLFile missing, sending the enquiry without photographs');
+		return torin_notify_tg_text($secrets, $torin_text);
+	}
+
+	// ── ONE ─────────────────────────────────────────────────────────────────
+	// The caption budget is 1024 characters and the composed enquiry can reach
+	// roughly 1600, because contact-send.php allows a 1024-character fault
+	// description on its own. So the caption is clamped unconditionally, and
+	// when the clamp ACTUALLY BIT the full text follows as its own message —
+	// the owner needs the whole fault description to quote a price, and a
+	// description silently losing its last third is the failure that would
+	// never be noticed on either end.
+	if ($torin_count === 1) {
+		$torin_caption = torin_notify_clamp($torin_text, 1024);
+		$torin_ok = torin_notify_tg_call($secrets, 'sendPhoto', array(
+			'chat_id' => $secrets['telegram_chat_id'],
+			'caption' => $torin_caption,
+			'photo'   => torin_notify_tg_file($torin_photos[0], 0)
+		), false);
+
+		if ($torin_ok) {
+			if ($torin_caption !== $torin_text) {
+				torin_notify_tg_text($secrets, $torin_text);
+			}
+			return true;
+		}
+
+		// The photo call failed. The enquiry is not lost with it: the text
+		// goes on its own. This is the ONLY path on which the one-photo branch
+		// makes a second call without the caption having overflowed.
+		error_log('torin notify: sendPhoto failed, falling back to text only');
+		return torin_notify_tg_text($secrets, $torin_text);
+	}
+
+	// ── TWO TO FIVE ─────────────────────────────────────────────────────────
+	// Text first. If the group fails, the shop still has the enquiry and the
+	// customer's number, which is the part that pays for the repair.
+	$torin_msg_ok = torin_notify_tg_text($secrets, $torin_text);
+
+	// The media array names each attachment by the multipart field it will
+	// arrive in. Five is the ceiling torin_collect_uploads() enforces, which is
+	// inside the method's own two-to-ten range; this function does not re-cap
+	// it, because two writers of one limit is how the two start to disagree.
+	$torin_media = array();
+	$torin_fields = array('chat_id' => $secrets['telegram_chat_id']);
+	$torin_i = 0;
+	foreach ($torin_photos as $torin_path) {
+		$torin_key = 'photo' . $torin_i;
+		$torin_media[] = array('type' => 'photo', 'media' => 'attach://' . $torin_key);
+		$torin_fields[$torin_key] = torin_notify_tg_file($torin_path, $torin_i);
+		$torin_i++;
+	}
+
+	$torin_media_json = json_encode($torin_media);
+	if ($torin_media_json === false) {
+		error_log('torin notify: media descriptor not encodable');
+		return $torin_msg_ok;
+	}
+	$torin_fields['media'] = $torin_media_json;
+
+	$torin_group_ok = torin_notify_tg_call($secrets, 'sendMediaGroup', $torin_fields, false);
+
+	// Either call landing is a delivered enquiry, on the same any-one-wins
+	// reading the fan-out below applies to channels.
+	return ($torin_msg_ok || $torin_group_ok);
 }
 
 // The fan-out. Returns array('ok' => bool, 'channels' => array(name => bool)).

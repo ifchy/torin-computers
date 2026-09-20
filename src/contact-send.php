@@ -62,6 +62,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
 
 require_once dirname(__FILE__) . '/includes/site-config.php';
 require_once dirname(__FILE__) . '/includes/notify.php';
+require_once dirname(__FILE__) . '/includes/upload.php';
 
 // A per-request id that appears in the log and, on the failure page, nowhere.
 // It exists so the owner can be told «it failed» and the developer can find
@@ -93,9 +94,13 @@ if (torin_post('website') !== '') {
 // both arrive EMPTY, with no error the handler can see. Without this explicit
 // test the visitor gets «fill in the required fields» about a form they did
 // fill in, and the handler cannot tell «too big» from «no submission at all».
-// The ceiling is 200M on this host (04-HOST-CAPABILITIES), so this is a
-// narrow case today — it becomes a real one in 04-03, when photographs start
-// arriving, and the check costs two lines now instead of a bug report then.
+//
+// THIS STOPPED BEING A NARROW CASE IN 04-03. The tracer note here read «the
+// ceiling is 200M on this host, so this is a narrow case today» — that was the
+// raw 8.5 ini. src/.user.ini now holds this directory at post_max_size 60M, a
+// deliberate tightening sized above five maximum photographs plus framing, and
+// photographs are what a visitor actually posts. Five originals straight off a
+// modern phone with the browser script blocked is the shape that lands here.
 $torin_len = (int) ($_SERVER['CONTENT_LENGTH'] ?? 0);
 if ($torin_len > 0 && count($_POST) === 0) {
     torin_send_fail_page(
@@ -159,6 +164,71 @@ if (count($torin_errors) > 0) {
     torin_send_fail_page('Проверете отбелязаните полета и опитайте отново.', $torin_errors);
 }
 
+// ── PHOTOGRAPHS (CONTACT-05) ────────────────────────────────────────────────
+// AFTER the text fields and BEFORE the secrets file, deliberately. A rejected
+// photograph should cost a visitor as little as possible, and nothing below
+// this line is reached by a submission that is going to be refused anyway.
+//
+// THE CEILINGS ARE POLICY AND THEY LIVE HERE, not in the pipeline. The
+// per-file figure is the one the form's own copy advertises («всяка до 10 MB»)
+// and the one src/.user.ini sets at the SAPI boundary; three places, one
+// number, and the day it changes all three have to move together. The long
+// edge of 1600px matches the browser-side downscale, so a photograph that took
+// the scripted path and one that did not arrive looking alike.
+//
+// EVERY ONE OF THESE IS ENFORCED WHETHER OR NOT THE BROWSER SCRIPT RAN
+// (P-6). js/photo-resize.js is an optimisation that saves a visitor's mobile
+// data; it is not a limit, because anyone can post straight to this file. No
+// check below may ever be weakened on the grounds that the script already did
+// it.
+$torin_limits = [
+    'max_files'       => 5,
+    'max_bytes'       => 10 * 1024 * 1024,
+    'max_total_bytes' => 50 * 1024 * 1024,
+    'max_edge'        => 1600,
+];
+$torin_uploads = torin_collect_uploads($_FILES['photos'] ?? null, $torin_limits);
+$torin_photos = $torin_uploads['paths'];
+
+// A FATAL BETWEEN HERE AND THE RELEASE BELOW WOULD OTHERWISE LEAVE A
+// VISITOR'S PHOTOGRAPH ON DISK. D4-07 buys this site a short privacy note and
+// no retention obligation precisely because nothing is kept; one surviving
+// temp file makes that a false statement on the terms page, in a directory
+// nobody ever looks at. The handler registers the cleanup with the engine so
+// the guarantee does not depend on this file reaching its own last line.
+// torin_release_uploads() is idempotent, so the ordinary path below still
+// unlinks immediately and this is a no-op.
+register_shutdown_function('torin_release_uploads', $torin_photos);
+
+// A REFUSED PHOTOGRAPH IS A FIELD-LEVEL ERROR ON THE PHOTO CONTROL, never a
+// nameless failure (T-04-17). The reason names the photo by its POSITION in
+// the list and never by its filename — that string arrived with the request
+// and would be landing in a page (T-04-07).
+//
+// Only the first reason is shown. The fail page renders one line per field,
+// and the second refusal is almost always the same refusal; the visitor needs
+// to know what to change, not a catalogue.
+if (count($torin_uploads['errors']) > 0) {
+    torin_release_uploads($torin_photos);
+    // The rejection path is where MORE temp files exist, not fewer: five
+    // photographs can normalise successfully and still be thrown away because
+    // a sixth was attached. So it gets the same leftover count the success
+    // path gets — counts and the request id only, never a filename or a
+    // reason string, both of which came from the request.
+    $torin_stale = 0;
+    foreach ($torin_photos as $torin_photo) {
+        if (file_exists($torin_photo)) {
+            $torin_stale++;
+        }
+    }
+    error_log('torin contact ' . $torin_rid . ': refused photos=' . count($torin_photos) .
+        ' rejected=' . count($torin_uploads['errors']) . ' leftover=' . $torin_stale);
+    torin_send_fail_page(
+        'Проверете отбелязаните полета и опитайте отново.',
+        ['photos' => $torin_uploads['errors'][0]]
+    );
+}
+
 // ── SECRETS ─────────────────────────────────────────────────────────────────
 // Read by ABSOLUTE PATH from outside the document root (T-04-08). This is the
 // only file in the tree that resolves this key; notify.php takes the resulting
@@ -182,9 +252,36 @@ if (!is_array($torin_secrets)) {
 }
 
 // ── NOTIFY ──────────────────────────────────────────────────────────────────
-// $photos is an empty array in this tracer; 04-03 fills it from
-// torin_collect_uploads() and nothing else on this line changes.
-$torin_result = torin_notify($torin_in, [], $torin_secrets);
+// The tracer passed an empty array here and this is the one line 04-03
+// changed. The driver branches on the photo count internally; the handler does
+// not know or care which of the three shapes went out, which is what keeps the
+// fan-out interface the same one 04-02 shipped.
+$torin_result = torin_notify($torin_in, $torin_photos, $torin_secrets);
+
+// RELEASED IMMEDIATELY, ON THE ONE LINE BOTH OUTCOMES PASS THROUGH. This sits
+// above the branch on purpose: putting an unlink inside each arm is how the
+// arm added next year is the one that leaks. The photographs have left the
+// machine by now, and D4-07's promise is that no copy of them stays on it.
+foreach ($torin_photos as $torin_photo) {
+    @unlink($torin_photo);
+}
+
+// THE POST-SEND LEFTOVER COUNT, LOGGED. Two integers and the request id; no
+// filename, no path, no submitted value, nothing a visitor typed (P-14).
+//
+// It exists because «no copy of a visitor's photograph survives the request»
+// is otherwise an unobservable promise: the visitor sees a redirect, the owner
+// sees a message, and a temp file that outlived the loop above would sit in a
+// directory neither of them can see. `leftover=0` is the only form of that
+// promise anyone outside this process can check.
+$torin_leftover = 0;
+foreach ($torin_photos as $torin_photo) {
+    if (file_exists($torin_photo)) {
+        $torin_leftover++;
+    }
+}
+error_log('torin contact ' . $torin_rid . ': photos=' . count($torin_photos) . ' leftover=' . $torin_leftover);
+$torin_photos = [];
 
 // BRANCH ON THE OVERALL FLAG ONLY, NEVER ON A CHANNEL (D4-08). Reading
 // $torin_result['channels']['telegram'] here would hard-code the current
