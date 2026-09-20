@@ -55,12 +55,15 @@ require_once(dirname(__FILE__) . '/includes/header.php');
 
 				<div class="cta-block__actions">
 					<a class="btn btn--primary" href="tel:<?php echo htmlspecialchars($site['phone_e164'], ENT_QUOTES, 'UTF-8'); ?>"><?php echo torin_icon('phone'); ?>Обадете се сега</a>
-					<?php // [ASSUMED] Which of the three shop numbers is reachable on Viber is
-					      // an open owner question (02-UI-SPEC C-9); the main line stands in
-					      // until the owner confirms it. The assumption now lives beside the
-					      // value in site-config.php's viber entry rather than in an inline
-					      // literal here, and this href reads that key. ?>
-					<a class="btn btn--primary" href="viber://chat?number=<?php echo rawurlencode($site['viber']); ?>"><?php echo torin_icon('chat'); ?>Пишете във Viber</a>
+					<?php // D4-17 (§C-7). The write action leads to the contact page, not to a
+					      // chat app. The speech-bubble glyph is REUSED unchanged — it never
+					      // meant a particular app, it meant "write" — so no icon was added.
+					      // The label is «Пишете ни», not the longer phrase D4-17 originally
+					      // named: §Conflicts C-1 measured that one as a two-line button in the
+					      // footer column and an overflow in the call bar. «Обадете се» /
+					      // «Пишете ни» is verb + pronoun twice over, which is the call-first /
+					      // write-second parallel D-16 built this row around. ?>
+					<a class="btn btn--primary" href="kontakti.html" data-slot="hero"><?php echo torin_icon('chat'); ?>Пишете ни</a>
 				</div>
 
 				<?php // D3.5-06. The claim is READ from site-config.php, never typed
@@ -294,13 +297,13 @@ require_once(dirname(__FILE__) . '/includes/header.php');
 			<div class="cta-block">
 				<div class="cta-block__actions">
 					<a class="btn btn--primary" href="tel:<?php echo htmlspecialchars($site['phone_e164'], ENT_QUOTES, 'UTF-8'); ?>"><?php echo torin_icon('phone'); ?>Обадете се</a>
-					<?php // [ASSUMED] Which of the three shop numbers is reachable on
-					      // Viber is an open owner question (02-UI-SPEC C-9); the main
-					      // line stands in until the owner confirms. Phase 4 / CONTACT-02
-					      // replaces it. The value is a developer-authored config entry,
-					      // never assembled from a request value (T-02-09), and it is
-					      // URL-encoded on the way into this query string. ?>
-					<a class="btn btn--primary" href="viber://chat?number=<?php echo rawurlencode($site['viber']); ?>"><?php echo torin_icon('chat'); ?>Пишете във Viber</a>
+					<?php // D4-17 (§C-7). Replaced the chat-app deep link, which was CONTACT-02's
+					      // whole remit: the destination is now a page this project controls,
+					      // so the CTA cannot depend on an account existing on someone else's
+					      // network. Same label and same reused glyph as the hero slot — one
+					      // destination must never be reached under two different names on the
+					      // same page. ?>
+					<a class="btn btn--primary" href="kontakti.html" data-slot="cta"><?php echo torin_icon('chat'); ?>Пишете ни</a>
 				</div>
 				<?php // D3.5-06. Claim and carve-out are both READ from site-config.php,
 				      // never typed here — the same two keys and the same composition
@@ -312,12 +315,13 @@ require_once(dirname(__FILE__) . '/includes/header.php');
 				      // which is the last moment a carve-out can still change what they
 				      // do. ?>
 				<p class="cta-block__note"><?php echo htmlspecialchars($site['free_diagnostics'], ENT_QUOTES, 'UTF-8'); ?> <?php echo htmlspecialchars($site['free_diagnostics_exception'], ENT_QUOTES, 'UTF-8'); ?> · Отговаряме в работно време</p>
-				<?php // OPTIONAL, pending OWNER-QUESTIONS #2 (should the form exist at
-				      // all?). Deliberately a SIBLING of the actions row, never a flex
-				      // child of it, and no stylesheet rule references it from a
-				      // parent's layout — so deleting this node is a subtraction, not a
-				      // redesign (D-17). Phase 4 / CONTACT-03 fills or removes it. ?>
-				<div class="cta-block__form"></div>
+				<?php // The empty reserved form container that stood here is GONE (04-04).
+				      // OWNER-QUESTIONS #2 is answered: the enquiry form exists and it
+				      // lives on its own page, kontakti.html, which the write button
+				      // above now leads to. The node was authored as a subtraction-safe
+				      // sibling of the actions row precisely so this removal would not be
+				      // a redesign, and grep confirmed at removal time that no stylesheet
+				      // rule named it. ?>
 				<?php // TRUST-02, the LAST CHILD of .cta-block. Same partial the
 				      // service-page CTA calls, so the two surfaces cannot drift.
 				      // This used to say the partial emits nothing and that the
@@ -340,7 +344,7 @@ require_once(dirname(__FILE__) . '/includes/header.php');
       // arithmetic directly, while carrying no conversion action. ?>
 <div class="callbar">
 	<a class="btn btn--primary" href="tel:<?php echo htmlspecialchars($site['phone_e164'], ENT_QUOTES, 'UTF-8'); ?>"><?php echo torin_icon('phone'); ?>Обадете се</a>
-	<a class="btn btn--primary" href="viber://chat?number=<?php echo rawurlencode($site['viber']); ?>"><?php echo torin_icon('chat'); ?>Пишете във Viber</a>
+	<a class="btn btn--primary" href="kontakti.html" data-slot="callbar"><?php echo torin_icon('chat'); ?>Пишете ни</a>
 </div>
 
 <?php require_once(dirname(__FILE__) . '/includes/footer.php'); ?>

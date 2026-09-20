@@ -351,11 +351,13 @@
 }
 
 /* --- Repeated CTA block (D-16, D-17) ------------------------------------
-   .cta-block__form is a SIBLING of the actions row and is referenced by no
-   rule in this stylesheet — not by a positional selector, not by a grid area,
-   not by a margin reset on a last child. Deleting the node must stay a
-   subtraction rather than a redesign, and that is only true while nothing
-   here depends on its presence or its position.                            */
+   The block once reserved an empty form container as a sibling of the actions
+   row, referenced by no rule here — not by a positional selector, not by a
+   grid area, not by a margin reset on a last child. That discipline is what
+   let 04-04 delete the node as a subtraction rather than a redesign once the
+   form moved to its own page. Keep it: the rating badge below relies on the
+   same property, so no rule in this file may start addressing .cta-block's
+   children positionally.                                                    */
 .cta-block {
 	margin-block-start: var(--sp-lg);
 }
@@ -383,9 +385,21 @@
 
 .callbar .btn {
 	flex: 1 1 50%;
-	/* The label «Пишете във Viber» measures ~141px of Sofia Sans at
-	   --fs-body/700; at 360px each half is 180px, so the button's normal
-	   --sp-lg side padding (48px total) would overflow it. */
+	/* Width budget, re-measured for the label that actually ships (04-04).
+	   «Пишете ни» is 88.7px of Sofia Sans at --fs-body/700. A button is not
+	   its label: add this rule's 16px of side padding plus the icon and its
+	   gap — .btn svg is 1.25em (21.3px) and .btn gap is --sp-sm (8px), 29.3px
+	   together — for 134.0px of button against the 180px each half gets at
+	   360px, and 134px against 160px at 320px. Both fit.
+
+	   The 29.3px is the correction this comment previously omitted, and the
+	   omission mattered: the retired label «Пишете във Viber» measured 141.4px,
+	   which the old arithmetic put at 189px total and called a fit, when the
+	   true figure was 186.7px against 180px — it was overflowing at 360px and
+	   below the whole time, saved from visible breakage only by the min-width
+	   below letting the label wrap to two lines inside a 56px bar. Measure a
+	   replacement label as label + padding + icon + gap, never as label alone,
+	   and confirm it in the render harness rather than in this comment. */
 	min-width: 0;
 	padding: 0 var(--sp-sm);
 	border-radius: 0;
