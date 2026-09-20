@@ -22,11 +22,20 @@
 // Spelling was corrected on port where the source was visibly wrong. The
 // misspelled forms are not reproduced here, for the same reason.
 //
-// RETENTION COMMITMENT — a note for Phase 4 (CONTACT-01…04). The declaration
-// below promises that data is deleted from the records of the shop once the
-// enquiry has been satisfied. Any contact-form work that stores, forwards or
-// retains submissions must not contradict that sentence; if the form behaves
-// differently in practice, this page changes FIRST and the form follows.
+// RETENTION COMMITMENT — DISCHARGED by 04-04 (CONTACT-06). The note that stood
+// here warned Phase 4 not to contradict the retention sentence. Phase 4 built
+// the form (D4-07: notifications only, no server-side storage), so the sentence
+// was corrected to match what the code does, and two blocks were added covering
+// the form data and the analytics processor. The rule the note stated still
+// holds and is worth keeping in force: if the form's behaviour ever changes,
+// THIS PAGE CHANGES FIRST and the form follows — never the other way round.
+//
+// NOT ANSWERED HERE, deliberately: what the shop promises about the customer
+// DATA ON A DEVICE left for repair. UI-SPEC §S11 sketched a block covering it,
+// but OWNER-QUESTIONS #27 is open and no measurement can close it. Writing a
+// plausible sentence would publish a commitment nobody at the shop has agreed
+// to, which is exactly the prohibition this plan carries. It is raised at the
+// 04-04 Task 3 checkpoint instead, and the block is added once he answers.
 //
 // OPEN, and deliberately not resolved here: OWNER-QUESTIONS #25 (the site uses
 // a trading name and a legal name and states no company registration number, so
@@ -35,7 +44,14 @@
 // Neither is a developer decision. The declaration is ported as published and
 // the gaps are on the list for the owner.
 $torin_title = 'Общи условия и поверителност · Торин';
-$torin_desc  = 'Декларация за поверителност на Торин Компютърс: какви лични данни събираме, за какво ги използваме и кога ги изтриваме от регистрите си.';
+// The description is part of the correction, not decoration: as written it told
+// the reader WHEN the shop erases their data from its registers, which asserts a
+// register exists. That is the same contradiction the retention block carried,
+// and a page whose meta description disagrees with its own body still carries
+// two positions. The retired phrasing is deliberately NOT quoted here — this
+// project has already been bitten by a comment quoting a gated string and
+// tripping its own grep (03-07).
+$torin_desc  = 'Декларация за поверителност на Торин Компютърс: какви лични данни събираме, за какво ги използваме и защо не ги съхраняваме на сървъра.';
 require_once(dirname(__FILE__) . '/includes/header.php');
 
 // The declaration, in blocks. Each block is a heading plus its paragraphs; the
@@ -61,10 +77,66 @@ $torin_blocks = array(
 			'Торин Къмпани ООД използва предоставените от Вас лични данни, за да се свърже с Вас и да Ви предостави информацията, която сте изискали при използване на нашия сайт — използваме Вашия имейл адрес и/или телефон, за да отговорим на Ваши коментари и въпроси.',
 		),
 	),
+	// CORRECTED by 04-04 (D4-07). As published, this sentence promised deletion
+	// "from our registers" — which implies a register exists to delete from. On
+	// this site none does: the enquiry is forwarded as a notification and the
+	// server keeps no copy. The sentence was CORRECTED IN PLACE rather than
+	// answered a second time further down the page, because a declaration
+	// carrying two answers to one question is how a visitor and a regulator read
+	// the same document and reach different conclusions.
+	//
+	// The second half is the shop's own inherited commitment, deliberately
+	// neither strengthened nor dropped: what the shop does with the enquiry once
+	// it has arrived is the OWNER's practice, not a property of this code, and
+	// rewriting it here would be inventing a procedure. It is on the Task 3
+	// checkpoint list for him to confirm.
 	array(
 		'heading' => 'Поверителност и срок на съхранение',
 		'paras'   => array(
-			'В съответствие с настоящата Декларация за поверителност Вашите данни ще бъдат третирани като строго поверителни и ще бъдат изтрити от нашите регистри след като удовлетворим Вашите изисквания.',
+			'В съответствие с настоящата Декларация за поверителност Вашите данни се третират като строго поверителни. Сайтът не води регистър на запитванията — на сървъра не остава копие от изпратеното от Вас. Данните, които достигат до магазина, ще бъдат изтрити от документацията му, след като удовлетворим Вашите изисквания.',
+		),
+	),
+
+	// ADDED by 04-04 (CONTACT-06, D4-07). Every sentence here describes behaviour
+	// that contact-send.php and includes/upload.php actually implement — the
+	// photographs are unlinked after the notification is sent and the handler
+	// logs `leftover=0` to prove it. Nothing about an erasure procedure, a
+	// retention window or a security standard is claimed, because none is
+	// performed, and a written commitment the shop does not keep is worse than
+	// silence.
+	array(
+		'heading' => 'Данни от формата за запитване',
+		'paras'   => array(
+			'Когато изпратите запитване през формата за контакт, Вие ни предоставяте модел на устройството, описание на повредата, Вашето име, телефон и имейл адрес, а по желание и снимки. Използваме ги само за да отговорим на конкретното Ви запитване.',
+			'Запитването се доставя до магазина като известие. Сървърът на сайта не съхранява запитвания — не се води база данни и не се пази архив. Прикачените снимки преминават през временната памет на сървъра само докато известието бъде изпратено, след което се изтриват автоматично.',
+		),
+	),
+
+	// ADDED by 04-04 (CONTACT-06, D4-18; Research P-8). GDPR Art. 13 transparency
+	// is a SEPARATE obligation from the ePrivacy Art. 5(3) consent trigger: the
+	// cookieless tool is why no banner is shown, and it is not a reason to say
+	// nothing. Three things are owed and all three are stated — the processor by
+	// name, the purpose, and that the data leaves the EU/EEA.
+	//
+	// The localStorage sentence is here because the tracker READS a key
+	// (`umami.disabled`) and EDPB Guidelines 2/2023 bring *access* into Art. 5(3)
+	// scope, not only storage. Reading an opt-out flag is the strongest possible
+	// "strictly necessary" framing, so this is a residual to disclose, not a
+	// blocker — but it is disclosed rather than glossed.
+	//
+	// ###############################################################
+	// ## COUPLING — this block and the tracker ship TOGETHER or    ##
+	// ## neither ships. The tracker is NOT in this tree yet (no    ##
+	// ## js/analytics.js, no script tag in header.php as of        ##
+	// ## 04-04). A disclosure naming a processor the site does not ##
+	// ## use is inaccurate in the other direction. If analytics is ##
+	// ## dropped, DELETE this block; do not leave it standing.     ##
+	// ###############################################################
+	array(
+		'heading' => 'Статистика за посещенията',
+		'paras'   => array(
+			'За да знаем кои страници се четат и кои от бутоните за контакт се използват, сайтът брои посещенията чрез Umami — услуга на Umami Software, Inc. Не се поставят бисквитки и не се изгражда профил за Вас.',
+			'Обработката се извършва на сървъри на доставчика в САЩ и в ЕС, тоест данните се обработват и извън ЕС/ЕИП. Скриптът чете една-единствена стойност от локалното хранилище на браузъра Ви — отметка дали сте отказали броенето — и по тази причина сайтът не показва банер за съгласие.',
 		),
 	),
 );
