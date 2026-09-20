@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 11
+open_count: 17
 waived_count: 0
 fixed_count: 5
-total_count: 16
-last_updated: 2026-09-20T10:55:25.672Z
+total_count: 22
+last_updated: 2026-09-20T11:52:51.426Z
 ---
 
 # Broken Windows Ledger
@@ -31,6 +31,12 @@ last_updated: 2026-09-20T10:55:25.672Z
 | 14 | 04 | unrun-verify | src/includes/contact-form.php |  | 04-02 Task 3: honeypot autofill false-positive UNCONFIRMED. The human's manual handset submission succeeded, but they did not state whether browser autofill/password-manager was active, which is the plan's named number-one honeypot false-positive source. A false positive silently discards a real enquiry and is invisible to both parties. Re-test with autofill explicitly on. | open |  | 2026-09-20T10:55:10.721Z |  |
 | 15 | 04 | unrun-verify | src/includes/notify.php |  | 04-02: the notification FAILURE path has never been exercised. Every live check drove the success branch; no check made api.telegram.org unreachable, so the visitor-facing 'every channel failed' page and the error_log correlation-id branch in contact-send.php are unproven at runtime. 04-05 adds a second driver and should exercise this while it is there. | open |  | 2026-09-20T10:55:16.705Z |  |
 | 16 | 04 | deviation | .planning/phases/04-hardening-cutover/04-02-PLAN.md |  | 04-02 verify V7 is NOT PORTABLE and reports a false failure on macOS: 'grep -L PATTERN FILE \| wc -l \| grep -qx 0' never matches on BSD wc, which pads its count to seven spaces then 0 (confirmed by od -c); GNU wc emits an unpadded 0 and the same check passes on Linux. The underlying condition was TRUE. Every later plan using the 'wc -l \| grep -qx N' idiom has the same defect; use N=$(... \| wc -l \| tr -d ' '); [ "$N" = "0" ] instead. | open |  | 2026-09-20T10:55:25.672Z |  |
+| 17 | 04 | unrun-verify | src/includes/upload.php |  | 04-03: the PORTRAIT-ORIENTATION path is unverified end to end, on BOTH sides. The server reads exif_read_data() Orientation before re-encoding and photo-resize.js passes imageOrientation:'from-image', but every fixture used in live testing was produced by macOS sips, which bakes rotation into pixels and writes NO orientation tag — and a file with no tag passes a completely broken pipeline identically to a correct one (P-7's named warning sign). Requires ONE portrait photograph taken on a real handset, submitted through kontakti.html, checked upright in Telegram. This is the plan's own backstop truth EA-07. | open |  | 2026-09-20T11:52:11.837Z |  |
+| 18 | 04 | unrun-verify | src/includes/notify.php |  | 04-03: nobody has LOOKED at the owner's phone. The host error_log carries no 'telegram transport failed' / 'sendPhoto failed' / 'telegram rejected the call' line for any of the 0/1/3-photo runs, so every API call returned ok:true and the photos reached Telegram's servers — but that is an assertion about the API's answer, not about what rendered. Unconfirmed: the single photo shows the enquiry as its caption, and the three arrive as ONE media group rather than three separate messages. One human glance closes it. | open |  | 2026-09-20T11:52:20.639Z |  |
+| 19 | 04 | unrun-verify | scripts/upload-selftest.php |  | 04-03: scripts/upload-selftest.php has NEVER BEEN EXECUTED, in either direction. It was authored before includes/upload.php as the plan's tdd=true RED half, but the build machine has no php binary and no running Docker daemon, so RED was never observed failing and GREEN was never observed passing. The eight behaviours it encodes are a specification, not a gate. Six of them are covered indirectly by the live server checks in 04-03-SUMMARY; the orientation one is not covered at all. Run 'php scripts/upload-selftest.php' the moment a PHP runtime exists. | open |  | 2026-09-20T11:52:27.963Z |  |
+| 20 | 04 | deviation | src/js/photo-resize.js |  | 04-03: photo-resize.js measures 2042 B gzipped against a 2048 B gate — SIX bytes of headroom. The UI-SPEC 2 KB budget and this tree's comment convention are in direct conflict for JS, because deploy-new.sh comment-strips CSS but not JS, so prose in a .js file is wire cost while prose in a .css file is free. The file's comments were cut to five to fit and the reasoning moved into 04-03-SUMMARY.md. The real fix is to route .js through scripts/lib/ a comment stripper in deploy-new.sh the same way CSS goes through strip-css-comments.py; until then the next comment added to this file breaks the gate. | open |  | 2026-09-20T11:52:35.755Z |  |
+| 21 | 04 | unrun-verify | src/includes/upload.php |  | 04-03: the WebP decode branch is unexercised. The form advertises accept=image/jpeg,image/png,image/webp and torin_normalise_upload() routes WebP through imagecreatefromwebp() behind a function_exists guard, but no WebP was ever submitted. GD's WebP decoder is a separate build option from ext-gd itself, which the probe measured; if it is absent, every WebP the picker happily offers is refused with 'файлът не е разпознат като снимка'. Either submit one WebP, or drop webp from the accept list so the copy stops advertising it. | open |  | 2026-09-20T11:52:43.288Z |  |
+| 22 | 04 | deviation | src/contact-send.php |  | 04-03: a refused photograph still costs the visitor their typed description. Per-file rejection reasons DO surface as a field-level error on the photo control (T-04-17, measured: 'Снимка 1: файлът не е разпознат като снимка' and 'Може да прикачите най-много 5 снимки, а са приложени 6'), but contact-send.php renders the 04-02 honest-failure page rather than re-rendering the form, so the device model and fault description are lost. torin_render_contact_form() already accepts and escapes $values; 04-05 owns wiring the re-render and should route the photos branch through it. | open |  | 2026-09-20T11:52:51.426Z |  |
 
 ````json
 [
@@ -224,6 +230,78 @@ last_updated: 2026-09-20T10:55:25.672Z
     "status": "open",
     "reason": "",
     "recorded_at": "2026-09-20T10:55:25.672Z",
+    "resolved_at": null
+  },
+  {
+    "id": 17,
+    "kind": "unrun-verify",
+    "phase": "04",
+    "file": "src/includes/upload.php",
+    "line": null,
+    "description": "04-03: the PORTRAIT-ORIENTATION path is unverified end to end, on BOTH sides. The server reads exif_read_data() Orientation before re-encoding and photo-resize.js passes imageOrientation:'from-image', but every fixture used in live testing was produced by macOS sips, which bakes rotation into pixels and writes NO orientation tag — and a file with no tag passes a completely broken pipeline identically to a correct one (P-7's named warning sign). Requires ONE portrait photograph taken on a real handset, submitted through kontakti.html, checked upright in Telegram. This is the plan's own backstop truth EA-07.",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-09-20T11:52:11.837Z",
+    "resolved_at": null
+  },
+  {
+    "id": 18,
+    "kind": "unrun-verify",
+    "phase": "04",
+    "file": "src/includes/notify.php",
+    "line": null,
+    "description": "04-03: nobody has LOOKED at the owner's phone. The host error_log carries no 'telegram transport failed' / 'sendPhoto failed' / 'telegram rejected the call' line for any of the 0/1/3-photo runs, so every API call returned ok:true and the photos reached Telegram's servers — but that is an assertion about the API's answer, not about what rendered. Unconfirmed: the single photo shows the enquiry as its caption, and the three arrive as ONE media group rather than three separate messages. One human glance closes it.",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-09-20T11:52:20.639Z",
+    "resolved_at": null
+  },
+  {
+    "id": 19,
+    "kind": "unrun-verify",
+    "phase": "04",
+    "file": "scripts/upload-selftest.php",
+    "line": null,
+    "description": "04-03: scripts/upload-selftest.php has NEVER BEEN EXECUTED, in either direction. It was authored before includes/upload.php as the plan's tdd=true RED half, but the build machine has no php binary and no running Docker daemon, so RED was never observed failing and GREEN was never observed passing. The eight behaviours it encodes are a specification, not a gate. Six of them are covered indirectly by the live server checks in 04-03-SUMMARY; the orientation one is not covered at all. Run 'php scripts/upload-selftest.php' the moment a PHP runtime exists.",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-09-20T11:52:27.963Z",
+    "resolved_at": null
+  },
+  {
+    "id": 20,
+    "kind": "deviation",
+    "phase": "04",
+    "file": "src/js/photo-resize.js",
+    "line": null,
+    "description": "04-03: photo-resize.js measures 2042 B gzipped against a 2048 B gate — SIX bytes of headroom. The UI-SPEC 2 KB budget and this tree's comment convention are in direct conflict for JS, because deploy-new.sh comment-strips CSS but not JS, so prose in a .js file is wire cost while prose in a .css file is free. The file's comments were cut to five to fit and the reasoning moved into 04-03-SUMMARY.md. The real fix is to route .js through scripts/lib/ a comment stripper in deploy-new.sh the same way CSS goes through strip-css-comments.py; until then the next comment added to this file breaks the gate.",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-09-20T11:52:35.755Z",
+    "resolved_at": null
+  },
+  {
+    "id": 21,
+    "kind": "unrun-verify",
+    "phase": "04",
+    "file": "src/includes/upload.php",
+    "line": null,
+    "description": "04-03: the WebP decode branch is unexercised. The form advertises accept=image/jpeg,image/png,image/webp and torin_normalise_upload() routes WebP through imagecreatefromwebp() behind a function_exists guard, but no WebP was ever submitted. GD's WebP decoder is a separate build option from ext-gd itself, which the probe measured; if it is absent, every WebP the picker happily offers is refused with 'файлът не е разпознат като снимка'. Either submit one WebP, or drop webp from the accept list so the copy stops advertising it.",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-09-20T11:52:43.288Z",
+    "resolved_at": null
+  },
+  {
+    "id": 22,
+    "kind": "deviation",
+    "phase": "04",
+    "file": "src/contact-send.php",
+    "line": null,
+    "description": "04-03: a refused photograph still costs the visitor their typed description. Per-file rejection reasons DO surface as a field-level error on the photo control (T-04-17, measured: 'Снимка 1: файлът не е разпознат като снимка' and 'Може да прикачите най-много 5 снимки, а са приложени 6'), but contact-send.php renders the 04-02 honest-failure page rather than re-rendering the form, so the device model and fault description are lost. torin_render_contact_form() already accepts and escapes $values; 04-05 owns wiring the re-render and should route the photos branch through it.",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-09-20T11:52:51.426Z",
     "resolved_at": null
   }
 ]
