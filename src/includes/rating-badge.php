@@ -84,8 +84,10 @@ function torin_render_rating_badge() {
 	//
 	// The badge owns its own top margin in components.css and no parent rule
 	// names it positionally, so this whole node can be deleted — or, as today,
-	// never emitted — and the CTA block's vertical rhythm is unchanged. Same
-	// structural discipline as .cta-block__form.
+	// never emitted — and the CTA block's vertical rhythm is unchanged. This is
+	// the same structural discipline the CTA block's reserved form container was
+	// built on, and 04-04 spent it: that node was deleted outright with no CSS
+	// consequence. This badge is now the only remaining node relying on it.
 ?>
 				<a class="rating-badge" href="<?php echo torin_esc($site['gbp_url']); ?>" rel="noopener"><span class="rating-badge__star"><?php echo torin_icon('star'); ?></span><span class="rating-badge__score"><?php echo torin_esc($site['gbp_rating']); ?></span><span class="rating-badge__label">от <?php echo torin_esc($site['gbp_reviews']); ?> отзива в Google</span></a>
 <?php

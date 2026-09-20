@@ -535,10 +535,11 @@ function torin_render_service_page($page) {
 	torin_render_brand_row(torin_next_tint($torin_tint));
 
 	// The CTA closes the spine on every category page. Same component as the
-	// homepage CTA block (D-16), not a category-only variant, and both values
-	// come from the site config rather than being retyped — the chat number is
-	// still [ASSUMED] (OWNER-QUESTIONS #21), and it must stay in exactly one
-	// place so a single later edit fixes every page at once.
+	// homepage CTA block (D-16), not a category-only variant. The call side
+	// still reads its value from the site config rather than being retyped, so
+	// one edit fixes every page at once. The write side no longer needs a
+	// config value at all: since 04-04 it is a relative link to a page in this
+	// tree, which is what closed OWNER-QUESTIONS #21 by making it moot.
 ?>
 	<section class="section<?php echo torin_next_tint($torin_tint); ?>" id="contact-us">
 		<div class="container">
@@ -551,7 +552,9 @@ function torin_render_service_page($page) {
 					      // one telephone fact, one representation, every primary call CTA
 					      // on the site resolving the same string (see site-config.php). ?>
 					<a class="btn btn--primary" href="tel:<?php echo torin_esc($site['phone_e164']); ?>"><?php echo torin_icon('phone'); ?>Обадете се</a>
-					<a class="btn btn--primary" href="viber://chat?number=<?php echo rawurlencode($site['viber']); ?>"><?php echo torin_icon('chat'); ?>Пишете във Viber</a>
+					<?php // D4-17 (§C-7). One write destination, one label, on all 15 service
+					      // pages — the same string the homepage and footer use. ?>
+					<a class="btn btn--primary" href="kontakti.html" data-slot="category"><?php echo torin_icon('chat'); ?>Пишете ни</a>
 				</div>
 <?php			// D3.5-06. The claim and its category-6 exclusion are READ from
 			// site-config.php, never typed here: this note renders on all 15 service

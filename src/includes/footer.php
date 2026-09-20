@@ -71,7 +71,13 @@ require_once(dirname(__FILE__) . '/icons.php');
 					      // and deliberately keep their local form. ?>
 					<div class="cta-block__actions">
 						<a class="btn btn--primary" href="tel:<?php echo htmlspecialchars($site['phone_e164'], ENT_QUOTES, 'UTF-8'); ?>"><?php echo torin_icon('phone'); ?>Обадете се</a>
-						<a class="btn btn--primary" href="viber://chat?number=<?php echo rawurlencode($site['viber']); ?>"><?php echo torin_icon('chat'); ?>Пишете във Viber</a>
+						<?php // D4-17 (§C-7). The write action leads to kontakti.html; the chat
+						      // glyph is reused, not replaced. This is the slot that decided the
+						      // label: §Conflicts C-1 measured this grid column at 233.6px at
+						      // 560px and 246.7px at 900px, where the longer phrase renders as a
+						      // TWO-LINE button beside a 48px call button — which is the exact
+						      // equal-weight pairing D4-17 exists to preserve. ?>
+						<a class="btn btn--primary" href="kontakti.html" data-slot="footer"><?php echo torin_icon('chat'); ?>Пишете ни</a>
 					</div>
 				</div>
 

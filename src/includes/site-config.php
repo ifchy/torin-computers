@@ -61,57 +61,13 @@ $site = array(
 	// BOTH when the owner answers.
 	'hours' => 'Понеделник – Петък, 8:00 – 16:00',
 
-	// The Viber deep-link target. UAT gap G-02-5 (test 28) is the whole story
-	// behind this value, and it is worth keeping because the same trap is easy
-	// to walk back into.
-	//
-	// This was +35929549710 — the main line — as an [ASSUMED] placeholder
-	// against OWNER-QUESTIONS #21. It was a dead end: 02 954 9710 is a Sofia
-	// LANDLINE and Viber accounts are provisioned against mobile numbers, so on
-	// Android the button returned Viber's "the requested page is unavailable,
-	// please update to the latest version" on all 16 deployed pages. The client
-	// was current; the deep link simply did not resolve.
-	//
-	// That failure had TWO candidate causes which could not be told apart while
-	// both were in play:
-	//   (a) the number has no Viber account
-	//   (b) viber://chat is the wrong deep-link path
-	// They were separated by deploying a number known to HAVE Viber: the button
-	// opened a conversation, so (b) is ELIMINATED — the viber://chat?number=
-	// scheme is correct and the fix is a value change, not a rewrite.
-	//
-	// ###########################################################
-	// ## CUTOVER GATE — must be re-tested before launch.       ##
-	// ## .planning/todos/pending/verify-viber-button-before-   ##
-	// ## launch.md (resolves_phase: 4)                         ##
-	// ###########################################################
-	//
-	// This number is DELIBERATE and settled — do not change it while chasing a
-	// bug report. Decision 2026-08-09: the button stays on 088 945 8404 and the
-	// OWNER will provision a Viber account on that number. The value is already
-	// the intended target; what is missing is the account on the far end.
-	//
-	// History, kept because the failure is easy to misdiagnose. At Phase 2 UAT
-	// this button was a dead link on all 16 pages. All three published shop
-	// numbers were tested individually on a real Android handset and all three
-	// failed identically with Viber's "the requested page is unavailable, please
-	// update to the latest version":
-	//   +35929549710  (02 954 9710, landline) -> no Viber account
-	//   +359879128244 (087 912 8244, mobile)  -> no Viber account
-	//   +359889458404 (088 945 8404, mobile)  -> no Viber account  <- current
-	//
-	// The deep-link SCHEME is NOT the problem and must not be "fixed". A control
-	// number known to have Viber was deployed briefly and opened a conversation
-	// normally through this identical viber://chat?number= href, which eliminates
-	// that hypothesis experimentally. Switching to viber://add or anything else
-	// would chase an already-falsified cause and hide the real one.
-	//
-	// No automated check can verify this. Every Phase 2 probe confirmed the href
-	// is present, well-formed and single-sourced — all true, and still true.
-	// Whether the number behind it has a Viber account is not a property of the
-	// markup and is invisible from the origin; it needs a real handset with Viber
-	// installed. Hence the human cutover gate rather than a script.
-	'viber' => '+359889458404',
+	// A chat-app deep-link key lived here until 04-04 (D4-17), together with
+	// roughly a hundred lines recording why it never worked. It is GONE, not
+	// dormant, and it must not come back: the five CTA slots it fed now link to
+	// kontakti.html, a page in this tree. The recorded history went with it on
+	// purpose — a dead value surrounded by an essay reads as a feature waiting
+	// to be switched on. The full account survives in this file's git log and in
+	// the Phase 2 and Phase 4 SUMMARYs, which is where a reader should look.
 
 	// TRUST-03 (D3-10). ONE warranty summary, written here once and read by
 	// every service page through $page['warranty_key'] — never retyped on a
