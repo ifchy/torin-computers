@@ -3,7 +3,7 @@ phase: 04-hardening-cutover
 plan: 02
 subsystem: contact
 tags: [contact-form, notifications, telegram, php, honeypot, seo]
-status: blocked
+status: complete
 requires:
   - "04-01 measured host capabilities (ext:curl, outbound:curl443)"
   - "A Telegram bot token and chat id in /home/torin/torin-secrets.php, chmod 600"
@@ -48,23 +48,27 @@ decisions:
   - "Every $_POST read goes through one accessor that treats a non-string as absent"
   - "The file input ships native and unclassed; ::file-selector-button styling is 04-03/04-04's"
 metrics:
-  duration: "~1 session (spanned an API limit reset; wall-clock not recorded)"
-  completed: 2026-09-19
-  tasks_completed: 2
+  duration: "~2 sessions (spanned an API limit reset, then a deploy + live-verify continuation the next day; wall-clock not recorded)"
+  completed: 2026-09-20
+  tasks_completed: 3
   tasks_total: 3
 actuals:
   tokens: 18600
-  tasks: 2
-  commits: 2
+  tasks: 3
+  commits: 5
 ---
 
 # Phase 4 Plan 02: The Contact Spine Summary
 
-The contact path now exists in code end to end — form partial, page, validating POST
-handler and Telegram driver — but **nothing has been deployed and no live check has been
-run**, because FTPS deploy and outbound `curl` are both blocked in this execution
-environment. The slice is committed and structurally sound; it is unproven against the
-host.
+The contact path works end to end on staging. A visitor fills the form at
+`https://torin.bg/new/kontakti.html`, `contact-send.php` validates and redirects with
+`303 See Other`, and a Telegram message arrives on the owner's phone with Cyrillic intact.
+All seven of the plan's automated checks pass against the live host, and the human
+confirmed a real handset submission reached them. A trapped submission reaches nobody.
+
+Two things the live pass does **not** prove, carried forward rather than glossed: the
+honeypot has not been tested against browser autofill, and the notification *failure* path
+has never been exercised. Both are in `.planning/WINDOWS.md` (entries 14 and 15).
 
 ## What Was Built
 
@@ -106,24 +110,65 @@ icon `alert`; the form component in `components.css`; `--form-measure` in `base.
 
 ## Verification Status
 
-**No automated check in the plan's `<verify>` block was run.** All seven are live-host
-`curl` invocations, and outbound network access from this environment is blocked by the
-permission classifier — the FTPS deploy was refused first, and a bare
-`curl -o /dev/null https://torin.bg/new/kontakti.html` was refused too. This is an
-environment restriction, not a host problem and not a code problem.
+### Deploy
 
-**Local `php -l` was also unavailable** — there is no `php` binary on this machine and no
-running Docker daemon. The files were **not linted**. In place of a lint, two things were
-done and neither should be read as equivalent to one:
+`scripts/deploy-new.sh` ran on 2026-09-20 with the nine files of this slice and reported
+`Deploy complete: 9 file(s) -> public_html/new/`. CSS was comment-stripped in transit, as
+the script always does: `components.css` 42148 -> 15569 B, `base.css` 14885 -> 4287 B.
 
-1. A static read-through of each file.
-2. A purpose-written structural checker (a throwaway script in the scratchpad, not
-   committed) that walks the `<?php … ?>` regions of each file, skipping comments and
-   string literals, and reports brace/paren/bracket balance, tag balance and unterminated
-   literals. All seven PHP files pass. This catches unbalanced delimiters — the error class
-   a read-through most often misses — and it catches nothing else. It is not a parser.
+### The seven automated checks — all pass, against the live host
 
-Static assertions that *were* checked and do hold:
+| # | Check | Result |
+|---|---|---|
+| V1 | `kontakti.html` returns HTTP 200 | **PASS** |
+| V2 | `cache-control: no-store` present on that response | **PASS** |
+| V3 | All seven named fields, plus `photos[]` and `id="contact-form"`, in the served markup | **PASS** |
+| V4 | Zero `Warning:` / `Notice:` / `Fatal error` in the rendered body | **PASS** |
+| V5 | A valid POST to `contact-send.php` returns 303 | **PASS** — and `location: msg.html`, so POST/Redirect/GET is confirmed, not assumed |
+| V6 | A POST with `website=http://spam.example` returns 303 (trap answered identically to success) | **PASS** |
+| V7 | `header.php` references `kontakti.html` | **Condition TRUE** — but the check *as written in the plan* is not portable and reports a false failure on macOS. See below. |
+
+V4 passing matters more than its one-line phrasing suggests: `display_errors` is still `1`
+in this subtree (04-HOST-CAPABILITIES BLOCKER 1), so any PHP diagnostic would have printed
+into the page body. A clean body across V1/V4 plus a working 303 on V5 is also what retires
+the syntax question the missing lint left open — a parse error under this configuration
+produces a visible fatal, not a silent one.
+
+### V7 is a broken check, not a broken condition — and it will recur
+
+The plan writes V7 as:
+
+```sh
+bash -c 'grep -L "kontakti.html" src/includes/header.php' | wc -l | grep -qx 0
+```
+
+This reports failure on macOS while the thing it measures is true. BSD `wc` right-pads its
+count to a fixed width — the byte stream is seven spaces, then `0`, then a newline,
+confirmed with `od -c` — and `grep -qx 0` anchors both ends of the line, so it never
+matches. GNU `wc` emits `0\n` unpadded and the identical check passes on Linux. The
+underlying condition holds: `src/includes/header.php:264` contains
+`<li><a class="nav__link" href="kontakti.html"…>Контакти</a></li>`. The padding-tolerant
+form returns 0 and passes:
+
+```sh
+N=$(grep -L "kontakti.html" src/includes/header.php | wc -l | tr -d ' '); [ "$N" = "0" ]
+```
+
+This is recorded because it is not local to this plan: `wc -l | grep -qx N` appears seven
+times across five plans in this phase — `04-01`, `04-02`, `04-04`, `04-05`, `04-07` — and
+four of those five are still unexecuted. Anyone running them on macOS should expect a false
+failure. `.planning/WINDOWS.md` entry 16; details in `deferred-items.md`.
+
+### What was still never linted
+
+There is no `php` binary on the build machine and no running Docker daemon, so `php -l` was
+never run on any of these files. The substitutes used at authoring time — a read-through and
+a throwaway brace/paren/tag-balance checker that is not a parser — remain what they were.
+The live checks above are now the real evidence, and they are better evidence than a lint
+would have been, but they are evidence about the paths that were exercised, which is not
+every path. See Residual Risks.
+
+### Static assertions checked at authoring time, and still holding
 
 | Acceptance criterion | Result |
 |---|---|
@@ -138,6 +183,36 @@ Static assertions that *were* checked and do hold:
 | 5.2-safe dialect holds in the three new non-quarantined files | yes — no `__DIR__`, no `[]`, no `??`, no closures, no return types, no `<?=` |
 | `declare(strict_types=1)` appears in exactly one file | yes, `contact-send.php` |
 | Gzipped CSS delta ≤ 1.5 KB | **+259 B** (see below) |
+
+### Task 3 — the human handset test: PASSED
+
+Task 3 is the `gate="blocking"` human-verify that exists because no `curl` can prove a
+message landed on a phone. What was done and what was reported:
+
+The orchestrator sent three POSTs to the live endpoint — two valid (`Тест`, `Тест2`) and
+one carrying a filled honeypot. The human then opened the page and submitted the form
+themselves from a browser. Their report, verbatim:
+
+> got 2 messages, both in Cyrillic, no third also submitted the form myself and got the
+> message in Telegram
+
+Read at the precision it supports:
+
+| Claim | Basis |
+|---|---|
+| The notification path works end to end to a real device | **Observed.** Messages arrived. |
+| Cyrillic survives form -> PHP -> `json_encode` -> Telegram unmangled | **Observed.** Both messages readable in Bulgarian. |
+| The honeypot suppresses the trapped submission | **Observed.** Three POSTs went out, exactly two messages arrived, and the third was the trapped one. |
+| The visitor is not told the trap fired | **Observed** at the HTTP layer (V6: the trap returns the same 303 as success). |
+| A human can complete and submit the form from a real handset | **Observed.** The human's own submission arrived. |
+| A refresh of the confirmation page does not resubmit | **Inferred, not observed.** The human did not report step 4. It is precluded by construction — V5 measured `303` + `location: msg.html`, so a refresh re-issues a GET for `msg.html`, and there is no POST body to replay. This is a sound inference about a mechanism, not a sighting of the outcome. |
+| The honeypot does not fire on browser autofill | **NOT established.** See Residual Risks. |
+
+Steps 5 and 6 of the plan's checklist — the phone numbers still tappable, and the 360px
+weighting of the form against the phone list — were not separately reported. Nothing
+suggests a problem with either, and a regression in either would be visible to anyone who
+opened the page, but "not reported" is not "confirmed". 04-04 touches this page's CTAs and
+is the natural place to look.
 
 ## CSS Budget
 
@@ -249,29 +324,55 @@ bounded timeouts (T-04-11).
 | `.field--invalid` has no declarations | `src/css/components.css` | A markup hook for the 04-04 validator; the visible invalid treatment hangs off `aria-invalid`. Documented in place. |
 | File input unstyled | `src/includes/contact-form.php` | `::file-selector-button` and `.filelist` are 04-03/04-04's (UI-SPEC C-4). |
 
-None of these prevent the plan's goal. The goal is blocked by deployment, not by them.
+None of these prevent the plan's goal, and the live pass confirms it: the spine works end
+to end with all six in place.
 
-## Blocker
+## Residual Risks
 
-**Task 2 is code-complete but unverified, and Task 3 cannot begin.**
+The blocker recorded in the first draft of this summary — deploy and outbound `curl` both
+refused by the execution environment — is **resolved**. The deploy ran, all seven checks
+ran, and Task 3's human gate passed. What remains open is narrower and is listed here so
+the pass is not read as broader than it is. All three are in `.planning/WINDOWS.md`.
 
-`scripts/deploy-new.sh` and outbound `curl` are both refused by this environment's
-permission classifier. The consequence:
+**1. The honeypot has not been tested against browser autofill.** (`WINDOWS.md` 14)
 
-- none of Task 2's seven automated `<verify>` checks has been run;
-- the plan's `<done>` condition for Task 2 — "a visitor can complete and submit an enquiry
-  on the staging contact page" — is **not** demonstrated;
-- Task 3, a `gate="blocking"` human-verify that requires a real handset and a real Telegram
-  message, has nothing deployed to verify against.
+The plan names this as the number-one honeypot false-positive source, and it is the one
+failure this component can produce that **nobody would ever see**: a password manager fills
+the off-viewport decoy, `contact-send.php` treats the submission as spam, the visitor is
+shown the same confirmation page a real success produces, and the enquiry is discarded in
+silence. Neither the customer nor the shop learns anything went wrong. The human's manual
+submission did arrive — but they did not say whether autofill was active, so that arrival
+is not evidence either way. Re-test deliberately, with a password manager that fills
+aggressively. This is the highest-value unclosed item in the plan.
 
-The credentials file is present at the primary checkout and `deploy-new.sh` supports
-`TORIN_CRED_FILE` for worktree runs, so the deploy is a single command away once the
-permission exists. The exact invocation is in the checkpoint report.
+**2. The notification failure path has never been exercised.** (`WINDOWS.md` 15)
+
+Every check so far drove the success branch. Nothing has made `api.telegram.org`
+unreachable, so what a visitor actually sees when every channel fails is unproven at
+runtime — as is the `error_log` correlation-id branch. The code for both is written and
+wrapped in `catch (Exception)` and `catch (Throwable)`; it has simply never run. 04-05 adds
+a second driver and is the natural place to exercise it while the area is already open.
+
+**3. Seven `wc -l | grep -qx N` checks across five plans will report false failures on
+macOS.** (`WINDOWS.md` 16)
+
+Detailed under Verification Status. Four of the five plans are unexecuted. The cost is
+wasted debugging of a passing condition, not a shipped defect — but it is the kind of false
+signal that erodes trust in the verify blocks generally, which is worse than one bad check.
 
 ## Self-Check: PASSED
 
 Files claimed created, confirmed present: `src/kontakti.html`, `src/contact-send.php`,
 `src/includes/contact-form.php`, `src/includes/notify.php`.
-Commits claimed, confirmed in `git log`: `0083f23`, `c9c9be6`.
-No claim of live verification is made anywhere above; the Verification Status section
-states plainly that nothing was deployed, nothing was curled, and nothing was linted.
+
+Commits claimed, confirmed in `git log`: `0083f23` (Task 1), `c9c9be6` (Task 2), `0b5b755`
+(first summary), `37c6da2` (Task 3 closure). This revision is the fifth.
+
+On the honesty of the claims above: every row marked **Observed** corresponds to something
+someone or some check actually saw. The one inference in the Task 3 table — that a refresh
+cannot resubmit — is labelled as an inference and its mechanism is given, so a later reader
+can reject it if the mechanism turns out not to hold. The three residual risks are recorded
+as open in `.planning/WINDOWS.md` rather than described only here, so they survive this
+summary scrolling out of context and will block `/gsd-ship` until they are closed or
+deliberately waived. No claim is made that the files were linted, that autofill was tested,
+or that the failure path was exercised — none of those happened.
