@@ -848,6 +848,103 @@ textarea.field__control {
 	flex: 1 0 100%;
 }
 
+/* --- Photo upload control (CONTACT-05, UI-SPEC C-4) ----------------------
+   The native control STAYS NATIVE, styled through ::file-selector-button. The
+   visually-hidden-input-plus-styled-<label> pattern is forbidden here: it
+   routinely loses the focus ring, and base.css says the ring is never
+   suppressed. Keyboard and screen-reader behaviour are the browser's, and
+   nothing below can break them because nothing below is a re-implementation.
+
+   The button is the .btn--secondary treatment without the class, because the
+   pseudo-element cannot carry one. That is the one place in this file where a
+   duplicated declaration is unavoidable rather than lazy.
+
+   Selected by ATTRIBUTE, not by a new class and not by #photos: the control
+   carries no class on purpose (see contact-form.php), an id selector would
+   drag 100 points of specificity into a component file that has none
+   anywhere else, and this is the only file input in the project.           */
+input[type="file"]::file-selector-button {
+	min-height: 44px;
+	margin-inline-end: var(--sp-md);
+	padding: 0 var(--sp-md);
+	background: transparent;
+	border: 2px solid var(--c-ink-deep);
+	border-radius: var(--r-md);
+	color: var(--c-ink-deep);
+	font-weight: var(--fw-bold);
+	cursor: pointer;
+}
+
+/* The selected-file list, rendered by js/photo-resize.js and by nothing else.
+   With scripting off it never exists and the native control's own «3 files
+   selected» is the entire feedback — which is acceptable, because the server
+   tells the truth about what it accepted either way.                       */
+.filelist {
+	margin-block-start: var(--sp-md);
+	padding: 0;
+	list-style: none;
+}
+
+.filelist__row {
+	display: flex;
+	gap: var(--sp-md);
+	align-items: center;
+	padding-block: var(--sp-xs);
+}
+
+.filelist__thumb {
+	flex: none;
+	width: 48px;
+	height: 48px;
+	background: var(--c-surface-3);
+	border-radius: var(--r-sm);
+	object-fit: cover;
+}
+
+/* min-width: 0 IS THE WHOLE RULE. A flex child's default min-width is auto,
+   which refuses to shrink below its content — so a long filename pushes the
+   row wider than the viewport and produces the horizontal scroll this design
+   system treats as a defect. Ellipsis without this declaration does nothing. */
+.filelist__name {
+	flex: 1 1 auto;
+	min-width: 0;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+.filelist__size {
+	flex: none;
+	color: var(--c-ink-muted);
+}
+
+/* 44px of hit area for a control a thumb has to find between two others. The
+   accessible name is «Премахнете {име}», written by the script — never a bare
+   «×», which announces as "times" or as nothing at all.                    */
+.filelist__remove {
+	flex: none;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 44px;
+	height: 44px;
+	padding: 0;
+	background: transparent;
+	border: 0;
+	border-radius: var(--r-sm);
+	color: var(--c-ink-muted);
+	cursor: pointer;
+}
+
+.filelist__remove > svg {
+	width: 1.25em;
+	height: 1.25em;
+}
+
+.filelist__remove:hover {
+	color: var(--c-danger);
+}
+
 /* The honeypot (UI-SPEC C-6). OFF-VIEWPORT, never display:none and never
    inline — an inline style="display:none" on a form field is the single most
    recognisable trap signature in served markup, and this rule living in a
