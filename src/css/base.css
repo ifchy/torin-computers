@@ -260,9 +260,19 @@ p, li { max-width: var(--measure); }
 	border-radius: var(--r-sm);
 }
 
+/* .holiday-banner is the FOURTH dark surface (Phase 4, OWNER-02). It carries no
+   link today — its text is escaped settings content and deliberately not an
+   HTML sink — so this selector currently matches nothing, and it is added
+   anyway. The CR-02 defect below was caused by exactly this omission for
+   .callbar: the surface was introduced, the group was not updated, and the
+   consequence was invisible until someone pressed Tab. #ffd84d measures 11.09:1
+   on the banner's --c-ink-deepest fill. If the strip is ever given a
+   .btn--primary, it must ALSO be named in the (0,3,0) group further down — the
+   two groups are not interchangeable and neither covers for the other. */
 .hero :focus-visible,
 .site-footer :focus-visible,
-.callbar :focus-visible { outline-color: var(--c-focus-on-dark); }
+.callbar :focus-visible,
+.holiday-banner :focus-visible { outline-color: var(--c-focus-on-dark); }
 
 /* MECHANISM, not decoration. The ring is drawn with a 2px offset, so it is
    painted on the surface BEHIND the button — in that gap and outward — and

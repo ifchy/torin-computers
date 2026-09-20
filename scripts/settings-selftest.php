@@ -1,7 +1,14 @@
 <?php
 // scripts/settings-selftest.php — the executable form of plan 04-06 Task 1's
 // <behavior> block: ten assertions, one per bullet, in the order the plan
-// writes them.
+// writes them, followed by the derived helpers the rest of the plan rests on
+// and by Task 2's date gate.
+//
+// THE DATE GATE IS IN THIS FILE RATHER THAN A SECOND ONE because the banner's
+// visibility is a settings question wearing a rendering costume: the gate reads
+// two parsed values and a timezone that this file's subject sets. Splitting
+// them would let one be run without the other, and the auto-expiry boundary is
+// the single most likely thing in this plan to be off by one day.
 //
 // IT LIVES UNDER scripts/ AND NOT UNDER src/, DELIBERATELY. deploy-new.sh
 // uploads only files beneath src/ (scripts/deploy-new.sh:40 and :161), so
@@ -235,6 +242,73 @@ torin_t(
 		&& torin_settings_date_range('2026-12-28', '2027-01-05') === '28 декември 2026 – 5 януари 2027',
 	'got ' . torin_settings_date_range('2026-08-10', '2026-08-20')
 		. ' / ' . torin_settings_date_range('2026-12-28', '2027-01-05')
+);
+
+// ── The banner's date gate (Task 2, OWNER-02) ───────────────────────────────
+//
+// THE AUTO-EXPIRY PROOF. The plan says this must be run rather than reasoned
+// about, and the reason is that a date boundary is exactly the kind of thing
+// that reads correct and behaves off by one. The four cases below are the
+// boundary in full: off, inside, the last day, and the day after. They are
+// written against RELATIVE dates so the file does not start passing or failing
+// because of the calendar.
+
+require_once dirname(dirname(__FILE__)) . '/src/includes/banner.php';
+
+function torin_banner_html($from, $to, $message) {
+	$site = array(
+		'vacation_from'    => $from,
+		'vacation_to'      => $to,
+		'vacation_message' => $message
+	);
+	ob_start();
+	torin_render_banner($site);
+	return ob_get_clean();
+}
+
+$torin_yesterday = date('Y-m-d', strtotime('-1 day'));
+$torin_today     = date('Y-m-d');
+$torin_tomorrow  = date('Y-m-d', strtotime('+1 day'));
+$torin_lastweek  = date('Y-m-d', strtotime('-7 days'));
+
+torin_t(
+	'banner off by default emits NOTHING — not an empty element',
+	torin_banner_html('', '', 'Затворено.') === '',
+	'emitted ' . var_export(torin_banner_html('', '', 'Затворено.'), true)
+);
+
+$torin_current = torin_banner_html($torin_yesterday, $torin_tomorrow, 'Затворено за отпуск.');
+torin_t(
+	'a current closure renders the strip exactly once, with its message',
+	substr_count($torin_current, 'holiday-banner') === 2   // block + __inner
+		&& substr_count($torin_current, 'Затворено за отпуск.') === 1,
+	'emitted ' . $torin_current
+);
+
+torin_t(
+	'INCLUSIVE end: a closure ending TODAY still renders today',
+	strpos(torin_banner_html($torin_lastweek, $torin_today, 'Затворено.'), 'holiday-banner') !== false,
+	'nothing emitted on the end date itself'
+);
+
+torin_t(
+	'AUTO-EXPIRY: a closure that ended YESTERDAY emits nothing, with no second edit',
+	torin_banner_html($torin_lastweek, $torin_yesterday, 'Затворено.') === '',
+	'strip survived its end date'
+);
+
+torin_t(
+	'a closure that has not started yet emits nothing',
+	torin_banner_html($torin_tomorrow, $torin_tomorrow, 'Затворено.') === '',
+	'strip rendered ahead of its start date'
+);
+
+torin_t(
+	'the strip carries no script, no button and no storage',
+	strpos($torin_current, '<script') === false
+		&& strpos($torin_current, '<button') === false
+		&& strpos($torin_current, 'localStorage') === false,
+	'interactive or scripted content found in the strip'
 );
 
 // ── Result ──────────────────────────────────────────────────────────────────
