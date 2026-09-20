@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 17
+open_count: 22
 waived_count: 0
 fixed_count: 5
-total_count: 22
-last_updated: 2026-09-20T11:52:51.426Z
+total_count: 27
+last_updated: 2026-09-20T16:00:59.898Z
 ---
 
 # Broken Windows Ledger
@@ -37,6 +37,11 @@ last_updated: 2026-09-20T11:52:51.426Z
 | 20 | 04 | deviation | src/js/photo-resize.js |  | 04-03: photo-resize.js measures 2042 B gzipped against a 2048 B gate — SIX bytes of headroom. The UI-SPEC 2 KB budget and this tree's comment convention are in direct conflict for JS, because deploy-new.sh comment-strips CSS but not JS, so prose in a .js file is wire cost while prose in a .css file is free. The file's comments were cut to five to fit and the reasoning moved into 04-03-SUMMARY.md. The real fix is to route .js through scripts/lib/ a comment stripper in deploy-new.sh the same way CSS goes through strip-css-comments.py; until then the next comment added to this file breaks the gate. | open |  | 2026-09-20T11:52:35.755Z |  |
 | 21 | 04 | unrun-verify | src/includes/upload.php |  | 04-03: the WebP decode branch is unexercised. The form advertises accept=image/jpeg,image/png,image/webp and torin_normalise_upload() routes WebP through imagecreatefromwebp() behind a function_exists guard, but no WebP was ever submitted. GD's WebP decoder is a separate build option from ext-gd itself, which the probe measured; if it is absent, every WebP the picker happily offers is refused with 'файлът не е разпознат като снимка'. Either submit one WebP, or drop webp from the accept list so the copy stops advertising it. | open |  | 2026-09-20T11:52:43.288Z |  |
 | 22 | 04 | deviation | src/contact-send.php |  | 04-03: a refused photograph still costs the visitor their typed description. Per-file rejection reasons DO surface as a field-level error on the photo control (T-04-17, measured: 'Снимка 1: файлът не е разпознат като снимка' and 'Може да прикачите най-много 5 снимки, а са приложени 6'), but contact-send.php renders the 04-02 honest-failure page rather than re-rendering the form, so the device model and fault description are lost. torin_render_contact_form() already accepts and escapes $values; 04-05 owns wiring the re-render and should route the photos branch through it. | open |  | 2026-09-20T11:52:51.426Z |  |
+| 23 | 04 | unrun-verify | src/uslovia.html |  | 04-04: EVERY live gate in this plan is unrun — six of them, all blocked by one cause and all closed by one action. scripts/deploy-new.sh and php are both denied to subagents by the permission classifier, so neither a staging deploy nor a local PHP render was possible from the executor. The six: (1) homepage carries the new label 3x with zero PHP warnings; (2) no horizontal overflow at 360x640 plus the measured call-bar button width via scripts/render-check.sh scripts/probes/svc-page.js; (3) uslovia.html returns 200 with zero PHP warnings; (4) uslovia.html body is Cyrillic; (5) uslovia.html names the processor (grep Umami); (6) no new SEO metadata failure for uslovia via node scripts/seo-metadata-check.js --live. This is an environment boundary, not a defect, and is NOT a reason to treat these as passing. Deploy the seven named paths, then run all six. | open |  | 2026-09-20T16:00:35.305Z |  |
+| 24 | 04 | deviation | src/uslovia.html |  | 04-04: the analytics disclosure on uslovia.html names a processor the site does not yet load. grep -rn 'umami' src/ returns nothing — there is no js/analytics.js and no Umami script tag as of this plan. The disclosure is correct AT CUTOVER, when 04-07 wires the tracker, and inaccurate in the other direction until then. Staging carries X-Robots-Tag: noindex so nothing is publicly committed yet, and a boxed comment at the block states the coupling and says to DELETE the block if analytics is dropped. THIS BLOCK MUST NOT REACH PRODUCTION AHEAD OF THE TRACKER — 04-07 and 04-10 both need to honour that ordering. | open |  | 2026-09-20T16:00:42.305Z |  |
+| 25 | 04 | stub | src/uslovia.html |  | 04-04: the device-data commitment is ABSENT BY CHOICE. UI-SPEC S11 sketched a terms block covering what happens to a customer's data on a device left for repair; OWNER-QUESTIONS #27 is open, so no sentence was written — publishing a plausible-sounding commitment nobody agreed to is the exact failure mode threat T-04-18 names. Recorded in the page's header comment so the gap is visible to the next reader rather than silently missing. Needs the owner's answer, then a block written to match it. | open |  | 2026-09-20T16:00:48.141Z |  |
+| 26 | 04 | stub | src/remont-na-portove.html |  | 04-04: carried-forward ROADMAP item 3 residue is untouched, as plan 04-04 directed. The unconfirmed symptoms line on remont-na-portove.html and the three owner questions behind it are deliberately not closed here. Raise at the 04-04 Task 3 owner checkpoint (he is reading the legal pages anyway) and record the answers in OWNER_ANSWERS.md. | open |  | 2026-09-20T16:00:53.877Z |  |
+| 27 | 04 | deviation | src/warrently.html |  | 04-04: the warranty-term rider is still open and is a published contradiction. The battery warranty term stated on za-bateriite.html and the one-month general term on warrently.html disagree (OWNER-QUESTIONS #23). Not 04-04's to fix; folded into its Task 3 owner checkpoint because the owner is reading the legal pages anyway. Must be reconciled before cutover — two different warranty promises on one site is the kind of thing a customer quotes back at you. | open |  | 2026-09-20T16:00:59.898Z |  |
 
 ````json
 [
@@ -302,6 +307,66 @@ last_updated: 2026-09-20T11:52:51.426Z
     "status": "open",
     "reason": "",
     "recorded_at": "2026-09-20T11:52:51.426Z",
+    "resolved_at": null
+  },
+  {
+    "id": 23,
+    "kind": "unrun-verify",
+    "phase": "04",
+    "file": "src/uslovia.html",
+    "line": null,
+    "description": "04-04: EVERY live gate in this plan is unrun — six of them, all blocked by one cause and all closed by one action. scripts/deploy-new.sh and php are both denied to subagents by the permission classifier, so neither a staging deploy nor a local PHP render was possible from the executor. The six: (1) homepage carries the new label 3x with zero PHP warnings; (2) no horizontal overflow at 360x640 plus the measured call-bar button width via scripts/render-check.sh scripts/probes/svc-page.js; (3) uslovia.html returns 200 with zero PHP warnings; (4) uslovia.html body is Cyrillic; (5) uslovia.html names the processor (grep Umami); (6) no new SEO metadata failure for uslovia via node scripts/seo-metadata-check.js --live. This is an environment boundary, not a defect, and is NOT a reason to treat these as passing. Deploy the seven named paths, then run all six.",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-09-20T16:00:35.305Z",
+    "resolved_at": null
+  },
+  {
+    "id": 24,
+    "kind": "deviation",
+    "phase": "04",
+    "file": "src/uslovia.html",
+    "line": null,
+    "description": "04-04: the analytics disclosure on uslovia.html names a processor the site does not yet load. grep -rn 'umami' src/ returns nothing — there is no js/analytics.js and no Umami script tag as of this plan. The disclosure is correct AT CUTOVER, when 04-07 wires the tracker, and inaccurate in the other direction until then. Staging carries X-Robots-Tag: noindex so nothing is publicly committed yet, and a boxed comment at the block states the coupling and says to DELETE the block if analytics is dropped. THIS BLOCK MUST NOT REACH PRODUCTION AHEAD OF THE TRACKER — 04-07 and 04-10 both need to honour that ordering.",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-09-20T16:00:42.305Z",
+    "resolved_at": null
+  },
+  {
+    "id": 25,
+    "kind": "stub",
+    "phase": "04",
+    "file": "src/uslovia.html",
+    "line": null,
+    "description": "04-04: the device-data commitment is ABSENT BY CHOICE. UI-SPEC S11 sketched a terms block covering what happens to a customer's data on a device left for repair; OWNER-QUESTIONS #27 is open, so no sentence was written — publishing a plausible-sounding commitment nobody agreed to is the exact failure mode threat T-04-18 names. Recorded in the page's header comment so the gap is visible to the next reader rather than silently missing. Needs the owner's answer, then a block written to match it.",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-09-20T16:00:48.141Z",
+    "resolved_at": null
+  },
+  {
+    "id": 26,
+    "kind": "stub",
+    "phase": "04",
+    "file": "src/remont-na-portove.html",
+    "line": null,
+    "description": "04-04: carried-forward ROADMAP item 3 residue is untouched, as plan 04-04 directed. The unconfirmed symptoms line on remont-na-portove.html and the three owner questions behind it are deliberately not closed here. Raise at the 04-04 Task 3 owner checkpoint (he is reading the legal pages anyway) and record the answers in OWNER_ANSWERS.md.",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-09-20T16:00:53.877Z",
+    "resolved_at": null
+  },
+  {
+    "id": 27,
+    "kind": "deviation",
+    "phase": "04",
+    "file": "src/warrently.html",
+    "line": null,
+    "description": "04-04: the warranty-term rider is still open and is a published contradiction. The battery warranty term stated on za-bateriite.html and the one-month general term on warrently.html disagree (OWNER-QUESTIONS #23). Not 04-04's to fix; folded into its Task 3 owner checkpoint because the owner is reading the legal pages anyway. Must be reconciled before cutover — two different warranty promises on one site is the kind of thing a customer quotes back at you.",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-09-20T16:00:59.898Z",
     "resolved_at": null
   }
 ]
