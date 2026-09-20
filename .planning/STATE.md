@@ -6,14 +6,14 @@ current_phase: 04
 current_phase_name: hardening-cutover
 status: executing
 stopped_at: Phase 4 UI-SPEC approved
-last_updated: "2026-09-17T19:18:48.651Z"
-last_activity: 2026-09-17
-last_activity_desc: Phase 04 execution started
+last_updated: "2026-09-19T15:12:22.597Z"
+last_activity: 2026-09-19
+last_activity_desc: Phase 04 execution resumed (wave continue)
 progress:
   total_phases: 5
   completed_phases: 4
   total_plans: 40
-  completed_plans: 30
+  completed_plans: 31
 ---
 
 # Project State
@@ -34,7 +34,7 @@ Status: Executing Phase 04
 Next: **Phase 4 — Hardening & Cutover.** The gap-closure plan (03.5-08) that owned
 `src/remont-na-portove.html` is DONE, merged and live-verified. `scripts/truth-gate.js` was
 deliberately NOT amended — see F2 below; that remit carries forward, it is not a blocker.
-Last activity: 2026-09-17 — Phase 04 execution started
+Last activity: 2026-09-19 — Phase 04 execution resumed (wave continue)
         `03.5-TRUTH-AUDIT.md` completed
 
 Progress: [██████████] 100%
