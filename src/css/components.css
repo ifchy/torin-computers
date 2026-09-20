@@ -725,6 +725,78 @@ body:not(:has(.callbar)) {
 	color: var(--c-success-ink);
 }
 
+/* --- Holiday closure strip (OWNER-02, D4-27, UI-SPEC C-1) -----------------
+   Rendered by includes/banner.php, called once from header.php as the first
+   child of #wrap. Present only while a closure is current; when it is off the
+   partial emits nothing, so none of these rules has anything to match and the
+   page is exactly what it was.
+
+   NOT STICKY, and that is a decision rather than an omission. A strip that
+   cannot be dismissed and is also fixed takes a permanent bite out of the
+   mobile viewport on every page for as long as it exists. This one scrolls away
+   with the page; a visitor landing anywhere still sees it at the top, which is
+   the whole requirement.
+
+   THE GRID IS THE .notice GRID, COPIED VERBATIM (see the four declarations
+   above at .notice). Same single icon column, same track for the content, same
+   gap, same start alignment. Written out rather than shared through a common
+   class because the two components differ in every other respect — fill, ink,
+   keyline, placement, block padding — and a shared base class would have to be
+   overridden four times at each call site. What must not happen is the icon
+   column DRIFTING from the rest of the system; the numbers being identical and
+   adjacent is what makes a drift visible to the next reader.
+
+   THE KEYLINE IS AN INSET SHADOW, NEVER A BORDER. An amber border is forbidden
+   system-wide, and a border would also add to the strip's box height and change
+   the measured arithmetic below. The shadow paints inside the existing box.
+
+   ABOVE-THE-FOLD COST, STATED RATHER THAN GLOSSED. Phase 2's D-30 arithmetic
+   left 9.2px of margin on the homepage's first category card at 360x640, so ANY
+   banner consumes it. That is accepted for the duration of a closure — when the
+   shop is shut, the closure outranks the fold — and it is bounded instead: the
+   message is capped at 120 code points, which is five lines at 360px. The
+   measured height at that cap is recorded in 04-06-SUMMARY.md. Above 180px is
+   a defect, not a trade-off.                                                */
+.holiday-banner {
+	background: var(--c-ink-deepest);
+	color: var(--c-on-dark);
+	box-shadow: inset 0 -3px 0 var(--c-brand);
+}
+
+.holiday-banner__inner {
+	display: grid;
+	grid-template-columns: 1.25em 1fr;
+	gap: var(--sp-sm);
+	align-items: start;
+	padding-block: var(--sp-md);
+}
+
+.holiday-banner__inner > svg {
+	width: 1.25em;
+	height: 1.25em;
+	margin-block-start: .2em;
+}
+
+/* base.css caps paragraphs at 66ch for readable body copy. Left in place that
+   rule narrows the strip to roughly half the desktop width and makes a closure
+   notice read like an article opening rather than a banner. The margin reset is
+   for the same reason a .notice carries one: this p is the strip's only child
+   and its block margin would show as dead space inside the fill. */
+.holiday-banner p {
+	max-width: none;
+	margin-block: 0;
+}
+
+/* The dates, not the sentence, are what a visitor needs off this strip, so they
+   take the bold weight and the full-strength white (15.35:1) rather than the
+   muted on-dark ink. Declared explicitly because base.css's strong rule is the
+   site-wide one and this is the one place the emphasis is doing navigational
+   work rather than prose work. */
+.holiday-banner strong {
+	font-weight: var(--fw-bold);
+	color: var(--c-on-dark);
+}
+
 /* --- Contact form (CONTACT-03/05/06) ------------------------------------
    UI-SPEC C-3 (form, field anatomy, control styling), C-5 (consent row),
    C-6 (honeypot). Rendered by includes/contact-form.php, which is the one

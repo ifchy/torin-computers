@@ -9,6 +9,16 @@
 // customers to a closed shop, sixteen pages and one search engine at once. Do
 // not quote them back as confirmed fact, and do not drop a marker until its
 // OWNER-QUESTIONS item is answered.
+//
+// SOME VALUES BELOW ARE NOW DEFAULTS RATHER THAN THE LAST WORD (OWNER-01,
+// D4-23). The six settings keys near the bottom of the array are overridden, one
+// key at a time, by the plain-text file the owner edits in the control panel.
+// The literals here are what the site renders when that file is absent, which is
+// the shipped state — so this file is still the thing that decides what a page
+// says, it is simply no longer the only thing that can. Read includes/settings.php
+// before changing any of them; the merge that applies them runs below the array.
+require_once(dirname(__FILE__) . '/settings.php');
+
 $site = array(
 	// Three separate numbers, never one joined string: each renders its own
 	// tel: link, so the footer works identically for one number or five. No
@@ -53,13 +63,40 @@ $site = array(
 	'geo_lat' => '42.68856',
 	'geo_lng' => '23.30806',
 
-	// [ASSUMED] OWNER-QUESTIONS #20. The live site states two different sets of
-	// hours across three sources (02-RESEARCH N-3): index.html and about.html
-	// say 8:00-16:00, profilaktika-laptop.html says 9:00-17:00, and the banner
-	// labelled «НОВО» says 8:00-16:00. The two-of-three majority is the interim
-	// value. It is also hard-coded into jsonld.php's opening hours — change
-	// BOTH when the owner answers.
-	'hours' => 'Понеделник – Петък, 8:00 – 16:00',
+	// ANSWERED 2026-09-17 (OWNER-QUESTIONS #20, recorded as CONTEXT D4-25):
+	// Monday to Friday, 8:00 to 16:00, no lunch break, closed Saturday and
+	// Sunday. The [ASSUMED] marker that stood here is gone because the question
+	// behind it was answered, not because a marker was tidied away — the live
+	// site had stated two different sets of hours across three pages and the
+	// interim value here was a two-of-three majority.
+	//
+	// The «change BOTH» instruction that stood beside it is gone too, and that
+	// is the substantive half of this edit. There is no second copy to change:
+	// jsonld.php read a hard-coded clock literal and the footer's notice band
+	// read a third hand-typed string, so the site could tell a search engine one
+	// thing, its own footer band another, and its footer hours line a third.
+	// Both derived values are now COMPOSED below from the three keys here.
+	//
+	// These three are the first of the six keys the owner's settings.txt can
+	// override. They are stored in machine form — zero-padded 24-hour clock and
+	// a fixed day token — because the structured data needs exactly that; every
+	// human-readable form is derived below and none of them is typed anywhere.
+	'hours_open'  => '08:00',
+	'hours_close' => '16:00',
+	'hours_days'  => 'Mo-Fr',
+
+	// The holiday-closure band (OWNER-02, D4-27). OFF by default and off as
+	// shipped: an empty start date emits nothing at all — not an empty element,
+	// not a collapsed container — so every page is unchanged until the owner
+	// schedules a closure. It then expires by itself the day after the end date,
+	// which was his explicit requirement rather than merely an off switch.
+	//
+	// The message is the compiled-in fallback and is deliberately generic: it is
+	// what renders if the owner sets dates but mistypes the message line. It is
+	// NOT a claim that the shop is closed — the dates alone decide that.
+	'vacation_from'    => '',
+	'vacation_to'      => '',
+	'vacation_message' => 'Сервизът е в годишен отпуск. Приемаме заявки по телефона.',
 
 	// A chat-app deep-link key lived here until 04-04 (D4-17), together with
 	// roughly a hundred lines recording why it never worked. It is GONE, not
@@ -275,8 +312,106 @@ $site = array(
 	// [ASSUMED] OWNER-QUESTIONS #8 asks whether the legacy otpuska.js
 	// holiday/hours banner should survive at all. It carried genuine content
 	// rather than decoration, so the safe default preserves an equivalent as
-	// static PHP-rendered content instead of dropping it. Set this to an empty
-	// string and the band disappears with no other edit.
-	'notice' => 'Работно време: понеделник – петък, 8:00 – 16:00 ч.',
+	// static PHP-rendered content instead of dropping it.
+	//
+	// THE MARKER STAYS, AND IT IS NARROWER THAN IT WAS. What is still
+	// unconfirmed is whether this band should EXIST — #8 has no answer. Its
+	// CONTENT is no longer unconfirmed: the string is composed below from the
+	// owner-confirmed hours (D4-25) instead of being hand-typed, which is what
+	// made it the third undetected copy of the working hours (UI-SPEC
+	// §Conflicts C-4). Do not read the composition as an answer to #8, and do
+	// not drop this marker until #8 itself is answered — every other marker in
+	// this file closes on its own owner answer and none may be promoted because
+	// it looked settled.
+	//
+	// The literal below is a PLACEHOLDER that is overwritten a few lines further
+	// down, unconditionally. It is not the rendered value and editing it changes
+	// nothing; set it to an empty string there, in the composition, to remove
+	// the band.
+	'notice' => '',
 );
+
+// ── The owner's settings file, merged one key at a time (OWNER-01, D4-23) ────
+//
+// settings.txt sits beside index.html rather than outside the document root,
+// because the whole point is that the owner reaches it in the control panel's
+// file manager without being told a server path. It is DENIED over HTTP in
+// src/.htaccess; that deny block and this path are a pair, and moving either
+// without the other publishes the file.
+//
+// THE PATH IS COMPUTED, NEVER HARD-CODED. includes/ is a direct child of the
+// site root on staging and will be again at the root cutover, so this resolves
+// correctly in both without an edit — which is one fewer thing for the cutover
+// checklist to miss.
+//
+// THE EXAMPLE FILE SHIPS; THE REAL FILE NEVER DOES. A no-argument deploy uploads
+// everything beneath src/, so a settings.txt committed here would overwrite
+// whatever the owner had typed on the server, on every deploy, silently
+// (T-04-34). src/settings.txt must not exist in this repository. The parser
+// treats an absent file as a non-error precisely so that shipping only the
+// example is safe.
+$site['settings_path'] = dirname(dirname(__FILE__)) . '/settings.txt';
+
+// The six keys the owner may override, and the ONLY six. A key absent from this
+// list cannot be set from settings.txt even if the parser accepted it.
+$torin_settings_managed = array(
+	'hours_open', 'hours_close', 'hours_days',
+	'vacation_from', 'vacation_to', 'vacation_message'
+);
+
+$torin_settings_read = torin_read_settings($site['settings_path']);
+
+// PER-KEY, in a loop, with the fallen-back keys recorded rather than merely
+// tolerated. A value the owner's file did not supply — because the file is
+// absent, or because that one line was malformed — leaves the literal above in
+// place and its name in this list. footer.php emits the list as an HTML comment
+// so a remote check can assert zero UNEXPECTED fallbacks; see the sentinel
+// argument in includes/settings.php's header. With no settings.txt on the
+// server every key is listed here, and that is the correct reading of the
+// shipped state rather than an alarm.
+$site['settings_fallbacks'] = array();
+foreach ($torin_settings_managed as $torin_settings_key) {
+	if (isset($torin_settings_read[$torin_settings_key])) {
+		$site[$torin_settings_key] = $torin_settings_read[$torin_settings_key];
+	} else {
+		$site['settings_fallbacks'][] = $torin_settings_key;
+	}
+}
+
+// ── Everything below is DERIVED. Nothing here may be hand-edited into a literal.
+//
+// This block is the whole of D4-26. The working hours are written once, in
+// machine form, and every human-readable and machine-readable consumer is
+// composed from that one value: the footer's hours line, the footer's notice
+// band, the contact page's hours line and the structured data Google reads. The
+// owner cannot change one and leave another behind, because there is no other to
+// leave behind.
+$torin_days = torin_settings_days($site['hours_days']);
+
+$site['hours_days_bg']       = $torin_days['bg'];
+$site['hours_days_open']     = $torin_days['open'];
+$site['hours_days_closed']   = $torin_days['closed'];
+$site['hours_open_display']  = torin_hours_display($site['hours_open']);
+$site['hours_close_display'] = torin_hours_display($site['hours_close']);
+
+// «Понеделник – Петък, 8:00 – 16:00» — the exact shape this site has rendered
+// since Phase 2, now assembled rather than typed. The en dash with spaces is the
+// site's existing convention and is used in both positions.
+$site['hours'] = $torin_days['bg'] . ', '
+	. $site['hours_open_display'] . ' – ' . $site['hours_close_display'];
+
+// The footer band. Set this to '' to remove it with no other edit — that switch
+// survives the composition and is the same one the [ASSUMED] note above
+// describes.
+$site['notice'] = 'Работно време: ' . $torin_days['bg_lower'] . ', '
+	. $site['hours_open_display'] . ' – ' . $site['hours_close_display'] . ' ч.';
+
+// Every page on the site includes this file, so each of the four names above is
+// squatted in that page's GLOBAL scope. That is not a theoretical tidiness
+// point here: header.php:33-41 records a live defect where exactly this
+// happened, four Phase 3 pages lost their own $page array to an include's
+// assignment, and every affected page still returned HTTP 200 while rendering a
+// single letter where its prose belonged. Nothing outside this block needs these
+// four, so they do not survive it.
+unset($torin_settings_managed, $torin_settings_read, $torin_settings_key, $torin_days);
 ?>

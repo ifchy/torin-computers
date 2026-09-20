@@ -11,24 +11,106 @@
 // repair-specific type — and the general LocalBusiness type rides alongside for
 // consumers that do not know the subtype (02-RESEARCH N-2).
 //
-// THE JSON IS ENCODED, NEVER HAND-WRITTEN. Two facts about this host's PHP
-// 5.2.17 build govern that choice:
+// THE JSON IS ENCODED, NEVER HAND-WRITTEN. Two properties of the encoder govern
+// that choice:
 //
-//   * The 5.4-era flag that would leave Unicode unescaped does not exist here,
-//     so Cyrillic is emitted as \uXXXX escapes. That is VALID JSON and Google
+//   * Cyrillic is emitted as \uXXXX escapes. That is VALID JSON and Google
 //     parses it correctly. Do NOT "fix" the escapes by writing the JSON by hand.
-//   * The 5.4-era flag that would leave forward slashes unescaped does not
-//     exist here either, and that absence is a SAFETY BENEFIT: this build always
-//     escapes "/", so a literal closing script tag inside any string can never
-//     terminate the block below early (T-02-11). A future PHP upgrade REMOVES
-//     that protection — whoever performs one must re-check this file.
+//   * Forward slashes are escaped, so a literal closing script tag inside any
+//     string can never terminate the block below early (T-02-11).
 //
-// (Neither flag is spelled out above on purpose: a plan-level grep asserts that
-// no 5.4+ JSON constant appears in this file, and naming them would defeat it.)
+// THE RUNTIME UPGRADE RE-CHECK, PERFORMED AND RECORDED (D4-01, plan 04-06).
+// This paragraph used to say that both behaviours came from the 5.2 build
+// lacking the 5.4-era flags, and that a PHP upgrade would REMOVE the slash
+// protection. The upgrade happened in 04-01 — this tree now runs 8.5 — and the
+// warning was discharged by MEASURING the served page rather than reasoning
+// about it. Result, read off https://torin.bg/new/index.html on 2026-09-20: the
+// block parses as valid JSON, carries 13 escaped forward slashes and ZERO bare
+// ones, and carries 45 Unicode escapes with no raw Cyrillic. Both behaviours are
+// unchanged. Nothing in this file needed a code change, and none was made.
+//
+// BUT THE GUARANTEE IS WEAKER THAN IT WAS, AND THAT IS THE PART WORTH KEEPING.
+// Under 5.2 the escaping was STRUCTURAL: the flag that switches it off did not
+// exist, so it could not be switched off. Under 8.5 it is a DEFAULT, and the
+// flag exists. The protection now depends on nobody passing a second argument to
+// the encoder below. So: NO ENCODING FLAG MAY BE PASSED HERE, ever, and in
+// particular not the one that leaves slashes bare — it would silently re-open
+// T-02-11. The plan-level grep asserting that no 5.4+ JSON constant appears in
+// this file is no longer a stylistic rule about a runtime that cannot use them;
+// it is the control. (The constants are still not spelled out above, for the
+// same reason as before: naming one would defeat that grep.)
 //
 // dayOfWeek values are English schema.org enums even on a Bulgarian page. They
 // are identifiers, not copy — do not translate them.
 require_once(dirname(__FILE__) . '/site-config.php');
+
+// ── Opening hours (D4-26, D4-27, research P-13) ─────────────────────────────
+//
+// Read from the single-sourced settings keys. They used to be a hard-coded
+// clock literal here, which meant the hours a search engine publishes and the
+// hours the site's own footer shows could drift apart silently — nobody reading
+// either one alone would see it, and the cost of being wrong is a customer
+// standing at a locked door. The reason the values are stored in machine form
+// rather than parsed back out of the Bulgarian display string lives beside them
+// in site-config.php and is deliberately not restated here: an explanation kept
+// in two places is the same defect as a value kept in two places.
+//
+// THE CLOSED DAYS ARE STATED, NOT INFERRED. schema.org does support reading an
+// absent day as closed — "the place is open if the opens property is specified,
+// and closed otherwise" — and the phase decision rested on that reading. But
+// Google's own documentation takes a different route: its guidance says to show
+// a business closed all day by setting opens and closes both to midnight, and
+// its worked example lists the closed day explicitly. Nowhere does it state
+// that omission means anything. Two extra array entries buy certainty on the
+// one value on this site where an inference sends a real person to a shut shop.
+//
+// The owner's decision is untouched by this: the weekend closure is still
+// stated in NEITHER rendered place. This is only about the JSON.
+$torin_hours = array(
+	array(
+		'@type'     => 'OpeningHoursSpecification',
+		'dayOfWeek' => $site['hours_days_open'],
+		'opens'     => $site['hours_open'],
+		'closes'    => $site['hours_close']
+	)
+);
+
+foreach ($site['hours_days_closed'] as $torin_closed_day) {
+	$torin_hours[] = array(
+		'@type'     => 'OpeningHoursSpecification',
+		'dayOfWeek' => $torin_closed_day,
+		'opens'     => '00:00',
+		'closes'    => '00:00'
+	);
+}
+
+// The scheduled closure, appended conditionally — the same idiom the sameAs
+// property below uses, and for the same reason: a property that would carry
+// nothing is omitted rather than emitted empty.
+//
+// This is Google's own seasonal shape. It carries NO dayOfWeek, and it lives in
+// the ordinary opening-hours property rather than the special one schema.org
+// defines for exceptions — because the special one does not appear in Google's
+// own example, and matching the documented shape is the whole point of the
+// paragraph above.
+//
+// THE CONDITION IS DELIBERATELY WIDER THAN THE BANNER'S. The strip in
+// includes/banner.php renders only while a closure is CURRENT, so that a
+// visitor never reads «Затворено» about a week that has not arrived. Here the
+// period is published as soon as it is scheduled and until it has passed,
+// because the entry declares its own validity window — a search engine is told
+// when the closure is, not that it is now. The two are not in conflict; they are
+// the same two dates addressed to readers who need different things.
+if ($site['vacation_from'] !== '' && $site['vacation_to'] !== ''
+	&& date('Y-m-d') <= $site['vacation_to']) {
+	$torin_hours[] = array(
+		'@type'        => 'OpeningHoursSpecification',
+		'opens'        => '00:00',
+		'closes'       => '00:00',
+		'validFrom'    => $site['vacation_from'],
+		'validThrough' => $site['vacation_to']
+	);
+}
 
 $torin_ld = array(
 	'@context'  => 'https://schema.org',
@@ -59,16 +141,9 @@ $torin_ld = array(
 		'latitude'  => $site['geo_lat'],
 		'longitude' => $site['geo_lng']
 	),
-	// [ASSUMED] These hours are the unconfirmed two-of-three majority — see
-	// site-config.php and OWNER-QUESTIONS #20. This is the copy Google acts on.
-	'openingHoursSpecification' => array(
-		array(
-			'@type'     => 'OpeningHoursSpecification',
-			'dayOfWeek' => array('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'),
-			'opens'     => '08:00',
-			'closes'    => '16:00'
-		)
-	)
+	// Built above, from the single-sourced settings keys plus the scheduled
+	// closure. There is no literal here to fall out of step with the page.
+	'openingHoursSpecification' => $torin_hours
 );
 
 // TRUST-02, structured half. sameAs points at the shop's own Google Business

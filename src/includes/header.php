@@ -22,6 +22,12 @@ require_once(dirname(__FILE__) . '/categories.php');
 // Required HERE, before the dev-only theme switcher partial is included below,
 // because that partial calls torin_asset_url() too and relies on this scope.
 require_once(dirname(__FILE__) . '/asset-version.php');
+// The holiday/closure strip (OWNER-02, D4-27). Required here and CALLED ONCE
+// below, as the first child of the page wrapper — the shared-layout rule means
+// every page gets it or no page does, and a second call site anywhere would
+// render two strips on whichever page carried it. It emits nothing while no
+// closure is scheduled, which is the shipped state.
+require_once(dirname(__FILE__) . '/banner.php');
 
 // Current-page detection for aria-current. SCRIPT_NAME is the ONLY acceptable
 // source here: the other self-referencing server variable appends
@@ -193,6 +199,7 @@ if (file_exists($torin_dev_switcher)) { torin_render_theme_switcher($torin_theme
 ?>
 
 <div id="wrap">
+<?php torin_render_banner($site); ?>
 
 	<header class="site-header">
 		<div class="container site-header__inner">

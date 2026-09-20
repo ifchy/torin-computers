@@ -21,8 +21,16 @@ require_once(dirname(__FILE__) . '/icons.php');
 			// Static, PHP-rendered replacement for the legacy otpuska.js banner.
 			// That script was 550 bytes of dependency-free vanilla JS carrying
 			// genuine content rather than decoration, so the safe default is to
-			// preserve an equivalent as content (OWNER-QUESTIONS #8). Emptying
-			// the config value removes the band with no other edit.
+			// preserve an equivalent as content (OWNER-QUESTIONS #8).
+			//
+			// The string is now COMPOSED in site-config.php from the same
+			// settings keys the hours line below renders and jsonld.php
+			// publishes (D4-26). It was the THIRD hand-typed copy of the
+			// working hours and nothing connected it to the other two, so the
+			// owner could have changed his hours and left this band saying
+			// something else on nineteen pages. Emptying the band is still one
+			// edit with no other consequence — it is the composition in
+			// site-config.php that gets emptied, not a literal here.
 			if ($site['notice'] !== '') { ?>
 			<p class="notice notice--info"><?php echo torin_icon('clock'); ?><span><?php echo htmlspecialchars($site['notice'], ENT_QUOTES, 'UTF-8'); ?></span></p>
 <?php		} ?>
@@ -119,6 +127,33 @@ require_once(dirname(__FILE__) . '/icons.php');
 	// $site (D-34). Included here rather than in header.php purely so that all
 	// 16 pages get it from the file they already share.
 	include(dirname(__FILE__) . '/jsonld.php');
+
+	// ── The settings sentinel (OWNER-01, D4-23) ─────────────────────────────
+	//
+	// WHY A PAGE EMITS THIS AT ALL. includes/settings.php falls back per key
+	// when the owner's settings.txt is absent or a line in it is malformed, and
+	// a fallback renders IDENTICALLY to a success — that is the entire design
+	// goal, and it is also what makes a silent one undetectable. This line is
+	// the same answer asset-version.php gives with its ?v=0 token: make the
+	// degraded state visible in the served page so a remote check can assert
+	// against it, rather than hoping someone notices the hours are last
+	// month's.
+	//
+	// HOW TO READ IT. `fallback=none` means every managed key came from the
+	// owner's file. A list of names means those keys came from the literals in
+	// site-config.php. With NO settings.txt on the server every key is listed,
+	// and that is the shipped state and not a fault — the interesting case is a
+	// SHORT list, which means the file exists and one line in it is wrong.
+	//
+	// It carries key NAMES only, never values, so it discloses nothing the
+	// rendered page does not already say out loud. It is a comment rather than
+	// an attribute or a header so that it survives a plain curl, costs nothing
+	// to the layout, and cannot be styled or scripted against by accident.
+	$torin_fb = isset($site['settings_fallbacks']) ? $site['settings_fallbacks'] : array();
+	echo "\n" . '<!-- torin-settings: fallback='
+		. (count($torin_fb) > 0 ? implode(',', $torin_fb) : 'none')
+		. ' -->';
+	unset($torin_fb);
 ?>
 
 </div><!-- /#wrap -->

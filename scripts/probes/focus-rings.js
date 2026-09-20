@@ -30,7 +30,15 @@ async function run(session, cdp, opts) {
 				return { text: (el.textContent || '').trim().slice(0, 30), cls: String(el.className).slice(0, 40), ring: null, noRing: true };
 			}
 			// Which surface is this control sitting on?
-			const onDark = !!el.closest('.hero, .site-footer, .callbar');
+			//
+			// .holiday-banner joined this list in Phase 4 (OWNER-02). It is the
+			// fourth dark surface, and the reason it is added here at the same
+			// time as the base.css rule is that a probe which does not know
+			// about a surface does not merely miss it — it reports a ring on
+			// that surface as though it were on the white page, and a
+			// too-light-for-dark ring would come back PASS. That is the same
+			// shape of silent wrong answer as CR-02 itself.
+			const onDark = !!el.closest('.hero, .site-footer, .callbar, .holiday-banner');
 			const darkTokens = {
 				'--c-ink-deep': __tokenRgb('--c-ink-deep'),
 				'--c-ink-deep-2': __tokenRgb('--c-ink-deep-2'),
