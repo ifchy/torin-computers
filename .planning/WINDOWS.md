@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 22
+open_count: 27
 waived_count: 0
-fixed_count: 5
-total_count: 27
-last_updated: 2026-09-20T16:00:59.898Z
+fixed_count: 6
+total_count: 33
+last_updated: 2026-09-20T16:29:03.826Z
 ---
 
 # Broken Windows Ledger
@@ -17,7 +17,7 @@ last_updated: 2026-09-20T16:00:59.898Z
 |----|-------|------|------|------|-------------|--------|--------|-------------|-------------|
 | 1 | 02 | stub | src/includes/category-page.php |  | Six template slots (intro, warranty/TRUST-03, process, FAQ, related, prices) render nothing on all three category pages — content is Phase 3 per D-25 | open |  | 2026-08-06T03:41:56.147Z |  |
 | 2 | 02 | stub | src/index.html |  | DIFF-02 (battery regeneration) ships inside a collapsed disclosure — knowingly unmet, must not pass silently in Phase 3 verification (D-13 / OWNER-QUESTIONS #9) | open |  | 2026-08-06T03:41:56.205Z |  |
-| 3 | 02 | stub | src/includes/site-config.php |  | hours, viber and notice are [ASSUMED] — OWNER-QUESTIONS #20/#21/#8 block the Phase 4 cutover | open |  | 2026-08-06T03:41:56.265Z |  |
+| 3 | 02 | stub | src/includes/site-config.php |  | hours, viber and notice are [ASSUMED] — OWNER-QUESTIONS #20/#21/#8 block the Phase 4 cutover | fixed |  | 2026-08-06T03:41:56.265Z | 2026-09-20T16:29:03.826Z |
 | 4 | 02 | stub | src/js/site.js |  | JS-disabled nav gap: with script blocked the six category links are unreachable from the nav; mitigated by the homepage card grid, accepted not solved | fixed |  | 2026-08-06T03:41:56.325Z | 2026-08-06T20:55:27.306Z |
 | 5 | 02 | unrun-verify | src/css/components.css |  | Hero stack height at 360x640 not re-measured after the CR-01 badge-margin fix: no Chrome/Chromium/Playwright on the build machine and Safari remote automation is disabled, so the comment records 241.6px as DERIVED (249.6 minus the 8px margin delta), not measured | fixed |  | 2026-08-06T13:58:23.175Z | 2026-08-06T20:55:13.586Z |
 | 6 | 02 | unrun-verify | src/css/base.css |  | Keyboard focus-ring human-check (six dark-surface CTAs, both themes, plus the light-surface CTA staying navy) not observed in a browser — ratios are computed, the rendered ring is not yet seen | fixed |  | 2026-08-06T13:58:23.244Z | 2026-08-06T20:55:27.370Z |
@@ -42,6 +42,12 @@ last_updated: 2026-09-20T16:00:59.898Z
 | 25 | 04 | stub | src/uslovia.html |  | 04-04: the device-data commitment is ABSENT BY CHOICE. UI-SPEC S11 sketched a terms block covering what happens to a customer's data on a device left for repair; OWNER-QUESTIONS #27 is open, so no sentence was written — publishing a plausible-sounding commitment nobody agreed to is the exact failure mode threat T-04-18 names. Recorded in the page's header comment so the gap is visible to the next reader rather than silently missing. Needs the owner's answer, then a block written to match it. | open |  | 2026-09-20T16:00:48.141Z |  |
 | 26 | 04 | stub | src/remont-na-portove.html |  | 04-04: carried-forward ROADMAP item 3 residue is untouched, as plan 04-04 directed. The unconfirmed symptoms line on remont-na-portove.html and the three owner questions behind it are deliberately not closed here. Raise at the 04-04 Task 3 owner checkpoint (he is reading the legal pages anyway) and record the answers in OWNER_ANSWERS.md. | open |  | 2026-09-20T16:00:53.877Z |  |
 | 27 | 04 | deviation | src/warrently.html |  | 04-04: the warranty-term rider is still open and is a published contradiction. The battery warranty term stated on za-bateriite.html and the one-month general term on warrently.html disagree (OWNER-QUESTIONS #23). Not 04-04's to fix; folded into its Task 3 owner checkpoint because the owner is reading the legal pages anyway. Must be reconciled before cutover — two different warranty promises on one site is the kind of thing a customer quotes back at you. | open |  | 2026-09-20T16:00:59.898Z |  |
+| 28 | 04 | unrun-verify | src/includes/settings.php |  | 04-06 (G1): EVERY live gate in this plan is unrun — same single cause as ledger entry 23, closed by the same single action. deploy-new.sh is denied to subagents (confirmed with the TORIN_CRED_FILE worktree override in place) and no php binary exists on the build machine; the orchestrator independently confirmed 'command -v php' is empty and no Docker daemon is running, so this is an absent runtime, not just a permission denial. Nothing in this plan reached the server. The six unrun gates: (1) a deliberately corrupted settings.txt on staging leaving all 20 pages at HTTP 200 with zero warnings, the corrupted key on its default and EVERY OTHER KEY still applied, both served bodies recorded; (2) settings.txt, .user.ini and php.fcgi each returning 403 or 404 over HTTP — the deny block is written and module-guarded but has never been exercised against a live Apache, and an .htaccess mistake in this tree has historically been a whole-subtree 500; (3) zero PHP warnings across the 20 served pages after the site-config.php / jsonld.php / footer.php changes; (4) banner absent by default on the served homepage, present exactly once on two pages with a current closure, gone with an expired one, present on its end date; (5) the one-edit-three-locations proof, with after values to pair with the recorded before values; (6) three/four/three openingHoursSpecification entries on the served page. | open |  | 2026-09-20T16:28:18.395Z |  |
+| 29 | 04 | unrun-verify | scripts/settings-selftest.php |  | 04-06 (G2): scripts/settings-selftest.php has NEVER BEEN EXECUTED, in either direction. 22 assertions covering the behaviour block, the date gate and the structured-data entry counts, authored against a machine with no PHP and no running Docker daemon — exactly as scripts/upload-selftest.php was in 04-03 (ledger entry 19). A test that has never run is a specification, not a gate. Run 'php scripts/settings-selftest.php' the moment a PHP runtime exists; it is the fastest way to close most of G1's logic half without a deploy. | open |  | 2026-09-20T16:28:24.222Z |  |
+| 30 | 04 | unrun-verify | src/includes/settings.php |  | 04-06 (G3) — HIGHEST-PRIORITY PRE-DEPLOY ACTION: no PHP file in this plan has been syntax-checked. 'php -l' was unavailable (orchestrator re-confirmed: no php binary, no Docker daemon). FIVE files gained or changed PHP — settings.php, banner.php, site-config.php, jsonld.php, footer.php — and a parse error in any one of them takes down all twenty pages at once, which is the precise failure mode this plan exists to prevent, arriving from the other direction. Run 'php -l' on all five before or immediately after the first deploy, and DEPLOY THEM TOGETHER rather than one at a time: these files include each other, so a partial upload can leave the site referencing a function that has not landed yet. | open |  | 2026-09-20T16:28:30.651Z |  |
+| 31 | 04 | deviation | src/includes/banner.php |  | 04-06 (G4) — OPEN OWNER QUESTION created by this plan. The closure strip does not appear until the closure actually starts (Decisions #3). The UI contract's phrasing would have shown it from the moment the dates were set, i.e. as advance notice. One comparison either way and it should be the owner's call, but he has not been asked. Raise at the 04-10 owner checkpoint. Two related plan deviations argued in 04-06-SUMMARY rather than quietly applied: hours_days is an allowlisted token rather than free text bounded at 20 chars (the plan's own headline truth is unreachable otherwise), and the banner message cap is 120 code points rather than 300 characters (the 180px backstop is arithmetically unmeetable at 300). | open |  | 2026-09-20T16:28:37.121Z |  |
+| 32 | 04 | unrun-verify | src/settings.txt.example |  | 04-06 (G6): the cPanel File Manager round-trip has NEVER BEEN PERFORMED. The Bulgarian guide (docs/naruchnik-nastroyki.md) tells the owner to copy settings.txt.example, rename it, and edit it in cPanel with UTF-8 encoding — nobody has done this even once. The realistic failure is the panel's editor writing a BOM or a non-UTF-8 encoding; the parser rejects non-UTF-8 values per-key so the failure mode is SAFE, but it would be SILENT: the owner sees his edit ignored with no explanation. One human performing the procedure once, with the guide open, closes both this and the D5 human-judgment item. | open |  | 2026-09-20T16:28:42.942Z |  |
+| 33 | 04 | stub | src/includes/site-config.php |  | 04-06 (G5) — NARROWS AND SUPERSEDES LEDGER ENTRY 3. Entry 3 covered three [ASSUMED] markers in site-config.php: hours, viber and notice. TWO ARE NOW RESOLVED — hours is closed by D4-25 and plan 04-06 (one source, four consumers); viber was removed in 04-04 when the chat button was retired from all five CTA slots. ONE REMAINS: the 'notice' marker. OWNER-QUESTIONS #8 asks whether the footer band should exist at all and still has no answer. Its CONTENT is no longer unconfirmed — it is composed from the confirmed hours — but the EXISTENCE question is untouched, and 04-06 deliberately left the marker in place rather than promoting it because it merely looked settled. This narrowed entry is the live one; entry 3 is marked fixed and should be read as superseded by this. | open |  | 2026-09-20T16:29:00.052Z |  |
 
 ````json
 [
@@ -76,10 +82,10 @@ last_updated: 2026-09-20T16:00:59.898Z
     "file": "src/includes/site-config.php",
     "line": null,
     "description": "hours, viber and notice are [ASSUMED] — OWNER-QUESTIONS #20/#21/#8 block the Phase 4 cutover",
-    "status": "open",
+    "status": "fixed",
     "reason": "",
     "recorded_at": "2026-08-06T03:41:56.265Z",
-    "resolved_at": null
+    "resolved_at": "2026-09-20T16:29:03.826Z"
   },
   {
     "id": 4,
@@ -367,6 +373,78 @@ last_updated: 2026-09-20T16:00:59.898Z
     "status": "open",
     "reason": "",
     "recorded_at": "2026-09-20T16:00:59.898Z",
+    "resolved_at": null
+  },
+  {
+    "id": 28,
+    "kind": "unrun-verify",
+    "phase": "04",
+    "file": "src/includes/settings.php",
+    "line": null,
+    "description": "04-06 (G1): EVERY live gate in this plan is unrun — same single cause as ledger entry 23, closed by the same single action. deploy-new.sh is denied to subagents (confirmed with the TORIN_CRED_FILE worktree override in place) and no php binary exists on the build machine; the orchestrator independently confirmed 'command -v php' is empty and no Docker daemon is running, so this is an absent runtime, not just a permission denial. Nothing in this plan reached the server. The six unrun gates: (1) a deliberately corrupted settings.txt on staging leaving all 20 pages at HTTP 200 with zero warnings, the corrupted key on its default and EVERY OTHER KEY still applied, both served bodies recorded; (2) settings.txt, .user.ini and php.fcgi each returning 403 or 404 over HTTP — the deny block is written and module-guarded but has never been exercised against a live Apache, and an .htaccess mistake in this tree has historically been a whole-subtree 500; (3) zero PHP warnings across the 20 served pages after the site-config.php / jsonld.php / footer.php changes; (4) banner absent by default on the served homepage, present exactly once on two pages with a current closure, gone with an expired one, present on its end date; (5) the one-edit-three-locations proof, with after values to pair with the recorded before values; (6) three/four/three openingHoursSpecification entries on the served page.",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-09-20T16:28:18.395Z",
+    "resolved_at": null
+  },
+  {
+    "id": 29,
+    "kind": "unrun-verify",
+    "phase": "04",
+    "file": "scripts/settings-selftest.php",
+    "line": null,
+    "description": "04-06 (G2): scripts/settings-selftest.php has NEVER BEEN EXECUTED, in either direction. 22 assertions covering the behaviour block, the date gate and the structured-data entry counts, authored against a machine with no PHP and no running Docker daemon — exactly as scripts/upload-selftest.php was in 04-03 (ledger entry 19). A test that has never run is a specification, not a gate. Run 'php scripts/settings-selftest.php' the moment a PHP runtime exists; it is the fastest way to close most of G1's logic half without a deploy.",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-09-20T16:28:24.222Z",
+    "resolved_at": null
+  },
+  {
+    "id": 30,
+    "kind": "unrun-verify",
+    "phase": "04",
+    "file": "src/includes/settings.php",
+    "line": null,
+    "description": "04-06 (G3) — HIGHEST-PRIORITY PRE-DEPLOY ACTION: no PHP file in this plan has been syntax-checked. 'php -l' was unavailable (orchestrator re-confirmed: no php binary, no Docker daemon). FIVE files gained or changed PHP — settings.php, banner.php, site-config.php, jsonld.php, footer.php — and a parse error in any one of them takes down all twenty pages at once, which is the precise failure mode this plan exists to prevent, arriving from the other direction. Run 'php -l' on all five before or immediately after the first deploy, and DEPLOY THEM TOGETHER rather than one at a time: these files include each other, so a partial upload can leave the site referencing a function that has not landed yet.",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-09-20T16:28:30.651Z",
+    "resolved_at": null
+  },
+  {
+    "id": 31,
+    "kind": "deviation",
+    "phase": "04",
+    "file": "src/includes/banner.php",
+    "line": null,
+    "description": "04-06 (G4) — OPEN OWNER QUESTION created by this plan. The closure strip does not appear until the closure actually starts (Decisions #3). The UI contract's phrasing would have shown it from the moment the dates were set, i.e. as advance notice. One comparison either way and it should be the owner's call, but he has not been asked. Raise at the 04-10 owner checkpoint. Two related plan deviations argued in 04-06-SUMMARY rather than quietly applied: hours_days is an allowlisted token rather than free text bounded at 20 chars (the plan's own headline truth is unreachable otherwise), and the banner message cap is 120 code points rather than 300 characters (the 180px backstop is arithmetically unmeetable at 300).",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-09-20T16:28:37.121Z",
+    "resolved_at": null
+  },
+  {
+    "id": 32,
+    "kind": "unrun-verify",
+    "phase": "04",
+    "file": "src/settings.txt.example",
+    "line": null,
+    "description": "04-06 (G6): the cPanel File Manager round-trip has NEVER BEEN PERFORMED. The Bulgarian guide (docs/naruchnik-nastroyki.md) tells the owner to copy settings.txt.example, rename it, and edit it in cPanel with UTF-8 encoding — nobody has done this even once. The realistic failure is the panel's editor writing a BOM or a non-UTF-8 encoding; the parser rejects non-UTF-8 values per-key so the failure mode is SAFE, but it would be SILENT: the owner sees his edit ignored with no explanation. One human performing the procedure once, with the guide open, closes both this and the D5 human-judgment item.",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-09-20T16:28:42.942Z",
+    "resolved_at": null
+  },
+  {
+    "id": 33,
+    "kind": "stub",
+    "phase": "04",
+    "file": "src/includes/site-config.php",
+    "line": null,
+    "description": "04-06 (G5) — NARROWS AND SUPERSEDES LEDGER ENTRY 3. Entry 3 covered three [ASSUMED] markers in site-config.php: hours, viber and notice. TWO ARE NOW RESOLVED — hours is closed by D4-25 and plan 04-06 (one source, four consumers); viber was removed in 04-04 when the chat button was retired from all five CTA slots. ONE REMAINS: the 'notice' marker. OWNER-QUESTIONS #8 asks whether the footer band should exist at all and still has no answer. Its CONTENT is no longer unconfirmed — it is composed from the confirmed hours — but the EXISTENCE question is untouched, and 04-06 deliberately left the marker in place rather than promoting it because it merely looked settled. This narrowed entry is the live one; entry 3 is marked fixed and should be read as superseded by this.",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-09-20T16:29:00.052Z",
     "resolved_at": null
   }
 ]
