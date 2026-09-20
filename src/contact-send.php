@@ -210,6 +210,19 @@ register_shutdown_function('torin_release_uploads', $torin_photos);
 // to know what to change, not a catalogue.
 if (count($torin_uploads['errors']) > 0) {
     torin_release_uploads($torin_photos);
+    // The rejection path is where MORE temp files exist, not fewer: five
+    // photographs can normalise successfully and still be thrown away because
+    // a sixth was attached. So it gets the same leftover count the success
+    // path gets — counts and the request id only, never a filename or a
+    // reason string, both of which came from the request.
+    $torin_stale = 0;
+    foreach ($torin_photos as $torin_photo) {
+        if (file_exists($torin_photo)) {
+            $torin_stale++;
+        }
+    }
+    error_log('torin contact ' . $torin_rid . ': refused photos=' . count($torin_photos) .
+        ' rejected=' . count($torin_uploads['errors']) . ' leftover=' . $torin_stale);
     torin_send_fail_page(
         'Проверете отбелязаните полета и опитайте отново.',
         ['photos' => $torin_uploads['errors'][0]]
@@ -252,6 +265,22 @@ $torin_result = torin_notify($torin_in, $torin_photos, $torin_secrets);
 foreach ($torin_photos as $torin_photo) {
     @unlink($torin_photo);
 }
+
+// THE POST-SEND LEFTOVER COUNT, LOGGED. Two integers and the request id; no
+// filename, no path, no submitted value, nothing a visitor typed (P-14).
+//
+// It exists because «no copy of a visitor's photograph survives the request»
+// is otherwise an unobservable promise: the visitor sees a redirect, the owner
+// sees a message, and a temp file that outlived the loop above would sit in a
+// directory neither of them can see. `leftover=0` is the only form of that
+// promise anyone outside this process can check.
+$torin_leftover = 0;
+foreach ($torin_photos as $torin_photo) {
+    if (file_exists($torin_photo)) {
+        $torin_leftover++;
+    }
+}
+error_log('torin contact ' . $torin_rid . ': photos=' . count($torin_photos) . ' leftover=' . $torin_leftover);
 $torin_photos = [];
 
 // BRANCH ON THE OVERALL FLAG ONLY, NEVER ON A CHANNEL (D4-08). Reading
