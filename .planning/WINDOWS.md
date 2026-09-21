@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 39
+open_count: 42
 waived_count: 0
 fixed_count: 11
-total_count: 50
-last_updated: 2026-09-21T18:56:55.528Z
+total_count: 53
+last_updated: 2026-09-21T19:15:52.846Z
 ---
 
 # Broken Windows Ledger
@@ -65,6 +65,9 @@ last_updated: 2026-09-21T18:56:55.528Z
 | 48 | 04 | deviation | scripts/asset-version-check.sh |  | 04-08: FOUR GATES IN THIS PLAN DID NOT MEASURE WHAT THEY CLAIMED — a recurring class on this project, worth reading as a pattern rather than four incidents. (1) WORST: a cache assertion written as grep 'cache-control:.*max-age=3' matches BOTH the old value 300 AND the new 31536000, because it is a PREFIX match on the digit 3. It therefore reported green before the change and green after — a gate that could never fail. Replaced with an exact comparison. (2) grep -o '<img[^>]*>' breaks on PHP source because [^>]* stops at the > of ?>, so it reported 9 defects against markup that has none; re-checked with a real parser (2 tags, 0 defects). (3) and (4) two of the executor's own new comments inflated substring counts — the literal <loc> and the word sitemap written as prose — which it reworded rather than let a counter pass for the wrong reason. SAME FAMILY AS ledger 16 (BSD wc padding defeating 'wc -l \| grep -qx 0'). STANDING RULE for this project: never assert a numeric threshold with a substring or prefix grep; extract the value and compare it numerically. | open |  | 2026-09-21T18:56:19.412Z |  |
 | 49 | 04 | deviation | .planning/phases/04-hardening-cutover/04-08-PLAN.md |  | 04-08: PLAN DEFECT, not a work defect — the plan's sitemap gate demands >= 20 URLs, but the correct number is 19 and the executor rightly refused to pad it. The arithmetic: 20 page files minus one deliberately noindexed (msg.html, excluded on purpose per threat T-04-39) equals 19, and all 19 return 200 live. Orchestrator independently confirmed post-merge: sitemap.xml contains exactly 19 <loc> entries and zero occurrences of msg.html. The gate figure was written before 04-07 introduced the robots emitter that makes msg.html noindex, so it counts a page the phase then decided to exclude. Treat 19 as correct and fix the gate, not the sitemap. Also recorded: two declared deviations outside files_modified, both justified — header.php (the logo <img> lives there and is the largest per-visit win) and scripts/asset-version-check.sh (its Check C asserted max-age <= 600 with failure text literally reading 'Phase 4 raises this, DESIGN-02', so left untouched it would fail forever once the new .htaccess lands). | open |  | 2026-09-21T18:56:29.519Z |  |
 | 50 | 04 | unrun-verify | scripts/seo-metadata-check.js |  | SUPERSEDES LEDGER 13, WHICH THE ORCHESTRATOR CLOSED IN ERROR on 2026-09-21. Entry 13 recorded the 03-09 SEO live gate as unrun pending a deploy, and its own closing condition was literally 'Deploy then re-run to close'. It was marked fixed while processing 04-08 on the mistaken basis that 04-08 completed the SEO work — but 04-08 DEPLOYED NOTHING, as its own summary states plainly. THIS ENTRY IS THE LIVE ONE; treat 13 as still open despite its status. The condition is unchanged: the 11 tuned pages still serve pre-plan metadata on the origin, and 'node scripts/seo-metadata-check.js --live' still reports served-matches-source on exactly those 11 because it is measuring the currently-deployed build. Deploy, then re-run, then close THIS entry. Note the general trap this is an instance of: any check run against the live origin during this phase measures the OLD build, so a green result is evidence about the deployed site and says nothing about the work in the tree. | open |  | 2026-09-21T18:56:55.528Z |  |
+| 51 | 04 | deviation | .planning/phases/04-hardening-cutover/04-CUTOVER-CHECKLIST.md |  | 04-09 CHECKLIST OMISSION found by the orchestrator, not the executor: the checklist instructs the operator to SUBMIT sitemap.xml to Search Console (section 6, 'scripts/sitemap-check.sh --live, and submit sitemap.xml') but contains NO STEP TELLING THEM TO REGENERATE IT FIRST. As it stands in the tree, sitemap.xml lists 19 STAGING URLs of the form https://torin.bg/new/<page>, and robots.txt's Sitemap: directive is likewise the absolute URL https://torin.bg/new/sitemap.xml. Following the checklist literally would submit 19 staging paths to Google immediately after a cutover whose entire purpose is URL continuity. THE CODE SIDE IS NOT BROKEN: plan 04-10 owns both src/sitemap.xml and src/includes/site-config.php, so the base_url change and sitemap regeneration have a designed home, and robots.txt carries a boxed warning that its directive is the second place in the tree encoding /new/, with scripts/sitemap-check.sh asserting the two agree and failing loudly. The defect is purely that the operator-facing checklist does not sequence it. ADD AN EXPLICIT STEP in Section 2 (the swap): change base_url from the /new/ staging value to the root, regenerate sitemap.xml, update the robots.txt Sitemap: directive, run sitemap-check.sh to confirm the two agree, and ONLY THEN submit. | open |  | 2026-09-21T19:15:34.474Z |  |
+| 52 | 04 | deviation | src/.htaccess |  | 04-09 NEW RISK INTRODUCED BY THIS PLAN, read before anyone runs deploy-new.sh again: src/.htaccess now addresses the document ROOT. Its RewriteBase and canonicalisation target were promoted from the /new/ staging segment to '/' (the two edits ROADMAP carried into Phase 4 as D4-30). Uploading this file to public_html/new/ would point the base at / while the file sits in /new/, BREAKING EVERY REDIRECT IN IT — which is precisely the historical defect this phase already hit once, where retirement rules answered 301 with a Location of https://torin.bg/home/torin/public_html/new/<target>, a server path leaked into a public URL that 404'd on follow while the 301 itself looked perfectly correct. The file now carries a boxed warning at the top and checklist step 2.4 repeats it: src/.htaccess is OUT OF SCOPE for deploy-new.sh and goes up only with the 04-10 root swap. Orchestrator verified post-merge that the file still balances 10 IfModule open/close and 3 FilesMatch open/close. | open |  | 2026-09-21T19:15:43.630Z |  |
+| 53 | 04 | unrun-verify | scripts/probes/cutover-sweep.js |  | 04-09: the cutover sweep's RENDERED probe has NEVER RUN. Every sweep execution used --no-render. The script parses and exports correctly and the HTTP half is genuinely proven — it was tested against a seeded known-bad case and FAILED correctly, which is the right direction to prove a gate: a naive status-line-plus-Location check saw a perfect 301, while following the redirect yielded 404 at a leaked server path, and the sweep reported the terminal status AND the leaked URL, exit 1, NO-GO. It then passed clean against staging, 33/0/5, all eight redirects terminal-verified. BUT the rendered probe's Cyrillic, diagnostic and widget assertions remain a SPECIFICATION, not a gate. Honest caveat the executor recorded rather than hid: 7 of the 8 failures in the known-bad run are loopback artefacts (www.127.0.0.1 does not resolve, no TLS on the stub) and only covid.html is the seeded defect — so the run proves the mechanism, not eight independent detections. Run the sweep WITH rendering enabled against staging before the swap. | open |  | 2026-09-21T19:15:52.846Z |  |
 
 ````json
 [
@@ -666,6 +669,42 @@ last_updated: 2026-09-21T18:56:55.528Z
     "status": "open",
     "reason": "",
     "recorded_at": "2026-09-21T18:56:55.528Z",
+    "resolved_at": null
+  },
+  {
+    "id": 51,
+    "kind": "deviation",
+    "phase": "04",
+    "file": ".planning/phases/04-hardening-cutover/04-CUTOVER-CHECKLIST.md",
+    "line": null,
+    "description": "04-09 CHECKLIST OMISSION found by the orchestrator, not the executor: the checklist instructs the operator to SUBMIT sitemap.xml to Search Console (section 6, 'scripts/sitemap-check.sh --live, and submit sitemap.xml') but contains NO STEP TELLING THEM TO REGENERATE IT FIRST. As it stands in the tree, sitemap.xml lists 19 STAGING URLs of the form https://torin.bg/new/<page>, and robots.txt's Sitemap: directive is likewise the absolute URL https://torin.bg/new/sitemap.xml. Following the checklist literally would submit 19 staging paths to Google immediately after a cutover whose entire purpose is URL continuity. THE CODE SIDE IS NOT BROKEN: plan 04-10 owns both src/sitemap.xml and src/includes/site-config.php, so the base_url change and sitemap regeneration have a designed home, and robots.txt carries a boxed warning that its directive is the second place in the tree encoding /new/, with scripts/sitemap-check.sh asserting the two agree and failing loudly. The defect is purely that the operator-facing checklist does not sequence it. ADD AN EXPLICIT STEP in Section 2 (the swap): change base_url from the /new/ staging value to the root, regenerate sitemap.xml, update the robots.txt Sitemap: directive, run sitemap-check.sh to confirm the two agree, and ONLY THEN submit.",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-09-21T19:15:34.474Z",
+    "resolved_at": null
+  },
+  {
+    "id": 52,
+    "kind": "deviation",
+    "phase": "04",
+    "file": "src/.htaccess",
+    "line": null,
+    "description": "04-09 NEW RISK INTRODUCED BY THIS PLAN, read before anyone runs deploy-new.sh again: src/.htaccess now addresses the document ROOT. Its RewriteBase and canonicalisation target were promoted from the /new/ staging segment to '/' (the two edits ROADMAP carried into Phase 4 as D4-30). Uploading this file to public_html/new/ would point the base at / while the file sits in /new/, BREAKING EVERY REDIRECT IN IT — which is precisely the historical defect this phase already hit once, where retirement rules answered 301 with a Location of https://torin.bg/home/torin/public_html/new/<target>, a server path leaked into a public URL that 404'd on follow while the 301 itself looked perfectly correct. The file now carries a boxed warning at the top and checklist step 2.4 repeats it: src/.htaccess is OUT OF SCOPE for deploy-new.sh and goes up only with the 04-10 root swap. Orchestrator verified post-merge that the file still balances 10 IfModule open/close and 3 FilesMatch open/close.",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-09-21T19:15:43.630Z",
+    "resolved_at": null
+  },
+  {
+    "id": 53,
+    "kind": "unrun-verify",
+    "phase": "04",
+    "file": "scripts/probes/cutover-sweep.js",
+    "line": null,
+    "description": "04-09: the cutover sweep's RENDERED probe has NEVER RUN. Every sweep execution used --no-render. The script parses and exports correctly and the HTTP half is genuinely proven — it was tested against a seeded known-bad case and FAILED correctly, which is the right direction to prove a gate: a naive status-line-plus-Location check saw a perfect 301, while following the redirect yielded 404 at a leaked server path, and the sweep reported the terminal status AND the leaked URL, exit 1, NO-GO. It then passed clean against staging, 33/0/5, all eight redirects terminal-verified. BUT the rendered probe's Cyrillic, diagnostic and widget assertions remain a SPECIFICATION, not a gate. Honest caveat the executor recorded rather than hid: 7 of the 8 failures in the known-bad run are loopback artefacts (www.127.0.0.1 does not resolve, no TLS on the stub) and only covid.html is the seeded defect — so the run proves the mechanism, not eight independent detections. Run the sweep WITH rendering enabled against staging before the swap.",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-09-21T19:15:52.846Z",
     "resolved_at": null
   }
 ]
