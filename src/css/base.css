@@ -130,10 +130,18 @@ button, input, select, textarea { font: inherit; color: inherit; }
 a { color: var(--c-link); }
 a:hover { color: var(--c-link-hover); }
 
-/* --- Design tokens — Theme B, unconditional (D-02a: the theme that ships).
-       Theme A lives ONLY in the dev-only theme-a.css override (D-02/D-03).  */
+/* --- Design tokens — unconditional (D-02a: the theme that ships).
+       Theme A was a dev-only colour override for live comparison and its
+       stylesheet is DELETED as of the Phase 4 cutover (plan 04-07), together
+       with the switcher that selected it. Nothing here changed with it: the
+       override only ever declared colours under an attribute selector that no
+       page carries any more, so every token below is the value it has always
+       rendered.                                                             */
 :root {
-	/* Themed colours — the exactly-10 set theme-a.css may override.
+	/* Themed colours — the exactly-10 set the deleted override could replace.
+	   The grouping is KEPT rather than merged into the invariant block below:
+	   these ten are the ones a future re-theme would touch, and that is worth
+	   more as a standing record than the two lines the merge would save.
 	   Amber is a SURFACE token: #ffc70a on white is 1.56:1. */
 	--c-brand: #ffc70a;   /* D-01: business.css --color-primary */
 	--c-brand-dim: #e8b400;
@@ -165,7 +173,11 @@ a:hover { color: var(--c-link-hover); }
 	--c-success-surface: #e8f5ee;
 	--c-success-ink: #0b5c36;
 
-	/* theme-a.css must NOT redeclare this, or the 10-token tripwire is blunted */
+	/* Derived, and deliberately NOT one of the ten above: the focus ring
+	   follows the link colour rather than carrying a colour of its own, so a
+	   re-theme cannot leave the ring pointing at a palette nothing else uses.
+	   The dev override that this rule once warned off is deleted (04-07); the
+	   rule stands on its own reasoning. */
 	--c-focus: var(--c-link);
 
 	/* Spacing — every step a multiple of 4 */

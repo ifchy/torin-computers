@@ -551,7 +551,7 @@ function torin_render_service_page($page) {
 					<?php // The E.164 key, not the first display entry of the phone list:
 					      // one telephone fact, one representation, every primary call CTA
 					      // on the site resolving the same string (see site-config.php). ?>
-					<a class="btn btn--primary" href="tel:<?php echo torin_esc($site['phone_e164']); ?>"><?php echo torin_icon('phone'); ?>Обадете се</a>
+					<a class="btn btn--primary" href="tel:<?php echo torin_esc($site['phone_e164']); ?>" data-slot="category"><?php echo torin_icon('phone'); ?>Обадете се</a>
 					<?php // D4-17 (§C-7). One write destination, one label, on all 15 service
 					      // pages — the same string the homepage and footer use. ?>
 					<a class="btn btn--primary" href="kontakti.html" data-slot="category"><?php echo torin_icon('chat'); ?>Пишете ни</a>

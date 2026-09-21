@@ -699,6 +699,29 @@ function torin_send_fail_page(string $summary, array $errors, int $status = 422,
 
     $torin_title = 'Запитването не беше изпратено · Торин';
     $torin_desc  = 'Запитването до Торин Компютърс не беше изпратено. Проверете данните и опитайте отново или се обадете на сервиза.';
+
+    // The «which field rejects people» event (UI-SPEC C-9, wired in 04-07).
+    // header.php emits this as a data attribute and js/analytics.js fires one
+    // event per token. It answers the single most actionable question this
+    // form can raise: a field that rejects a large share of the people who
+    // reach it is a field whose rules or wording are wrong, not a population
+    // of careless visitors.
+    //
+    // ONLY THE FIELD NAME TRAVELS — never the value the visitor typed, never
+    // the server's message, never anything about who they are. The names are
+    // taken from the SAME fixed whitelist the in-page link list below uses, so
+    // an array key that somehow arrived with the request cannot reach the
+    // attribute, and analytics.js independently drops any name outside that
+    // list. Two gates on one string, because this is the one place in the
+    // project where a submitted-data structure meets a third-party beacon.
+    $torin_track = '';
+    $torin_track_fields = array('device', 'fault', 'photos', 'name', 'phone', 'email', 'consent');
+    foreach ($torin_track_fields as $torin_track_field) {
+        if (isset($errors[$torin_track_field])) {
+            $torin_track .= ($torin_track === '' ? '' : ' ') . 'form-error:' . $torin_track_field;
+        }
+    }
+
     require_once dirname(__FILE__) . '/includes/header.php';
 ?>
 
@@ -706,12 +729,15 @@ function torin_send_fail_page(string $summary, array $errors, int $status = 422,
 	<section class="section">
 		<div class="container">
 			<?php // tabindex="-1" makes the band programmatically focusable so a
-			      // keyboard or screen-reader user can be sent to the explanation
-			      // rather than to the top of the document (UI-SPEC C-8). The
-			      // .focus() call that would USE it belongs to js/analytics.js,
-			      // which this plan does not touch; the attribute ships now so the
-			      // two halves cannot be deployed apart, and the gap is recorded
-			      // in the SUMMARY rather than left to be discovered. ?>
+			      // keyboard or screen-reader user is sent to the explanation
+			      // rather than to the top of the document (UI-SPEC C-8).
+			      //
+			      // BOTH HALVES NOW SHIP. 04-05 placed this attribute and the id
+			      // while the .focus() that uses them belonged to a file it did
+			      // not touch; 04-07 added that call to js/analytics.js, which
+			      // finds this band by the id below on every rendering of this
+			      // page. The id is therefore load-bearing in a second file and
+			      // must not be renamed here alone. ?>
 			<p class="notice notice--error" id="form-error" tabindex="-1"><?php echo torin_icon('alert'); ?><span><?php echo torin_esc($summary); ?></span></p>
 
 			<h1>Запитването не беше изпратено</h1>

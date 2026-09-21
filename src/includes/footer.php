@@ -55,7 +55,7 @@ require_once(dirname(__FILE__) . '/icons.php');
 						?>
 						<span class="footer-phones">
 <?php foreach ($site['phones'] as $torin_phone) { ?>
-							<a class="footer-phone" href="tel:<?php echo htmlspecialchars(str_replace(' ', '', $torin_phone), ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($torin_phone, ENT_QUOTES, 'UTF-8'); ?></a>
+							<a class="footer-phone" href="tel:<?php echo htmlspecialchars(str_replace(' ', '', $torin_phone), ENT_QUOTES, 'UTF-8'); ?>" data-slot="footer-list"><?php echo htmlspecialchars($torin_phone, ENT_QUOTES, 'UTF-8'); ?></a>
 <?php } ?>
 						</span>
 					</div>
@@ -78,7 +78,7 @@ require_once(dirname(__FILE__) . '/icons.php');
 					      // one key. The three display links above are a different job
 					      // and deliberately keep their local form. ?>
 					<div class="cta-block__actions">
-						<a class="btn btn--primary" href="tel:<?php echo htmlspecialchars($site['phone_e164'], ENT_QUOTES, 'UTF-8'); ?>"><?php echo torin_icon('phone'); ?>Обадете се</a>
+						<a class="btn btn--primary" href="tel:<?php echo htmlspecialchars($site['phone_e164'], ENT_QUOTES, 'UTF-8'); ?>" data-slot="footer-cta"><?php echo torin_icon('phone'); ?>Обадете се</a>
 						<?php // D4-17 (§C-7). The write action leads to kontakti.html; the chat
 						      // glyph is reused, not replaced. This is the slot that decided the
 						      // label: §Conflicts C-1 measured this grid column at 233.6px at

@@ -51,6 +51,18 @@
 // a carried dependency in 04-05-SUMMARY.md: if 04-07 slips, this page ships
 // without its noindex and must not be listed in the sitemap, which 04-08 owns.
 $torin_robots = 'noindex, follow';
+// The completion end of the contact funnel (UI-SPEC C-9, 04-07). header.php
+// emits this as a data attribute and js/analytics.js fires the event; no
+// property, nothing about who. It is what makes the funnel measurable end to
+// end — without it every earlier step is a count with no denominator.
+//
+// IT OVER-COUNTS SLIGHTLY, AND KNOWINGLY. This is a plain URL with no
+// server-side state behind it, so a direct visit, a bookmark or a refresh
+// fires it too, and so do the two deliberately indistinguishable spam
+// rejections described above. Making it exact would mean a token or a cookie,
+// and a cookie re-opens the consent question D4-18 was chosen to close. Read
+// this number as an upper bound on completed enquiries, never as a total.
+$torin_track = 'form-sent';
 $torin_title = 'Съобщението е изпратено · Торин';
 $torin_desc  = 'Съобщението ви до Торин Компютърс е изпратено. Отговаряме в работното време на сервиза.';
 require_once(dirname(__FILE__) . '/includes/header.php');

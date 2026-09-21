@@ -284,11 +284,13 @@ function torin_render_contact_form($values = array(), $errors = array()) {
 			      // nineteen pages' dead download. Emitting it here means the
 			      // script and the DOM it needs cannot be deployed apart.
 			      //
-			      // In the body rather than the head, because the shared head is
-			      // not ours to extend from a page: header.php:50 resets
-			      // $torin_extra_head after a page could have assigned it, so
-			      // that variable is the dev switcher's and not a page hook. A
-			      // deferred script with a src is deferred wherever it sits.
+			      // In the body rather than the head, because the shared head
+			      // offers a page no hook for arbitrary markup. It carried one
+			      // until 04-07 — a dev-only slot the theme switcher owned,
+			      // reset on every include so a page could not use it — and
+			      // that slot is now deleted outright rather than promoted into
+			      // a page hook. A deferred script with a src is deferred
+			      // wherever it sits, so this placement costs nothing.
 			      //
 			      // torin_asset_url() stamps it with the deployed file's mtime,
 			      // the same invalidation every other asset here gets. ?>
