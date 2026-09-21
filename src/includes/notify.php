@@ -313,6 +313,89 @@ function torin_notify_telegram($payload, $photos, $secrets) {
 	return ($torin_msg_ok || $torin_group_ok);
 }
 
+// ── THE MAIL DRIVER (CONTACT-03, D4-09, D4-11) ──────────────────────────────
+// The second channel, and the reason the fan-out above was introduced in 04-02
+// with only one driver behind it. Nothing in torin_notify() changed to accept
+// it beyond one array entry and one branch: no caller learned a new name, and
+// contact-send.php's success test is byte-for-byte the one the tracer shipped.
+//
+// THIS FUNCTION DELIBERATELY CONTAINS NO MAIL LIBRARY, NO TRANSPORT SETTING
+// AND NO CREDENTIAL READ. It composes and delegates. The library is namespaced
+// modern PHP, and a 5.2 interpreter meeting a namespaced file fails at COMPILE
+// time — before any output, with no page left to explain it. contact-send.php
+// is the single quarantined file allowed to reach the vendor directory
+// (RESEARCH A-3), and this file sits in includes/ beside the chrome partials,
+// one careless require away from header.php.
+//
+// A PLAN-LEVEL GREP ASSERTS THAT THE VENDOR PATH APPEARS ZERO TIMES ANYWHERE
+// UNDER src/includes/, which is why the delegation below looks indirect. That
+// path is DESCRIBED here and never spelled, on the same discipline as
+// brand-row.php:34-36 and contact-send.php:34-41: a comment quoting the banned
+// string trips the very gate that guards it — as this comment did, on its
+// first draft — and, worse, teaches whoever fixes the gate to weaken it.
+//
+// THE function_exists GUARD IS THE QUARANTINE'S OWN FAILURE MODE, not padding.
+// torin_send_mail() is defined in contact-send.php, so this driver only works
+// when that file is the entry point — which is the whole design. If anything
+// else ever includes notify.php and calls the fan-out, the mail channel
+// reports itself unavailable in the log and returns false, and D4-08 turns
+// that into «the other channel carried it» rather than into a fatal on an
+// undefined function.
+function torin_notify_mail($payload, $photos, $secrets) {
+	if (!function_exists('torin_send_mail')) {
+		error_log('torin notify: mail driver unavailable (torin_send_mail not loaded)');
+		return false;
+	}
+
+	$torin_photos = is_array($photos) ? array_values($photos) : array();
+
+	// ONE COMPOSER FOR BOTH CHANNELS. torin_notify_compose() clamps at
+	// Telegram's 4096-character ceiling, which email has no equivalent of —
+	// and the clamp cannot bite here anyway, because contact-send.php bounds
+	// the fault description at 1024 characters and every other field is
+	// shorter still. Re-composing the same eight lines a second time for the
+	// sake of removing a clamp that never fires would be a second writer of
+	// the message body, and two writers of one message is how the owner ends
+	// up with a Telegram notification and an email that disagree about what
+	// the customer said.
+	//
+	// THE SUBJECT CARRIES NO SUBMITTED VALUE. PHPMailer does strip CR and LF
+	// from header values, so putting the device model here would probably be
+	// safe — «probably safe» is not the standard this file is held to when the
+	// anti-analog (site-current/mailer.php:83) is a live header-injection
+	// vulnerability built from exactly that assumption. The server-generated
+	// timestamp is what keeps two enquiries from collapsing into one
+	// conversation thread in the owner's mail client; it is not decoration.
+	$torin_spec = array(
+		'to'          => 'office@torin.bg',
+		'subject'     => 'Ново запитване от сайта — ' . date('d.m.Y H:i'),
+		'body'        => torin_notify_compose($payload),
+		'reply_to'    => '',
+		'attachments' => $torin_photos
+	);
+
+	// THE VISITOR'S ADDRESS GOES HERE AND NOWHERE ELSE (T-04-22). It has
+	// already been through FILTER_VALIDATE_EMAIL in contact-send.php — an
+	// unvalidated address never reaches this array, because a submission that
+	// failed validation never reaches the fan-out at all.
+	//
+	// The visitor's NAME is deliberately NOT passed as the reply-to display
+	// name. It is not validated the way the address is, PHPMailer would encode
+	// it into a header, and it is already in the body one line below the
+	// address. A display name buys the owner nothing and puts one more
+	// attacker-chosen string into a header for no reason.
+	if (isset($payload['email']) && is_string($payload['email']) && $payload['email'] !== '') {
+		$torin_spec['reply_to'] = $payload['email'];
+	}
+
+	// torin_send_mail() returns the NAME OF THE TRANSPORT that delivered, or
+	// false. The name is logged at its own call site, where the request's
+	// correlation id lives; here it collapses to the boolean the fan-out
+	// interface is contracted to return, unchanged since 04-02.
+	$torin_via = torin_send_mail($torin_spec, $secrets);
+	return ($torin_via !== false);
+}
+
 // The fan-out. Returns array('ok' => bool, 'channels' => array(name => bool)).
 //
 // $secrets is a third parameter that RESEARCH A-1's sketch does not show. It
@@ -323,9 +406,17 @@ function torin_notify_telegram($payload, $photos, $secrets) {
 function torin_notify($payload, $photos, $secrets) {
 	$torin_channels = array();
 
-	// One entry per registered driver. 04-05 adds 'mail' here and nothing else
-	// in this function changes.
-	$torin_drivers = array('telegram');
+	// One entry per registered driver. 04-05 added 'mail' here and nothing else
+	// in this function changed — which is the claim 04-02 made when it built a
+	// fan-out for a single channel, now discharged rather than merely repeated.
+	//
+	// ORDER IS NOT PRIORITY. Every driver in this list runs on every request;
+	// there is no short-circuit on the first success, and there must not be
+	// one. The owner reads Telegram on a phone and email at a desk, and D4-08
+	// says a delivered enquiry is one that reached the shop — not one that
+	// reached the cheapest channel. Telegram is first only because it was
+	// first.
+	$torin_drivers = array('telegram', 'mail');
 
 	foreach ($torin_drivers as $torin_driver) {
 		$torin_channels[$torin_driver] = false;
@@ -337,6 +428,8 @@ function torin_notify($payload, $photos, $secrets) {
 		try {
 			if ($torin_driver === 'telegram') {
 				$torin_channels[$torin_driver] = torin_notify_telegram($payload, $photos, $secrets);
+			} elseif ($torin_driver === 'mail') {
+				$torin_channels[$torin_driver] = torin_notify_mail($payload, $photos, $secrets);
 			}
 		} catch (Exception $torin_err) {
 			error_log('torin notify: driver threw (' . $torin_driver . ')');

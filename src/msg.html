@@ -18,6 +18,39 @@
 // actually happens on submit — a queue, a delay, an autoresponder — this page
 // is the sentence that has to change with it, and uslovia.html carries the
 // retention commitment it must not contradict.
+//
+// 04-05 IS THAT CHANGE, AND THE SENTENCES BELOW MOVED WITH IT. Submitting now
+// sends a confirmation email to the address the visitor typed (D4-09), so this
+// page says so — a visitor who is told to expect one and does not get it has
+// learned, in minutes, that they mistyped their address. That is the entire
+// point of the confirmation and it only works if the page announces it.
+//
+// EVERY SENTENCE HERE IS CONDITIONAL OR GENERAL, NEVER AN ASSERTION ABOUT THIS
+// READER. This is a plain URL with no server-side state behind it: anybody can
+// open /new/msg.html directly, from a bookmark, from a search result, or by
+// typing it. A page that says «вашите снимки пристигнаха» to somebody who
+// submitted nothing is telling them something false about their own day, and
+// on this site it would be telling it to them in Bulgarian in a shop's voice.
+// So the photographs are named with «ако сте приложили» and the confirmation
+// email as something that «тръгва», not as something that has demonstrably
+// arrived — both true for the visitor who did submit, neither a claim about
+// the one who did not.
+//
+// THE FORM HANDLER REACHES THIS PAGE ON A 303, and on two deliberately
+// indistinguishable spam rejections (the decoy and the sub-three-second time
+// trap, contact-send.php). A bot that can tell rejection from acceptance tunes
+// past the trap on its next run — so those two get this page too, and this
+// page must never grow a sentence that only a genuine submission could have
+// produced.
+//
+// $torin_robots: noindex, follow (UI-SPEC C-8). A confirmation page has no
+// business in search results — it answers no query and reads as an error to
+// anyone who lands on it cold. THE EMITTER FOR THIS VARIABLE SHIPS IN 04-07;
+// header.php does not read it yet, so the assignment below is inert TODAY and
+// is made anyway so that the two halves cannot be deployed apart. Recorded as
+// a carried dependency in 04-05-SUMMARY.md: if 04-07 slips, this page ships
+// without its noindex and must not be listed in the sitemap, which 04-08 owns.
+$torin_robots = 'noindex, follow';
 $torin_title = 'Съобщението е изпратено · Торин';
 $torin_desc  = 'Съобщението ви до Торин Компютърс е изпратено. Отговаряме в работното време на сервиза.';
 require_once(dirname(__FILE__) . '/includes/header.php');
@@ -27,7 +60,8 @@ require_once(dirname(__FILE__) . '/includes/header.php');
 	<section class="section">
 		<div class="container">
 			<h1>Съобщението е изпратено</h1>
-			<p class="svc__intro">Получихме съобщението ви и ще се свържем с вас в работното време на сервиза — телефоните и часовете са в долната част на страницата.</p>
+			<p class="svc__intro">Получихме съобщението ви и ще се свържем с вас в работното време на сервиза — телефоните и часовете са в долната част на страницата. Ако сте приложили снимки, те също стигнаха до нас.</p>
+			<p>На имейла, който посочихте, тръгва и потвърждение. Ако то не пристигне до няколко минути, най-вероятно адресът е въведен сгрешен — тогава ни потърсете по телефона.</p>
 		</div>
 	</section>
 
