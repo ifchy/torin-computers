@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 38
+open_count: 39
 waived_count: 0
 fixed_count: 11
-total_count: 49
-last_updated: 2026-09-21T18:56:38.709Z
+total_count: 50
+last_updated: 2026-09-21T18:56:55.528Z
 ---
 
 # Broken Windows Ledger
@@ -64,6 +64,7 @@ last_updated: 2026-09-21T18:56:38.709Z
 | 47 | 04 | unrun-verify | src/includes/header.php |  | 04-08: NOTHING FROM THIS PLAN IS DEPLOYED, and one unrun item is the highest-risk in the phase. robots.txt, sitemap.xml, the 43 WebP siblings and the new .htaccess all return 404 or serve old values on the origin right now, so EVERY live number in 04-08-SUMMARY is a PRE-DEPLOY BASELINE, not a pass. Highest risk: the PHP edits to header.php and category-page.php are SYNTAX-UNVERIFIED (no php binary, no Docker), and a parse error in header.php breaks all 19 pages at once — header.php is included by every page. This compounds with ledger 30, which already requires php -l on five files from 04-06; header.php is now on BOTH lists and has been edited by three separate plans (04-06, 04-07, 04-08) without once being parsed. Run php -l on header.php before anything else at deploy time, and deploy the PHP includes together rather than one at a time. | open |  | 2026-09-21T18:56:09.283Z |  |
 | 48 | 04 | deviation | scripts/asset-version-check.sh |  | 04-08: FOUR GATES IN THIS PLAN DID NOT MEASURE WHAT THEY CLAIMED — a recurring class on this project, worth reading as a pattern rather than four incidents. (1) WORST: a cache assertion written as grep 'cache-control:.*max-age=3' matches BOTH the old value 300 AND the new 31536000, because it is a PREFIX match on the digit 3. It therefore reported green before the change and green after — a gate that could never fail. Replaced with an exact comparison. (2) grep -o '<img[^>]*>' breaks on PHP source because [^>]* stops at the > of ?>, so it reported 9 defects against markup that has none; re-checked with a real parser (2 tags, 0 defects). (3) and (4) two of the executor's own new comments inflated substring counts — the literal <loc> and the word sitemap written as prose — which it reworded rather than let a counter pass for the wrong reason. SAME FAMILY AS ledger 16 (BSD wc padding defeating 'wc -l \| grep -qx 0'). STANDING RULE for this project: never assert a numeric threshold with a substring or prefix grep; extract the value and compare it numerically. | open |  | 2026-09-21T18:56:19.412Z |  |
 | 49 | 04 | deviation | .planning/phases/04-hardening-cutover/04-08-PLAN.md |  | 04-08: PLAN DEFECT, not a work defect — the plan's sitemap gate demands >= 20 URLs, but the correct number is 19 and the executor rightly refused to pad it. The arithmetic: 20 page files minus one deliberately noindexed (msg.html, excluded on purpose per threat T-04-39) equals 19, and all 19 return 200 live. Orchestrator independently confirmed post-merge: sitemap.xml contains exactly 19 <loc> entries and zero occurrences of msg.html. The gate figure was written before 04-07 introduced the robots emitter that makes msg.html noindex, so it counts a page the phase then decided to exclude. Treat 19 as correct and fix the gate, not the sitemap. Also recorded: two declared deviations outside files_modified, both justified — header.php (the logo <img> lives there and is the largest per-visit win) and scripts/asset-version-check.sh (its Check C asserted max-age <= 600 with failure text literally reading 'Phase 4 raises this, DESIGN-02', so left untouched it would fail forever once the new .htaccess lands). | open |  | 2026-09-21T18:56:29.519Z |  |
+| 50 | 04 | unrun-verify | scripts/seo-metadata-check.js |  | SUPERSEDES LEDGER 13, WHICH THE ORCHESTRATOR CLOSED IN ERROR on 2026-09-21. Entry 13 recorded the 03-09 SEO live gate as unrun pending a deploy, and its own closing condition was literally 'Deploy then re-run to close'. It was marked fixed while processing 04-08 on the mistaken basis that 04-08 completed the SEO work — but 04-08 DEPLOYED NOTHING, as its own summary states plainly. THIS ENTRY IS THE LIVE ONE; treat 13 as still open despite its status. The condition is unchanged: the 11 tuned pages still serve pre-plan metadata on the origin, and 'node scripts/seo-metadata-check.js --live' still reports served-matches-source on exactly those 11 because it is measuring the currently-deployed build. Deploy, then re-run, then close THIS entry. Note the general trap this is an instance of: any check run against the live origin during this phase measures the OLD build, so a green result is evidence about the deployed site and says nothing about the work in the tree. | open |  | 2026-09-21T18:56:55.528Z |  |
 
 ````json
 [
@@ -653,6 +654,18 @@ last_updated: 2026-09-21T18:56:38.709Z
     "status": "open",
     "reason": "",
     "recorded_at": "2026-09-21T18:56:29.519Z",
+    "resolved_at": null
+  },
+  {
+    "id": 50,
+    "kind": "unrun-verify",
+    "phase": "04",
+    "file": "scripts/seo-metadata-check.js",
+    "line": null,
+    "description": "SUPERSEDES LEDGER 13, WHICH THE ORCHESTRATOR CLOSED IN ERROR on 2026-09-21. Entry 13 recorded the 03-09 SEO live gate as unrun pending a deploy, and its own closing condition was literally 'Deploy then re-run to close'. It was marked fixed while processing 04-08 on the mistaken basis that 04-08 completed the SEO work — but 04-08 DEPLOYED NOTHING, as its own summary states plainly. THIS ENTRY IS THE LIVE ONE; treat 13 as still open despite its status. The condition is unchanged: the 11 tuned pages still serve pre-plan metadata on the origin, and 'node scripts/seo-metadata-check.js --live' still reports served-matches-source on exactly those 11 because it is measuring the currently-deployed build. Deploy, then re-run, then close THIS entry. Note the general trap this is an instance of: any check run against the live origin during this phase measures the OLD build, so a green result is evidence about the deployed site and says nothing about the work in the tree.",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-09-21T18:56:55.528Z",
     "resolved_at": null
   }
 ]
