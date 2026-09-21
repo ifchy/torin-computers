@@ -1,0 +1,390 @@
+# 04 — Cutover Checklist
+
+> **Status:** authored in plan 04-09. **EXECUTED BY PLAN 04-10, WHICH IS NOT YET AUTHORISED.**
+> Nothing in this document has been performed. Plan 04-09 deployed nothing and ran
+> `scripts/deploy-live.sh` zero times.
+>
+> **How to read this file.** Every step is written to be executed by hand, in order, by a
+> person at a terminal and an FTP client. Steps marked **GATE** must be *true* before the next
+> step starts — a gate that cannot be satisfied is a STOP, not a note. Steps marked
+> **UNRUN** describe checks that have never executed anywhere, because the build machine has
+> no `php` binary and no running Docker daemon; they are specifications until the day someone
+> runs them, and must never be reported as passing on the strength of having been written.
+
+---
+
+## The trap that governs this entire document
+
+**Any check run against the live origin during Phase 4 measured the OLD build.**
+
+Nothing from plans 04-01 through 04-09 is deployed. `robots.txt`, `sitemap.xml`, the 43 WebP
+siblings, the contact page, the PHP includes and this promoted `.htaccess` all either 404 or
+serve pre-phase values on the origin right now. A green live result collected during this
+phase is evidence about *the site that is currently deployed* and says nothing whatsoever
+about the work in the tree.
+
+Consequence for this checklist: **every live measurement recorded in any 04-xx summary must be
+re-taken after the swap.** They are baselines, not passes. (Ledger #50, which supersedes #13 —
+#13 was closed in error and should be read as still open.)
+
+---
+
+## Section 0 — BLOCKING PRE-FLIGHT GATES
+
+These four are unresolved as of 04-09. **Do not begin the swap until each is answered.**
+
+### GATE 0.1 — The reporting property must exist and be verified BEFORE any redirect ships
+
+The canonical host is decided: **`https://torin.bg` (no `www`) is canonical** — locked decision
+D4-29, confirmed by plan 04-09 against the live origin on 2026-09-21:
+
+| variant | status | hops |
+|---|---|---|
+| `http://torin.bg/` | 200 | 0 |
+| `https://torin.bg/` | 200 | 0 |
+| `http://www.torin.bg/` | 200 | 0 |
+| `https://www.torin.bg/` | 200 | 0 |
+
+All four serve the same content with **no redirect at all**, so ranking signals are split four
+ways. Publishing the canonicalisation rule fixes that — and is **one-way**: once Google
+consolidates onto the apex, moving to `www` later means a second consolidation across the whole
+site with real ranking disturbance.
+
+**In a URL-prefix property those four variants are four different properties.** The moment the
+redirects go live, traffic moves to the canonical form and the property holding this site's
+history falls to zero — during precisely the window in which this phase's success is judged by
+watching for new errors and ranking drops.
+
+- [ ] **Identify which Search Console property currently holds this site's data, and how it is
+      verified.** Unresolved: the only discoverable token is `google1718743335455f1c.html`,
+      dated 2020; there is no verification meta tag on the live homepage and no verification
+      DNS record — yet sixteen months of impression data exists. Something verifies an active
+      property that has not been identified. *(Settings → Ownership verification)*
+- [ ] **Create and verify the property that will carry post-launch traffic, BEFORE the swap.**
+      Prefer a **domain-level** property: it unifies all four variants and is immune to any
+      file move. Failing that, a URL-prefix property on `https://torin.bg/`.
+      *(Add property)*
+- [ ] **GATE:** that property is verified and reporting. A checklist whose property step comes
+      *after* the swap is blind during the only window that matters.
+
+### GATE 0.2 — Is DNS record editing available at all?
+
+- [ ] Check cPanel → Zone Editor, or the registrar's DNS panel.
+
+This single answer decides two things: whether a **domain-level** property (GATE 0.1) is
+possible, and whether a mail authentication policy record is possible at all. **If DNS is
+inaccessible:** record it and move on — the mail policy record is out of scope, and Search
+Console verification stays dependent on a file that a directory move can orphan. That is a
+risk to record, not a blocker. See Section 3 note on the verification file.
+
+### GATE 0.3 — A second, move-proof Search Console verification method
+
+The current verification depends on a single file at the document root. This cutover **moves
+the document root**. If that file is left behind, verification lapses and the property stops
+reporting — during the observation window.
+
+- [ ] Establish a second method (DNS TXT if GATE 0.2 allows; otherwise the HTML meta tag in
+      `includes/header.php`, which travels with the build and cannot be orphaned by a move).
+
+### GATE 0.4 — Owner sign-off on public commitments
+
+- [ ] The privacy / terms wording on `uslovia.html` is flagged for **owner approval before
+      launch** — it becomes a public commitment the moment it is served from the root.
+
+---
+
+## Section 1 — Pre-flight, in this order
+
+### 1.1 — `php -l` ON EVERY PHP FILE. BEFORE ANYTHING ELSE. (ledger #47, #30)
+
+**No PHP in this entire phase has ever been parsed.** There is no `php` binary and no Docker
+daemon on the build machine, so not one file has been syntax-checked.
+
+`src/includes/header.php` is the acute case: it has been edited by **three separate plans**
+(04-06, 04-07, 04-08) without once being parsed, and it is `include`d by **all 19 pages**. One
+parse error there takes the whole site down at once — the precise failure mode this phase
+exists to prevent, arriving from the other direction. Five more files from 04-06 are in the
+same state.
+
+- [ ] **UNRUN** — run `php -l` on **`src/includes/header.php` first**, then on every other
+      PHP file in the tree. At minimum: `settings.php`, `banner.php`, `site-config.php`,
+      `jsonld.php`, `footer.php` (the 04-06 five), plus `category-page.php`, `contact-form.php`,
+      `notify.php`, `upload.php`, `spam-guard.php`, `contact-send.php`, and the 19 `.html`
+      pages — which are PHP wearing a `.html` extension and are parsed as code on this host.
+- [ ] **GATE:** zero parse errors. A parse error found here is free; found after the swap it
+      is an outage.
+
+**Deploy the PHP includes TOGETHER, not one at a time.** These files include each other, so a
+partial upload can leave the site calling a function that has not landed yet.
+
+### 1.2 — The four self-tests that have never run (ledger #19, #29, #35, #40)
+
+All four wait on the same single missing dependency: a PHP runtime. The moment one exists:
+
+- [ ] **UNRUN** — `php scripts/upload-selftest.php` (#19). Eight behaviours, authored as the
+      RED half of a TDD cycle whose RED was never observed failing and whose GREEN was never
+      observed passing.
+- [ ] **UNRUN** — `php scripts/settings-selftest.php` (#29). 22 assertions over the behaviour
+      block, the date gate and the structured-data entry counts.
+- [ ] **UNRUN** — `php scripts/notify-selftest.php` (#40). Encodes the all-channels-failed
+      branch, still unproven at runtime.
+- [ ] **NOT EVEN WRITTEN** — `scripts/spam-guard-selftest.php` (#35) was never authored. Nine
+      assertions matching 04-05's behaviour list would close it, in the same shape as the
+      other three.
+
+A test that has never run is a **specification, not a gate.** None of these may be reported as
+passing.
+
+### 1.3 — Two cheap open decisions, both still open
+
+- [ ] **#43 — the JS comment-stripping decision.** `analytics.js` gzips to 1959 B against a
+      ≤1024 B budget. **The code alone is 972 B — inside budget; the comments are the entire
+      overage.** There is no build step, so comments are wire bytes. Second file to hit this
+      exact wall (#20: `photo-resize.js`, 2042 B against 2048 B, six bytes of headroom). Pick
+      one: **(a)** accept and raise the budget to ~2.0 KB; **(b)** add deploy-time JS comment
+      stripping to `deploy-new.sh`, the way CSS already goes through
+      `scripts/lib/strip-css-comments.py` — brings `analytics.js` to ~972 B and gives
+      `photo-resize.js` real headroom; **(c)** strip by hand and lose the documentation.
+      **Recommended: (b).**
+- [ ] **#44 — move the C-8 error-band `.focus()` call out of `analytics.js` into
+      `src/js/site.js`.** **A two-line move.** Content blockers commonly match the filename
+      `analytics.js` by pattern; a blocked file means error-band focus silently stops working
+      for exactly the keyboard and screen-reader users who need it, landing them at the top of
+      the document instead of on the explanation of what went wrong. `site.js` is immune and is
+      the right home for accessibility behaviour.
+
+### 1.4 — Ordering constraint: the analytics disclosure must not ship ahead of the tracker (#24)
+
+`uslovia.html` carries a disclosure naming an analytics processor. It is **accurate only once
+`src/js/analytics.js` is actually loading.** Both are in the tree now, so this is satisfied by
+deploying them together — but it is recorded because the failure is silent and one-directional:
+
+- [ ] **GATE:** `uslovia.html` and `js/analytics.js` go up in the **same** deploy. The
+      disclosure must never be live ahead of the tracker it describes. (If analytics is ever
+      dropped, DELETE the disclosure block rather than leaving it.)
+
+### 1.5 — Backup
+
+- [ ] Run `scripts/backup-live-site.sh` and confirm the archive is complete and restorable.
+      This is the floor under every rollback below (MIGR-03).
+
+---
+
+## Section 2 — The swap, in order
+
+**Mechanism (D4-28): server-side renames, both directions.** No re-upload, a swap window
+measured in seconds, and rollback is the same move in reverse.
+
+- [ ] **2.1 — Point cPanel → Select PHP Version at `public_html/` (the ROOT) and set PHP 8.5.**
+      **This is not optional and was not in the original cutover sketch.** That action is what
+      *generates* `/home/torin/public_html/php.fcgi` and `php85-fcgi.ini`. The promoted
+      `.htaccess` names `/home/torin/public_html/php.fcgi` in three `FcgidWrapper` directives;
+      the wrapper embeds an **absolute path** that the directory move invalidates, and the root
+      has never had one generated because D4-03 deliberately left it untouched. **A stale or
+      missing wrapper path does not warn — it 500s every page at once.**
+
+- [ ] **2.2 — Move the current live root OUTSIDE the document root.**
+      Move it to `/home/torin/old-site/` — **NOT** to `public_html/old/`.
+      **A subdirectory of the document root would publish a complete crawlable copy of every
+      retired page and of the unstaffed Zendesk chat widget that CONTACT-02 exists to remove**
+      (T-04-50). The old site stays on disk as a live safety net; it must not stay *reachable*.
+      Leave the Section 4 files where they are — do not sweep them along with the move.
+
+- [ ] **2.3 — Move `public_html/new/*` up to `public_html/`.**
+
+- [ ] **2.4 — Confirm `.htaccess` landed at the root** and is the promoted form. Spot-check the
+      two edits by eye before running anything: the rewrite base is `/`, and the
+      canonicalisation substitution target is the bare apex. **One being right does not imply
+      the other** — that is the whole of warning D4-30.
+
+- [ ] **2.5 — Confirm `src/google1718743335455f1c.html` is present at the root.** Verified
+      byte-identical to what the live root serves (53 bytes, no trailing newline, compared with
+      `cmp` in 04-09). **Trap specific to this host:** its `.html` extension is executed as PHP
+      here, so after promotion the file is *parsed before being served*. It must come back
+      byte-identical — the sweep fetches and compares it rather than checking it merely exists.
+
+- [ ] **2.6 — Remove the staging subtree** once the root is confirmed serving.
+
+---
+
+## Section 3 — The manual deletion list: ELEVEN files, by exact path
+
+**Why this is manual.** `scripts/deploy-new.sh` **uploads and never deletes**, and no script in
+this project can delete a remote file. Giving the deploy script a delete capability was
+deliberately rejected (D4-31): that means building a tool whose worst-case failure is
+destructive, to solve an eleven-file problem that happens once.
+
+> **NAME THE CLASS, NOT JUST THESE FILES (ledger #45).** Every file deletion in this project
+> has this same gap: removing a file from `src/` removes it from the tree and leaves it live on
+> the server forever. **Any future deletion needs a manual removal pass too.** This list is one
+> instance of a standing problem, not a one-off.
+
+Delete each of the following by hand in FileZilla. Each path is **relative to the document
+root after the swap**.
+
+1. `covid.html` — retired page; source-deleted, unreachable behind its retirement redirect.
+2. `laptopi.html` — retired page; source-deleted, unreachable behind its retirement redirect.
+3. `rezervni-chasti.html` — retired page; source-deleted, unreachable behind its redirect.
+4. `za-bateriite.html` — retired page; source-deleted, unreachable behind its redirect.
+5. `img/repairs/profilaktika7.jpg` — withdrawn photograph; referenced by no page, but **fetchable by direct URL** (confirmed 200 on 2026-09-21).
+6. `img/repairs/profilaktika15.jpg` — withdrawn photograph; same, confirmed 200 on 2026-09-21.
+7. `img/repairs/profilaktika17.jpg` — withdrawn photograph; same, confirmed 200 on 2026-09-21.
+8. `css/theme-a.css` — development scaffolding, deleted from the tree in 04-07, **still resident on the server** because the deploy script never deletes (confirmed 200 on 2026-09-21).
+9. `includes/dev-switcher.php` — development scaffolding, deleted from the tree in 04-07, still resident (confirmed 200 on 2026-09-21). **This has been rendering on all 19 staging pages since Phase 2 — leaving it after cutover would publish it.**
+10. `header.js` — superseded by the rebuild; still returning 200 at the live root (`04-RESEARCH.md:916`, VERIFIED curl 2026-09-17; re-confirmed 200 on 2026-09-21).
+11. `otpuska.js` — superseded by the rebuild; still returning 200 at the live root (same source, re-confirmed 200 on 2026-09-21).
+
+> **Entries 10 and 11 are the two most likely to fall off this list.** They are what expanded
+> it from seven files to eleven *after* D4-31 was written, so every older reference to "the
+> seven stale files" is short by exactly these two. Check them by name.
+
+- [ ] All eleven deleted.
+- [ ] **GATE:** re-fetch each of the eleven and confirm **404**. Deleting and not checking is
+      how a file survives a deletion pass.
+
+---
+
+## Section 4 — Leave these at the root. Do not move them.
+
+- [ ] `.well-known/` — **the certificate challenge directory.** The TLS certificate renews
+      within weeks of an autumn cutover, and a missing challenge path **fails renewal silently
+      until the certificate expires** (T-04-52). By then the whole site is untrustworthy in
+      every browser.
+- [ ] `cgi-bin/` — the host's script directory.
+- [ ] The host-generated **error log** at the root. It stays, and it stays **refused over
+      HTTP** — the root is about to gain executing pages and a submission handler, so it will
+      start accumulating entries that must not be publicly readable (T-04-51). The sweep
+      **asserts** it is refused rather than merely observing that it looks refused.
+- [ ] `php.fcgi`, `php85-fcgi.ini`, `.user.ini`, `settings.txt` — generated or owner-edited,
+      all four denied by the authorisation block in `.htaccess`.
+
+**Watch item (T-04-53):** cPanel may **rewrite its own handler block into the root
+`.htaccess`**, where it will coexist with the hand-written one. If pages start 500ing or
+serving as source after a panel visit, look here first — the panel's block covers `.php` only,
+and every page on this site is PHP wearing a `.html` extension.
+
+---
+
+## Section 5 — Go/no-go sweep
+
+**Rollback on any failure.** A homepage spot-check was explicitly rejected as the go/no-go: it
+would not have caught the redirect defect this project actually shipped.
+
+- [ ] Run `scripts/cutover-sweep.sh --target https://torin.bg` and read the verdict.
+
+The sweep **follows every redirect to its terminal response** and asserts the final status and
+the final URL, not the first status line. This is the single most important property of the
+instrument: **a check that reads only the first response line and the `Location` header PASSES
+the exact defect this project shipped** — four indexed URLs returning a correct-looking `301`
+straight to a missing page, with nothing in any build failing.
+
+It covers: all 19 pages 200 with zero runtime warnings and a substantive Cyrillic token count;
+the four retirement redirects and the four host variants, each to its terminal state with a hop
+count; the staging `noindex` header **absent**; the verification file byte-identical; favicon,
+`robots.txt` and `sitemap.xml` present; the host error log refused; the Zendesk widget absent
+from every page; the contact page reachable with its `no-store` directive intact.
+
+- [ ] **GATE:** sweep passes. **Any** failure → Section 7.
+- [ ] **UNRUN, manual** — submit **one real enquiry** through the live form and confirm it
+      arrives. The sweep cannot prove delivery, only that the endpoint answered.
+
+---
+
+## Section 6 — After the swap
+
+### 6.1 — Re-run everything that was measured against the old build (#50)
+
+- [ ] `node scripts/seo-metadata-check.js --live` — the 11 tuned pages served **pre-plan**
+      metadata throughout this phase, so the check reported served-matches-source on exactly
+      those 11 while measuring the old build. Re-run, then close ledger #50.
+- [ ] `scripts/asset-version-check.sh` — the `?v=<filemtime>` stamps are the **precondition**
+      for the one-year CSS/JS cache lifetimes in `.htaccess`, not a nicety. A year-long
+      lifetime on an unstamped URL is unreachable by any correction.
+- [ ] `scripts/sitemap-check.sh --live`, and submit `sitemap.xml` in Search Console.
+- [ ] Re-run the rendered probes against the root origin.
+
+### 6.2 — The SMTP-to-sendmail cascade, never once observed (#38)
+
+**The functional heart of the notification design, and no real authentication failure has ever
+been watched falling through.** It cannot be simulated on the build machine — it needs a live
+host, a relay to fail against, and a deliberately wrong credential. Run **all three** cases:
+
+- [ ] **(a) NO CREDENTIAL** — the shipped state. Submit the form. Expect log
+      `mail no smtp credential, using sendmail`, then `mail delivered via=sendmail`.
+- [ ] **(b) WRONG CREDENTIAL** — add `'smtp_password' => 'definitely-wrong'` to
+      `/home/torin/torin-secrets.php`. Submit. Expect
+      `mail smtp failed before acceptance, falling through to sendmail`, then
+      `mail delivered via=sendmail`, a 303, and the email to arrive.
+- [ ] **(c) CORRECT CREDENTIAL** — expect `mail delivered via=smtp` and **no** fall-through line.
+
+> **IN ALL THREE CASES THE ENQUIRY MUST ARRIVE EXACTLY ONCE.** Two copies means the
+> pre/post-acceptance boundary is wrong, which is the single outcome this design exists to
+> prevent. The boundary is implemented by observing the relay's literal `354` reply rather than
+> parsing PHPMailer's localised exception text; ambiguity resolves to **DO NOT RETRY**.
+
+- [ ] Remove the deliberately wrong credential afterwards.
+
+### 6.3 — The photo pipeline's human-eyes items
+
+None of these can be closed by a script. Each needs a person looking at a screen.
+
+- [ ] **#17 — one PORTRAIT photograph from a real handset**, submitted through `kontakti.html`,
+      **checked upright in Telegram.** Every fixture used so far was produced by macOS `sips`,
+      which bakes rotation into pixels and writes **no orientation tag** — and a file with no
+      tag passes a completely broken pipeline identically to a correct one. This is the plan's
+      own backstop truth EA-07; it is unverified on **both** sides.
+- [ ] **#18 — somebody actually LOOKS at the owner's phone.** Every API call returned `ok:true`
+      and the photos reached Telegram's servers, but that is an assertion about the API's
+      answer, not about what rendered. Confirm: the single photo shows the enquiry **as its
+      caption**, and three photos arrive as **ONE media group**, not three separate messages.
+      One human glance closes it.
+- [ ] **#21 — submit one WebP, or drop `webp` from the accept list.** The form advertises
+      `accept=image/jpeg,image/png,image/webp` and routes WebP through
+      `imagecreatefromwebp()` behind a `function_exists` guard, but no WebP was ever submitted.
+      **GD's WebP decoder is a separate build option from `ext-gd` itself**, which is what the
+      probe measured. If it is absent, every WebP the picker happily offers is refused with
+      «файлът не е разпознат като снимка». Either prove it works or stop advertising it.
+
+### 6.4 — Retire the transition guard
+
+- [ ] Confirm `x-powered-by` at the root does **not** report PHP 5.2.
+- [ ] **Only then**, delete the `<IfModule !mod_fcgid.c>` fail-safe block from the root
+      `.htaccess`. It is kept through the swap on purpose: if the Section 2.1 panel step is
+      missed, the block degrades the failure from "20 pages served to the public as readable
+      PHP source" to "still on 5.2, which is where we already were". **A fallback quietly
+      keeping 5.2 alive must never be allowed to pass as success.**
+
+### 6.5 — Observation window
+
+- [ ] Watch Search Console for new 404s and ranking movement.
+
+> **Read the success criterion correctly or it fails by construction.** Google's own guidance
+> is that consolidation after a protocol/host change takes **a few weeks or more**, and that no
+> change-of-address tool is involved for a same-domain protocol or prefix move. **Movement
+> during consolidation is expected and normal.** The criterion is *no unexplained drops and no
+> new missing pages* — not *no movement*.
+
+---
+
+## Section 7 — Rollback
+
+**The same move in reverse**, and it is seconds, which is the entire reason D4-28 chose
+server-side renames over a re-upload.
+
+1. Move `public_html/*` (the new site) back down to `public_html/new/`.
+2. Move `/home/torin/old-site/*` back up to `public_html/`.
+3. Restore the previous root `.htaccess` from the Section 1.5 backup.
+4. Re-point cPanel → Select PHP Version back at `public_html/new/` so the wrapper path in the
+   staging `.htaccess` resolves again.
+5. Re-fetch the homepage and confirm the old site is serving.
+
+**Rollback trigger:** any Section 5 gate failing. **If the sweep cannot fail, the rollback can
+never fire** — which is why the sweep is required to have been demonstrated failing against a
+known-bad case before it is trusted to pass a real one.
+
+> **One thing rollback does NOT undo.** The canonicalisation redirects are a **one-way door**
+> (D4-29). Moving files back restores the content; it does not un-consolidate a search index
+> that has begun following `301`s to the apex. If the swap is rolled back, the redirects
+> published in step 2.4 keep pointing at the apex — which is still correct for the old site,
+> since it is served on the same four variants. Rolling back the *content* is cheap; rolling
+> back the *canonical host choice* is not, and is not attempted here.
