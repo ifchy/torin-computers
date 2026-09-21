@@ -103,9 +103,20 @@ require_once(dirname(__FILE__) . '/includes/header.php');
 			      // .cta-block__actions is reused verbatim for the wrapping flex
 			      // row — no new class, no new rule, nothing spent from this
 			      // phase's 1.5 KB CSS budget. ?>
+			<?php // data-slot is the analytics label (UI-SPEC C-9), added in 04-07.
+			      // THIS SLOT IS NOT IN C-9's TABLE and its absence there is not a
+			      // reason to remove it: that table was written before 04-05 created
+			      // this page, so it enumerates six slots and seven rendered anchors
+			      // on the homepage. This loop is a SEVENTH slot and a further three
+			      // rendered anchors — one source line, one slot value, exactly like
+			      // the footer's phones loop. Leaving it unlabelled would have made
+			      // calls from the highest-intent page on the site the one call
+			      // surface nobody could count. The value is in analytics.js's
+			      // closed SLOTS list; adding a slot means adding it there too, or
+			      // the event is silently dropped. ?>
 			<div class="cta-block__actions">
 <?php			foreach ($site['phones'] as $torin_phone) { ?>
-				<a class="btn btn--secondary" href="tel:<?php echo torin_esc(str_replace(' ', '', $torin_phone)); ?>"><?php echo torin_icon('phone'); ?><?php echo torin_esc($torin_phone); ?></a>
+				<a class="btn btn--secondary" href="tel:<?php echo torin_esc(str_replace(' ', '', $torin_phone)); ?>" data-slot="kontakti"><?php echo torin_icon('phone'); ?><?php echo torin_esc($torin_phone); ?></a>
 <?php			} ?>
 			</div>
 		</div>

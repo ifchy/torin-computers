@@ -258,6 +258,41 @@ $site = array(
 	'gbp_reviews' => '150+',
 	'gbp_url'     => 'https://maps.google.com/?cid=7041654319750291392',
 
+	// ANALYTICS-01 (D4-18, D4-19, D4-21). The Umami Cloud website id — the only
+	// value the tracker tag needs, and NOT a secret: it ships in the HTML of
+	// every page by construction, so hiding it would be theatre. What is
+	// genuinely secret — the account behind it — is not in this repository at
+	// all and never may be, which is the same handling 'secrets_path' below
+	// describes for the Telegram credentials.
+	//
+	// PROVENANCE: read from Umami Cloud → Settings → Websites and supplied by
+	// the shop owner on 2026-09-21, together with his sign-off on the departure
+	// from the analytics product he originally asked for by name. D4-18 made
+	// that sign-off a precondition rather than a courtesy; plan 04-07 Task 1 is
+	// where it was given.
+	//
+	// FREE-TIER LIMITS, re-verified on 2026-09-21 as D4-19 requires: 100,000
+	// events per month, THREE websites, six months of retention. 04-07-PLAN.md
+	// says «one website» — that figure is out of date and this line is the
+	// correction, recorded rather than silently carried forward. A completed
+	// enquiry costs at most six events, so a local repair shop is nowhere near
+	// the ceiling.
+	//
+	// COMMERCIAL USE: confirmed permitted BY THE OWNER on 2026-09-21, and not
+	// by any public document. The pricing and terms pages render through
+	// JavaScript and return nothing to a fetcher; the Cloud FAQ says only that
+	// the tier suits «personal projects and low traffic websites», which is
+	// marketing copy and not a restriction clause. There is no public
+	// prohibition AND no public permission — the permission on record is his.
+	// Do not read this line as a citation of vendor terms. 04-07-SUMMARY.md
+	// carries the full provenance and the open request for the artefact behind
+	// his confirmation.
+	//
+	// BLANK THIS STRING to remove analytics from every page with no other edit:
+	// header.php emits no tracker tag at all when it is empty, and js/analytics.js
+	// then finds no tracker and silently does nothing.
+	'umami_website_id' => '51b8d23c-9410-4a41-8e56-3a63a3835bb2',
+
 	// [ASSUMED] The absolute base every BreadcrumbList item URL is built from
 	// (jsonld.php), because schema.org item URLs must be absolute while every
 	// href in the markup stays relative.

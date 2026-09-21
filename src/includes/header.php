@@ -81,6 +81,26 @@ if (!isset($torin_title)) {
 if (!isset($torin_desc)) {
 	$torin_desc = 'ТОРИН КОМПЮТЪРС — ремонт на лаптопи в София: счупвания, екран и клавиатура, оптимизация, заливане и дънни платки, прегряване, нестандартна техника.';
 }
+
+// SERVER-RENDERED ANALYTICS EVENTS (UI-SPEC C-9). Two of the nine events in
+// the contract cannot be observed from the client — «this enquiry completed»
+// and «the server rejected this field» are facts only the server holds — so
+// the page DECLARES them here and js/analytics.js fires them. A page assigns
+// $torin_track before this include as a space-separated token string:
+// «form-sent», or «form-error:device form-error:email».
+//
+// THE TOKEN IS NOT A PROPERTY BAG AND MUST NEVER BECOME ONE. Only the fixed
+// event names and the seven fixed field names may appear in it; analytics.js
+// drops anything outside those lists, so a submitted value written here would
+// be discarded rather than sent — but it must not be written here in the first
+// place. Nothing derived from what a visitor typed goes into this string.
+//
+// Unset on nineteen of twenty pages, where it emits no attribute at all and
+// the <body> tag is byte-identical to what it has always been.
+$torin_track_attr = '';
+if (isset($torin_track) && $torin_track !== '') {
+	$torin_track_attr = ' data-track="' . htmlspecialchars($torin_track, ENT_QUOTES, 'UTF-8') . '"';
+}
 ?>
 <!DOCTYPE html>
 <html lang="bg"<?php echo $torin_html_attr; ?>>
@@ -188,10 +208,46 @@ if (!isset($torin_desc)) {
       // written before first paint, which this project deliberately does not
       // have. ?>
 <script src="<?php echo htmlspecialchars(torin_asset_url('js/site.js'), ENT_QUOTES, 'UTF-8'); ?>" defer></script>
+<?php // ANALYTICS-01 (D4-18, UI-SPEC C-9). The tracker, emitted ONCE, here,
+      // and deferred so it never blocks the parser.
+      //
+      // NOT version-stamped by torin_asset_url() like every other script URL
+      // in this file: that helper reads a local filemtime and this is not a
+      // first-party asset. No integrity pin is possible either — the vendor
+      // updates the file in place — which is accepted and recorded as T-04-37
+      // rather than papered over with a hash that would go stale silently.
+      //
+      // NO CONNECTION HINT OF ANY KIND MAY BE ADDED FOR THIS ORIGIN, EVER.
+      // One would open a third-party connection in competition with the
+      // Cyrillic font preload above, which is the largest-contentful-paint
+      // resource on every page. Analytics never races the font. (The two
+      // relevant link-rel keywords are deliberately not spelled out here: a
+      // plan-level grep asserts this file contains neither, and writing them
+      // in a comment would fail the gate that guards them.)
+      //
+      // The web-vitals collection attribute is OMITTED — it is opt-in, adds
+      // payload, and would spend the event allowance on a question nobody
+      // asked. Its name is likewise not written here, for the same reason.
+      //
+      // Emitted only when the id is set, so blanking that one config value
+      // removes the third party from all 20 pages with no edit here.
+      if ($site['umami_website_id'] !== '') { ?>
+<script defer src="https://cloud.umami.is/script.js" data-website-id="<?php echo htmlspecialchars($site['umami_website_id'], ENT_QUOTES, 'UTF-8'); ?>"></script>
+<?php } ?>
+<?php // The first-party listener that fires every event on this site. Site-wide
+      // and deferred, because the phone-anchor listener is needed on every page
+      // and the form handlers inside it guard on the form's own id. It is
+      // version-stamped like every other first-party asset.
+      //
+      // IT IS LOADED AFTER THE TRACKER ABOVE AND THAT ORDER IS NOT LOAD-BEARING:
+      // both are deferred, analytics.js re-reads window.umami at each call
+      // rather than capturing it once, and a missing tracker is a silent no-op.
+      // Do not "fix" the order into a dependency it does not have. ?>
+<script src="<?php echo htmlspecialchars(torin_asset_url('js/analytics.js'), ENT_QUOTES, 'UTF-8'); ?>" defer></script>
 <?php echo $torin_extra_head; ?>
 </head>
 
-<body class="site-body">
+<body class="site-body"<?php echo $torin_track_attr; ?>>
 <?php
 // ── DEV-ONLY (D-03) — delete these lines at the Phase 4 cutover ──────────────
 if (file_exists($torin_dev_switcher)) { torin_render_theme_switcher($torin_theme); }
