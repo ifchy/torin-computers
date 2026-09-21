@@ -176,14 +176,28 @@ done
 echo
 
 # ---------------------------------------------------------------------------
-# Check C -- the cache lifetime is bounded.
+# Check C -- the cache lifetime is EXACTLY the declared one.
+#
+# CHANGED BY PLAN 04-08 (D4-34). This check used to assert `max-age <= 600`,
+# and its own failure text said "Phase 4 raises this, DESIGN-02". This is that
+# moment: .htaccess now serves stylesheets and first-party scripts with a
+# one-year lifetime, which is safe ONLY because every one of these URLs carries
+# a ?v=<filemtime> stamp -- the property Checks A and B above assert. Left at
+# 600 this check would fail forever the moment the new .htaccess deployed.
+#
+# It asserts an EXACT value rather than a bound, deliberately. A bound cannot
+# tell the new state from the old one, and neither can a substring: the gate
+# `grep 'cache-control:.*max-age=3'` matches BOTH the old max-age=300 and the
+# new max-age=31536000, so it would have reported green before this change and
+# green after, while measuring nothing. An exact comparison is the only form of
+# this check that can actually observe the change it exists to guard.
 # ---------------------------------------------------------------------------
-echo "== Check C: Cache-Control max-age bounded (<= 600) =="
-echo "   (the second line of defence behind the stamp; catches a future edit"
-echo "    raising the staging expiry back to days while the stamp stands alone)"
+EXPECTED_MAXAGE=31536000   # one year, D4-34
+echo "== Check C: Cache-Control max-age is exactly ${EXPECTED_MAXAGE} (one year) =="
+echo "   (safe ONLY because of the ?v= stamp proved by Checks A and B; an exact"
+echo "    match, because a bound cannot distinguish 300 from 31536000)"
 printf '%-28s %-12s %s\n' ASSET MAXAGE VERDICT
 
-MAX_ALLOWED=600
 for path in css/base.css css/components.css js/site.js; do
 	cc=$(curl -sI "${BASE}/${path}" | tr -d '\r' \
 		| awk 'tolower($1)=="cache-control:"{sub(/^[^:]*: */,"");print}')
@@ -192,9 +206,9 @@ for path in css/base.css css/components.css js/site.js; do
 	if [ -z "$maxage" ]; then
 		printf '%-28s %-12s %s\n' "$path" "none" "MISSING"
 		fail "${path} returned no Cache-Control max-age -- it falls to heuristic caching, which is undeclared behaviour"
-	elif [ "$maxage" -gt "$MAX_ALLOWED" ]; then
-		printf '%-28s %-12s %s\n' "$path" "$maxage" "TOO LONG"
-		fail "${path} max-age=${maxage} exceeds ${MAX_ALLOWED} -- /new/ is a reviewed staging preview whose CSS changes several times a day (Phase 4 raises this, DESIGN-02)"
+	elif [ "$maxage" -ne "$EXPECTED_MAXAGE" ]; then
+		printf '%-28s %-12s %s\n' "$path" "$maxage" "WRONG"
+		fail "${path} max-age=${maxage}, expected ${EXPECTED_MAXAGE} (D4-34). Below it: the deploy has not landed, or the expiry block was edited. Above it: something is overriding .htaccess."
 	else
 		printf '%-28s %-12s %s\n' "$path" "$maxage" "OK"
 	fi
