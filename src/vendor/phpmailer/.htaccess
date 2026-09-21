@@ -1,0 +1,38 @@
+# src/vendor/phpmailer/.htaccess — DENY EVERYTHING IN THIS DIRECTORY.
+#
+# The three files beside this one are third-party library code. They are
+# `require`d by ../../contact-send.php and are never a URL anybody should be
+# able to fetch. Requesting PHPMailer.php directly today produces an empty
+# 200 — the file only declares a namespace and a class, so nothing runs and
+# nothing prints — but an empty 200 still confirms to a scanner that this
+# library is present at this path, and the version constant is two lines into
+# a file that a future misconfiguration (a lost handler mapping, a rolled-back
+# .htaccess) would serve as plain text. Denying the directory outright costs
+# nothing and closes both, today and after any such rollback.
+#
+# THIS FILE IS PER-DIRECTORY ON PURPOSE rather than a fifth name added to the
+# FilesMatch block in ../../.htaccess. That block guards files whose names are
+# fixed by the control panel; this one guards a whole directory whose contents
+# change whenever the library is updated, and keeping the rule inside the
+# directory means a future file added here is denied the moment it lands
+# instead of the moment somebody remembers to extend a regular expression two
+# levels up.
+#
+# BOTH AUTHORISATION SYNTAXES, EACH MODULE-GUARDED, exactly as ../../.htaccess
+# argues at its own deny block: an unguarded directive for an absent module
+# returns 500 for the whole subtree (T-02-02). The modern syntax is tried
+# first; the legacy one fires only where mod_authz_core is genuinely absent,
+# so the two can never both apply.
+#
+# T-04-24 (the vendored library silently swapped) is mitigated by the SHA256
+# digests recorded in 04-05-SUMMARY.md, not by this file. This file only stops
+# the copy being READ over HTTP.
+<IfModule mod_authz_core.c>
+	Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+	<IfModule mod_access_compat.c>
+		Order allow,deny
+		Deny from all
+	</IfModule>
+</IfModule>
