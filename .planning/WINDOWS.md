@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 27
+open_count: 31
 waived_count: 0
 fixed_count: 6
-total_count: 33
-last_updated: 2026-09-20T16:29:03.826Z
+total_count: 37
+last_updated: 2026-09-21T06:08:54.267Z
 ---
 
 # Broken Windows Ledger
@@ -48,6 +48,10 @@ last_updated: 2026-09-20T16:29:03.826Z
 | 31 | 04 | deviation | src/includes/banner.php |  | 04-06 (G4) — OPEN OWNER QUESTION created by this plan. The closure strip does not appear until the closure actually starts (Decisions #3). The UI contract's phrasing would have shown it from the moment the dates were set, i.e. as advance notice. One comparison either way and it should be the owner's call, but he has not been asked. Raise at the 04-10 owner checkpoint. Two related plan deviations argued in 04-06-SUMMARY rather than quietly applied: hours_days is an allowlisted token rather than free text bounded at 20 chars (the plan's own headline truth is unreachable otherwise), and the banner message cap is 120 code points rather than 300 characters (the 180px backstop is arithmetically unmeetable at 300). | open |  | 2026-09-20T16:28:37.121Z |  |
 | 32 | 04 | unrun-verify | src/settings.txt.example |  | 04-06 (G6): the cPanel File Manager round-trip has NEVER BEEN PERFORMED. The Bulgarian guide (docs/naruchnik-nastroyki.md) tells the owner to copy settings.txt.example, rename it, and edit it in cPanel with UTF-8 encoding — nobody has done this even once. The realistic failure is the panel's editor writing a BOM or a non-UTF-8 encoding; the parser rejects non-UTF-8 values per-key so the failure mode is SAFE, but it would be SILENT: the owner sees his edit ignored with no explanation. One human performing the procedure once, with the guide open, closes both this and the D5 human-judgment item. | open |  | 2026-09-20T16:28:42.942Z |  |
 | 33 | 04 | stub | src/includes/site-config.php |  | 04-06 (G5) — NARROWS AND SUPERSEDES LEDGER ENTRY 3. Entry 3 covered three [ASSUMED] markers in site-config.php: hours, viber and notice. TWO ARE NOW RESOLVED — hours is closed by D4-25 and plan 04-06 (one source, four consumers); viber was removed in 04-04 when the chat button was retired from all five CTA slots. ONE REMAINS: the 'notice' marker. OWNER-QUESTIONS #8 asks whether the footer band should exist at all and still has no answer. Its CONTENT is no longer unconfirmed — it is composed from the confirmed hours — but the EXISTENCE question is untouched, and 04-06 deliberately left the marker in place rather than promoting it because it merely looked settled. This narrowed entry is the live one; entry 3 is marked fixed and should be read as superseded by this. | open |  | 2026-09-20T16:29:00.052Z |  |
+| 34 | 04 | unrun-verify | src/includes/spam-guard.php |  | 04-05 Task 2: nothing in the spam guard has been executed by a PHP interpreter, in either direction. No php binary and no running Docker daemon on the build machine (orchestrator-confirmed), and deploy-new.sh is denied to subagents, so neither a local render nor a staging deploy was possible. Balance checks and greps are STRUCTURAL and do not prove the file parses. Three live gates are unrun: (a) a POST with a forged timestamp returns no 5xx and produces no notification; (b) a valid submission succeeds and an identical repeat inside the window is rejected, both with timestamps; (c) each rejection produces exactly one correlation line in the host error log with NO submitted field value in it. Run all three the moment the code reaches /new/. This is an environment boundary, not evidence of correctness. | open |  | 2026-09-21T06:08:35.337Z |  |
+| 35 | 04 | unrun-verify | src/includes/spam-guard.php |  | 04-05 Task 2: the tdd=true RED/GREEN cycle was NOT performed. With no PHP runtime there is no way to observe a failing test, and this run's scope was limited to three named source files, so no scripts/spam-guard-selftest.php was authored either. The same shape as scripts/upload-selftest.php (ledger 19) and scripts/settings-selftest.php (ledger 29) would close it: nine assertions matching the plan's behavior list, runnable as 'php scripts/spam-guard-selftest.php' once a runtime exists. Three selftests now await the same single missing dependency. | open |  | 2026-09-21T06:08:41.039Z |  |
+| 36 | 04 | deviation | src/includes/spam-guard.php |  | 04-05 Task 2: the HMAC signing key and the throttle records live in sys_get_temp_dir(), matching the precedent upload.php:178-194 set for visitor photographs. On a host whose temp directory is genuinely shared between accounts, a neighbouring tenant could read the key or pre-create the file; the exclusive-create mode and symlink refusal close the cheap version of that attack, not the expensive one. Worth ONE LINE of confirmation from the hosting panel that this account has a private temp directory. Second-order effect worth knowing: a temp-dir change or a system reaper ROTATES the key, which makes in-flight forms verify as 'forged' — those get the honest retry page, so the failure is visible and recoverable rather than silent. | open |  | 2026-09-21T06:08:47.618Z |  |
+| 37 | 04 | deviation | src/includes/spam-guard.php |  | 04-05 Task 2: the throttle is keyed on REMOTE_ADDR, so a whole office or a mobile carrier behind one NAT address shares a quota of one delivered enquiry per fifteen minutes. The rejection message names the shop's telephone number in the same sentence, so a throttled visitor is never left without a route — but this shape must be understood before the window is ever tightened. Related design call, deliberate and documented: the throttle records DELIVERED ENQUIRIES, not POSTs (via torin_rate_limit_record() inside the success branch), because counting every POST would throttle a visitor correcting a validation error or retrying after a page that told them to retry. | open |  | 2026-09-21T06:08:54.267Z |  |
 
 ````json
 [
@@ -445,6 +449,54 @@ last_updated: 2026-09-20T16:29:03.826Z
     "status": "open",
     "reason": "",
     "recorded_at": "2026-09-20T16:29:00.052Z",
+    "resolved_at": null
+  },
+  {
+    "id": 34,
+    "kind": "unrun-verify",
+    "phase": "04",
+    "file": "src/includes/spam-guard.php",
+    "line": null,
+    "description": "04-05 Task 2: nothing in the spam guard has been executed by a PHP interpreter, in either direction. No php binary and no running Docker daemon on the build machine (orchestrator-confirmed), and deploy-new.sh is denied to subagents, so neither a local render nor a staging deploy was possible. Balance checks and greps are STRUCTURAL and do not prove the file parses. Three live gates are unrun: (a) a POST with a forged timestamp returns no 5xx and produces no notification; (b) a valid submission succeeds and an identical repeat inside the window is rejected, both with timestamps; (c) each rejection produces exactly one correlation line in the host error log with NO submitted field value in it. Run all three the moment the code reaches /new/. This is an environment boundary, not evidence of correctness.",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-09-21T06:08:35.337Z",
+    "resolved_at": null
+  },
+  {
+    "id": 35,
+    "kind": "unrun-verify",
+    "phase": "04",
+    "file": "src/includes/spam-guard.php",
+    "line": null,
+    "description": "04-05 Task 2: the tdd=true RED/GREEN cycle was NOT performed. With no PHP runtime there is no way to observe a failing test, and this run's scope was limited to three named source files, so no scripts/spam-guard-selftest.php was authored either. The same shape as scripts/upload-selftest.php (ledger 19) and scripts/settings-selftest.php (ledger 29) would close it: nine assertions matching the plan's behavior list, runnable as 'php scripts/spam-guard-selftest.php' once a runtime exists. Three selftests now await the same single missing dependency.",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-09-21T06:08:41.039Z",
+    "resolved_at": null
+  },
+  {
+    "id": 36,
+    "kind": "deviation",
+    "phase": "04",
+    "file": "src/includes/spam-guard.php",
+    "line": null,
+    "description": "04-05 Task 2: the HMAC signing key and the throttle records live in sys_get_temp_dir(), matching the precedent upload.php:178-194 set for visitor photographs. On a host whose temp directory is genuinely shared between accounts, a neighbouring tenant could read the key or pre-create the file; the exclusive-create mode and symlink refusal close the cheap version of that attack, not the expensive one. Worth ONE LINE of confirmation from the hosting panel that this account has a private temp directory. Second-order effect worth knowing: a temp-dir change or a system reaper ROTATES the key, which makes in-flight forms verify as 'forged' — those get the honest retry page, so the failure is visible and recoverable rather than silent.",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-09-21T06:08:47.618Z",
+    "resolved_at": null
+  },
+  {
+    "id": 37,
+    "kind": "deviation",
+    "phase": "04",
+    "file": "src/includes/spam-guard.php",
+    "line": null,
+    "description": "04-05 Task 2: the throttle is keyed on REMOTE_ADDR, so a whole office or a mobile carrier behind one NAT address shares a quota of one delivered enquiry per fifteen minutes. The rejection message names the shop's telephone number in the same sentence, so a throttled visitor is never left without a route — but this shape must be understood before the window is ever tightened. Related design call, deliberate and documented: the throttle records DELIVERED ENQUIRIES, not POSTs (via torin_rate_limit_record() inside the success branch), because counting every POST would throttle a visitor correcting a validation error or retrying after a page that told them to retry.",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-09-21T06:08:54.267Z",
     "resolved_at": null
   }
 ]
