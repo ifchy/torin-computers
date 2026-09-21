@@ -15,9 +15,25 @@
 // site whose phone numbers are on every page and are the faster route anyway.
 //
 // THE RULE THAT KEEPS THAT TRUE: no include chain from header.php or
-// footer.php may reach this file, or reach src/vendor/phpmailer/ when 04-05
-// vendors it. This file includes the chrome; the chrome never includes this
+// footer.php may reach this file, or reach the vendored mail library beneath
+// src/vendor/. This file includes the chrome; the chrome never includes this
 // file. A plan-level grep asserts it in both directions.
+//
+// AS OF 04-05 THAT IS NO LONGER HYPOTHETICAL. The vendor directory exists and
+// holds three files of namespaced library code, required from exactly one
+// function in this file (torin_send_mail, at the bottom) and from nowhere else
+// in the tree. includes/notify.php registers a mail driver that DELEGATES to
+// that function by name rather than loading anything itself, so the library
+// path appears zero times under src/includes/. Keep it that way: the moment a
+// partial in includes/ requires the library directly, the rollback story at
+// the top of this comment stops being true for the whole site rather than for
+// one endpoint.
+//
+// THE THREE REQUIRE LINES AT THE BOTTOM ARE THE ONLY PLACE THAT PATH IS
+// WRITTEN IN THIS FILE, and the comments here describe it rather than spell
+// it, deliberately: a plan-level check counts the occurrences and expects
+// exactly three. The same discipline the note below applies to the legacy send
+// function, applied to a path instead of a function name.
 //
 // ANTI-ANALOG — site-current/mailer.php:84-99, the handler this replaces.
 // Three defects, all three live on the production site today, none repeated
@@ -193,8 +209,18 @@ if ($torin_ts_verdict !== 'ok') {
         // «stale» and a fair guess for the other two; what matters is that the
         // ACTION is the same in every case and is one the visitor can take.
         // Naming the verdict would be telling a bot which knob to turn.
-        'Изпращането не беше прието — възможно е формулярът да е стоял отворен твърде дълго. Отворете страницата наново и опитайте отново.',
-        []
+        'Изпращането не беше прието — възможно е формулярът да е стоял отворен твърде дълго. Опитайте отново — това, което сте написали, е запазено.',
+        [],
+        422,
+        // THE SENTENCE CHANGED WITH THE PAGE. It used to say «отворете
+        // страницата наново», because the page it led to had no form on it and
+        // reopening kontakti.html was the only way forward. The failure page
+        // now RETURNS the form, with a freshly-minted token and the visitor's
+        // own text in it, so that instruction would send them away from the
+        // thing that fixes their problem. A stale token is the likeliest
+        // non-bot cause of this branch and it is exactly the one a re-render
+        // repairs in a single click.
+        torin_values()
     );
 }
 
@@ -222,7 +248,11 @@ if (!torin_rate_limit_ok($torin_ip, $torin_secret, $torin_rl)) {
         'Вече получихме запитване от вас. Обадете се на ' . $site['phones'][0] .
         ', ако има какво да добавите, или изпратете нов формуляр след няколко минути.',
         [],
-        429
+        429,
+        // Repopulated like every other rejection. The visitor is being asked
+        // to WAIT, not to retype — and a throttled visitor who came back with
+        // something to add is the likeliest genuine case this branch sees.
+        torin_values()
     );
 }
 
@@ -278,7 +308,10 @@ if (torin_post('consent') === '') {
 }
 
 if (count($torin_errors) > 0) {
-    torin_send_fail_page('Проверете отбелязаните полета и опитайте отново.', $torin_errors);
+    // $torin_in, not torin_values(): identical content, but this is the array
+    // the validation above actually ruled on, so the page cannot show a value
+    // that differs from the one that was judged.
+    torin_send_fail_page('Проверете отбелязаните полета и опитайте отново.', $torin_errors, 422, $torin_in);
 }
 
 // ── PHOTOGRAPHS (CONTACT-05) ────────────────────────────────────────────────
@@ -340,9 +373,18 @@ if (count($torin_uploads['errors']) > 0) {
     }
     error_log('torin contact ' . $torin_rid . ': refused photos=' . count($torin_photos) .
         ' rejected=' . count($torin_uploads['errors']) . ' leftover=' . $torin_stale);
+    // WINDOWS ENTRY 22, CLOSED HERE. The per-file rejection reason already
+    // surfaced as a field-level error on the photo control; what it cost the
+    // visitor was everything they had typed, because this branch rendered a
+    // page with no form on it and the only way back was an empty one. A
+    // refused photograph is the cheapest thing in this submission to redo and
+    // the fault description is the most expensive, so losing the second to
+    // reject the first was exactly backwards.
     torin_send_fail_page(
         'Проверете отбелязаните полета и опитайте отново.',
-        ['photos' => $torin_uploads['errors'][0]]
+        ['photos' => $torin_uploads['errors'][0]],
+        422,
+        $torin_in
     );
 }
 
@@ -360,12 +402,12 @@ if (count($torin_uploads['errors']) > 0) {
 $torin_secrets_path = (string) ($site['secrets_path'] ?? '');
 if ($torin_secrets_path === '' || !is_file($torin_secrets_path)) {
     error_log('torin contact ' . $torin_rid . ': secrets file missing');
-    torin_send_fail_page(torin_fail_copy(), []);
+    torin_send_fail_page(torin_fail_copy(), [], 422, $torin_in);
 }
 $torin_secrets = require $torin_secrets_path;
 if (!is_array($torin_secrets)) {
     error_log('torin contact ' . $torin_rid . ': secrets file malformed');
-    torin_send_fail_page(torin_fail_copy(), []);
+    torin_send_fail_page(torin_fail_copy(), [], 422, $torin_in);
 }
 
 // ── NOTIFY ──────────────────────────────────────────────────────────────────
@@ -413,6 +455,58 @@ if ($torin_result['ok'] === true) {
     // one that would have worked.
     torin_rate_limit_record($torin_ip, $torin_secret, $torin_rl);
 
+    // ── THE CUSTOMER CONFIRMATION (D4-09) ───────────────────────────────────
+    // A SECOND, SEPARATE MESSAGE, and it lives INSIDE THE SUCCESS BRANCH
+    // rather than inside the mail driver. That placement is the whole
+    // judgement here and it is not an implementation detail:
+    //
+    // · Inside the driver it would be sent whenever the EMAIL channel worked,
+    //   which is not the same question. It would also NOT be sent when
+    //   Telegram alone carried the enquiry — so the visitor whose enquiry
+    //   arrived perfectly well would get no confirmation, purely because of
+    //   which internal channel happened to be up.
+    // · Here it is sent exactly when the enquiry REACHED THE SHOP by any
+    //   route, which is what «получихме запитването ви» actually claims.
+    //   Sending it on a failed submission would be the prohibition this plan
+    //   states outright — telling a visitor something was received when it was
+    //   not — in its most convincing possible form, because it would arrive in
+    //   their inbox.
+    //
+    // ITS FAILURE IS NOT THE SUBMISSION'S FAILURE. The return value is logged
+    // and then dropped: the enquiry has already been delivered, and refusing
+    // to redirect because a courtesy message bounced would turn a successful
+    // submission into a visible failure. The bounce is the POINT of D4-09 —
+    // it is what makes a mistyped address visible in minutes instead of after
+    // a lost week — and a bounce arrives at office@torin.bg, not here.
+    //
+    // NO ATTACHMENT. The visitor has the photographs; they are on the phone
+    // that took them. Sending them back costs the visitor mobile data to
+    // receive their own files and is the one part of this message that could
+    // plausibly push it into a spam folder.
+    $torin_confirm_via = torin_send_mail([
+        'to'          => $torin_in['email'],
+        'subject'     => 'Получихме запитването ви — Торин Компютърс',
+        // Composed from $site rather than typed, exactly like the failure
+        // copy: site-config.php owns the phone list, and a literal here is the
+        // copy that gets forgotten the day the number changes.
+        'body'        => "Здравейте,\n\n"
+            . "получихме запитването ви и ще се свържем с вас в работното време на сервиза.\n"
+            . 'Работно време: ' . $site['hours'] . ".\n\n"
+            . "Ако въпросът не търпи отлагане, обадете се на " . $site['phones'][0] . ".\n\n"
+            . "Това съобщение е изпратено автоматично — няма нужда да отговаряте на него.\n\n"
+            . "Торин Компютърс\n"
+            . $site['address'] . "\n",
+        // NO reply-to. The shop's own address is already the sender, so a
+        // visitor who replies anyway reaches a real mailbox; pointing reply-to
+        // back at the visitor's own address would make a reply go to
+        // themselves.
+        'reply_to'    => '',
+        'attachments' => [],
+    ], $torin_secrets);
+    if ($torin_confirm_via === false) {
+        error_log('torin contact ' . $torin_rid . ': confirmation to the customer failed');
+    }
+
     // 303 See Other — POST/Redirect/GET. The method is downgraded to GET for
     // the redirect, so a refresh on the confirmation page re-fetches msg.html
     // and cannot resubmit the enquiry or re-notify the owner. A 302 is not a
@@ -425,8 +519,21 @@ if ($torin_result['ok'] === true) {
 // EVERY CHANNEL FAILED. The visitor is told the truth and given the phone
 // number, because D4-07 keeps no server-side copy — a false success here is an
 // enquiry that nobody, on either end, knows was lost.
-error_log('torin contact ' . $torin_rid . ': all notification channels failed');
-torin_send_fail_page(torin_fail_copy(), []);
+// The channel-by-channel verdict, logged ONCE and only on this branch. The
+// success test above still reads the overall flag and nothing else (D4-08) —
+// this is a diagnostic, not a decision, and it must never become one. It
+// exists because «all notification channels failed» on its own does not say
+// whether Telegram and the mail leg failed for one shared reason or two
+// different ones, and with two channels that is now the first question anybody
+// debugging this asks. Channel NAMES are developer-authored constants; no
+// submitted value goes near it (P-14).
+$torin_verdicts = [];
+foreach ($torin_result['channels'] as $torin_name => $torin_ok) {
+    $torin_verdicts[] = $torin_name . '=' . ($torin_ok ? 'ok' : 'fail');
+}
+error_log('torin contact ' . $torin_rid . ': all notification channels failed (' .
+    implode(' ', $torin_verdicts) . ')');
+torin_send_fail_page(torin_fail_copy(), [], 422, $torin_in);
 
 // ── PAGE RENDERING ──────────────────────────────────────────────────────────
 // Declared after use; PHP hoists function declarations at the top level of a
@@ -482,6 +589,28 @@ function torin_chars(string $value): int
     return strlen($value);
 }
 
+// The five text fields, read for REPOPULATION rather than for validation.
+//
+// It exists because the guard branches above run before $torin_in is built,
+// and a visitor rejected by the time trap or the throttle has typed exactly as
+// much as one rejected by validation — losing it costs them exactly as much.
+// Composed through torin_post(), so a non-string value is treated as absent
+// here for the same reason it is everywhere else in this file.
+//
+// The consent box and the photographs are deliberately absent: consent must be
+// a deliberate act on every submission, and a file input's value cannot be set
+// from markup in any browser.
+function torin_values(): array
+{
+    return [
+        'device' => torin_post('device'),
+        'fault'  => torin_post('fault'),
+        'name'   => torin_post('name'),
+        'phone'  => torin_post('phone'),
+        'email'  => torin_post('email'),
+    ];
+}
+
 // The all-channels-failed sentence, with the shop's main number COMPOSED from
 // $site rather than typed. site-config.php owns the phone list, footer.php
 // renders it at the bottom of this very page, and a literal here is the copy
@@ -497,32 +626,57 @@ function torin_fail_copy(): string
 // carried-forward visual check» — this is where that check is discharged. No
 // second band component is authored.
 //
-// WHAT THIS DELIBERATELY IS NOT: the full error re-render. Repopulating the
-// form from $values is 04-05's, together with the spam guard that produces
-// most of the errors worth repopulating for. What ships here is the honest
-// half — the visitor is never told a failed submission succeeded, and is never
-// redirected to a confirmation page for something that did not happen. Adding
-// the re-render now would mean writing it against a validation set that is
-// still half-built.
+// ── THE ERROR RE-RENDER, WHICH 04-02 DEFERRED TO HERE ───────────────────────
+// 04-02 shipped the honest HALF of this page: the visitor was never told a
+// failed submission had succeeded. What it could not ship — because the
+// validation set was still half-built — was the visitor's own text coming back
+// with them. Until now every failure branch replaced the form with a link back
+// to an EMPTY one, so a customer who attached a sixth photograph lost the
+// model number and the fault description they had just typed, and the only way
+// to find that out was to be that customer (WINDOWS entry 22).
 //
-// NO EXCEPTION TEXT, NO PATH, NO SUBMITTED VALUE reaches this page (T-04-09,
-// P-14). $summary and $errors are developer-authored literals; $errors keys
-// are compared against a fixed list rather than echoed, so nothing
-// attacker-controlled can reach the markup even through the id of an anchor.
-// $status DEFAULTS TO 422 so the three 04-02/04-03 call sites are untouched.
-// It exists because 04-05 added a branch that is not «what you sent is
+// The partial that renders the empty form on kontakti.html renders the
+// populated one here — ONE markup source with TWO callers, which is the whole
+// contract contact-form.php:6-15 states and the reason that file is one
+// function and no output. A second copy of a seven-field form is how the two
+// renderings start to disagree about their own field names, and a field name
+// that disagrees with this handler is a silently dropped enquiry.
+//
+// EVERY REDISPLAYED VALUE IS ESCAPED BY THE PARTIAL, on both of its branches
+// (T-04-07). The consent box renders unchecked regardless of what was
+// submitted, because contact-form.php does not read $values for it at all —
+// that omission is the feature, and restoring a previously-ticked box would be
+// pre-ticked consent by another name.
+//
+// THE HIDDEN TIMESTAMP IS RE-MINTED by the partial on every render, including
+// this one, so the returned form is immediately submittable rather than
+// carrying a token that is already seconds into its own window.
+//
+// NO EXCEPTION TEXT, NO PATH AND NO SUBMITTED VALUE REACHES THE BAND OR THE
+// LINK LIST (T-04-09, P-14). $summary and $errors are developer-authored
+// literals; $errors keys are compared against a fixed list rather than echoed,
+// so nothing attacker-controlled can reach the markup even through the id of
+// an anchor. $values reaches the FORM CONTROLS only, through the partial's
+// escaping.
+//
+// $status DEFAULTS TO 422 so the 04-02/04-03 call sites are untouched. It
+// exists because 04-05 added a branch that is not «what you sent is
 // unprocessable» but «you have sent one already»: a throttle answering 422
 // would be a lie told to every machine reading the response, including the
-// host's own logs, for no saving at all. The visible page is the same one; the
-// status line is the part that has to stay honest.
-function torin_send_fail_page(string $summary, array $errors, int $status = 422): void
+// host's own logs, for no saving at all. $values is likewise defaulted and
+// last, so a call site with nothing to repopulate — the oversized POST, where
+// the engine threw the fields away before this file ran — says so by omission.
+function torin_send_fail_page(string $summary, array $errors, int $status = 422, array $values = []): void
 {
     global $site;
 
     http_response_code($status);
     // Same no-store contract as kontakti.html (RESEARCH P-11), and for the
-    // same reason: this page links back to a form whose hidden timestamp
-    // 04-05 will verify.
+    // same reason — but now it is not merely consistency. This page CARRIES a
+    // form whose hidden timestamp this same file verifies on the next request.
+    // A cached copy of this response would hand two visitors the same signed
+    // token, and every one of them past the first would be told the form had
+    // sat open too long.
     header('Cache-Control: no-store');
 
     // category-page.php owns torin_esc(); required BEFORE the chrome so every
@@ -537,6 +691,11 @@ function torin_send_fail_page(string $summary, array $errors, int $status = 422)
     // the import, footer.php reads an undefined $site and prints warnings into
     // the page instead of the shop's address.
     require_once dirname(__FILE__) . '/includes/category-page.php';
+    // The form partial. It emits nothing on include — one function definition
+    // and no top-level output — so requiring it here, after the response code
+    // and the cache header but before the chrome, cannot produce a «headers
+    // already sent» failure.
+    require_once dirname(__FILE__) . '/includes/contact-form.php';
 
     $torin_title = 'Запитването не беше изпратено · Торин';
     $torin_desc  = 'Запитването до Торин Компютърс не беше изпратено. Проверете данните и опитайте отново или се обадете на сервиза.';
@@ -546,15 +705,28 @@ function torin_send_fail_page(string $summary, array $errors, int $status = 422)
 <main>
 	<section class="section">
 		<div class="container">
-			<p class="notice notice--error"><?php echo torin_icon('alert'); ?><span><?php echo torin_esc($summary); ?></span></p>
+			<?php // tabindex="-1" makes the band programmatically focusable so a
+			      // keyboard or screen-reader user can be sent to the explanation
+			      // rather than to the top of the document (UI-SPEC C-8). The
+			      // .focus() call that would USE it belongs to js/analytics.js,
+			      // which this plan does not touch; the attribute ships now so the
+			      // two halves cannot be deployed apart, and the gap is recorded
+			      // in the SUMMARY rather than left to be discovered. ?>
+			<p class="notice notice--error" id="form-error" tabindex="-1"><?php echo torin_icon('alert'); ?><span><?php echo torin_esc($summary); ?></span></p>
 
 			<h1>Запитването не беше изпратено</h1>
 
 <?php   if (count($errors) > 0) { ?>
-			<?php // In-page links to each failing control on the contact page.
-			      // On a phone the first invalid field is usually off-screen, and
-			      // a list of links is what makes the band actionable instead of
-			      // decorative.
+			<?php // In-page links to each failing control. On a phone the first
+			      // invalid field is usually off-screen, and a list of links is
+			      // what makes the band actionable instead of decorative.
+			      //
+			      // The fragments are BARE now («#device», not
+			      // «kontakti.html#device») and that is the substantive half of
+			      // this edit rather than a tidy-up: the form is on THIS page, so
+			      // the old href navigated away from the populated re-render to an
+			      // empty form — throwing away the very values this function now
+			      // exists to preserve.
 			      //
 			      // The fragment is built from a FIXED whitelist of field names,
 			      // never from an array key that arrived with the request. The
@@ -567,14 +739,23 @@ function torin_send_fail_page(string $summary, array $errors, int $status = 422)
                 if (!isset($errors[$torin_field])) {
                     continue;
                 } ?>
-				<li><a href="kontakti.html#<?php echo torin_esc($torin_field); ?>"><?php echo torin_esc($errors[$torin_field]); ?></a></li>
+				<li><a href="#<?php echo torin_esc($torin_field); ?>"><?php echo torin_esc($errors[$torin_field]); ?></a></li>
 <?php       } ?>
 			</ul>
 <?php   } ?>
 
 			<p>Обаждането е най-бързият начин да стигнете до нас — телефоните и работното време са в долната част на страницата.</p>
 
-			<p><a class="btn btn--primary" href="kontakti.html#contact-form">Обратно към формата</a></p>
+			<?php // THE FORM ITSELF, repopulated. The photographs are NOT carried
+			      // back and cannot be: a file input's value is not settable from
+			      // markup, by design, in every browser. The help text under the
+			      // control already says the photographs are optional, and the
+			      // text a visitor typed — which is the expensive part — survives.
+			      // Saying this out loud here so that a future reader does not
+			      // "fix" the omission by inventing a server-side upload cache,
+			      // which is precisely what D4-07 promises this site does not
+			      // keep. ?>
+			<?php torin_render_contact_form($values, $errors); ?>
 		</div>
 	</section>
 </main>
@@ -582,5 +763,287 @@ function torin_send_fail_page(string $summary, array $errors, int $status = 422)
 <?php
     require_once dirname(__FILE__) . '/includes/footer.php';
     exit;
+}
+
+// ── THE EMAIL TRANSPORT (CONTACT-03, D4-11) ─────────────────────────────────
+//
+// THE ONLY PLACE IN THIS TREE THAT LOADS THE MAIL LIBRARY. Three require lines
+// and nothing else reaches src/vendor/ — a grep asserts it in both directions:
+// zero occurrences of the library path under src/includes/, exactly three in
+// this file. The library is namespaced modern PHP; a 5.2 interpreter meeting
+// it fails at COMPILE time, before a byte of output, so confining it here
+// means a runtime rollback breaks the contact form and nothing else.
+//
+// THE REQUIRES ARE INSIDE THE FUNCTION, not at the top of the file. A bot
+// stopped by the spam guard never parses 150 KB of library it was never going
+// to use, and the quarantine's blast radius shrinks from «any POST to this
+// endpoint» to «a POST that got as far as having something to deliver». Class
+// declarations from a require inside a function land in the global scope, so
+// nothing about the namespace resolution below depends on this placement.
+//
+// ── THE CASCADE, AND WHY IT EXISTS ──────────────────────────────────────────
+// Authenticated SMTP against the host's own relay is attempted first when a
+// credential exists; ANY failure before the relay has accepted the message
+// falls through to the local sendmail binary, which needs no credential at
+// all. If no credential is present the connection is not attempted — going
+// straight to sendmail rather than paying a 15-second timeout on every single
+// send, on the one form this business depends on.
+//
+// The owner's instruction, in their words: a missing or wrong password must
+// never cost the business an enquiry. Both paths leave the same machine, and
+// both are therefore covered by the same published SPF (+a, +ip4 for this
+// box) and the same default._domainkey.torin.bg DKIM key, so the fallback
+// gives up no deliverability — which is the usual reason not to have one.
+//
+// ┌────────────────────────────────────────────────────────────────────────┐
+// │ THE PRE-ACCEPTANCE BOUNDARY. READ THIS BEFORE CHANGING ANYTHING BELOW. │
+// └────────────────────────────────────────────────────────────────────────┘
+// The fall-through may fire ONLY on a failure that happened before the relay
+// took responsibility for the message. Once the relay has accepted it, the
+// message is queued and WILL be delivered; retrying through sendmail at that
+// point sends the enquiry TWICE. Two identical enquiries arriving is a worse
+// outcome than one error line in a log, because the owner cannot tell them
+// apart — they may be one customer who wrote twice, or one customer whose
+// enquiry we duplicated, and quoting a price twice for one laptop is a real
+// cost to a real business.
+//
+// The boundary is placed by OBSERVATION, not by parsing an exception message.
+// PHPMailer raises one exception class for every failure and localises its
+// text, so a string match would silently stop matching the day the library
+// updates or the language changes. Instead the SMTP conversation is watched
+// for the server's `354` reply — the «start mail input» that answers the DATA
+// command and is the exact instant the relay begins taking the message. Seen
+// it, and this attempt is post-acceptance and is NEVER retried. Not seen it —
+// connection refused, TLS failure, AUTH rejected, MAIL FROM refused, RCPT TO
+// refused, timeout before DATA — and the message provably never got in, so
+// sendmail is safe.
+//
+// THE DEFAULT, WHEN THERE IS NO EVIDENCE EITHER WAY, IS «DO NOT RETRY» for
+// everything from the 354 onwards. That includes the genuinely ambiguous case
+// the SMTP protocol cannot resolve: the terminating dot is written and the
+// connection dies before the relay's reply arrives, where the message may or
+// may not have been queued. Not retrying risks losing one enquiry, which the
+// visitor is TOLD about on the failure page and can act on. Retrying risks
+// silently duplicating it, which nobody is told about at all.
+//
+// WHY WATCHING THE CONVERSATION IS SAFE HERE. SMTP::client_send() replaces the
+// AUTH payload with the literal '[credentials hidden]' at every debug level
+// below DEBUG_LOWLEVEL (SMTP.php:1240-1251); this runs at DEBUG_SERVER, which
+// is two levels below it, so the mailbox password cannot reach the callback.
+// The callback ALSO never stores, logs or returns the strings it is handed —
+// it sets one boolean and drops everything else on the floor. Do not add a
+// diagnostic here that keeps them.
+function torin_send_mail(array $spec, array $secrets)
+{
+    global $torin_rid;
+
+    require_once dirname(__FILE__) . '/vendor/phpmailer/Exception.php';
+    require_once dirname(__FILE__) . '/vendor/phpmailer/PHPMailer.php';
+    require_once dirname(__FILE__) . '/vendor/phpmailer/SMTP.php';
+
+    // ── THE PER-REQUEST CIRCUIT BREAKER ─────────────────────────────────────
+    // A single submission sends TWO messages: the enquiry to the shop and the
+    // confirmation to the customer. Without this flag, a relay that is down —
+    // or a password that is wrong — costs the visitor the full connect timeout
+    // TWICE while they sit on a submitted form, and the second wait buys
+    // nothing, because the first attempt already established the answer.
+    //
+    // It is deliberately NOT persisted anywhere. A flat file or an APC entry
+    // would mean a five-minute outage kept SMTP switched off long after it
+    // came back, and the state would need its own expiry, its own storage
+    // outside the web root and its own failure mode. Per request, in memory,
+    // dead at the end of the request: the only cost of being wrong is one
+    // extra attempt on the next submission.
+    //
+    // Only a PRE-ACCEPTANCE failure sets it. A post-acceptance failure means
+    // the connection and the credential both worked, which is the opposite of
+    // what this flag records.
+    static $torin_smtp_down = false;
+
+    $torin_cred = (isset($secrets['smtp_password']) && is_string($secrets['smtp_password']))
+        ? trim($secrets['smtp_password'])
+        : '';
+
+    if ($torin_cred !== '' && $torin_smtp_down) {
+        error_log('torin contact ' . $torin_rid .
+            ': mail smtp already failed this request, going straight to sendmail');
+    } elseif ($torin_cred !== '') {
+        $torin_verdict = torin_mail_attempt($spec, $torin_cred, true);
+        if ($torin_verdict === 'sent') {
+            error_log('torin contact ' . $torin_rid . ': mail delivered via=smtp');
+            return 'smtp';
+        }
+        if ($torin_verdict === 'accepted') {
+            // The relay took the message and then something went wrong. It is
+            // queued; a second send would duplicate it. This channel reports
+            // failure, D4-08 lets the other one carry the enquiry, and the log
+            // line is deliberately distinct from the one above it so that the
+            // day an owner says «I got two of these» this branch can be found.
+            error_log('torin contact ' . $torin_rid .
+                ': mail smtp failed AFTER the relay accepted — not retried, message may be queued');
+            return false;
+        }
+        $torin_smtp_down = true;
+        error_log('torin contact ' . $torin_rid .
+            ': mail smtp failed before acceptance, falling through to sendmail');
+    } else {
+        error_log('torin contact ' . $torin_rid . ': mail no smtp credential, using sendmail');
+    }
+
+    $torin_verdict = torin_mail_attempt($spec, '', false);
+    if ($torin_verdict === 'sent') {
+        error_log('torin contact ' . $torin_rid . ': mail delivered via=sendmail');
+        return 'sendmail';
+    }
+    error_log('torin contact ' . $torin_rid . ': mail sendmail failed');
+    return false;
+}
+
+// ONE ATTEMPT ON ONE TRANSPORT. Returns 'sent', 'accepted' (the relay took the
+// message and the attempt failed afterwards — never retry) or 'pre' (nothing
+// was accepted — retrying is safe).
+//
+// $password IS PASSED SEPARATELY rather than the whole secrets array, so that
+// the only credential this function can see is the one it needs. The Telegram
+// token is in that array and has no business being in scope here.
+function torin_mail_attempt(array $spec, string $password, bool $useSmtp): string
+{
+    // Set by the observer below, read in both exits. Declared before the try
+    // so that a throw on the very first line still finds it defined.
+    $torin_accepted = false;
+
+    $torin_m = new \PHPMailer\PHPMailer\PHPMailer(true);
+    try {
+        if ($useSmtp) {
+            // Settings from the host's own documentation, verified at research:
+            // the host's server, port 25, AUTH yes, ENCRYPTION none. Outbound
+            // 25, 26 and 465 to EXTERNAL servers are blocked on this shared
+            // hosting, so a transactional relay is not reachable over SMTP at
+            // all and this is effectively the only SMTP option.
+            $torin_m->isSMTP();
+            $torin_m->Host     = 'torin.bg';
+            $torin_m->Port     = 25;
+            $torin_m->SMTPAuth = true;
+            $torin_m->Username = 'office@torin.bg';
+            $torin_m->Password = $password;
+            // Unencrypted, and the second line is what makes that stick.
+            // Without SMTPAutoTLS = false the library opportunistically issues
+            // STARTTLS whenever the server advertises it and then fails the
+            // handshake — a failure that reads like a network fault and is
+            // nothing of the kind. It is a same-machine hop.
+            $torin_m->SMTPSecure  = '';
+            $torin_m->SMTPAutoTLS = false;
+            // Bounded, because a visitor is holding a submitted form open for
+            // the duration (T-04-11). 15s against the host's own relay, which
+            // is either on this machine's network or not reachable at all.
+            $torin_m->Timeout = 15;
+
+            // THE PRE-ACCEPTANCE OBSERVER. See the long note above
+            // torin_send_mail(); this is its entire implementation.
+            //
+            // The prefix match is anchored at position 0 and includes the
+            // literal PHPMailer writes before every server reply
+            // (SMTP.php:380, :1148), so a '354' appearing inside a message id
+            // or a banner cannot trip it. Being wrong in the eager direction
+            // would suppress a legitimate fall-through and lose one enquiry;
+            // being wrong in the lax direction would duplicate one. The
+            // anchoring makes the first unlikely and the ordering below makes
+            // the second impossible.
+            $torin_m->SMTPDebug   = \PHPMailer\PHPMailer\SMTP::DEBUG_SERVER;
+            $torin_m->Debugoutput = function ($torin_str, $torin_level) use (&$torin_accepted) {
+                // Sets a boolean. Stores nothing, logs nothing, returns
+                // nothing. Do not make this function helpful.
+                if (strpos($torin_str, 'SERVER -> CLIENT: 354') === 0) {
+                    $torin_accepted = true;
+                }
+            };
+        } else {
+            // The local binary, confirmed present at /usr/sbin/sendmail and
+            // configured as sendmail_path = '/usr/sbin/sendmail -t -i'
+            // (04-HOST-CAPABILITIES:94, :98). isSendmail() reads that same ini
+            // value, so the command this runs is the host's own, not a guess.
+            //
+            // NOTE FOR ANYONE READING 04-HOST-CAPABILITIES BLOCKER 2: the
+            // «smtp:localhost:25 FAIL Connection refused» reading there rules
+            // out a LOCAL MTA LISTENING ON A SOCKET. It says nothing about
+            // this path, which pipes to a binary, and nothing about the relay
+            // above, which is a different host.
+            $torin_m->isSendmail();
+        }
+
+        // UTF-8 IS MANDATORY, not a preference: every string in this message
+        // is Bulgarian, and the default 8-bit charset would deliver mojibake
+        // to the one person who needs to read it.
+        $torin_m->CharSet = 'UTF-8';
+
+        // THE SENDER IS A FIXED, DEVELOPER-AUTHORED LITERAL (T-04-22). This is
+        // the single line that most distinguishes this handler from the one it
+        // replaces, where the From header was built by concatenating $_POST —
+        // header injection and sender spoofing in one line, live on the
+        // production site today.
+        //
+        // WRITTEN AS A LITERAL RATHER THAN READ FROM $site['email'], and the
+        // difference is not stylistic. This address is ALSO the mailbox the
+        // SMTP leg authenticates as; deriving it from an editable config value
+        // would mean a future edit to the displayed contact address silently
+        // broke authentication, in a place nobody would think to look. The two
+        // uses are the same string for a reason and they are pinned together.
+        $torin_m->setFrom('office@torin.bg', 'ТОРИН КОМПЮТЪРС');
+        $torin_m->addAddress($spec['to']);
+
+        // The visitor's address, and the ONLY header it may ever occupy. It
+        // has already passed FILTER_VALIDATE_EMAIL above — an address that
+        // failed validation never reaches this function, because a submission
+        // that failed validation never reaches the fan-out.
+        if (isset($spec['reply_to']) && $spec['reply_to'] !== '') {
+            $torin_m->addReplyTo($spec['reply_to']);
+        }
+
+        // The filename given to each attachment is GENERATED. The visitor's
+        // own filename never travels — it is not even an argument to the
+        // upload pipeline — and a name that arrived with the request has no
+        // business in a Content-Disposition header.
+        if (isset($spec['attachments']) && is_array($spec['attachments'])) {
+            $torin_i = 0;
+            foreach ($spec['attachments'] as $torin_path) {
+                $torin_m->addAttachment($torin_path, 'torin-' . $torin_i . '.jpg');
+                $torin_i++;
+            }
+        }
+
+        $torin_m->Subject = $spec['subject'];
+        // PLAIN TEXT, NO HTML PART. Same reasoning as notify.php's refusal of
+        // a Telegram parse_mode: with markup, every submitted value becomes
+        // attacker-controlled markup needing its own escaping rules, and the
+        // owner gains bold labels in exchange for a whole class of bug. Set
+        // BEFORE Body, because isHTML() decides how the body is treated.
+        $torin_m->isHTML(false);
+        $torin_m->Body = $spec['body'];
+
+        if ($torin_m->send()) {
+            return 'sent';
+        }
+        // send() returned false rather than throwing. Reachable when
+        // exceptions are suppressed internally; the boundary reading applies
+        // identically.
+        return $torin_accepted ? 'accepted' : 'pre';
+    } catch (\PHPMailer\PHPMailer\Exception $torin_e) {
+        // LOGGED AS A FIXED LITERAL, NEVER ECHOED AND NEVER WITH ITS MESSAGE
+        // (T-04-09, T-04-27, P-14). The library's exception text can carry the
+        // relay's response, which can carry a recipient address — which is a
+        // submitted value. The caller writes the correlation line that makes
+        // this findable; this one says only which transport it was.
+        error_log('torin mail: send failed (' . ($useSmtp ? 'smtp' : 'sendmail') . ')');
+        return $torin_accepted ? 'accepted' : 'pre';
+    } catch (\Throwable $torin_e) {
+        // A TypeError or a missing extension is a code defect, not a delivery
+        // failure — but it must still leave this function as a return value
+        // rather than as a 500 on a form the visitor spent two minutes filling
+        // in (T-04-11). The fan-out's own wrapper would catch it one level up;
+        // catching it here is what preserves the acceptance verdict, which
+        // that wrapper cannot see.
+        error_log('torin mail: driver errored (' . ($useSmtp ? 'smtp' : 'sendmail') . ')');
+        return $torin_accepted ? 'accepted' : 'pre';
+    }
 }
 ?>
