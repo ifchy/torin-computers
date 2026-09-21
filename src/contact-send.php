@@ -63,6 +63,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
 require_once dirname(__FILE__) . '/includes/site-config.php';
 require_once dirname(__FILE__) . '/includes/notify.php';
 require_once dirname(__FILE__) . '/includes/upload.php';
+require_once dirname(__FILE__) . '/includes/spam-guard.php';
 
 // A per-request id that appears in the log and, on the failure page, nowhere.
 // It exists so the owner can be told «it failed» and the developer can find
@@ -70,9 +71,65 @@ require_once dirname(__FILE__) . '/includes/upload.php';
 // T-04-09). Nothing derived from user input is ever logged below.
 $torin_rid = bin2hex(random_bytes(4));
 
-// ── HONEYPOT, FIRST ─────────────────────────────────────────────────────────
-// Checked before validation, before the secrets file is opened, and before any
-// work that costs anything. A non-empty decoy means stop.
+// ── OVERSIZED POST, FIRST ───────────────────────────────────────────────────
+// When post_max_size is exceeded PHP discards the body: $_POST and $_FILES
+// both arrive EMPTY, with no error the handler can see. Without this explicit
+// test the visitor gets «fill in the required fields» about a form they did
+// fill in, and the handler cannot tell «too big» from «no submission at all».
+//
+// IT RUNS BEFORE THE SPAM GUARD, AND THE ORDER IS LOAD-BEARING RATHER THAN
+// TIDY. 04-02 placed this second, behind the honeypot, which was harmless
+// while the decoy was the only check: an emptied body has an empty decoy and
+// fell through. It stops being harmless the moment the signed time trap is
+// added below — an emptied body also has no `t` field, so a visitor whose five
+// photographs exceeded the ceiling would be judged a forger and told nothing
+// useful. The guard must never be asked to rule on a request whose fields the
+// engine already threw away.
+//
+// THIS STOPPED BEING A NARROW CASE IN 04-03. The tracer note here read «the
+// ceiling is 200M on this host, so this is a narrow case today» — that was the
+// raw 8.5 ini. src/.user.ini now holds this directory at post_max_size 60M, a
+// deliberate tightening sized above five maximum photographs plus framing, and
+// photographs are what a visitor actually posts. Five originals straight off a
+// modern phone with the browser script blocked is the shape that lands here.
+//
+// The logged length is a byte count the SERVER observed, never a submitted
+// value (P-14) — it is the one number that distinguishes this branch from a
+// bug, and without it the log cannot tell them apart either.
+$torin_len = (int) ($_SERVER['CONTENT_LENGTH'] ?? 0);
+if ($torin_len > 0 && count($_POST) === 0) {
+    error_log('torin contact ' . $torin_rid . ': refused reason=oversized-post len=' . $torin_len);
+    torin_send_fail_page(
+        'Файловете са твърде големи и не стигнаха до сървъра. Намалете броя или размера на снимките.',
+        []
+    );
+}
+
+// ── THE SPAM GUARD (CONTACT-03) ─────────────────────────────────────────────
+// Decoy, then signed time trap, then per-address throttle — ALL OF IT ABOVE
+// FIELD VALIDATION AND ABOVE EVERY OUTBOUND CALL, so a bot never reaches the
+// network, never opens the secrets file and never costs this account a photo
+// re-encode. includes/spam-guard.php holds the mechanism and the reasoning;
+// what lives here is the ORDER and what each rejection shows the visitor.
+//
+// EVERY REJECTION BELOW WRITES ONE CORRELATION LINE NAMING ITS REASON AND NO
+// SUBMITTED CONTENT (P-14, T-04-27). That is not logging hygiene, it is the
+// only recourse a false positive has: D4-07 keeps no server-side copy, so a
+// wrongly-discarded enquiry is unrecoverable — the log line at least makes it
+// recoverable as a FACT, which is what a customer saying «I wrote to you last
+// Tuesday» needs somebody to be able to check.
+$torin_secret = torin_guard_secret();
+if ($torin_secret === '') {
+    // The guard is running degraded — it still rejects the sub-three-second
+    // bot, because both sides compute the same keyless HMAC, but the token is
+    // forgeable by anyone who reads this tree. Said out loud here rather than
+    // left as a silence in spam-guard.php, because «the trap is not protecting
+    // you today» is exactly the fact that otherwise goes unnoticed for months.
+    error_log('torin contact ' . $torin_rid . ': guard degraded reason=no-signing-key');
+}
+
+// ── HONEYPOT ────────────────────────────────────────────────────────────────
+// A non-empty decoy means stop.
 //
 // The visitor is NOT told the trap fired, and the response is byte-identical
 // to a success: same 303, same destination. A bot that can tell rejection from
@@ -84,28 +141,88 @@ $torin_rid = bin2hex(random_bytes(4));
 // a real customer's enquiry and nobody — not the shop, not the customer — ever
 // finds out. That is why the trap is a single unambiguous signal and not a
 // score.
-if (torin_post('website') !== '') {
+//
+// The decoy test moved into spam-guard.php in 04-05 and is no longer read
+// through torin_post(): that helper treats a non-string as ABSENT, which is
+// right for a real field and wrong for this one, where posting `website[]=x`
+// is nothing a rendering of our form can produce.
+if (!torin_verify_honeypot($_POST)) {
+    error_log('torin contact ' . $torin_rid . ': guard reject reason=honeypot');
     header('Location: msg.html', true, 303);
     exit;
 }
 
-// ── OVERSIZED POST ──────────────────────────────────────────────────────────
-// When post_max_size is exceeded PHP discards the body: $_POST and $_FILES
-// both arrive EMPTY, with no error the handler can see. Without this explicit
-// test the visitor gets «fill in the required fields» about a form they did
-// fill in, and the handler cannot tell «too big» from «no submission at all».
+// ── THE SIGNED TIME TRAP ────────────────────────────────────────────────────
+// The hidden `t` field carries the moment contact-form.php rendered the page,
+// signed. A submission faster than a human could type is a bot; one older than
+// a couple of hours is a replay. No session and no cookie is involved, which
+// is what keeps the consent question D4-18 closed (T-04-28).
 //
-// THIS STOPPED BEING A NARROW CASE IN 04-03. The tracer note here read «the
-// ceiling is 200M on this host, so this is a narrow case today» — that was the
-// raw 8.5 ini. src/.user.ini now holds this directory at post_max_size 60M, a
-// deliberate tightening sized above five maximum photographs plus framing, and
-// photographs are what a visitor actually posts. Five originals straight off a
-// modern phone with the browser script blocked is the shape that lands here.
-$torin_len = (int) ($_SERVER['CONTENT_LENGTH'] ?? 0);
-if ($torin_len > 0 && count($_POST) === 0) {
+// THE TWO REJECTIONS ARE NOT SHOWN THE SAME FACE, and the split is the whole
+// judgement in this block:
+//
+// · «too-fast» is absorbed SILENTLY, with the same 303 to the same page a
+//   success gets. A bot that can tell rejection from acceptance tunes past the
+//   trap on its next run. Nothing a human does produces this verdict — three
+//   seconds is not enough to read seven fields, let alone answer them — so the
+//   silent branch carries no risk of swallowing a real enquiry.
+//
+// · «forged», «malformed» and «stale» get the HONEST page instead, because
+//   each of them has a mundane non-bot cause: an intermediary that cached the
+//   contact page and served a stale token (RESEARCH P-11), our own signing key
+//   rotating between render and submit, a proxy mangling a hidden field, or
+//   simply a tab left open over lunch. Telling that visitor «sent» when
+//   nothing was sent is the one thing this plan's prohibitions forbid
+//   outright, and it would be unobservable on both ends.
+$torin_ts_verdict = torin_verify_timestamp(
+    (isset($_POST['t']) && is_string($_POST['t'])) ? $_POST['t'] : '',
+    $torin_secret,
+    3,
+    7200
+);
+if ($torin_ts_verdict === 'too-fast') {
+    error_log('torin contact ' . $torin_rid . ': guard reject reason=timestamp-too-fast');
+    header('Location: msg.html', true, 303);
+    exit;
+}
+if ($torin_ts_verdict !== 'ok') {
+    error_log('torin contact ' . $torin_rid . ': guard reject reason=timestamp-' . $torin_ts_verdict);
     torin_send_fail_page(
-        'Файловете са твърде големи и не стигнаха до сървъра. Намалете броя или размера на снимките.',
+        // ONE SENTENCE FOR ALL THREE VERDICTS, and it names the likeliest
+        // cause without asserting it. «The form sat open too long» is true for
+        // «stale» and a fair guess for the other two; what matters is that the
+        // ACTION is the same in every case and is one the visitor can take.
+        // Naming the verdict would be telling a bot which knob to turn.
+        'Изпращането не беше прието — възможно е формулярът да е стоял отворен твърде дълго. Отворете страницата наново и опитайте отново.',
         []
+    );
+}
+
+// ── THE PER-ADDRESS THROTTLE ────────────────────────────────────────────────
+// Read-only here; the counterpart that WRITES a record runs further down, only
+// once a channel has actually accepted the enquiry. spam-guard.php's own
+// comment carries the reasoning — counting every POST would throttle the
+// visitor who mistyped their email and corrected it ten seconds later, and the
+// one re-sending after a failure page that told them to try again.
+//
+// REMOTE_ADDR, never a forwarded-for header: that header arrives with the
+// request, so trusting it would let a bot mint a fresh identity per request
+// and exhaust somebody else's quota by claiming their address.
+//
+// One delivered enquiry per quarter of an hour. A visitor with a genuine
+// second enquiry is not turned away — they are told, in the same sentence,
+// that the phone is open.
+$torin_rl = ['window' => 900, 'max' => 1];
+$torin_ip = (isset($_SERVER['REMOTE_ADDR']) && is_string($_SERVER['REMOTE_ADDR']))
+    ? $_SERVER['REMOTE_ADDR']
+    : '';
+if (!torin_rate_limit_ok($torin_ip, $torin_secret, $torin_rl)) {
+    error_log('torin contact ' . $torin_rid . ': guard reject reason=rate-limit');
+    torin_send_fail_page(
+        'Вече получихме запитване от вас. Обадете се на ' . $site['phones'][0] .
+        ', ако има какво да добавите, или изпратете нов формуляр след няколко минути.',
+        [],
+        429
     );
 }
 
@@ -288,6 +405,14 @@ $torin_photos = [];
 // channel into the success test and quietly un-do D4-05's reversibility the
 // day 04-05 adds the mail leg.
 if ($torin_result['ok'] === true) {
+    // THE THROTTLE RECORD IS WRITTEN HERE AND ONLY HERE — after a channel has
+    // accepted the enquiry, not when the guard checked the quota above. The
+    // window then means what its message says («вече получихме запитване от
+    // вас»): it counts enquiries that reached the shop, so no rejected,
+    // mistyped or undelivered attempt can lock a visitor out of retrying the
+    // one that would have worked.
+    torin_rate_limit_record($torin_ip, $torin_secret, $torin_rl);
+
     // 303 See Other — POST/Redirect/GET. The method is downgraded to GET for
     // the redirect, so a refresh on the confirmation page re-fetches msg.html
     // and cannot resubmit the enquiry or re-notify the owner. A 302 is not a
@@ -384,11 +509,17 @@ function torin_fail_copy(): string
 // P-14). $summary and $errors are developer-authored literals; $errors keys
 // are compared against a fixed list rather than echoed, so nothing
 // attacker-controlled can reach the markup even through the id of an anchor.
-function torin_send_fail_page(string $summary, array $errors): void
+// $status DEFAULTS TO 422 so the three 04-02/04-03 call sites are untouched.
+// It exists because 04-05 added a branch that is not «what you sent is
+// unprocessable» but «you have sent one already»: a throttle answering 422
+// would be a lie told to every machine reading the response, including the
+// host's own logs, for no saving at all. The visible page is the same one; the
+// status line is the part that has to stay honest.
+function torin_send_fail_page(string $summary, array $errors, int $status = 422): void
 {
     global $site;
 
-    http_response_code(422);
+    http_response_code($status);
     // Same no-store contract as kontakti.html (RESEARCH P-11), and for the
     // same reason: this page links back to a form whose hidden timestamp
     // 04-05 will verify.
