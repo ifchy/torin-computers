@@ -31,6 +31,12 @@ require_once(dirname(__FILE__) . '/category-page.php');
 // helper that happens to be loaded because some other include pulled it in is
 // a dependency that holds right up until the include order changes.
 require_once(dirname(__FILE__) . '/asset-version.php');
+// spam-guard.php is required for torin_sign_timestamp() and torin_guard_secret()
+// alone. It is functions and no data, it opens no credential — the key it uses
+// is its own, created in private storage for exactly this reason
+// (spam-guard.php:109-131) — and it emits nothing on include, so this file's
+// own one-function-no-output contract survives the addition.
+require_once(dirname(__FILE__) . '/spam-guard.php');
 
 // $values repopulates the controls on the error re-render; $errors maps a
 // field name to the Bulgarian message the SERVER produced for it. Both default
@@ -62,22 +68,31 @@ function torin_render_contact_form($values = array(), $errors = array()) {
 	$torin_e_email   = isset($errors['email'])   ? $errors['email']   : '';
 	$torin_e_consent = isset($errors['consent']) ? $errors['consent'] : '';
 
-	// The render timestamp for the time trap (UI-SPEC C-6). The tracer only
-	// PASSES IT THROUGH — 04-05 signs it with HMAC and verifies the window.
+	// The render timestamp for the time trap (UI-SPEC C-6), SIGNED as of
+	// 04-05: the field stopped being the tracer's pass-through and now carries
+	// «<unix time>.<keyed SHA-256 HMAC of it>». contact-send.php re-signs the
+	// claimed time and compares in constant time, so the value cannot be
+	// back-dated to walk past the lower bound or forward-dated to survive the
+	// upper one. The signature is what lets the window be stateless — no
+	// server-side record of this render exists, and none is wanted, because
+	// keeping one means a cookie and a cookie re-opens the consent question
+	// D4-18 was chosen to close.
 	//
 	// Deliberately re-read from server time on every render, including the
-	// error re-render, rather than carried forward out of $values. Until 04-05
-	// signs it, a carried-forward value is an attacker-controlled string that
-	// nothing verifies; re-emitting server time keeps the one writer of this
-	// field on the server for as long as it is unverified. The cost is that a
-	// visitor who fails validation restarts their own clock, which is the
-	// harmless direction to be wrong in — the lower bound exists to catch bots,
+	// error re-render, rather than carried forward out of $values. A
+	// carried-forward value would hand the submitter control of their own
+	// clock — the signature makes forgery hard, but re-emitting it costs
+	// nothing and keeps the server the one writer of this field. The visitor
+	// who fails validation therefore restarts their own clock, which is the
+	// harmless direction to be wrong in: the lower bound exists to catch bots,
 	// and a human who just filled a form in is past it either way.
 	//
 	// COUPLED TO kontakti.html's Cache-Control: no-store (RESEARCH P-11). If
 	// that header is ever dropped, an intermediary hands two visitors the same
-	// timestamp and the 04-05 window starts rejecting real people.
-	$torin_t = time();
+	// timestamp — and every one of them past the first would be judged stale
+	// and told to open the page again. The header is half of this mechanism,
+	// not a cache-tuning preference.
+	$torin_t = torin_sign_timestamp(time(), torin_guard_secret());
 ?>
 			<form class="form" id="contact-form" action="contact-send.php" method="post" enctype="multipart/form-data" novalidate>
 
