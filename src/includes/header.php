@@ -290,7 +290,21 @@ if (isset($torin_track) && $torin_track !== '') {
 	<header class="site-header">
 		<div class="container site-header__inner">
 			<a class="site-header__brand" href="index.html">
-				<img class="site-header__logo" src="img/torin-logo.png" width="150" height="80" alt="ТОРИН КОМПЮТЪРС">
+				<?php // D4-33. The logo is the heaviest non-photographic asset on every
+				      // page (19,147 B PNG -> 5,482 B WebP, measured), so it is the one
+				      // image whose conversion pays 19 times over. The <img> below is
+				      // UNCHANGED -- same src, same width/height, same alt, and still no
+				      // loading attribute, because it sits in the first viewport and a
+				      // lazy logo would delay the very paint this plan exists to speed up.
+				      // The PNG stays as the fallback: a browser without WebP support gets
+				      // byte-for-byte the header that shipped before this plan.
+				      //
+				      // The wrapper was measured, not assumed: <picture> is display:inline
+				      // and the brand link is a FLEX ITEM whose height is content-derived,
+				      // so a descender-space contribution would have grown the 56px header
+				      // row. Measured in Brave at 390x844 and 1440x900 -- header 57px,
+				      // inner 56px, brand 40px, img 75x40, identical before and after. ?>
+				<picture><source srcset="img/torin-logo.webp" type="image/webp"><img class="site-header__logo" src="img/torin-logo.png" width="150" height="80" alt="ТОРИН КОМПЮТЪРС"></picture>
 			</a>
 <?php
 			// The five-item navigation (IA-02, D-18) with ONE single-level

@@ -205,9 +205,12 @@ RewriteRule ^za-bateriite\.html$ zalivane-technosti.html [R=301,L]
 # 18,302 B gzipped. Phase 3 therefore budgets TRANSFER, not raw bytes:
 # <= 20 KB gzipped for base + layout + components + no-js together.
 #
-# Caching: assets DO now carry Expires/Cache-Control via the mod_expires block
-# below. HTML is deliberately held at zero seconds while /new/ is a staging
-# preview.
+# Caching: assets carry Expires/Cache-Control via the mod_expires block below.
+# Stylesheets and first-party scripts are at ONE YEAR (D4-34, plan 04-08), which
+# is safe only because every one of those URLs carries a ?v=<filemtime> stamp.
+# Markup stays at zero seconds and the contact page is excluded explicitly — the
+# reasoning for each lives in the block itself, next to the value it governs,
+# rather than up here where it would drift out of step with it.
 #
 # mod_deflate and mod_expires availability on bell.host.bg is UNVERIFIED. Each
 # block below is therefore individually module-guarded: an unguarded directive for
@@ -231,28 +234,81 @@ RewriteRule ^za-bateriite\.html$ zalivane-technosti.html [R=301,L]
 
 <IfModule mod_expires.c>
 	ExpiresActive On
-	# HTML must stay uncached while /new/ is a live staging preview being reviewed;
-	# tuning for the real cutover is Phase 4's job (DESIGN-02).
+
+	# ── Markup: NOT cached (D4-34 · plan 04-08) ───────────────────────────
+	# IF THIS IS WRONG: the owner edits settings.txt to put up a holiday notice
+	# and the site keeps serving the old page until the lifetime expires.
+	#
+	# The staging rationale that used to stand here ("uncached while /new/ is a
+	# live preview") is GONE — it was about to become a stale reason sitting
+	# beside a value it no longer justified.
+	#
+	# The durable reason is that these 20 pages are PHP wearing a .html
+	# extension, and their output depends on request-time state: the holiday
+	# banner and opening hours are read from settings.txt, which the owner is
+	# expected to edit through the control panel and see take effect. D4-34
+	# says "HTML stays at minutes"; zero is kept rather than raised to minutes
+	# because the only thing minutes would buy is a repeat view inside one
+	# session, while the thing it would cost is the owner's edit appearing to
+	# do nothing. The origin gzips HTML (measured), so the re-fetch is cheap.
 	ExpiresByType text/html "access plus 0 seconds"
-	# CSS and JS lifetimes are bounded to MINUTES for the staging window, down
-	# from the 7 days that produced gap G-02-1 (a reviewer stuck on a stylesheet
-	# from an earlier state of the design system, with no remote way to flush
-	# it). This is the SECOND line of defence, not the first: the ?v=<filemtime>
-	# stamp that header.php now puts on every one of these URLs is the primary
-	# mechanism, and both must fail before the condition recurs. If the stamp
-	# ever fails (asset-version.php emits a ?v=0 sentinel when a stat fails) a
-	# returning visitor is stale for 5 minutes instead of a week.
-	# js/site.js previously matched NO expiry rule at all and therefore fell to
-	# heuristic caching derived from Last-Modified — undeclared behaviour for
-	# the file that owns the navigation. Both registered JavaScript media types
-	# are listed because this host's mapping for .js is not verified.
-	# Phase 4 raises these once the stamp is proven in production (DESIGN-02),
-	# and must NOT raise them before: /new/ is a reviewed staging preview whose
-	# CSS changes several times a day.
-	ExpiresByType text/css "access plus 5 minutes"
-	ExpiresByType application/javascript "access plus 5 minutes"
-	ExpiresByType text/javascript "access plus 5 minutes"
+
+	# ── Stylesheets and first-party scripts: ONE YEAR (D4-34 · plan 04-08) ─
+	# IF THIS IS WRONG: a visitor is served a year-old stylesheet or script and
+	# there is no way to reach them to correct it.
+	#
+	# THIS LIFETIME IS SAFE ONLY BECAUSE OF THE ?v=<filemtime> STAMP.
+	# Every URL that lands in these three media types is emitted through
+	# torin_asset_url() — base/layout/components/no-js.css, js/site.js,
+	# js/analytics.js, js/photo-resize.js — so editing a file changes its URL,
+	# and a changed URL is a different cache entry. THAT is what makes a year
+	# survivable; the lifetime and the stamp are one mechanism in two files.
+	# DO NOT raise a lifetime here for anything that is not stamped, and do not
+	# remove the stamp while this value stands. scripts/asset-version-check.sh
+	# asserts the stamps are live on every page and is the precondition for
+	# this block, not a nicety.
+	#
+	# This replaces the 5-minute staging values, which existed only because
+	# /new/ was reviewed daily. Those in turn replaced the 7 days that produced
+	# gap G-02-1 — a reviewer stuck on a stylesheet from an earlier state of the
+	# design system with no remote way to flush it. G-02-1 is not a reason to
+	# keep the lifetime short; it is the reason the stamp exists, and the stamp
+	# is what closes it. If the stamp ever fails (asset-version.php emits a ?v=0
+	# sentinel when a stat fails) this block is no longer a second line of
+	# defence, which is precisely why the check is run rather than assumed.
+	#
+	# Both registered JavaScript media types are listed because this host's
+	# mapping for .js is not verified. js/site.js once matched NO rule at all
+	# and fell to heuristic caching derived from Last-Modified — undeclared
+	# behaviour for the file that owns the navigation.
+	ExpiresByType text/css "access plus 1 year"
+	ExpiresByType application/javascript "access plus 1 year"
+	ExpiresByType text/javascript "access plus 1 year"
+
+	# ── EXCEPTION: the Cyrillic subset font stays UNSTAMPED ────────────────
+	# One year, and it keeps it WITHOUT a ?v= stamp. This is deliberate twice
+	# over and must not be "made consistent" with the block above:
+	#  1. base.css declares the same file as url('../fonts/...woff2') with no
+	#     query. A stamped <link rel=preload> would no longer byte-match that
+	#     @font-face source, so the subset would download TWICE on every cold
+	#     visit — the opposite of what a preload is for.
+	#  2. scripts/probes/font-swap.js blocks the fallback pass with
+	#     Network.setBlockedURLs on the glob ['*.woff2', ...]. A query string
+	#     defeats that glob, so a stamped font would not FAIL the measurement —
+	#     it would sail through and report a flawless result while measuring
+	#     nothing at all. A check that silently stops checking is worse than
+	#     one that breaks loudly.
+	# The font is safe unstamped because it is immutable in practice: changing
+	# the subset means a new filename, not new bytes at the same name.
 	ExpiresByType font/woff2 "access plus 1 year"
+
+	# ── Images: 30 days, because image URLs are NOT stamped ────────────────
+	# The photographs and the logo are referenced as plain relative paths
+	# (img/repairs/*.jpg, img/torin-logo.png) with no ?v= — torin_asset_url()
+	# is not in that path. They therefore may NOT take the one-year lifetime:
+	# the prohibition is that no lifetime may be raised on anything whose URL
+	# does not change when its content does. 30 days is the standing value and
+	# it stays.
 	ExpiresByType image/png "access plus 30 days"
 	# Added with the ~40 first-party repair photographs in src/img/repairs/
 	# (plan 03-02). Without this line every one of them matches NO expiry rule
@@ -262,4 +318,50 @@ RewriteRule ^za-bateriite\.html$ zalivane-technosti.html [R=301,L]
 	# to say almost never, so they take the same 30 days as the PNGs.
 	ExpiresByType image/jpeg "access plus 30 days"
 	ExpiresByType image/svg+xml "access plus 30 days"
+	# WebP siblings, added with the 43 conversions in plan 04-08. Without this
+	# line every .webp matches NO expiry rule and falls to undeclared heuristic
+	# caching derived from Last-Modified — the identical defect js/site.js had
+	# before Phase 2 named it and the JPEGs had before plan 03-02 named it.
+	# Making that mistake a third time, in the very plan that adds the files,
+	# is how it would have shipped. Same 30 days as the originals they sit
+	# beside: a <picture> serves one or the other to the same visitor, so two
+	# different lifetimes would mean two different staleness windows for what
+	# is meant to be the same photograph.
+	ExpiresByType image/webp "access plus 30 days"
+	# favicon.ico, for the same reason. Both registered media types are listed
+	# because the host's mapping for .ico is not verified — the same doubt that
+	# puts two JavaScript types in the block above.
+	ExpiresByType image/x-icon "access plus 30 days"
+	ExpiresByType image/vnd.microsoft.icon "access plus 30 days"
+</IfModule>
+
+# ── EXCEPTION: the contact page may never be cached (D4-34 · plan 04-08) ───
+#
+# IF THIS IS WRONG, THE FORM REJECTS REAL PEOPLE.
+#
+# kontakti.html embeds a SIGNED RENDER TIMESTAMP in the form, and contact-send.php
+# refuses a submission whose timestamp is outside the accept window. A cached
+# contact page hands every later visitor the same timestamp, so the window has to
+# be either wide enough to be useless as a bot defence or narrow enough to refuse
+# genuine submissions. There is no setting that is both.
+#
+# kontakti.html already sends `Cache-Control: no-store` itself (line 41), and
+# text/html is at zero seconds above, so today this block is the THIRD guard on
+# the same property. It is here anyway because the other two are easy to lose by
+# accident and neither announces itself: the PHP header sits 40 lines into a page
+# file, and the zero-second HTML rule is a value someone will eventually raise
+# for good reasons, not knowing this page depends on it. The exception is stated
+# where the lifetimes are decided, so raising HTML cannot silently take the
+# contact form with it.
+#
+# Module-guarded like every other block in this file: an unguarded directive for
+# an absent module returns 500 for the whole subtree (T-02-02).
+<IfModule mod_headers.c>
+	<FilesMatch "^kontakti\.html$">
+		# `always` so it applies to the final response headers rather than only
+		# the success-path table, and `set` so it replaces any max-age that
+		# mod_expires put there rather than appending a contradiction.
+		Header always set Cache-Control "no-store, max-age=0"
+		Header always unset Expires
+	</FilesMatch>
 </IfModule>

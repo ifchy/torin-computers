@@ -285,8 +285,23 @@ function torin_render_evidence($items) {
 			// they are the whole CLS defence; CSS sets the DISPLAY size, and
 			// these attributes never do. loading/decoding are unconditional,
 			// which is safe by construction because an evidence strip may never
-			// be the first contentful element on a page. ?>
-				<li><figure><img src="img/repairs/<?php echo torin_esc($torin_ev['file']); ?>" width="<?php echo torin_esc($torin_ev['w']); ?>" height="<?php echo torin_esc($torin_ev['h']); ?>" alt="<?php echo torin_esc($torin_ev_alt); ?>" loading="lazy" decoding="async">
+			// be the first contentful element on a page.
+			//
+			// D4-33: a WebP sibling is offered THROUGH <picture>, and the <img>
+			// below is left exactly as it was — same src, same width/height,
+			// same alt, same loading/decoding. A browser without WebP support
+			// therefore sees byte-for-byte the page that shipped before this
+			// plan, because the fallback IS the previous markup rather than a
+			// reconstruction of it. The <source> is emitted only when the file
+			// actually exists on disk, mirroring the file_exists() guard above:
+			// the failure this closes is a <source> pointing at a sibling that
+			// was never generated, which one engine falls back from silently
+			// and another renders as nothing at all.
+			$torin_ev_webp = preg_replace('/\.[^.]+$/', '.webp', $torin_ev['file']);
+			$torin_ev_has_webp = ($torin_ev_webp !== $torin_ev['file'])
+				&& file_exists($torin_ev_dir . $torin_ev_webp);
+?>
+				<li><figure><picture><?php if ($torin_ev_has_webp) { ?><source srcset="img/repairs/<?php echo torin_esc($torin_ev_webp); ?>" type="image/webp"><?php } ?><img src="img/repairs/<?php echo torin_esc($torin_ev['file']); ?>" width="<?php echo torin_esc($torin_ev['w']); ?>" height="<?php echo torin_esc($torin_ev['h']); ?>" alt="<?php echo torin_esc($torin_ev_alt); ?>" loading="lazy" decoding="async"></picture>
 <?php		if (torin_has_content($torin_ev_cap)) { ?>
 					<figcaption><?php echo torin_esc($torin_ev_cap); ?></figcaption>
 <?php		} ?>
