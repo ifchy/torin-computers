@@ -1,9 +1,27 @@
-# public_html/new/.htaccess — Phase 1 rehearsal file, scoped to the /new/ staging subtree only.
-# At Phase 4 cutover, this file (or its rules) is promoted to the root .htaccess. TWO edits are
-# required there, not one:
-#   1. the canonicalisation target changes from https://torin.bg/new/$1 to https://torin.bg/$1
-#   2. the RewriteBase directly below changes from /new/ to /
-# Missing either one breaks a redirect silently, at 301, with no build failure.
+# public_html/.htaccess — PROMOTED TO ROOT FORM (plan 04-09, D4-30). This file is no longer
+# scoped to the staging subtree.
+#
+# ############################################################################
+# ## THIS FILE MUST NOT BE DEPLOYED TO THE STAGING SUBTREE ANY MORE.        ##
+# ## Its rewrite base and canonicalisation target now both address the      ##
+# ## document ROOT. Uploading it to public_html/new/ would point the base   ##
+# ## at / while the file sits in /new/, which breaks every redirect in it.  ##
+# ## scripts/deploy-new.sh writes ONLY to public_html/new/, so this file is ##
+# ## now out of that script's scope: it goes up with the 04-10 root swap.   ##
+# ############################################################################
+#
+# THE TWO EDITS ARE MADE (D4-30). Both are recorded here because the whole point of the
+# warning was that ONE of them passing does not imply the other:
+#   1. the canonicalisation substitution target now addresses the root, not the staging subtree
+#   2. the rewrite base directly below is now "/" rather than the staging segment
+# Missing either one breaks a redirect SILENTLY, at 301, with a Location header present and
+# no build failure. On the first deploy of the retirement rules that is exactly what happened.
+# Two separate gates assert these two lines; neither is allowed to stand in for the other.
+#
+# ALSO ABSENT BY DESIGN: the X-Robots-Tag "noindex, nofollow" block that kept the staging
+# subtree out of the index. It is DELETED, not commented out, so no future edit can re-enable
+# it by uncommenting. Carrying it to the root would remove the entire live site from Google's
+# index in one move. If you are reading this looking for it: its absence is the feature.
 
 RewriteEngine On
 
@@ -15,14 +33,41 @@ RewriteEngine On
 # https://torin.bg/home/torin/public_html/new/<target> — a server path leaked into a public
 # URL, and every one of them 404'd on the follow. The 301 itself looked correct, which is
 # why only following the redirect caught it.
-RewriteBase /new/
+#
+# EDIT 1 OF 2 AT PROMOTION (D4-30). This directive was the staging segment and is now "/".
+# It is still REQUIRED at the root: the retirement rules below use relative substitutions,
+# and a relative substitution with no base resolves against the filesystem path. Deleting
+# this line because "the root is / anyway" would reintroduce the exact original defect.
+RewriteBase /
 
-# Canonicalize all 4 protocol/host variants to https://torin.bg/new/... in exactly 1 hop.
-# Target is a hardcoded literal, never %{HTTP_HOST} reflection — reflecting the client-supplied
-# Host header into a redirect Location is a host-header-injection/open-redirect vector (T-01-03).
+# ── HOST CANONICALISATION (D4-29 · plan 04-09) ────────────────────────────
+#
+# EDIT 2 OF 2 AT PROMOTION (D4-30). The substitution target was the staging subtree and now
+# addresses the document root. This is the line that pairs with the rewrite base above; the
+# warning carried into this phase is that fixing one and not the other looks like success.
+#
+# IF THIS BLOCK IS ABSENT, THE SITE IS SERVED ON FOUR HOSTS AT ONCE. Measured live on
+# 2026-09-21 at the root, all four protocol/host variants returned 200 with ZERO redirects:
+#   http://torin.bg/       -> 200, 0 hops      http://www.torin.bg/  -> 200, 0 hops
+#   https://torin.bg/      -> 200, 0 hops      https://www.torin.bg/ -> 200, 0 hops
+# SEO-04 covered paths; nothing in three phases ever covered the host, which is how this
+# went unseen. Search Console's ranking variant is the insecure www form — the least
+# preferred of the four — while includes/site-config.php already declares https://torin.bg/.
+# Choosing the secure apex therefore changes NOTHING in the build (D4-29, one-way).
+#
+# TARGET IS A HARDCODED LITERAL, NEVER %{HTTP_HOST} REFLECTION. Reflecting the
+# client-supplied Host header into a redirect Location is a host-header-injection /
+# open-redirect vector (T-01-03, T-04-47). The host variable appears below in a CONDITION
+# only, which is a read; it must never appear in a SUBSTITUTION, which is a write into a
+# Location the client controls. That distinction is the whole mitigation and a gate asserts
+# it. This rationale is carried across the promotion deliberately — losing it in the edit
+# was itself a named risk.
+#
+# One hop from any variant: the off-HTTPS case and the www case both match a single rule
+# whose target is already secure and already apex, so no variant is ever redirected twice.
 RewriteCond %{HTTPS} off [OR]
 RewriteCond %{HTTP_HOST} ^www\.torin\.bg$ [NC]
-RewriteRule ^(.*)$ https://torin.bg/new/$1 [R=301,L]
+RewriteRule ^(.*)$ https://torin.bg/$1 [R=301,L]
 
 # ── SEO-05 retirements (plan 03.5-01 · CONTEXT D3.5-03, D3.5-09) ─────────────
 #
@@ -77,11 +122,20 @@ RewriteRule ^laptopi\.html$ index.html [R=301,L]
 RewriteRule ^rezervni-chasti\.html$ ekran-klaviatura-portove.html [R=301,L]
 RewriteRule ^za-bateriite\.html$ zalivane-technosti.html [R=301,L]
 
-# Keep this staging subtree out of Google's index — robots.txt is ignored outside the true
-# domain root, so X-Robots-Tag via HTTP header is the correct mechanism here (RESEARCH.md Pitfall C).
-<IfModule mod_headers.c>
-	Header set X-Robots-Tag "noindex, nofollow"
-</IfModule>
+# ── THE STAGING NO-INDEX BLOCK WAS HERE, AND IS DELETED (plan 04-09) ──────
+#
+# A header block setting the response to "noindex, nofollow" used to sit at this point. It
+# existed so the staging subtree stayed out of Google's index, and robots.txt could not do
+# that job because robots.txt is ignored outside the true domain root.
+#
+# It is REMOVED rather than commented out. A commented-out directive is one keystroke from
+# live, and the failure mode of that keystroke is the entire site dropping out of the search
+# index — the folded todo strip-staging-noindex-at-cutover.md was rated blocker-at-cutover
+# for exactly this. Nothing here to re-enable is the point.
+#
+# At the root, indexing is governed by src/robots.txt (plan 04-08), which IS at the true
+# domain root after the swap and therefore IS honoured. The cutover sweep asserts this
+# header is absent from live responses rather than assuming the deletion travelled.
 
 # ── Host-side files that live in the document root (D4-23 · plan 04-06) ────
 #
@@ -134,18 +188,29 @@ RewriteRule ^za-bateriite\.html$ zalivane-technosti.html [R=301,L]
 # pointing at php85-fcgi.ini, which makes that ini - not .user.ini, not php_value
 # - the lever for every limit in this subtree.
 #
-# THE PATH IS ABSOLUTE, SO A DIRECTORY MOVE SILENTLY INVALIDATES IT. At the Phase
-# 4 root cutover it becomes /home/torin/public_html/php.fcgi, and the panel has to
-# be pointed at the root directory first so that wrapper exists at all. That is a
-# NAMED STEP in the cutover checklist, not a discovery for whoever runs it: a
-# stale wrapper path does not warn, it 500s the entire subtree.
+# THE PATH IS ABSOLUTE, SO A DIRECTORY MOVE SILENTLY INVALIDATES IT. The three
+# directives below have been REWRITTEN to the root path for the 04-10 cutover.
+# Rewriting them here is only half the job and is worthless on its own:
+#
+#   /home/torin/public_html/php.fcgi MUST ACTUALLY EXIST BEFORE THIS FILE GOES UP.
+#
+# That file is GENERATED by cPanel -> Select PHP Version when a PHP version is set
+# for a directory. It was generated for public_html/new/ on 2026-09-17; it has
+# NEVER been generated for public_html/ itself, because D4-03 deliberately left
+# the root untouched. So the panel must be pointed at the ROOT directory first,
+# which creates php.fcgi and php85-fcgi.ini there. Step 4 of the cutover checklist.
+#
+# A stale or missing wrapper path does not warn. It 500s every page at once.
 #
 # WHY THE EXTENSION LIST IS WIDER THAN THE PANEL'S. SuperHosting's PHP manager
 # does not write a handler block itself - it hands you one and asks you to paste
 # it in. What it hands you covers .php and nothing else:
 #
 #     AddHandler fcgid-script .php
-#     FcgidWrapper /home/torin/public_html/new/php.fcgi .php
+#     FcgidWrapper /home/torin/public_html/php.fcgi .php
+#
+# (shown here with the ROOT path, which is what the panel emits once it is
+# pointed at public_html/ — it emits whichever directory you selected.)
 #
 # Paste that verbatim, then follow the host's other instruction - "remove any
 # existing AddHandler line for a PHP version" - and every .html page in this
@@ -161,9 +226,9 @@ RewriteRule ^za-bateriite\.html$ zalivane-technosti.html [R=301,L]
 # are changed in php85-fcgi.ini instead.
 <IfModule mod_fcgid.c>
 	AddHandler fcgid-script .php .html .htm
-	FcgidWrapper /home/torin/public_html/new/php.fcgi .php
-	FcgidWrapper /home/torin/public_html/new/php.fcgi .html
-	FcgidWrapper /home/torin/public_html/new/php.fcgi .htm
+	FcgidWrapper /home/torin/public_html/php.fcgi .php
+	FcgidWrapper /home/torin/public_html/php.fcgi .html
+	FcgidWrapper /home/torin/public_html/php.fcgi .htm
 </IfModule>
 
 # FAIL-SAFE. This is a deliberate deviation from this task's own acceptance
@@ -185,8 +250,20 @@ RewriteRule ^za-bateriite\.html$ zalivane-technosti.html [R=301,L]
 # load-bearing because expose_php = On in php85-fcgi.ini (line 286, read
 # 2026-09-17).
 #
-# Delete this block at the root cutover (04-10) once 8.5 is proven in production.
-# It is a transition guard, not a permanent feature.
+# KEPT THROUGH THE PROMOTION, DELIBERATELY (plan 04-09). The original note said
+# to delete this at the root cutover, and that is read here as AFTER 8.5 is proven
+# at the root — not as part of the swap itself. 8.5 has been proven only in the
+# staging subtree, under a wrapper whose absolute path the move invalidates; the
+# root has never executed a single PHP page. Removing the fail-safe in the same
+# operation that first exercises the root wrapper would mean that if the panel
+# step is missed, 20 pages are served to the public as readable PHP SOURCE
+# (T-04-03) — including contact-send.php's logic. With the block kept, that same
+# mistake degrades to "still on 5.2", which is where the site already is today.
+#
+# It is therefore a POST-CUTOVER deletion, listed as its own checklist step after
+# the sweep confirms x-powered-by does not report 5.2 at the root. It must never
+# be allowed to pass as success: a fallback quietly keeping 5.2 alive is exactly
+# the green check this project has shipped once already.
 <IfModule !mod_fcgid.c>
 	AddHandler application/x-httpd-php52 .html .htm
 </IfModule>
