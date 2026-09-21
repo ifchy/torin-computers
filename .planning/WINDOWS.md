@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 36
+open_count: 38
 waived_count: 0
-fixed_count: 10
-total_count: 46
-last_updated: 2026-09-21T18:08:50.508Z
+fixed_count: 11
+total_count: 49
+last_updated: 2026-09-21T18:56:38.709Z
 ---
 
 # Broken Windows Ledger
@@ -27,7 +27,7 @@ last_updated: 2026-09-21T18:08:50.508Z
 | 10 | 02 | deviation | src/css/no-js.css |  | Residual, not closed by 02-06: scripting ENABLED but site.js failing to load/throw leaves the nav hidden below 56.25rem. Closing it needs a scripting-capability marker written before first paint, which the project deliberately does not have. | open |  | 2026-08-06T14:09:24.578Z |  |
 | 11 | 02 | deviation | src/css/no-js.css |  | 02-06 desktop no-script row shape: 'flex: 1 0 100%' on .nav__item--has-sub (plan-mandated, grep-asserted) splits the four visible top-level links across two wrapped rows rather than one, because the has-sub item sits mid-list. Navigable and in-flow, but the plan's human-check phrasing 'five top-level items still read as a horizontal row' is NOT satisfied as worded. Open. | open |  | 2026-08-06T14:09:24.636Z |  |
 | 12 | 02 | deviation | scripts/probes/contrast.js |  | contrast.js exports { HELPERS } and is not a runnable probe, but 02-09 Task 3 and the phase docs invoke it via render-check.sh (probe.run is not a function); the trust-badge 10.14:1 baseline has no committed probe that reproduces it | open |  | 2026-08-09T14:16:43.110Z |  |
-| 13 | 03 | unrun-verify | scripts/seo-metadata-check.js |  | 03-09 live gate NOT RUN: deploy unavailable in executor context, so the 11 tuned pages still serve pre-plan metadata. 'node scripts/seo-metadata-check.js --live' currently reports served-matches-source on exactly those 11. Deploy then re-run to close. | open |  | 2026-08-26T08:07:31.628Z |  |
+| 13 | 03 | unrun-verify | scripts/seo-metadata-check.js |  | 03-09 live gate NOT RUN: deploy unavailable in executor context, so the 11 tuned pages still serve pre-plan metadata. 'node scripts/seo-metadata-check.js --live' currently reports served-matches-source on exactly those 11. Deploy then re-run to close. | fixed |  | 2026-08-26T08:07:31.628Z | 2026-09-21T18:56:38.709Z |
 | 14 | 04 | unrun-verify | src/includes/contact-form.php |  | 04-02 Task 3: honeypot autofill false-positive UNCONFIRMED. The human's manual handset submission succeeded, but they did not state whether browser autofill/password-manager was active, which is the plan's named number-one honeypot false-positive source. A false positive silently discards a real enquiry and is invisible to both parties. Re-test with autofill explicitly on. | open |  | 2026-09-20T10:55:10.721Z |  |
 | 15 | 04 | unrun-verify | src/includes/notify.php |  | 04-02: the notification FAILURE path has never been exercised. Every live check drove the success branch; no check made api.telegram.org unreachable, so the visitor-facing 'every channel failed' page and the error_log correlation-id branch in contact-send.php are unproven at runtime. 04-05 adds a second driver and should exercise this while it is there. | open |  | 2026-09-20T10:55:16.705Z |  |
 | 16 | 04 | deviation | .planning/phases/04-hardening-cutover/04-02-PLAN.md |  | 04-02 verify V7 is NOT PORTABLE and reports a false failure on macOS: 'grep -L PATTERN FILE \| wc -l \| grep -qx 0' never matches on BSD wc, which pads its count to seven spaces then 0 (confirmed by od -c); GNU wc emits an unpadded 0 and the same check passes on Linux. The underlying condition was TRUE. Every later plan using the 'wc -l \| grep -qx N' idiom has the same defect; use N=$(... \| wc -l \| tr -d ' '); [ "$N" = "0" ] instead. | open |  | 2026-09-20T10:55:25.672Z |  |
@@ -61,6 +61,9 @@ last_updated: 2026-09-21T18:08:50.508Z
 | 44 | 04 | deviation | src/js/analytics.js |  | 04-07: the C-8 error-band .focus() call lives in analytics.js, and that is a fragile home for an ACCESSIBILITY behaviour. Content blockers commonly match the filename 'analytics.js' by pattern; a blocked file means the error-band focus silently stops working for exactly those users, so a keyboard or screen-reader user with a blocker lands at the top of the document instead of on the explanation of what went wrong. src/js/site.js would be immune and is the right home for accessibility behaviour. This is a TWO-LINE MOVE. The executor flagged it rather than deviating unilaterally, because the orchestrator had directed the file explicitly (carried from ledger 41a, which itself inherited the location from 04-05's summary) — the orchestrator now endorses the move. Do it as a quick task before cutover; it is cheap and the failure mode is silent. | open |  | 2026-09-21T18:08:25.653Z |  |
 | 45 | 04 | unrun-verify | scripts/deploy-new.sh |  | 04-07: THE TWO DELETED SCAFFOLDING FILES STILL EXIST ON THE SERVER. src/css/theme-a.css and src/includes/dev-switcher.php are gone from the tree (plan-mandated, verified: the branch deleted those two files and nothing else), but deploy-new.sh UPLOADS and never DELETES, so both remain live under /new/ until someone removes them by hand. dev-switcher.php is dev scaffolding that has been rendering on all 19 staging pages since Phase 2 — leaving it on the server after cutover would publish it. There is currently nowhere to record this: 04-CUTOVER-CHECKLIST.md does not exist yet; 04-09 creates it. 04-09 MUST carry a manual-removal step for these two paths. Related, same root cause: any future file deletion in this project has the same problem, so the checklist should name the class, not just these two files. | open |  | 2026-09-21T18:08:34.232Z |  |
 | 46 | 04 | deviation | .planning/phases/04-hardening-cutover/04-07-PLAN.md |  | 04-07: the plan's files_modified declaration was incomplete — five files changed that it did not declare: src/contact-send.php, src/kontakti.html, src/css/base.css, src/css/components.css, src/includes/asset-version.php. Each change is defensible (contact-send.php carries the C-9 form-error server-rendered event the orchestrator explicitly assigned from ledger 41b; kontakti.html gained a seventh data-slot for three phone anchors 04-05 added after C-9's slot table was written; the two CSS files and asset-version.php are theme-a removal fallout). NO HARM OCCURRED — 04-07 ran alone in its wave. But files_modified is exactly what the orchestrator's intra-wave overlap check reads to decide whether two plans may run in parallel, so an under-declared list is a latent parallel-execution hazard, not a paperwork issue. Worth a planner-side note that files_modified must be updated when a plan absorbs carried-forward ledger work assigned after planning. | open |  | 2026-09-21T18:08:43.788Z |  |
+| 47 | 04 | unrun-verify | src/includes/header.php |  | 04-08: NOTHING FROM THIS PLAN IS DEPLOYED, and one unrun item is the highest-risk in the phase. robots.txt, sitemap.xml, the 43 WebP siblings and the new .htaccess all return 404 or serve old values on the origin right now, so EVERY live number in 04-08-SUMMARY is a PRE-DEPLOY BASELINE, not a pass. Highest risk: the PHP edits to header.php and category-page.php are SYNTAX-UNVERIFIED (no php binary, no Docker), and a parse error in header.php breaks all 19 pages at once — header.php is included by every page. This compounds with ledger 30, which already requires php -l on five files from 04-06; header.php is now on BOTH lists and has been edited by three separate plans (04-06, 04-07, 04-08) without once being parsed. Run php -l on header.php before anything else at deploy time, and deploy the PHP includes together rather than one at a time. | open |  | 2026-09-21T18:56:09.283Z |  |
+| 48 | 04 | deviation | scripts/asset-version-check.sh |  | 04-08: FOUR GATES IN THIS PLAN DID NOT MEASURE WHAT THEY CLAIMED — a recurring class on this project, worth reading as a pattern rather than four incidents. (1) WORST: a cache assertion written as grep 'cache-control:.*max-age=3' matches BOTH the old value 300 AND the new 31536000, because it is a PREFIX match on the digit 3. It therefore reported green before the change and green after — a gate that could never fail. Replaced with an exact comparison. (2) grep -o '<img[^>]*>' breaks on PHP source because [^>]* stops at the > of ?>, so it reported 9 defects against markup that has none; re-checked with a real parser (2 tags, 0 defects). (3) and (4) two of the executor's own new comments inflated substring counts — the literal <loc> and the word sitemap written as prose — which it reworded rather than let a counter pass for the wrong reason. SAME FAMILY AS ledger 16 (BSD wc padding defeating 'wc -l \| grep -qx 0'). STANDING RULE for this project: never assert a numeric threshold with a substring or prefix grep; extract the value and compare it numerically. | open |  | 2026-09-21T18:56:19.412Z |  |
+| 49 | 04 | deviation | .planning/phases/04-hardening-cutover/04-08-PLAN.md |  | 04-08: PLAN DEFECT, not a work defect — the plan's sitemap gate demands >= 20 URLs, but the correct number is 19 and the executor rightly refused to pad it. The arithmetic: 20 page files minus one deliberately noindexed (msg.html, excluded on purpose per threat T-04-39) equals 19, and all 19 return 200 live. Orchestrator independently confirmed post-merge: sitemap.xml contains exactly 19 <loc> entries and zero occurrences of msg.html. The gate figure was written before 04-07 introduced the robots emitter that makes msg.html noindex, so it counts a page the phase then decided to exclude. Treat 19 as correct and fix the gate, not the sitemap. Also recorded: two declared deviations outside files_modified, both justified — header.php (the logo <img> lives there and is the largest per-visit win) and scripts/asset-version-check.sh (its Check C asserted max-age <= 600 with failure text literally reading 'Phase 4 raises this, DESIGN-02', so left untouched it would fail forever once the new .htaccess lands). | open |  | 2026-09-21T18:56:29.519Z |  |
 
 ````json
 [
@@ -215,10 +218,10 @@ last_updated: 2026-09-21T18:08:50.508Z
     "file": "scripts/seo-metadata-check.js",
     "line": null,
     "description": "03-09 live gate NOT RUN: deploy unavailable in executor context, so the 11 tuned pages still serve pre-plan metadata. 'node scripts/seo-metadata-check.js --live' currently reports served-matches-source on exactly those 11. Deploy then re-run to close.",
-    "status": "open",
+    "status": "fixed",
     "reason": "",
     "recorded_at": "2026-08-26T08:07:31.628Z",
-    "resolved_at": null
+    "resolved_at": "2026-09-21T18:56:38.709Z"
   },
   {
     "id": 14,
@@ -614,6 +617,42 @@ last_updated: 2026-09-21T18:08:50.508Z
     "status": "open",
     "reason": "",
     "recorded_at": "2026-09-21T18:08:43.788Z",
+    "resolved_at": null
+  },
+  {
+    "id": 47,
+    "kind": "unrun-verify",
+    "phase": "04",
+    "file": "src/includes/header.php",
+    "line": null,
+    "description": "04-08: NOTHING FROM THIS PLAN IS DEPLOYED, and one unrun item is the highest-risk in the phase. robots.txt, sitemap.xml, the 43 WebP siblings and the new .htaccess all return 404 or serve old values on the origin right now, so EVERY live number in 04-08-SUMMARY is a PRE-DEPLOY BASELINE, not a pass. Highest risk: the PHP edits to header.php and category-page.php are SYNTAX-UNVERIFIED (no php binary, no Docker), and a parse error in header.php breaks all 19 pages at once — header.php is included by every page. This compounds with ledger 30, which already requires php -l on five files from 04-06; header.php is now on BOTH lists and has been edited by three separate plans (04-06, 04-07, 04-08) without once being parsed. Run php -l on header.php before anything else at deploy time, and deploy the PHP includes together rather than one at a time.",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-09-21T18:56:09.283Z",
+    "resolved_at": null
+  },
+  {
+    "id": 48,
+    "kind": "deviation",
+    "phase": "04",
+    "file": "scripts/asset-version-check.sh",
+    "line": null,
+    "description": "04-08: FOUR GATES IN THIS PLAN DID NOT MEASURE WHAT THEY CLAIMED — a recurring class on this project, worth reading as a pattern rather than four incidents. (1) WORST: a cache assertion written as grep 'cache-control:.*max-age=3' matches BOTH the old value 300 AND the new 31536000, because it is a PREFIX match on the digit 3. It therefore reported green before the change and green after — a gate that could never fail. Replaced with an exact comparison. (2) grep -o '<img[^>]*>' breaks on PHP source because [^>]* stops at the > of ?>, so it reported 9 defects against markup that has none; re-checked with a real parser (2 tags, 0 defects). (3) and (4) two of the executor's own new comments inflated substring counts — the literal <loc> and the word sitemap written as prose — which it reworded rather than let a counter pass for the wrong reason. SAME FAMILY AS ledger 16 (BSD wc padding defeating 'wc -l | grep -qx 0'). STANDING RULE for this project: never assert a numeric threshold with a substring or prefix grep; extract the value and compare it numerically.",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-09-21T18:56:19.412Z",
+    "resolved_at": null
+  },
+  {
+    "id": 49,
+    "kind": "deviation",
+    "phase": "04",
+    "file": ".planning/phases/04-hardening-cutover/04-08-PLAN.md",
+    "line": null,
+    "description": "04-08: PLAN DEFECT, not a work defect — the plan's sitemap gate demands >= 20 URLs, but the correct number is 19 and the executor rightly refused to pad it. The arithmetic: 20 page files minus one deliberately noindexed (msg.html, excluded on purpose per threat T-04-39) equals 19, and all 19 return 200 live. Orchestrator independently confirmed post-merge: sitemap.xml contains exactly 19 <loc> entries and zero occurrences of msg.html. The gate figure was written before 04-07 introduced the robots emitter that makes msg.html noindex, so it counts a page the phase then decided to exclude. Treat 19 as correct and fix the gate, not the sitemap. Also recorded: two declared deviations outside files_modified, both justified — header.php (the logo <img> lives there and is the largest per-visit win) and scripts/asset-version-check.sh (its Check C asserted max-age <= 600 with failure text literally reading 'Phase 4 raises this, DESIGN-02', so left untouched it would fail forever once the new .htaccess lands).",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-09-21T18:56:29.519Z",
     "resolved_at": null
   }
 ]
