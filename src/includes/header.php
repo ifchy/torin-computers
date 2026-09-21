@@ -19,8 +19,11 @@ require_once(dirname(__FILE__) . '/icons.php');
 require_once(dirname(__FILE__) . '/categories.php');
 // Version-stamps every static asset URL this head emits (gap G-02-1: a bare
 // href cannot be invalidated, and the origin caches these files for days).
-// Required HERE, before the dev-only theme switcher partial is included below,
-// because that partial calls torin_asset_url() too and relies on this scope.
+// It used to be required at exactly this point because the dev-only theme
+// switcher partial, included a few lines below, called the helper too and
+// relied on this scope. That partial is deleted (04-07) and the ordering
+// constraint went with it; the require stays here because every stylesheet
+// and script URL this file emits below still needs the helper.
 require_once(dirname(__FILE__) . '/asset-version.php');
 // The holiday/closure strip (OWNER-02, D4-27). Required here and CALLED ONCE
 // below, as the first child of the page wrapper — the shared-layout rule means
@@ -47,16 +50,29 @@ require_once(dirname(__FILE__) . '/banner.php');
 // narrow and nav-specific so a page-level array can never collide with it.
 $torin_nav_current = basename($_SERVER['SCRIPT_NAME']);
 
-// ── DEV-ONLY THEME SWITCHER (D-03) — delete this block at the Phase 4 cutover.
-// The guard is file existence and nothing else: never a request-path check
-// (request values are client-influenced) and never a constant in
-// site-config.php (that file does ship to production). "Is the switcher live?"
-// must be answerable from an FTP directory listing.
-$torin_html_attr = '';
-$torin_extra_head = '';
-$torin_dev_switcher = dirname(__FILE__) . '/dev-switcher.php';
-if (file_exists($torin_dev_switcher)) { include($torin_dev_switcher); }
-// ── END DEV-ONLY ─────────────────────────────────────────────────────────────
+// THE DEV-ONLY THEME SWITCHER (D-03) STOOD HERE AND IS DELETED (04-07, the
+// Phase 4 cutover step it was always marked for). It included a partial when
+// that partial existed on the server, and set two variables this file echoed:
+// one attribute on <html> selecting the comparison theme, and one extra-head
+// slot that linked the comparison stylesheet. Both echoes are gone below, and
+// both files are gone from the tree. (Their two names are deliberately NOT
+// written anywhere in here: a plan-level grep asserts src/ contains zero
+// references to either, and naming them in this tombstone would fail the very
+// gate that proves the deletion — the same discipline the nav block below
+// uses for the two ARIA role names it must not contain.)
+//
+// NOTHING THAT SHIPS CHANGED COLOUR. The shipping theme is the unconditional
+// :root block in css/base.css; the deleted override only ever declared
+// colours under an attribute selector that no page carries now.
+//
+// THE FILES ARE NOT GONE FROM THE SERVER. scripts/deploy-new.sh uploads and
+// never removes, and no script in this project can delete a remote file, so
+// both paths are on the cutover manual-deletion list. Deleting them here is
+// half the job; "gone" is proved by fetching both paths and getting a 404.
+//
+// Do not confuse the deleted extra-head slot with the $torin_robots mechanism
+// added below. They look alike and are unrelated: that one was a dev hook,
+// this one is a production per-page directive.
 
 // Per-page metadata mechanism (02-RESEARCH N-5). A page assigns these before
 // the include; anything left unset falls back to the site-level default, so a
@@ -103,7 +119,7 @@ if (isset($torin_track) && $torin_track !== '') {
 }
 ?>
 <!DOCTYPE html>
-<html lang="bg"<?php echo $torin_html_attr; ?>>
+<html lang="bg">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -112,6 +128,26 @@ if (isset($torin_track) && $torin_track !== '') {
       // in actual styling. ?>
 <meta name="theme-color" content="#ffc70a">
 <meta name="description" content="<?php echo htmlspecialchars($torin_desc, ENT_QUOTES, 'UTF-8'); ?>">
+<?php // PER-PAGE ROBOTS DIRECTIVE (UI-SPEC C-8, plan 04-07). A page assigns
+      // $torin_robots before this include; anything that does not assign it
+      // emits NO tag at all, which is why every page that already ships is
+      // byte-identical after this line was added. Same escaping form as the
+      // description above, deliberately — one convention for every meta
+      // content value in this file.
+      //
+      // THIS IS A PRODUCTION MECHANISM AND IS NOT THE DEV EXTRA-HEAD SLOT
+      // DELETED IN THE SAME PLAN. The two look alike — a per-page string the
+      // head echoes — and a later reader will otherwise conflate them and
+      // delete this one as more cutover leftovers. That one injected an
+      // arbitrary markup blob for the theme switcher; this one emits a single
+      // known tag with an escaped value and has a caller in the tree
+      // (msg.html, keeping the confirmation page out of the index).
+      //
+      // The emitter is an echo rather than a template block so that the
+      // unset case produces no output whatsoever — not a blank line.
+      if (isset($torin_robots) && $torin_robots !== '') {
+	echo '<meta name="robots" content="' . htmlspecialchars($torin_robots, ENT_QUOTES, 'UTF-8') . '">' . "\n";
+} ?>
 
 <title><?php echo htmlspecialchars($torin_title, ENT_QUOTES, 'UTF-8'); ?></title>
 
@@ -244,15 +280,9 @@ if (isset($torin_track) && $torin_track !== '') {
       // rather than capturing it once, and a missing tracker is a silent no-op.
       // Do not "fix" the order into a dependency it does not have. ?>
 <script src="<?php echo htmlspecialchars(torin_asset_url('js/analytics.js'), ENT_QUOTES, 'UTF-8'); ?>" defer></script>
-<?php echo $torin_extra_head; ?>
 </head>
 
 <body class="site-body"<?php echo $torin_track_attr; ?>>
-<?php
-// ── DEV-ONLY (D-03) — delete these lines at the Phase 4 cutover ──────────────
-if (file_exists($torin_dev_switcher)) { torin_render_theme_switcher($torin_theme); }
-// ── END DEV-ONLY ─────────────────────────────────────────────────────────────
-?>
 
 <div id="wrap">
 <?php torin_render_banner($site); ?>

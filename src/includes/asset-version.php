@@ -1,7 +1,8 @@
 <?php
 // includes/asset-version.php — PHP 5.2-safe. Emits nothing on include; it is
 // one function and no data, per this tree's include-boundary rule (only
-// header.php, footer.php and dev-switcher.php produce markup).
+// header.php, footer.php and banner.php produce markup; the dev switcher
+// partial that used to be the third name here is deleted as of 04-07).
 //
 // WHY THIS FILE EXISTS (gap G-02-1). Every stylesheet link the shared head
 // emitted carried a bare href, while the origin serves those files with a
