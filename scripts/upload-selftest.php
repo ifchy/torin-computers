@@ -270,6 +270,99 @@ torin_t(
 );
 foreach ($paths as $p) { unlink($p); }
 
+// ── CONTAINMENT: THE REJECTION SIDE (ledger 54) ─────────────────────────────
+//
+// WHY THESE EXIST, because the assertion above looks like it already covers
+// this and does not. "every normalised path sits under the system temp
+// directory" feeds the pipeline ordinary files and checks where they landed —
+// but they landed there because tempnam() put them there, which is true
+// whether the guard runs or not. Proved on 2026-09-22 by replacing the guard's
+// condition with `if (false)`: the guard was entirely dead and that assertion
+// still passed.
+//
+// A guard is only tested by the inputs it is supposed to REFUSE. Those inputs
+// cannot be produced through torin_normalise_upload(), whose path always comes
+// from tempnam() — which is why the decision was split into
+// torin_path_is_contained() and is called directly here.
+//
+// The stakes: this server maps .html to PHP, so a file written outside the temp
+// directory and inside the served tree is code execution, not clutter. The
+// decode-and-re-encode step makes the CONTENTS safe; this is what makes the
+// LOCATION safe. Both halves have to hold.
+
+torin_t(
+	'containment: a file directly inside the root is contained',
+	torin_path_is_contained('/tmp/torin_abc', '/tmp') === true
+		&& torin_path_is_contained('/tmp/a/b/c', '/tmp') === true,
+	'a legitimate temp path was refused — this refuses every upload, invisibly'
+);
+
+// THE CLASSIC BUG IN THIS SHAPE. '/tmpevil' shares '/tmp' as a string prefix
+// while being an entirely different directory. A naive prefix test accepts it.
+torin_t(
+	'containment: a SIBLING sharing a string prefix is refused',
+	torin_path_is_contained('/tmpevil/torin_abc', '/tmp') === false
+		&& torin_path_is_contained('/tmp-other/x', '/tmp') === false,
+	'a sibling directory sharing the root prefix passed containment'
+);
+
+torin_t(
+	'containment: the root itself is not a file inside the root',
+	torin_path_is_contained('/tmp', '/tmp') === false
+		&& torin_path_is_contained('/tmp/', '/tmp') === false,
+	'the root directory passed as though it were a file within itself'
+);
+
+torin_t(
+	'containment: an unrelated absolute path is refused',
+	torin_path_is_contained('/var/www/html/evil.php', '/tmp') === false
+		&& torin_path_is_contained('/etc/passwd', '/tmp') === false,
+	'a path outside the root passed containment'
+);
+
+// An unresolved path must fail CLOSED. A '..' segment cannot survive
+// realpath(), so its presence means the caller skipped resolution — and a
+// prefix test on an unresolved path is the bypass this guard exists to stop.
+torin_t(
+	'containment: a traversal segment is refused rather than compared',
+	torin_path_is_contained('/tmp/../etc/passwd', '/tmp') === false
+		&& torin_path_is_contained('/tmp/a/../../etc/passwd', '/tmp') === false
+		&& torin_path_is_contained('/tmp/ok', '/tmp/..') === false,
+	'a path carrying .. was compared instead of refused'
+);
+
+// A root spelled with a trailing slash is the same root. Getting this wrong
+// would refuse every upload on a host whose temp dir is reported that way.
+torin_t(
+	'containment: a trailing slash on the root changes nothing',
+	torin_path_is_contained('/tmp/torin_abc', '/tmp/') === true
+		&& torin_path_is_contained('/tmpevil/x', '/tmp/') === false,
+	'the root spelling changed the verdict'
+);
+
+torin_t(
+	'containment: empty and non-string arguments are refused',
+	torin_path_is_contained('', '/tmp') === false
+		&& torin_path_is_contained('/tmp/x', '') === false
+		&& torin_path_is_contained(false, '/tmp') === false
+		&& torin_path_is_contained('/tmp/x', null) === false,
+	'a missing argument was treated as containment'
+);
+
+// The wiring, asserted at source: the call site must USE the predicate, and it
+// must remove the file when containment fails. A guard that refuses the path
+// but leaves the bytes on disk has not finished the job.
+$torin_up_src = file_get_contents(dirname(dirname(__FILE__)) . '/src/includes/upload.php');
+torin_t(
+	'SOURCE: the guard calls the predicate and unlinks on refusal',
+	strpos($torin_up_src, '!torin_path_is_contained($torin_real, $torin_root)') !== false
+		&& preg_match(
+			'/!torin_path_is_contained\([^)]*\)\)\s*\{\s*@unlink\(\$torin_out\);/',
+			$torin_up_src
+		) === 1,
+	'the call site no longer uses the predicate, or no longer removes the refused file'
+);
+
 // ── RESULT ──────────────────────────────────────────────────────────────────
 echo "\n";
 if (count($torin_fails) === 0) {

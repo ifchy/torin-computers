@@ -33,6 +33,47 @@
 // exhaustion), T-04-14 (EXIF metadata forwarded to a third party), T-04-15
 // ($_FILES metadata trusted), T-04-17 (a refused photo costing the enquiry).
 
+// True when $real sits strictly INSIDE $root. The containment decision, split
+// out of torin_normalise_upload() so it can be tested against paths that do
+// not exist — which is the only way to exercise the REJECTION side of a guard
+// whose caller can only ever hand it a path tempnam() already made valid.
+// Extracted 2026-09-22 to close ledger 54.
+//
+// BOTH ARGUMENTS MUST ALREADY BE RESOLVED by realpath(). This function does no
+// filesystem work at all; that is deliberate, and it is what makes '/tmpevil/x'
+// or '/tmp/../etc/passwd' testable without creating either. The resolution
+// stays at the call site, where the paths are real.
+//
+// A RESOLVED PATH NEVER CONTAINS A '..' SEGMENT, so one appearing here means
+// the caller skipped realpath() — and a prefix test against an unresolved path
+// is precisely the bypass this guard exists to prevent. That is refused rather
+// than compared, so the mistake fails closed instead of silently passing.
+//
+// The trailing slash on the root is load-bearing and is not cosmetic: without
+// it '/tmpevil/x' passes containment in '/tmp', because it shares the prefix
+// while being a sibling directory. It also makes the root ITSELF fail, which
+// is correct — the root is not a file inside the root.
+function torin_path_is_contained($real, $root) {
+	if (!is_string($real) || !is_string($root) || $real === '' || $root === '') {
+		return false;
+	}
+	if (in_array('..', explode('/', $real), true)
+	    || in_array('..', explode('/', $root), true)) {
+		return false;
+	}
+	// Normalise the trailing slash on BOTH sides before comparing. realpath()
+	// never emits one, so '/tmp/' cannot arrive here from the call site — but
+	// «the root itself is not a file inside the root» should hold however the
+	// root is spelled, not only in the spelling realpath() happens to produce.
+	// Without this, '/tmp/' tested against '/tmp' reports contained.
+	$torin_real = rtrim($real, '/');
+	$torin_root = rtrim($root, '/');
+	if ($torin_real === '' || $torin_real === $torin_root) {
+		return false;
+	}
+	return strpos($torin_real, $torin_root . '/') === 0;
+}
+
 // Normalise ONE uploaded file. Returns a fresh temp path, or false.
 //
 // $tmpPath is a path PHP itself produced for an upload; $maxEdge is the cap
@@ -199,10 +240,12 @@ function torin_normalise_upload($tmpPath, $maxEdge) {
 	// realpath() on both sides is also strictly STRONGER than the comparison it
 	// replaces: it collapses `..` and resolves symlinks BEFORE the prefix test,
 	// so a path that merely looks contained can no longer pass one.
+	// The comparison itself lives in torin_path_is_contained() so that its
+	// rejection side can be tested; this call site owns only the resolution.
 	$torin_root = realpath(sys_get_temp_dir());
 	$torin_real = realpath($torin_out);
 	if ($torin_root === false || $torin_real === false
-	    || strpos($torin_real, rtrim($torin_root, '/') . '/') !== 0) {
+	    || !torin_path_is_contained($torin_real, $torin_root)) {
 		@unlink($torin_out);
 		imagedestroy($torin_dst);
 		error_log('torin upload: temp path escaped the system temp directory');
