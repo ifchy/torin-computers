@@ -25,16 +25,46 @@
 // learned, in minutes, that they mistyped their address. That is the entire
 // point of the confirmation and it only works if the page announces it.
 //
-// EVERY SENTENCE HERE IS CONDITIONAL OR GENERAL, NEVER AN ASSERTION ABOUT THIS
-// READER. This is a plain URL with no server-side state behind it: anybody can
-// open /new/msg.html directly, from a bookmark, from a search result, or by
-// typing it. A page that says «вашите снимки пристигнаха» to somebody who
-// submitted nothing is telling them something false about their own day, and
-// on this site it would be telling it to them in Bulgarian in a shop's voice.
-// So the photographs are named with «ако сте приложили» and the confirmation
-// email as something that «тръгва», not as something that has demonstrably
-// arrived — both true for the visitor who did submit, neither a claim about
-// the one who did not.
+// WHAT THAT EMAIL ACTUALLY IS, since this page is the only place a visitor is
+// promised it: contact-send.php builds a plain-text message, subject
+// «Получихме запитването ви — Торин Компютърс», body composed from $site (the
+// working hours and the first phone number, never typed literals), with NO
+// attachment — the visitor already has their own photographs — and NO
+// reply-to, so a reply reaches the shop's real mailbox rather than the
+// visitor's own address. It is sent inside the SUCCESS branch, so it goes
+// exactly when the enquiry reached the shop by ANY channel, and its own
+// failure is logged and dropped rather than turned into a failed submission.
+//
+// THE COPY BELOW WAS REPLACED WHOLESALE BY THE OWNER ON 2026-09-22, and two
+// of the constraints the previous wording was built around were relaxed in the
+// process. Recorded here so that neither reads later as an accident:
+//
+//   · THE PHOTOGRAPH SENTENCE IS GONE. «Ако сте приложили снимки, те също
+//     стигнаха до нас.» is no longer on the page. Dropped deliberately, not
+//     lost in an edit — do not reinstate it as a fix.
+//   · THE CONFIRMATION EMAIL IS NOW ASSERTED, NOT HEDGED. The old sentence said
+//     the confirmation «тръгва»; the new one says «ще получите потвърждение за
+//     изпратеното съобщение».
+//
+// The reasoning the hedge served still stands and is worth keeping legible:
+// this is a plain URL with no server-side state behind it. Anybody can open
+// /new/msg.html directly, from a bookmark, a search result, or by typing it,
+// AND the two deliberately indistinguishable spam rejections land here too
+// (see below). So the page can now tell a visitor who submitted nothing that
+// they will receive a confirmation they will never get.
+//
+// Why that was judged acceptable rather than argued down: the follow-on
+// sentence sends exactly that reader to the telephone, which is the route the
+// shop wants them on anyway. The cost is a moment of confusion; the previous
+// wording's cost was a weaker promise to the far larger number of people who
+// did submit. A human wrongly caught by the sub-three-second time trap lands
+// in the same place and is likewise told to call.
+//
+// The principle the old note stated — never assert something about THIS reader
+// that only a genuine submission could have produced — is now bounded rather
+// than absolute. Anything ADDED here later should still respect it: «получихме
+// снимките ви» remains out of bounds, because unlike a promise about a future
+// email it cannot be recovered from by picking up the phone.
 //
 // THE FORM HANDLER REACHES THIS PAGE ON A 303, and on two deliberately
 // indistinguishable spam rejections (the decoy and the sub-three-second time
@@ -69,11 +99,26 @@ require_once(dirname(__FILE__) . '/includes/header.php');
 ?>
 
 <main>
+	<?php // `confirm` is a PAGE-SCOPED HOOK, and it exists to avoid the change
+	      // that would otherwise have been made here. The two paragraphs below
+	      // were reported as too light with no gap between them, and both are
+	      // true: .svc__intro carries --c-ink-muted (#55637a, 6.08:1 on white)
+	      // against --c-ink's #1f2a3c (14.44:1), and the second paragraph has no
+	      // class at all, so base.css's `p { margin: 0 }` stands — the rule that
+	      // would space it, `.svc__block p`, applies only inside .svc__block and
+	      // this is a plain .container.
+	      //
+	      // THE FIX IS NOT TO RECOLOUR .svc__intro. That class is the muted lede
+	      // on fifteen-plus service pages, where muted is correct: it introduces
+	      // the prose beneath it. Here the same class is carrying the page's
+	      // ENTIRE message, in the colour reserved for supporting text. Changing
+	      // the token globally would restyle every service page to fix this one.
+	      // The scope overrides the colour; the class keeps its meaning. ?>
 	<section class="section">
-		<div class="container">
+		<div class="container confirm">
 			<h1>Съобщението е изпратено</h1>
-			<p class="svc__intro">Получихме съобщението ви и ще се свържем с вас в работното време на сервиза — телефоните и часовете са в долната част на страницата. Ако сте приложили снимки, те също стигнаха до нас.</p>
-			<p>На имейла, който посочихте, тръгва и потвърждение. Ако то не пристигне до няколко минути, най-вероятно адресът е въведен сгрешен — тогава ни потърсете по телефона.</p>
+			<p class="svc__intro">Получихме съобщението ви и ще се свържем с вас в рамките на работното време на сервиза. Телефоните за контакт и работното ни време ще намерите в долната част на страницата.</p>
+			<p>На посочения от вас имейл адрес ще получите потвърждение за изпратеното съобщение. Ако не го получите в рамките на няколко минути, възможно е да сте въвели адреса си неправилно. В такъв случай ви препоръчваме да се свържете с нас по телефона.</p>
 		</div>
 	</section>
 
