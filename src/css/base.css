@@ -130,6 +130,25 @@ button, input, select, textarea { font: inherit; color: inherit; }
 a { color: var(--c-link); }
 a:hover { color: var(--c-link-hover); }
 
+/* THE `hidden` ATTRIBUTE, MADE ACTUALLY BINDING. `hidden` is enforced only by
+   the UA stylesheet's `[hidden] { display: none }`, and an AUTHOR-origin
+   `display` declaration beats a UA-origin one regardless of specificity — so
+   any component rule that sets `display` on a node that is sometimes hidden
+   silently cancels the attribute, with nothing in the markup to show for it.
+
+   This is not hypothetical here. `.field__error { display: flex }` did exactly
+   that: all seven of the contact form's error messages carried `hidden` and all
+   seven rendered anyway, on every first load, telling visitors «Моля, попълнете
+   полето.» under fields they had not typed in yet. contact-form.php emits the
+   attribute conditionally and documents toggling it as the mechanism — the CSS
+   had been overriding that intent for as long as both files existed.
+
+   Scoped to `.field__error[hidden]` this would fix the one instance and leave
+   the trap armed for the next component that pairs a display rule with a
+   hidden node. `!important` is the point of the rule, not a shortcut: `hidden`
+   means hidden, and nothing below should be able to out-specify it.          */
+[hidden] { display: none !important; }
+
 /* --- Design tokens — unconditional (D-02a: the theme that ships).
        Theme A was a dev-only colour override for live comparison and its
        stylesheet is DELETED as of the Phase 4 cutover (plan 04-07), together
