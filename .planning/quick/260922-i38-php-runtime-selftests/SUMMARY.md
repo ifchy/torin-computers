@@ -82,3 +82,29 @@ PHP 8.5 deprecates `imagedestroy` (8 call sites), so the CLI emits deprecation n
 **not** a production risk: the host's `error_reporting` is 22519, and decoding that bitmask shows
 `E_DEPRECATED` (8192) is **not** reported. Worth knowing only if `error_reporting` is ever
 widened to `E_ALL`.
+
+---
+
+## Addendum — 2026-09-22: ledger 35 closed
+
+`scripts/spam-guard-selftest.php` written and run: **27/27**, `open_count` 33 → 32.
+
+Seven of the nine plan behaviours are exercised for real; the oversized-post branch and the
+correlation-id log lines live in `contact-send.php` (a handler that executes on include) and are
+asserted at source level, each labelled `SOURCE:` in its own assertion name.
+
+Mutation-tested: honeypot always-true → decoy assertion fails; `hash_equals` → `!==` → the
+constant-time source assertion fails; throttle always-allows → two throttle assertions fail.
+Each mutant reverted via `git checkout`, tree confirmed clean.
+
+The second mutant is the case for keeping a source-level assertion at all: `!==` is
+behaviourally identical — it still rejects every forgery — so no behavioural test can see the
+timing regression. Only reading the code catches it.
+
+**Two of my own assertions failed before the code did**, both instances of this project's
+standing traps: banning `$field ===` tripped on the legitimate `$field === ''` emptiness check,
+and the narrowed version then matched `===` inside the comment that *explains the rule*
+("CONSTANT-TIME COMPARISON, never ==="). Comments are stripped before matching now. Ledger 48's
+rule generalises: a pattern that reads comments is measuring the wrong text.
+
+All four suites green: spam-guard 27/27, upload 10/10, settings 26/26, notify 9/9.
