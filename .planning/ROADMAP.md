@@ -230,7 +230,7 @@ Plans:
   4. `robots.txt` and `sitemap.xml` exist on the live site and have been submitted to Search Console.
   5. The redesigned site is live at torin.bg on `bell.host.bg` at the same URLs, with `.htaccess`, the Search Console verification file, favicon, and `robots.txt` all confirmed intact post-cutover, and Search Console shows no new 404s or ranking drops in the days following launch.
 
-**Plans**: 9/10 plans executed
+**Plans**: 8/10 complete, 1 executed but BLOCKED (04-04 — Task 3 owner sign-off never run), 1 not started (04-10)
 
 Plans:
 **Wave 1**
@@ -247,7 +247,7 @@ Plans:
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
-- [x] 04-04-PLAN.md — CTA slot swap (5 slots, not 4), Viber retirement and the privacy/terms text (wave 4)
+- [x] 04-04-PLAN.md — CTA slot swap (5 slots, not 4), Viber retirement and the privacy/terms text (wave 4) — **⚠ BLOCKED, not complete**: the box records that the plan was EXECUTED (Tasks 1–2, code done). `04-04-SUMMARY.md` reads `status: blocked` — Task 3 is a `gate="blocking"` human checkpoint (owner confirms every published data-handling sentence) and was never started. Contrast 04-05, which carries an explicit `status blocked -> complete` flip in `ca701d0`; 04-04 has no such commit. Ledger entries 23, 25 and 26 all hang off this same unrun checkpoint. Do not read this `[x]` as done, and do not re-dispatch the plan — only the checkpoint is owed.
 - [x] 04-05-PLAN.md — Spam guard, the email leg and every failure state a visitor sees (wave 4)
 
 **Wave 5** *(blocked on Wave 4 completion)*
@@ -281,4 +281,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 3.5 → 4
 | 2. Design System & Information Architecture | 9/9 | Complete    | 2026-08-09 |
 | 3. Content & Trust-Signal Build-Out | 9/9 | Built — partly superseded | 2026-08-26 |
 | 3.5. Content Truth Revision | 8/7 | Complete    | 2026-09-15 |
-| 4. Hardening & Cutover | 9/10 | In Progress|  |
+| 4. Hardening & Cutover | 8/10 (+1 blocked: 04-04) | In Progress|  |
