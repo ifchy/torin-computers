@@ -107,14 +107,31 @@ function torin_render_contact_form($values = array(), $errors = array()) {
 				      // they render in the browser's locale — English error
 				      // bubbles on a site whose hard constraint is Bulgarian only.
 				      //
-				      // aria-describedby names BOTH the help node and the error
-				      // node unconditionally. Toggling the id list is a standard
-				      // source of stale references; the `hidden` attribute on the
-				      // node is what changes instead. ?>
+				      // aria-describedby names the error node unconditionally.
+				      // Toggling the id list is a standard source of stale
+				      // references; the `hidden` attribute on the node is what
+				      // changes instead — and as of 2026-09-22 that attribute is
+				      // finally binding (base.css `[hidden]`), which it had never
+				      // been while `.field__error { display: flex }` outranked the
+				      // UA rule.
+				      //
+				      // THE HINT IS A PLACEHOLDER, NOT A LINE OF ITS OWN (owner,
+				      // 2026-09-22: «too much information … hard to say what is
+				      // going on»). The visible <label> STAYS. A placeholder that
+				      // replaces its label is the well-known accessibility defect
+				      // — the field loses its name as soon as it has a value, for
+				      // sighted and assistive users alike. Here the label names
+				      // the field and the placeholder only shows the shape of an
+				      // answer, which is the one division of labour that survives
+				      // the visitor starting to type.
+				      //
+				      // Shortened from the old help line: «Ако не знаете модела,
+				      // опишете с думи» was reassurance rather than an example,
+				      // and a placeholder long enough to clip mid-word at 360px
+				      // teaches nothing. ?>
 				<div class="field<?php echo ($torin_e_device !== '' ? ' field--invalid' : ''); ?>">
 					<label class="field__label" for="device">Модел на устройството <span class="field__req" aria-hidden="true">*</span></label>
-					<input class="field__control" id="device" name="device" type="text" maxlength="120" autocomplete="off" required aria-describedby="device-help device-err"<?php echo ($torin_e_device !== '' ? ' aria-invalid="true"' : ''); ?> data-err="Моля, попълнете полето." value="<?php echo torin_esc($torin_v_device); ?>">
-					<p class="field__help" id="device-help">Например Lenovo ThinkPad T480. Ако не знаете модела, опишете с думи.</p>
+					<input class="field__control" id="device" name="device" type="text" maxlength="120" autocomplete="off" required placeholder="Например Lenovo ThinkPad T480" aria-describedby="device-err"<?php echo ($torin_e_device !== '' ? ' aria-invalid="true"' : ''); ?> data-err="Моля, попълнете полето." value="<?php echo torin_esc($torin_v_device); ?>">
 					<p class="field__error" id="device-err"<?php echo ($torin_e_device !== '' ? '' : ' hidden'); ?>><?php echo torin_icon('alert'); ?><span><?php echo torin_esc($torin_e_device !== '' ? $torin_e_device : 'Моля, попълнете полето.'); ?></span></p>
 				</div>
 
@@ -126,8 +143,7 @@ function torin_render_contact_form($values = array(), $errors = array()) {
 				      // bounds the length again server-side and unconditionally. ?>
 				<div class="field<?php echo ($torin_e_fault !== '' ? ' field--invalid' : ''); ?>">
 					<label class="field__label" for="fault">Какво прави устройството <span class="field__req" aria-hidden="true">*</span></label>
-					<textarea class="field__control" id="fault" name="fault" rows="5" maxlength="1024" required aria-describedby="fault-help fault-err"<?php echo ($torin_e_fault !== '' ? ' aria-invalid="true"' : ''); ?> data-err="Моля, опишете повредата."><?php echo torin_esc($torin_v_fault); ?></textarea>
-					<p class="field__help" id="fault-help">Кога започна, какво сте опитали, какво чувате или виждате.</p>
+					<textarea class="field__control" id="fault" name="fault" rows="5" maxlength="1024" required placeholder="Кога започна, какво сте опитали, какво чувате или виждате" aria-describedby="fault-err"<?php echo ($torin_e_fault !== '' ? ' aria-invalid="true"' : ''); ?> data-err="Моля, опишете повредата."><?php echo torin_esc($torin_v_fault); ?></textarea>
 					<p class="field__error" id="fault-err"<?php echo ($torin_e_fault !== '' ? '' : ' hidden'); ?>><?php echo torin_icon('alert'); ?><span><?php echo torin_esc($torin_e_fault !== '' ? $torin_e_fault : 'Моля, опишете повредата.'); ?></span></p>
 				</div>
 
@@ -165,7 +181,13 @@ function torin_render_contact_form($values = array(), $errors = array()) {
 					      // it just inherited — is how a component ends up with a
 					      // variant whose whole job is cancelling another. ?>
 					<input id="photos" name="photos[]" type="file" multiple accept="image/jpeg,image/png,image/webp" aria-describedby="photos-help photos-err"<?php echo ($torin_e_photos !== '' ? ' aria-invalid="true"' : ''); ?>>
-					<p class="field__help" id="photos-help">Не е задължително. До 5 снимки, всяка до 10 MB. Смаляваме ги автоматично преди изпращане.</p>
+					<?php // THE ONE HELP LINE THAT STAYS, because a file input cannot
+					      // carry a placeholder — there is no text field to put one
+					      // in. Trimmed to the two facts a visitor acts on: «Не е
+					      // задължително» repeated the label's «(по избор)», and
+					      // the auto-downscale promise was reassurance about
+					      // something that happens either way. ?>
+					<p class="field__help" id="photos-help">До 5 снимки, всяка до 10 MB.</p>
 					<?php // The remove glyph for the JS-rendered .filelist rows,
 					      // parked in an inert <template> so icons.php stays the
 					      // ONE writer of every glyph in this project. The
@@ -197,8 +219,13 @@ function torin_render_contact_form($values = array(), $errors = array()) {
 				      // broken laptop should not be arguing with a phone mask. ?>
 				<div class="field<?php echo ($torin_e_phone !== '' ? ' field--invalid' : ''); ?>">
 					<label class="field__label" for="phone">Телефон <span class="field__req" aria-hidden="true">*</span></label>
-					<input class="field__control" id="phone" name="phone" type="tel" inputmode="tel" maxlength="40" autocomplete="tel" required aria-describedby="phone-help phone-err"<?php echo ($torin_e_phone !== '' ? ' aria-invalid="true"' : ''); ?> data-err="Моля, въведете телефон за връзка." value="<?php echo torin_esc($torin_v_phone); ?>">
-					<p class="field__help" id="phone-help">За да ви върнем обаждане.</p>
+					<?php // NO PLACEHOLDER AND NO HELP LINE. «За да ви върнем
+					      // обаждане» was a reassurance, not an entry hint, and the
+					      // owner chose to drop it rather than have it rewritten
+					      // into a fake example (2026-09-22). An example number
+					      // would also be the one thing capable of implying a
+					      // format on a field that deliberately imposes none. ?>
+					<input class="field__control" id="phone" name="phone" type="tel" inputmode="tel" maxlength="40" autocomplete="tel" required aria-describedby="phone-err"<?php echo ($torin_e_phone !== '' ? ' aria-invalid="true"' : ''); ?> data-err="Моля, въведете телефон за връзка." value="<?php echo torin_esc($torin_v_phone); ?>">
 					<p class="field__error" id="phone-err"<?php echo ($torin_e_phone !== '' ? '' : ' hidden'); ?>><?php echo torin_icon('alert'); ?><span><?php echo torin_esc($torin_e_phone !== '' ? $torin_e_phone : 'Моля, въведете телефон за връзка.'); ?></span></p>
 				</div>
 
@@ -210,8 +237,14 @@ function torin_render_contact_form($values = array(), $errors = array()) {
 				      // remains the one writer of both strings. ?>
 				<div class="field<?php echo ($torin_e_email !== '' ? ' field--invalid' : ''); ?>">
 					<label class="field__label" for="email">Имейл <span class="field__req" aria-hidden="true">*</span></label>
-					<input class="field__control" id="email" name="email" type="email" inputmode="email" maxlength="254" autocomplete="email" required aria-describedby="email-help email-err"<?php echo ($torin_e_email !== '' ? ' aria-invalid="true"' : ''); ?> data-err="Моля, въведете имейл." value="<?php echo torin_esc($torin_v_email); ?>">
-					<p class="field__help" id="email-help">Ще получите потвърждение, че запитването е стигнало до нас.</p>
+					<?php // The «Ще получите потвърждение…» line is dropped here by
+					      // the same owner decision. The promise itself is NOT
+					      // lost — contact-send.php actually sends that
+					      // confirmation, and the success page is where a visitor
+					      // reads about it at the moment it becomes true, rather
+					      // than as a fourteenth line of small print beside an
+					      // empty field. ?>
+					<input class="field__control" id="email" name="email" type="email" inputmode="email" maxlength="254" autocomplete="email" required aria-describedby="email-err"<?php echo ($torin_e_email !== '' ? ' aria-invalid="true"' : ''); ?> data-err="Моля, въведете имейл." value="<?php echo torin_esc($torin_v_email); ?>">
 					<p class="field__error" id="email-err"<?php echo ($torin_e_email !== '' ? '' : ' hidden'); ?>><?php echo torin_icon('alert'); ?><span><?php echo torin_esc($torin_e_email !== '' ? $torin_e_email : 'Моля, въведете имейл.'); ?></span></p>
 				</div>
 
@@ -294,6 +327,27 @@ function torin_render_contact_form($values = array(), $errors = array()) {
 			      //
 			      // torin_asset_url() stamps it with the deployed file's mtime,
 			      // the same invalidation every other asset here gets. ?>
+			<?php // ORDER IS LOAD-BEARING: form-validate BEFORE photo-resize.
+			      // Deferred scripts execute in document order, so listener
+			      // registration follows markup order, and the validator must get
+			      // the submit event FIRST.
+			      //
+			      // photo-resize.js:130 registers its own submit listener which
+			      // disables the button and relabels it «Изпраща се…» /
+			      // «Подготвяме снимките…». If the validator rejected a submit
+			      // without also stopping that listener, the button would lock
+			      // disabled on a form that is not being sent — a dead page, worse
+			      // than the clutter this change set out to fix. The validator
+			      // therefore calls stopImmediatePropagation() as well as
+			      // preventDefault() on rejection; the two are one mechanism here,
+			      // not belt and braces.
+			      //
+			      // photo-resize.js:114 then calls form.submit(), which does NOT
+			      // fire the submit event. That is correct and must stay correct:
+			      // validation already ran on the user-initiated submit that
+			      // started the resize, and a second check there would be
+			      // unreachable. ?>
+			<script src="<?php echo torin_esc(torin_asset_url('js/form-validate.js')); ?>" defer></script>
 			<script src="<?php echo torin_esc(torin_asset_url('js/photo-resize.js')); ?>" defer></script>
 <?php
 }
