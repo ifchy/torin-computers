@@ -201,10 +201,13 @@ measured in seconds, and rollback is the same move in reverse.
       5. **Deploy exactly those three, by explicit path:**
          `scripts/deploy-new.sh includes/site-config.php sitemap.xml robots.txt`
 
-      > **Never use a bare no-argument `deploy-new.sh` run here.** With no arguments it builds
-      > its file list from `find . -type f` and uploads **everything** under `src/` — including
-      > `src/.htaccess`, which is now in root form. That is precisely the D4-30 catastrophe
-      > described in step 2.4, arriving through the deploy script instead of by hand.
+      > **Name the three paths rather than running a bare no-argument deploy.** A no-argument run
+      > uploads everything under `src/`, which is a far larger blast radius than this step needs.
+      > It is no longer *dangerous* — `deploy-new.sh` now refuses the root `src/.htaccess` in
+      > code (skipped in a no-argument run, hard error when named explicitly, override
+      > `TORIN_DEPLOY_HTACCESS=1`), so the D4-30 catastrophe described in step 2.4 can no longer
+      > arrive through the deploy script. Keep the explicit form anyway: a deploy that names what
+      > it changes is one you can reason about afterwards.
 
       > **Why this goes before the rename, not after.** Swapping first and fixing after leaves a
       > window in which the live root publishes canonical, JSON-LD and sitemap URLs pointing
