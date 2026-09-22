@@ -236,10 +236,18 @@ unlink($small);
 // to compare against, so asserting it here would be theatre.
 $paths = array(torin_fx_jpeg(200, 200), torin_fx_jpeg(200, 200));
 $res = torin_collect_uploads(torin_fx_files($paths), torin_fx_limits(array()));
-$tmp = rtrim(sys_get_temp_dir(), '/');
-$allInTmp = count($res['paths']) === 2;
+// Resolve both sides, for the same reason upload.php's own containment check
+// does: tempnam() hands back an already-resolved path while sys_get_temp_dir()
+// reports the symlinked spelling, and on macOS those differ (/var ->
+// /private/var). Comparing the two spellings directly fails while the condition
+// under test is TRUE — the assertion would report a containment breach that is
+// really a path-spelling mismatch.
+$tmp = realpath(sys_get_temp_dir());
+$tmp = ($tmp === false) ? '' : rtrim($tmp, '/');
+$allInTmp = ($tmp !== '') && count($res['paths']) === 2;
 foreach ($res['paths'] as $p) {
-	if (strpos($p, $tmp . '/') !== 0) { $allInTmp = false; }
+	$real = realpath($p);
+	if ($real === false || strpos($real, $tmp . '/') !== 0) { $allInTmp = false; }
 }
 torin_t(
 	'every normalised path sits under the system temp directory',

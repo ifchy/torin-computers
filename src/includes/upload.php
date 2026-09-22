@@ -186,8 +186,23 @@ function torin_normalise_upload($tmpPath, $maxEdge) {
 	// is the behaviour being relied on — but «relied on» and «checked» are
 	// different claims, and this one guards the single worst outcome in the
 	// whole phase. A path that lands anywhere else is removed and refused.
-	$torin_root = rtrim(sys_get_temp_dir(), '/');
-	if ($torin_root === '' || strpos($torin_out, $torin_root . '/') !== 0) {
+	//
+	// COMPARE RESOLVED PATHS ON BOTH SIDES. tempnam() returns an already-
+	// resolved path on some platforms while sys_get_temp_dir() returns the
+	// symlinked form. On macOS /var is a symlink to /private/var, so the two
+	// spellings disagree and the plain string prefix test refused EVERY upload
+	// it was handed — a false refusal dressed as containment, and invisible to
+	// the visitor, who is simply told their photo was not recognised.
+	// Discovered 2026-09-22 the first time scripts/upload-selftest.php was
+	// executed, which is the whole argument for owning a runtime.
+	//
+	// realpath() on both sides is also strictly STRONGER than the comparison it
+	// replaces: it collapses `..` and resolves symlinks BEFORE the prefix test,
+	// so a path that merely looks contained can no longer pass one.
+	$torin_root = realpath(sys_get_temp_dir());
+	$torin_real = realpath($torin_out);
+	if ($torin_root === false || $torin_real === false
+	    || strpos($torin_real, rtrim($torin_root, '/') . '/') !== 0) {
 		@unlink($torin_out);
 		imagedestroy($torin_dst);
 		error_log('torin upload: temp path escaped the system temp directory');
