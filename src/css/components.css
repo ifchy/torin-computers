@@ -1310,6 +1310,37 @@ input[type="file"]::file-selector-button {
 	font-size: var(--fs-body);
 }
 
+/* --- Confirmation page prose (msg.html) ----------------------------------
+   A PAGE SCOPE, not a change to .svc__intro. Owner report, 2026-09-22: the two
+   paragraphs on the confirmation page read too light and ran together. Both
+   were true, from two different causes:
+
+   · COLOUR. .svc__intro sets --c-ink-muted (#55637a, 6.08:1 on white) against
+     --c-ink's #1f2a3c (14.44:1). On a service page that is right — the class
+     is a lede introducing the prose beneath it. On msg.html the same class
+     carries the page's ENTIRE message, in the colour reserved for supporting
+     text. Recolouring the class itself would restyle fifteen-plus service
+     pages to fix one confirmation page, so the scope overrides it here and
+     .svc__intro keeps its meaning everywhere else.
+
+   · SPACING. base.css zeroes `p` margins. .svc__intro brings its own
+     margin-block-start, so the first paragraph clears the h1 — the second has
+     no class at all, and the rule that would space it (.svc__block p) applies
+     only inside .svc__block. This section is a plain .container, so the gap
+     was exactly 0px.
+
+   The adjacent-sibling selector, rather than a margin on every p: the first
+   paragraph's spacing is already owned by .svc__intro, and two rules setting
+   the same margin on the same element is how they drift apart later.       */
+.confirm p {
+	max-width: var(--measure);
+	color: var(--c-ink);
+}
+
+.confirm p + p {
+	margin-block-start: var(--sp-md);
+}
+
 /* --- Breakpoint 1 — 35rem / 560px ---------------------------------------
    min-width only, never max-width, so no two adjacent breakpoints can both
    match or both miss. At >=560px the content box is >=528px, so both CTA
