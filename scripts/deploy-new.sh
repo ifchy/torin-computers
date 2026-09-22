@@ -20,6 +20,10 @@
 #   scripts/deploy-new.sh                    # upload every file under src/
 #   scripts/deploy-new.sh css/base.css ...   # upload only the named paths
 #                                            # (each relative to src/)
+#
+# .htaccess is REFUSED by this script -- skipped in a no-argument run, a hard
+# error when named explicitly. It is in root form and this script only writes to
+# the staging subtree; see the guard below for the incident that motivates it.
 
 set -euo pipefail
 
@@ -151,12 +155,64 @@ resolve_upload_path() {
   esac
 }
 
+# ---------------------------------------------------------------------------
+# .htaccess IS NOT DEPLOYABLE FROM HERE, AND THAT IS NOW ENFORCED IN CODE.
+#
+# src/.htaccess was promoted to ROOT form in 04-09 (D4-30): its RewriteBase and
+# its canonicalisation target both address "/". REMOTE_ROOT above is hardcoded
+# to the staging subtree. Uploading that file through this script therefore
+# points the rewrite base at / from a file living in /new/, which BREAKS EVERY
+# REDIRECT IN IT.
+#
+# This is not a hypothetical. It shipped once already: the retirement rules
+# answered with a perfectly well-formed 301 whose Location was
+# https://torin.bg/home/torin/public_html/new/<target> -- a server path leaked
+# into a public URL, 404 on follow, while the 301 itself looked correct to every
+# check that read the status line instead of following it.
+#
+# Until this block existed the rule was written in two places that only a
+# careful human reads: a boxed comment at the top of src/.htaccess, and step 2.4
+# of the cutover checklist. `find -type f` matches dotfiles, so a no-argument
+# run cheerfully uploaded it anyway. A rule a script can violate is not a rule.
+#
+# The file goes up exactly once, by hand, with the 04-10 root swap.
+#
+# MATCH THE ROOT FILE ONLY, NOT EVERY .htaccess. The first cut of this guard
+# tested basename and therefore also blocked src/vendor/phpmailer/.htaccess --
+# which is a deny block that MUST ship, and whose absence is the whole of ledger
+# 42. A nested .htaccess is scoped to its own directory and carries no
+# RewriteBase; only the root file was promoted. Caught by running the guard
+# rather than by reading it, which is the same lesson this tree keeps relearning.
+is_root_htaccess() { [ "${1#./}" = ".htaccess" ]; }
+# ---------------------------------------------------------------------------
+
 # Build the file list: explicit arguments, or every file under src/.
 FILES=()
 if [ "$#" -gt 0 ]; then
+  # NAMED EXPLICITLY -> hard error. This is the invocation that produces the
+  # failure above, so it earns a stop rather than a skip.
+  for rel in "$@"; do
+    if is_root_htaccess "$rel" && [ "${TORIN_DEPLOY_HTACCESS:-}" != "1" ]; then
+      echo "ERROR: refusing to upload '${rel}' to ${REMOTE_ROOT}/" >&2
+      echo "       src/.htaccess is in ROOT form (RewriteBase /). Uploading it to the" >&2
+      echo "       staging subtree breaks every redirect in it -- this project has" >&2
+      echo "       already shipped that defect once. It goes up by hand with the" >&2
+      echo "       04-10 root swap." >&2
+      echo "       Override only if you know why: TORIN_DEPLOY_HTACCESS=1" >&2
+      exit 1
+    fi
+  done
   FILES=("$@")
 else
+  # NO ARGUMENT -> skip it, loudly. The operator meant "deploy the site"; they
+  # did not name this file, so aborting the whole routine deploy over it would
+  # just teach people to route around the guard.
   while IFS= read -r f; do
+    if is_root_htaccess "$f" && [ "${TORIN_DEPLOY_HTACCESS:-}" != "1" ]; then
+      echo "NOTE: skipping ${f} -- root-form file, not deployable to ${REMOTE_ROOT}/ (D4-30)." >&2
+      echo "      It goes up by hand with the 04-10 root swap." >&2
+      continue
+    fi
     FILES+=("$f")
   done < <(cd "$SRC_ROOT" && find . -type f ! -name '.DS_Store' | sed 's|^\./||' | sort)
 fi
