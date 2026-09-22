@@ -182,12 +182,17 @@ follow_redirect "https://${APEX_HOST}${TARGET_PATH}/${VARIANT_PAGE}"      "${CAN
 echo
 echo "[3] Page availability — derived from src/*.html, not a hardcoded list"
 PAGE_COUNT=0
+PAGE_URLS=()
 for f in "${SRC_ROOT}"/*.html; do
   [ -e "$f" ] || continue
   b="$(basename "$f")"
   # The verification file is not a page; it is asserted byte-wise in [6].
   case "$b" in google*.html) continue ;; esac
   PAGE_COUNT=$((PAGE_COUNT + 1))
+  # The SAME list feeds the rendered probe in [9]. Derived once, here, so the
+  # set that is status-checked and the set that is rendered cannot drift apart
+  # — a second hardcoded list is how a page ends up in one and not the other.
+  PAGE_URLS+=("${TARGET}/${b}")
   expect_status "${TARGET}/${b}" 200 "page ${b}"
 done
 echo "  (${PAGE_COUNT} pages checked)"
@@ -286,15 +291,34 @@ if [ "$DO_RENDER" = "0" ]; then
   skip "rendered probe — --no-render was passed"
 elif [ ! -x "${SCRIPT_DIR}/render-check.sh" ]; then
   skip "rendered probe — scripts/render-check.sh not executable"
+elif [ "${#PAGE_URLS[@]}" -eq 0 ]; then
+  fail "rendered probe — no pages were derived from ${SRC_ROOT}/*.html, so there was nothing to render"
 else
-  RENDER_OUT="$("${SCRIPT_DIR}/render-check.sh" "${SCRIPT_DIR}/probes/cutover-sweep.js" \
+  # EVERY page from [3], in one browser session. The probe owns the loop; the
+  # browser is launched once. One newline-separated list, one env var.
+  RENDER_OUT="$(SWEEP_URLS="$(printf '%s\n' "${PAGE_URLS[@]}")" \
+                "${SCRIPT_DIR}/render-check.sh" "${SCRIPT_DIR}/probes/cutover-sweep.js" \
                 "${TARGET}/index.html" 390 844 2>&1 || true)"
-  echo "$RENDER_OUT" | sed 's/^/      /'
+
+  # Twenty raw JSON blobs is not a report. Print one line per page, and the
+  # full record only for pages that did not pass. If the output cannot be
+  # parsed (harness error, browser failure), fall back to printing it raw —
+  # that text is the diagnosis.
+  RENDER_TMP="$(mktemp "${TMPDIR:-/tmp}/cutover-render-XXXXXX")"
+  printf '%s' "$RENDER_OUT" > "$RENDER_TMP"
+  if ! node "${SCRIPT_DIR}/lib/render-digest.js" "$RENDER_TMP" 2>/dev/null; then
+    echo "$RENDER_OUT" | sed 's/^/      /'
+  fi
+  rm -f "$RENDER_TMP"
+
+  # Match ONLY the aggregate key. Per-page records carry `pageVerdict`, so a
+  # single passing page can never satisfy the run-level match.
   case "$RENDER_OUT" in
-    *'"verdict": "PASS"'*|*'"verdict":"PASS"'*) pass "rendered probe on index.html" ;;
-    *'"verdict": "INCONCLUSIVE"'*|*'"verdict":"INCONCLUSIVE"'*)
-      skip "rendered probe returned INCONCLUSIVE — it asserted nothing, which is not a pass" ;;
-    *) fail "rendered probe did not report PASS on index.html" ;;
+    *'"sweepVerdict": "PASS"'*|*'"sweepVerdict":"PASS"'*)
+      pass "rendered probe: all ${PAGE_COUNT} pages" ;;
+    *'"sweepVerdict": "INCONCLUSIVE"'*|*'"sweepVerdict":"INCONCLUSIVE"'*)
+      skip "rendered probe returned INCONCLUSIVE — at least one page asserted nothing, which is not a pass" ;;
+    *) fail "rendered probe did not report PASS across all ${PAGE_COUNT} pages" ;;
   esac
 fi
 
