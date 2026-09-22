@@ -86,6 +86,15 @@ for f in "${SRC_DIR}"/*.html; do
 	else
 		loc="${BASE_URL}${base}"
 	fi
+	# Not every .html in src/ is a page -- the Search Console verification token
+	# is plain text with no PHP and no $torin_robots line, so the noindex rule
+	# cannot see it. Discriminate on including includes/header.php, exactly as
+	# gen-sitemap.sh does. KEEP THE TWO RULES IDENTICAL: this block exists to
+	# re-derive the set independently, and it is only worth anything while both
+	# sides answer the same question.
+	if ! grep -q 'includes/header.php' "$f"; then
+		continue
+	fi
 	if grep -qE '^\$torin_robots[[:space:]]*=.*noindex' "$f"; then
 		NOINDEX_LOCS="${NOINDEX_LOCS}${loc}"$'\n'
 	else

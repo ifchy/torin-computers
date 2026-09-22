@@ -76,6 +76,20 @@ EXCLUDED=()
 for f in "${SRC_DIR}"/*.html; do
 	[ -e "$f" ] || continue
 	base="$(basename "$f")"
+	# NOT EVERY .html IN src/ IS A PAGE. The Search Console verification token
+	# (google<hash>.html) is 53 bytes of plain text with no PHP in it -- it must
+	# stay fetchable at its own URL, but it is not content and must never appear
+	# in a sitemap. It has no $torin_robots line to exclude it by, so the noindex
+	# rule below cannot see it.
+	#
+	# Discriminate on what actually makes a file a rendered page in this tree:
+	# every one of them includes includes/header.php. That is DERIVED, like the
+	# noindex rule, so the next static drop-in is handled without editing a list
+	# -- which is the whole reason this script refuses to carry hard-coded slugs.
+	if ! grep -q 'includes/header.php' "$f"; then
+		EXCLUDED+=("$base")
+		continue
+	fi
 	if grep -qE '^\$torin_robots[[:space:]]*=.*noindex' "$f"; then
 		EXCLUDED+=("$base")
 		continue
