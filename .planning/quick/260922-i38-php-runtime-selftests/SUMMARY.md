@@ -108,3 +108,38 @@ and the narrowed version then matched `===` inside the comment that *explains th
 rule generalises: a pattern that reads comments is measuring the wrong text.
 
 All four suites green: spam-guard 27/27, upload 10/10, settings 26/26, notify 9/9.
+
+---
+
+## Addendum 2 — 2026-09-22: ledger 54 closed
+
+The containment decision is extracted as `torin_path_is_contained($real, $root)` — a pure
+predicate doing no filesystem work, which is what makes `/tmpevil/x` and `/tmp/../etc/passwd`
+testable without creating either. The `realpath()` resolution stays at the call site, where the
+paths are real. Call-site behaviour unchanged: the 10 original behaviours still hold, now
+**18/18**.
+
+Eight assertions cover what the prefix test has to get right — a nested file is contained; a
+sibling sharing a string prefix (`/tmpevil` vs root `/tmp`) is refused; the root itself is
+refused however spelled; unrelated absolute paths are refused; any `..` segment is refused
+rather than compared (it means the caller skipped `realpath()`, and comparing an unresolved path
+is the bypass the guard exists to stop); a trailing slash on the root changes no verdict; empty
+and non-string arguments are refused; and the wiring is source-asserted — the call site uses the
+predicate **and** unlinks the refused file.
+
+**One assertion failed against the first extraction, and the code was wrong, not the test.**
+`/tmp/` tested against root `/tmp` reported *contained*. `realpath()` never emits a trailing
+slash so it cannot arrive from the call site, but "the root is not a file inside the root" should
+hold however the root is spelled. Both sides are normalised now and the equal case refused
+explicitly.
+
+Mutation-tested, each mutant reverted and the file's sha compared back to baseline:
+
+| mutation | result |
+|---|---|
+| call site → `if (false)` — **the original ledger-54 mutation** | SOURCE assertion fails (previously passed silently) |
+| predicate → always true | 5 assertions fail |
+| predicate → naive prefix, no trailing slash | 2 fail, including the sibling case |
+
+All four suites green: upload 18/18, spam-guard 27/27, settings 26/26, notify 9/9.
+`open_count` 32 → 31.
