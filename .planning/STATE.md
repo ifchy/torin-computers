@@ -257,6 +257,7 @@ None yet.
 | # | Description | Date | Commit | Status | Directory |
 |---|-------------|------|--------|--------|-----------|
 | 260919-m0i | Patch live `mailer.php` CRLF mail-header injection | 2026-09-19 | `ff7d469` | ⚠ **INCOMPLETE — live, runtime-unverified** (Task 3 mailbox proof blocked until Mon 2026-09-21) | `.planning/quick/260919-m0i-fix-live-mailer-header-injection/` |
+| 260922-dlw | Audit all 42 open ledger entries; close six, correct 04-04 status | 2026-09-22 | `e2f2f8e`, `0640f7d` | ✅ **Complete** — 3 stale + 3 discharged closed (open 42→36); 36 confirmed real; ROADMAP phase-4 counts corrected (04-04 is blocked, not complete) | `.planning/quick/260922-dlw-close-audited-ledger-entries/` |
 
 ## Deferred Items
 
