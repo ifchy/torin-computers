@@ -175,6 +175,43 @@ deploying them together — but it is recorded because the failure is silent and
 **Mechanism (D4-28): server-side renames, both directions.** No re-upload, a swap window
 measured in seconds, and rollback is the same move in reverse.
 
+- [ ] **2.0 — Retarget `base_url`, regenerate the sitemap, repoint the robots directive. BEFORE
+      the rename** (ledger #51). **The swap re-uploads nothing** — it is a server-side rename, so
+      whatever these three files say at the moment of the move is what the live root publishes.
+      Three files in the tree still encode the `/new/` staging segment:
+
+      1. **`src/includes/site-config.php`** — change `'base_url'` from `https://torin.bg/new/`
+         to **`https://torin.bg/`**, the same canonical target D4-30 fixes in `.htaccess:70`.
+         This is the only place the staging segment appears in a page-serving file, and every
+         `rel=canonical` and JSON-LD `BreadcrumbList` URL on the site is built from it.
+      2. **`scripts/gen-sitemap.sh`** — regenerate `src/sitemap.xml`. It reads `base_url` from
+         the config and refuses to hard-code a host, so this is the step that turns 19 `/new/`
+         `<loc>` entries into 19 root URLs. Confirm **19**, and that `msg.html` is still absent
+         (it is deliberately noindexed — see #49; 20 is the wrong number). `src/` holds 21
+         `.html` files and the sitemap lists 19 on purpose: `msg.html` is noindexed, and
+         `google1718743335455f1c.html` is the Search Console verification token, which is not a
+         page. Both generator and checker exclude it by rule, and the checker now *rejects* it
+         if it ever appears in the sitemap.
+      3. **`src/robots.txt`** — change the `Sitemap:` directive **by hand** to
+         `https://torin.bg/sitemap.xml`. It is a static file and the **second** place in the
+         tree encoding `/new/`; nothing regenerates it for you.
+      4. **`scripts/sitemap-check.sh`** — run it offline. Checks D and E exist for exactly this
+         moment: D asserts every `<loc>` derives from `base_url`, E asserts the robots directive
+         does too. Both must pass before you go any further.
+      5. **Deploy exactly those three, by explicit path:**
+         `scripts/deploy-new.sh includes/site-config.php sitemap.xml robots.txt`
+
+      > **Never use a bare no-argument `deploy-new.sh` run here.** With no arguments it builds
+      > its file list from `find . -type f` and uploads **everything** under `src/` — including
+      > `src/.htaccess`, which is now in root form. That is precisely the D4-30 catastrophe
+      > described in step 2.4, arriving through the deploy script instead of by hand.
+
+      > **Why this goes before the rename, not after.** Swapping first and fixing after leaves a
+      > window in which the live root publishes canonical, JSON-LD and sitemap URLs pointing
+      > into `/new/`, while `robots.txt` says `Allow: /`. Nothing stops a crawl during that
+      > window. Doing it first costs only a brief cosmetic mismatch on a staging tree that is
+      > about to stop existing.
+
 - [ ] **2.1 — Point cPanel → Select PHP Version at `public_html/` (the ROOT) and set PHP 8.5.**
       **This is not optional and was not in the original cutover sketch.** That action is what
       *generates* `/home/torin/public_html/php.fcgi` and `php85-fcgi.ini`. The promoted
@@ -300,7 +337,12 @@ from every page; the contact page reachable with its `no-store` directive intact
 - [ ] `scripts/asset-version-check.sh` — the `?v=<filemtime>` stamps are the **precondition**
       for the one-year CSS/JS cache lifetimes in `.htaccess`, not a nicety. A year-long
       lifetime on an unstamped URL is unreachable by any correction.
-- [ ] `scripts/sitemap-check.sh --live`, and submit `sitemap.xml` in Search Console.
+- [ ] `scripts/sitemap-check.sh --live` — **and only then** submit `sitemap.xml` in Search
+      Console. **Do not submit if step 2.0 was skipped** (ledger #51): un-regenerated, the file
+      lists 19 `https://torin.bg/new/` staging URLs, and submitting those is the exact opposite
+      of the URL continuity this cutover exists to preserve. The check is what tells you which
+      state you are in — if `base_url` was retargeted but the sitemap was not regenerated, D
+      fails; if the sitemap was regenerated but `robots.txt` was not repointed, E fails.
 - [ ] Re-run the rendered probes against the root origin.
 
 ### 6.2 — The SMTP-to-sendmail cascade, never once observed (#38)
