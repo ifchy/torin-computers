@@ -18,23 +18,23 @@ require_once(dirname(__FILE__) . '/icons.php');
 	<footer class="site-footer">
 		<div class="container">
 <?php
-			// Static, PHP-rendered replacement for the legacy otpuska.js banner.
-			// That script was 550 bytes of dependency-free vanilla JS carrying
-			// genuine content rather than decoration, so the safe default is to
-			// preserve an equivalent as content (OWNER-QUESTIONS #8).
+			// THE «NOTICE» BAND THAT STOOD HERE IS GONE — owner decision,
+			// 2026-09-22. It rendered «Работно време: ...» at the top of every
+			// footer, restating the hours line thirty-four lines below it.
 			//
-			// The string is now COMPOSED in site-config.php from the same
-			// settings keys the hours line below renders and jsonld.php
-			// publishes (D4-26). It was the THIRD hand-typed copy of the
-			// working hours and nothing connected it to the other two, so the
-			// owner could have changed his hours and left this band saying
-			// something else on nineteen pages. Emptying the band is still one
-			// edit with no other consequence — it is the composition in
-			// site-config.php that gets emptied, not a literal here.
-			if ($site['notice'] !== '') { ?>
-			<p class="notice notice--info"><?php echo torin_icon('clock'); ?><span><?php echo htmlspecialchars($site['notice'], ENT_QUOTES, 'UTF-8'); ?></span></p>
-<?php		} ?>
-
+			// It was carried over as the static replacement for the hours half
+			// of the legacy otpuska.js, whose live value was «В А Ж Н О !!!
+			// НОВО Работно време ...» — an announcement that the hours HAD
+			// CHANGED, temporary by nature. Made permanent and stripped of its
+			// «НОВО», it was just a duplicate. The closure half of that script
+			// survives as banner.php, which is the part OWNER-QUESTIONS #8
+			// approved; this band was never what #8 asked about.
+			//
+			// Do not reinstate it to show working hours. The footer already has
+			// one hours line, composed from the same single source (D4-26), and
+			// a second one is how this site previously came to publish three
+			// disagreeing copies.
+?>
 			<div class="footer-grid">
 
 				<div class="footer-contact">

@@ -75,7 +75,9 @@ $site = array(
 	// jsonld.php read a hard-coded clock literal and the footer's notice band
 	// read a third hand-typed string, so the site could tell a search engine one
 	// thing, its own footer band another, and its footer hours line a third.
-	// Both derived values are now COMPOSED below from the three keys here.
+	// Both derived values are now COMPOSED below from the three keys here, and
+	// the notice band itself was removed entirely on 2026-09-22 — see the
+	// DERIVED block below for why it never should have been made permanent.
 	//
 	// These three are the first of the six keys the owner's settings.txt can
 	// override. They are stored in machine form — zero-padded 24-hour clock and
@@ -344,26 +346,6 @@ $site = array(
 	// ###########################################################
 	'secrets_path' => '/home/torin/torin-secrets.php',
 
-	// [ASSUMED] OWNER-QUESTIONS #8 asks whether the legacy otpuska.js
-	// holiday/hours banner should survive at all. It carried genuine content
-	// rather than decoration, so the safe default preserves an equivalent as
-	// static PHP-rendered content instead of dropping it.
-	//
-	// THE MARKER STAYS, AND IT IS NARROWER THAN IT WAS. What is still
-	// unconfirmed is whether this band should EXIST — #8 has no answer. Its
-	// CONTENT is no longer unconfirmed: the string is composed below from the
-	// owner-confirmed hours (D4-25) instead of being hand-typed, which is what
-	// made it the third undetected copy of the working hours (UI-SPEC
-	// §Conflicts C-4). Do not read the composition as an answer to #8, and do
-	// not drop this marker until #8 itself is answered — every other marker in
-	// this file closes on its own owner answer and none may be promoted because
-	// it looked settled.
-	//
-	// The literal below is a PLACEHOLDER that is overwritten a few lines further
-	// down, unconditionally. It is not the rendered value and editing it changes
-	// nothing; set it to an empty string there, in the composition, to remove
-	// the band.
-	'notice' => '',
 );
 
 // ── The owner's settings file, merged one key at a time (OWNER-01, D4-23) ────
@@ -417,10 +399,17 @@ foreach ($torin_settings_managed as $torin_settings_key) {
 //
 // This block is the whole of D4-26. The working hours are written once, in
 // machine form, and every human-readable and machine-readable consumer is
-// composed from that one value: the footer's hours line, the footer's notice
-// band, the contact page's hours line and the structured data Google reads. The
-// owner cannot change one and leave another behind, because there is no other to
-// leave behind.
+// composed from that one value: the footer's hours line, the contact page's
+// hours line and the structured data Google reads. The owner cannot change one
+// and leave another behind, because there is no other to leave behind.
+//
+// A FOURTH consumer stood here until 2026-09-22 — the footer's «notice» band —
+// and it is gone by owner decision, not by refactor. It descended from the
+// hours half of the legacy otpuska.js, which announced «НОВО Работно време» as
+// a TEMPORARY notice that the hours had changed. Carried across permanently and
+// stripped of its «НОВО», it just restated the hours line thirty-four lines
+// above it in the same footer. The closure half of otpuska.js is alive and well
+// as banner.php, which is what OWNER-QUESTIONS #8 actually approved.
 $torin_days = torin_settings_days($site['hours_days']);
 
 $site['hours_days_bg']       = $torin_days['bg'];
@@ -435,11 +424,6 @@ $site['hours_close_display'] = torin_hours_display($site['hours_close']);
 $site['hours'] = $torin_days['bg'] . ', '
 	. $site['hours_open_display'] . ' – ' . $site['hours_close_display'];
 
-// The footer band. Set this to '' to remove it with no other edit — that switch
-// survives the composition and is the same one the [ASSUMED] note above
-// describes.
-$site['notice'] = 'Работно време: ' . $torin_days['bg_lower'] . ', '
-	. $site['hours_open_display'] . ' – ' . $site['hours_close_display'] . ' ч.';
 
 // Every page on the site includes this file, so each of the four names above is
 // squatted in that page's GLOBAL scope. That is not a theoretical tidiness

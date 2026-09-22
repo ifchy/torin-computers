@@ -388,12 +388,27 @@ torin_t(
 	'bare slashes found — an encoding flag has been introduced somewhere'
 );
 
+// WAS "the three rendered hours consumers". The third was the footer's notice
+// band, removed 2026-09-22 by owner decision — it restated the hours line
+// thirty-four lines below it in the same footer. The assertion is NARROWED
+// rather than deleted: the one-source property (D4-26) is exactly what stops
+// this site publishing disagreeing copies of its hours again, and it still has
+// two consumers to enforce it across.
 torin_t(
-	'the three rendered hours consumers all read one composed value',
+	'both rendered hours consumers read one composed value',
 	strpos($site['hours'], $site['hours_open_display']) !== false
-		&& strpos($site['notice'], $site['hours_open_display']) !== false
 		&& $torin_ld_off['openingHoursSpecification'][0]['opens'] === $site['hours_open'],
-	'hours: ' . $site['hours'] . ' / notice: ' . $site['notice']
+	'hours: ' . $site['hours']
+		. ' / ld opens: ' . $torin_ld_off['openingHoursSpecification'][0]['opens']
+);
+
+// The band must not come back by accident. A future edit re-adding a 'notice'
+// key would restore the duplicate silently, because nothing else in the suite
+// looks at the footer's composition.
+torin_t(
+	'the removed notice band has not returned',
+	!isset($site['notice']),
+	'a notice key is back in site-config.php — the footer band was removed on purpose'
 );
 
 // ── Result ──────────────────────────────────────────────────────────────────

@@ -654,13 +654,14 @@ body:not(:has(.callbar)) {
 }
 
 /* --- Notice bands -------------------------------------------------------
-   .notice--info is the static replacement for the legacy holiday/hours banner
-   script (OWNER-QUESTIONS #8). The error and success variants have NO handler
-   behind them until Phase 4 (CONTACT-03): they are built now because the
-   tokens and the Bulgarian copy are specified now, and their appearance is a
-   carried-forward visual check rather than something this phase can prove
-   end to end. Each pair is a UI-SPEC computed-contrast pair — do not mix an
-   ink from one variant with a surface from another.                        */
+   .notice--error is live: contact-send.php renders it on a failed submission.
+   .notice--success has no handler behind it yet. Each pair is a UI-SPEC
+   computed-contrast pair — do not mix an ink from one variant with a surface
+   from another.
+
+   .notice--info WAS REMOVED on 2026-09-22 along with the footer band that was
+   its only user (owner decision). The base .notice grid stays: it is shared by
+   the error variant and copied verbatim by the closure strip below.        */
 .notice {
 	display: grid;
 	grid-template-columns: 1.25em 1fr;
@@ -676,11 +677,6 @@ body:not(:has(.callbar)) {
 	width: 1.25em;
 	height: 1.25em;
 	margin-block-start: .2em;
-}
-
-.notice--info {
-	background: var(--c-surface-2);
-	color: var(--c-ink);
 }
 
 .notice--error {
