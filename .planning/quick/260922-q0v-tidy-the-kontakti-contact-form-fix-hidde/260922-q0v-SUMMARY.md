@@ -98,7 +98,27 @@ Selftests: settings 27/27, notify 9/9, spam-guard 27/27, upload 18/18. `php -l` 
 `contact-send.php` is untouched — server-side validation remains the source of truth and its error
 re-render drives the same markup through the same partial.
 
-**Not yet deployed.** `deploy-new.sh` is denied to agents by the permission classifier (STATE.md
-:148); the owner runs it. Until then staging still serves the old form. Post-deploy verification
-against `https://torin.bg/new/kontakti.html` is the one step of this task's verify list that has
-not run.
+## Deployed and re-verified live, 2026-09-22
+
+Owner ran `deploy-new.sh css/base.css includes/contact-form.php js/form-validate.js`.
+Re-measured against `https://torin.bg/new/kontakti.html`:
+
+| Check | Live result |
+|---|---|
+| On load | 0 errors visible, 0 `aria-invalid`, 2 help lines, placeholders on `device`/`fault` only |
+| Empty submit | 6 required fields flagged, focus on `device`, **button still enabled and labelled «Изпратете запитване»** |
+| Fix one field | `device-err` cleared, the other 5 untouched |
+| Valid submit | 0 errors, and the button flipped to disabled/«Изпраща се…» — that is `photo-resize.js` behaving normally, which is positive evidence the validator **allowed** the submit rather than cancelling it |
+| Console errors | none |
+
+**No enquiry was sent.** The live test installed a capture-phase `submit` listener on `window`
+before anything else, so no path could reach `contact-send.php`. `location.pathname` stayed
+`/new/kontakti.html`, confirming it held. (The local run could afford to read the verdict in the
+bubble phase; on a host that pages a human, the cancel goes first.)
+
+Full sweep after the change: **20/20 pages PASS**, 34 pass / 0 fail / 4 skip.
+
+`kontakti.html` fell 166 → 95 Cyrillic tokens. The removed strings account for exactly that:
+8 (device hint) + 9 (fault hint) + 8 (photos trim) + 5 (phone) + 9 (email) + 32 (seven error
+messages) = **71**. Every other page's token count is unchanged, which is the evidence that the
+global `[hidden]` rule affected nothing beyond this form.
