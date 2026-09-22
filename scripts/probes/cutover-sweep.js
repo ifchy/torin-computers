@@ -37,6 +37,18 @@
 // runs in the browser. Everything the page needs is read HERE and serialised in
 // below — the same discipline svc-page.js and trust-signals.js already follow.
 //
+// EVERY DEPLOYED PAGE, NOT JUST THE HOMEPAGE. SWEEP_URLS carries the whole list
+// and the loop below walks it in ONE browser session — one launch, one profile,
+// repeated navigations. Rendering only index.html left the other nineteen pages
+// asserted by HTTP status alone, which is exactly the check the «s» incident
+// already passed. The list is derived by cutover-sweep.sh from src/*.html, so
+// the rendered set and the status-checked set are the same set by construction.
+//
+// TWO KEYS, DELIBERATELY NAMED APART. Per-page records use `pageVerdict`; the
+// aggregate uses `sweepVerdict`. The shell reads the verdict with a glob over
+// the whole output, so a per-page key spelled `verdict` would let one passing
+// page satisfy the match while the run as a whole failed.
+//
 
 async function run(session, cdp, opts) {
 	// Read here, in Node, ABOVE the evaluate call. Serialised into the page scope
@@ -44,14 +56,26 @@ async function run(session, cdp, opts) {
 	// ReferenceError in the browser, and a probe that throws reports nothing.
 	const minCyrillicTokens = Number(process.env.SWEEP_MIN_CYRILLIC || 40);
 
+	// Same rule, same reason: read in Node. Falls back to the single URL the
+	// harness was given, so a manual one-page invocation still works unchanged.
+	const urls = String(process.env.SWEEP_URLS || '')
+		.split(/[\s,]+/)
+		.map(s => s.trim())
+		.filter(Boolean);
+	if (urls.length === 0 && opts.url) urls.push(opts.url);
+
+	// Console errors are delivered as CDP events into this one buffer; each page
+	// takes the slice that arrived during its own navigation. Awaited, because
+	// Runtime.enable is what starts the flow and a load that begins before it
+	// lands reports nothing.
 	const consoleErrors = [];
+	let consoleMeasured = false;
 	if (typeof cdp.onConsoleError === 'function') {
-		cdp.onConsoleError(session, (text) => consoleErrors.push(String(text)));
+		await cdp.onConsoleError(session, (text) => consoleErrors.push(String(text)));
+		consoleMeasured = true;
 	}
 
-	await cdp.open(session, opts.url, opts);
-
-	const result = await cdp.evaluate(session, `(() => {
+	const pageExpression = `(() => {
 		const minCyrillicTokens = ${minCyrillicTokens};
 
 		const text = (document.body && document.body.innerText) || '';
@@ -119,24 +143,81 @@ async function run(session, cdp, opts) {
 			h1Count: document.querySelectorAll('h1').length,
 			inconclusive: inconclusive,
 			failures: failures,
-			verdict: inconclusive.length > 0
+			pageVerdict: inconclusive.length > 0
 				? 'INCONCLUSIVE'
 				: (failures.length === 0 ? 'PASS' : 'FAIL')
 		};
-	})()`);
+	})()`;
 
-	// Console errors are collected in Node, so they are merged after the fact.
-	// A page can render perfectly and still be throwing — site.js owns the
-	// navigation, and a nav that throws is a nav that does not open.
-	result.consoleErrors = consoleErrors;
-	if (result.verdict === 'PASS' && consoleErrors.length > 0) {
-		result.failures = (result.failures || []).concat(
-			['console errors during load: ' + consoleErrors.join(' | ')]
-		);
-		result.verdict = 'FAIL';
+	const pages = [];
+	for (const url of urls) {
+		// Where this page's console errors start in the shared buffer.
+		const consoleFrom = consoleErrors.length;
+		let page;
+
+		try {
+			await cdp.open(session, url, opts);
+			page = await cdp.evaluate(session, pageExpression);
+		} catch (e) {
+			// One unreachable page must not cost the other nineteen their results.
+			// Recorded as a FAIL with its reason, and the loop continues.
+			pages.push({
+				url: url,
+				requestedUrl: url,
+				failures: ['probe threw while rendering: ' + e.message],
+				inconclusive: [],
+				consoleErrors: consoleErrors.slice(consoleFrom),
+				pageVerdict: 'FAIL'
+			});
+			continue;
+		}
+
+		page.requestedUrl = url;
+
+		// Console errors are collected in Node, so they are merged after the fact.
+		// A page can render perfectly and still be throwing — site.js owns the
+		// navigation, and a nav that throws is a nav that does not open.
+		page.consoleErrors = consoleMeasured ? consoleErrors.slice(consoleFrom) : null;
+		if (consoleMeasured && page.consoleErrors.length > 0 && page.pageVerdict === 'PASS') {
+			page.failures = (page.failures || []).concat(
+				['console errors during load: ' + page.consoleErrors.join(' | ')]
+			);
+			page.pageVerdict = 'FAIL';
+		}
+
+		// An unmeasurable surface is named, never folded into a pass. If the CDP
+		// client cannot deliver events, `consoleErrors: []` would be an empty
+		// array nothing could fill — which is the defect this probe was built to
+		// catch in the pages, and it is no more acceptable in the probe itself.
+		if (!consoleMeasured) {
+			page.inconclusive = (page.inconclusive || []).concat(
+				['console errors NOT MEASURED — this cdp-client exports no onConsoleError, so the empty list below was never filled by anything']
+			);
+			if (page.pageVerdict === 'PASS') page.pageVerdict = 'INCONCLUSIVE';
+		}
+
+		pages.push(page);
 	}
 
-	return result;
+	const failed = pages.filter(p => p.pageVerdict === 'FAIL');
+	const unresolved = pages.filter(p => p.pageVerdict === 'INCONCLUSIVE');
+
+	// A sweep over zero pages asserted nothing. It is not a pass.
+	const sweepVerdict = pages.length === 0
+		? 'INCONCLUSIVE'
+		: (failed.length > 0 ? 'FAIL' : (unresolved.length > 0 ? 'INCONCLUSIVE' : 'PASS'));
+
+	return {
+		sweepVerdict: sweepVerdict,
+		pagesChecked: pages.length,
+		passed: pages.length - failed.length - unresolved.length,
+		failed: failed.length,
+		inconclusive: unresolved.length,
+		viewport: opts.width + 'x' + opts.height,
+		minCyrillicTokens: minCyrillicTokens,
+		consoleErrorsMeasured: consoleMeasured,
+		pages: pages
+	};
 }
 
 module.exports = { run };
