@@ -1,10 +1,10 @@
 ---
 schema_version: 1
-open_count: 29
+open_count: 30
 waived_count: 3
 fixed_count: 22
-total_count: 54
-last_updated: 2026-09-23T06:12:00.000Z
+total_count: 55
+last_updated: 2026-09-23T16:40:00.000Z
 ---
 
 # Broken Windows Ledger
@@ -69,6 +69,7 @@ last_updated: 2026-09-23T06:12:00.000Z
 | 52 | 04 | deviation | src/.htaccess |  | 04-09 NEW RISK INTRODUCED BY THIS PLAN, read before anyone runs deploy-new.sh again: src/.htaccess now addresses the document ROOT. Its RewriteBase and canonicalisation target were promoted from the /new/ staging segment to '/' (the two edits ROADMAP carried into Phase 4 as D4-30). Uploading this file to public_html/new/ would point the base at / while the file sits in /new/, BREAKING EVERY REDIRECT IN IT — which is precisely the historical defect this phase already hit once, where retirement rules answered 301 with a Location of https://torin.bg/home/torin/public_html/new/<target>, a server path leaked into a public URL that 404'd on follow while the 301 itself looked perfectly correct. The file now carries a boxed warning at the top and checklist step 2.4 repeats it: src/.htaccess is OUT OF SCOPE for deploy-new.sh and goes up only with the 04-10 root swap. Orchestrator verified post-merge that the file still balances 10 IfModule open/close and 3 FilesMatch open/close. | open |  | 2026-09-21T19:15:43.630Z |  |
 | 53 | 04 | unrun-verify | scripts/probes/cutover-sweep.js |  | 04-09: the cutover sweep's RENDERED probe has NEVER RUN. Every sweep execution used --no-render. The script parses and exports correctly and the HTTP half is genuinely proven — it was tested against a seeded known-bad case and FAILED correctly, which is the right direction to prove a gate: a naive status-line-plus-Location check saw a perfect 301, while following the redirect yielded 404 at a leaked server path, and the sweep reported the terminal status AND the leaked URL, exit 1, NO-GO. It then passed clean against staging, 33/0/5, all eight redirects terminal-verified. BUT the rendered probe's Cyrillic, diagnostic and widget assertions remain a SPECIFICATION, not a gate. Honest caveat the executor recorded rather than hid: 7 of the 8 failures in the known-bad run are loopback artefacts (www.127.0.0.1 does not resolve, no TLS on the stub) and only covid.html is the seeded defect — so the run proves the mechanism, not eight independent detections. Run the sweep WITH rendering enabled against staging before the swap. | open |  | 2026-09-21T19:15:52.846Z |  |
 | 54 | 04 | unrun-verify | scripts/upload-selftest.php |  | upload-selftest's containment assertion CANNOT DETECT A DISABLED GUARD, and this was observed, not theorised: during mutation testing on 2026-09-22 the containment condition in torin_normalise_upload() was replaced with 'if (false)' — the guard entirely dead — and the assertion 'every normalised path sits under the system temp directory' still PASSED. It checks that the happy path returns paths under the temp dir, which tempnam() guarantees on its own; it never feeds the function a path that SHOULD be rejected. So the one control standing between a visitor upload and code execution on a host that maps .html to PHP has no negative-path test. Closing it needs a case where the containment check is made to fail — e.g. stubbing the temp dir to a location the output cannot sit under — and asserting torin_normalise_upload() returns false AND removes the file. Everything else in that suite is genuinely proven: 10/10, mutation-tested. | fixed |  | 2026-09-22T10:06:08.360Z | 2026-09-22T10:36:47.279Z |
+| 55 | 04 | deviation | scripts/deploy-new.sh |  | NOTHING IN THIS PROJECT CAN TELL YOU WHAT IS UNSHIPPED, and it has now cost a broken homepage. 2026-09-23: index.html was deployed referencing img/icons/cat-N.svg while those six files and the components.css rule they need were still local. All six returned 404 and the live staging homepage showed six broken images until a second deploy went out. The deploy list had been derived from the files touched by the MOST RECENT commits rather than from everything not yet on the server. ROOT CAUSE, and it is the same one as the two-day staleness found earlier the same day: deploy-new.sh uploads and never deletes, keeps no manifest, and the server holds no record of what it is missing — so an incomplete deploy is invisible from both ends. The cutover sweep does not catch it either: it passed 20/20 before and after, because every assertion it makes (Cyrillic prose, diagnostics, widget, console) is satisfied by a stale or partial deploy. A 404 on a referenced asset is not something any current check asserts. CHEAPEST FIX, and it closes both instances: assert that every local asset referenced by a served page returns 200, and compare the committed tree against what the origin actually serves. Both are curl-able and neither needs new infrastructure. Until then, derive a deploy list from what is unshipped, never from the latest diff. | open |  | 2026-09-23T16:40:00.000Z |  |
 
 ````json
 [
@@ -719,6 +720,18 @@ last_updated: 2026-09-23T06:12:00.000Z
     "reason": "",
     "recorded_at": "2026-09-22T10:06:08.360Z",
     "resolved_at": "2026-09-22T10:36:47.279Z"
+  },
+  {
+    "id": 55,
+    "kind": "deviation",
+    "phase": "04",
+    "file": "scripts/deploy-new.sh",
+    "line": null,
+    "description": "NOTHING IN THIS PROJECT CAN TELL YOU WHAT IS UNSHIPPED, and it has now cost a broken homepage. 2026-09-23: index.html was deployed referencing img/icons/cat-N.svg while those six files and the components.css rule they need were still local. All six returned 404 and the live staging homepage showed six broken images until a second deploy went out. The deploy list had been derived from the files touched by the MOST RECENT commits rather than from everything not yet on the server. ROOT CAUSE, and it is the same one as the two-day staleness found earlier the same day: deploy-new.sh uploads and never deletes, keeps no manifest, and the server holds no record of what it is missing — so an incomplete deploy is invisible from both ends. The cutover sweep does not catch it either: it passed 20/20 before and after, because every assertion it makes (Cyrillic prose, diagnostics, widget, console) is satisfied by a stale or partial deploy. A 404 on a referenced asset is not something any current check asserts. CHEAPEST FIX, and it closes both instances: assert that every local asset referenced by a served page returns 200, and compare the committed tree against what the origin actually serves. Both are curl-able and neither needs new infrastructure. Until then, derive a deploy list from what is unshipped, never from the latest diff.",
+    "status": "open",
+    "reason": "",
+    "recorded_at": "2026-09-23T16:40:00.000Z",
+    "resolved_at": null
   }
 ]
 ````
