@@ -269,4 +269,66 @@ async function onConsoleError(session, cb) {
 	await session.cmd('Runtime.enable');
 }
 
-module.exports = { connect, open, evaluate, pressTab, screenshot, httpJson, onConsoleError };
+// Subscribe to subresource failures: anything the page requests that comes back
+// 4xx/5xx, or that never comes back at all.
+//
+// WHY THIS EXISTS. On 2026-09-23 index.html was deployed referencing six icon
+// files that were still local. All six returned 404, the live homepage showed
+// six broken images, and the cutover sweep reported 20/20 PASS — because every
+// assertion it made (Cyrillic prose, PHP diagnostics, chat widget, console
+// errors) is satisfied by a page whose images are missing. A 404 on a
+// referenced asset was asserted by nothing. For a script whose own header calls
+// it the go/no-go instrument for the root cutover, "the server is actually
+// serving what the markup asks for" is close to the most important thing it can
+// check.
+//
+// MEASURED IN THE BROWSER, NOT BY GREPPING THE MARKUP, and that is the whole
+// reason it lives here. A regex over src=/href= sees only what is written in
+// the HTML: it misses fonts and background images referenced from CSS, anything
+// a script requests, and every URL assembled at runtime. The browser knows the
+// true request list because it made the requests.
+//
+// requestWillBeSent IS NOT OPTIONAL BOOKKEEPING. Network.loadingFailed carries
+// a requestId and no URL, so without the map a hard failure reports that
+// something failed while being unable to say what — which is worse than silence
+// because it cannot be acted on. The map is how a failure gets a name.
+//
+// MUST BE AWAITED before the first navigation, for the same reason as
+// onConsoleError: Network.enable is what starts the event flow, and a load
+// already in flight when it lands is never reported.
+async function onSubresourceFailure(session, cb) {
+	if (typeof session.onEvent !== 'function') {
+		throw new Error('cdp session has no onEvent -- connect() is too old to deliver CDP events');
+	}
+
+	const urls = new Map();
+
+	session.onEvent('Network.requestWillBeSent', params => {
+		if (params.requestId && params.request && params.request.url) {
+			urls.set(params.requestId, params.request.url);
+		}
+	});
+
+	session.onEvent('Network.responseReceived', params => {
+		const r = params.response || {};
+		if (typeof r.status === 'number' && r.status >= 400) {
+			cb({ url: r.url || urls.get(params.requestId) || '(url unknown)',
+				status: r.status, type: params.type || '', reason: 'http ' + r.status });
+		}
+		urls.delete(params.requestId);
+	});
+
+	session.onEvent('Network.loadingFailed', params => {
+		// canceled is not a failure: a navigation away from a page with requests
+		// still open cancels them, and this probe navigates twenty times in one
+		// session. Reporting those would make every page after the first dirty.
+		if (params.canceled) { urls.delete(params.requestId); return; }
+		cb({ url: urls.get(params.requestId) || '(url unknown)', status: 0,
+			type: params.type || '', reason: params.errorText || 'loading failed' });
+		urls.delete(params.requestId);
+	});
+
+	await session.cmd('Network.enable');
+}
+
+module.exports = { connect, open, evaluate, pressTab, screenshot, httpJson, onConsoleError, onSubresourceFailure };
