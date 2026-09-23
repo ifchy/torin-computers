@@ -72,8 +72,23 @@ async function run(session, cdp, opts) {
 	const withRing = production.filter(r => !r.noRing && r.worstRatio !== null);
 	const failing = withRing.filter(r => r.worstRatio < 3);
 
+	// MEASURED, not inferred from the URL. This used to read
+	// `opts.url.indexOf('theme=a') !== -1 ? 'A' : 'B'`, which was correct only
+	// while the dev switcher existed and `?theme=a` selected the override. That
+	// switcher was deleted in 04-07, and the owner's 2026-09-23 reversal baked
+	// Theme A into :root — so the URL test would have labelled every future run
+	// "B" no matter what was actually on screen, quietly mislabelling the
+	// evidence in exactly the artefact that exists to be trusted. The brand
+	// token is the ground truth; the label is derived from it and the raw value
+	// is reported alongside so an unrecognised palette cannot masquerade as
+	// either one.
+	const brand = await cdp.evaluate(session,
+		"getComputedStyle(document.documentElement).getPropertyValue('--c-brand').trim()");
+	const themeLabel = brand === '#fbad03' ? 'A' : (brand === '#ffc70a' ? 'B' : 'unrecognised');
+
 	return {
-		theme: opts.url.indexOf('theme=a') !== -1 ? 'A' : 'B',
+		theme: themeLabel,
+		brandToken: brand,
 		viewport: opts.width + 'x' + opts.height,
 		tabbed: results.length,
 		productionControls: production.length,
