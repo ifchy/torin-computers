@@ -2,11 +2,10 @@
 phase: quick-260919-m0i
 plan: 01
 subsystem: contact-form / live-deploy
-tags: [security, header-injection, php, ftps, live-production, unverified]
-status: incomplete
-blocked_on: "Task 3 — mailbox raw-header inspection at office@torin.bg. No mailbox access until Monday."
+tags: [security, header-injection, php, ftps, live-production, verified]
+status: complete
 requires:
-  - "human inspection of three test messages sent 2026-09-19 13:14:58Z / 13:15:26Z / 13:15:36Z"
+  - "human inspection of three test messages sent 2026-09-19 13:14:58Z / 13:15:26Z / 13:15:36Z — DONE 2026-09-23, all three pass"
 provides:
   - "site-current/mailer.php with no path from POST data to a mail header — DEPLOYED"
   - "scripts/deploy-live.sh — allowlisted single-file live-root uploader"
@@ -137,7 +136,7 @@ applied to the same bytes production was running.
 | Post-patch normal, 13:15:26Z | `302`, `location: msg.html`, `content-length: 0`, 0-byte body |
 | Post-patch injection, 13:15:36Z | `302`, `location: msg.html`, `content-length: 0`, 0-byte body |
 | Live static pages after deploy | `/`, `/index.html`, `/uslovia.html`, `/msg.html` all `200` |
-| **Mailbox raw-header inspection** | **NOT DONE — blocked until Monday** |
+| **Mailbox raw-header inspection** | ✅ **DONE 2026-09-23 — all three messages pass** (see the closing section at the end of this file) |
 
 ## The Weakest Link: unparsed PHP went live
 
@@ -254,3 +253,62 @@ throughout.
 Every live figure in this summary was supplied by the developer from a real run and
 is reproduced without rounding. No claim is made anywhere that the injection has been
 observed to be absent from a delivered message, because it has not.
+
+---
+
+## ✅ CLOSED 2026-09-23 — the header assertion was read, all three messages pass
+
+This task shipped a security patch to a live production file on 2026-09-19 and then sat
+`incomplete` for four days, because **the only observable that could prove it works lives in
+delivered email headers, not in anything this repo can reach.**
+
+The owner inspected the raw headers of all three test messages at `office@torin.bg` and reports
+all three matched their criteria:
+
+| # | Sent (UTC) | Criterion | Result |
+|---|---|---|---|
+| 1 | 13:14:58 | `X-Torin-Injection-Test: PRE-PATCH-260919` **present** | ✅ present |
+| 2 | 13:15:26 | correct `From:`, `Reply-To:` holds the visitor address, no `X-Torin-` | ✅ |
+| 3 | 13:15:36 | **zero** `X-Torin` hits, correct `From:`, **no** `Reply-To:` | ✅ |
+
+**Message 1 is the load-bearing result and it is easy to misread as the boring one.** Its
+criterion is a PRESENCE while message 3's is an ABSENCE. Had message 1 come back clean, message
+3's clean headers would have proven nothing — an injection that never worked is absent from every
+message, patched or not, and this task would have shipped a fix for a vulnerability it had not
+demonstrated. Message 1 carrying the marker establishes the hole was real and reachable on the
+live host; only against that does message 3's zero hits mean the patch closed it.
+
+**Nothing cheaper could have substituted.** §3 and §4 recorded byte-identical HTTP responses
+before and after the patch — `302`, `location: msg.html`, `content-length: 0`, zero-byte body. No
+status code, no source gate, no re-reading of the deployed bytes distinguishes a patched host from
+an unpatched one here. The gates that looked green on 2026-09-19 were all necessary and none of
+them was sufficient, which is exactly why this task refused to mark itself complete on their
+strength.
+
+Message 2 also confirms the shop's real workflow survived: pressing Reply still addresses the
+customer, not `office@torin.bg`. That was the single thing the change was most likely to break.
+
+### The process lesson stands, and is not retired by this
+
+**Unparsed PHP reached the live root.** There was no `php` binary on the build machine and Docker
+was down, so the patch was never syntax-checked before upload — the first thing to execute it was
+a real public HTTP request. It parsed clean, but that is verification *after* exposure, and a
+parse error would have taken the live contact form down for every visitor.
+
+That gap is now closed by circumstance rather than by discipline: **PHP 8.5.10 is installed** (see
+quick task `260922-i38`, which ran `php -l` clean across all 45 files and found a real containment
+bug on a selftest's first-ever execution). The rule survives the fix: lint before a live PHP
+deploy, every time.
+
+### Owner housekeeping still outstanding
+
+The three test messages should be **deleted from `office@torin.bg`**. They are labelled
+`AUTOMATED SECURITY TEST 260919-m0i`, but a security test left in an enquiry mailbox is eventually
+read as a real customer. Nothing in this repo can do it.
+
+### Scope note
+
+This closes the patch on the **old site's root `mailer.php`** only. It is a different code path
+from `contact-send.php` under `/new/`, whose own end-to-end delivery was proven separately on
+2026-09-22 (quick task `260923-ebg`). Phase 4 plan 04-05 retires this endpoint entirely at
+cutover, at which point the patched file stops being reachable at all.
