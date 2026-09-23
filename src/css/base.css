@@ -149,29 +149,39 @@ a:hover { color: var(--c-link-hover); }
    means hidden, and nothing below should be able to out-specify it.          */
 [hidden] { display: none !important; }
 
-/* --- Design tokens — unconditional (D-02a: the theme that ships).
-       Theme A was a dev-only colour override for live comparison and its
-       stylesheet is DELETED as of the Phase 4 cutover (plan 04-07), together
-       with the switcher that selected it. Nothing here changed with it: the
-       override only ever declared colours under an attribute selector that no
-       page carries any more, so every token below is the value it has always
-       rendered.                                                             */
+/* --- Design tokens — unconditional. D-02a REVERSED BY THE OWNER 2026-09-23:
+       the site now ships THEME A, the logo's own amber and electric blue.
+
+       D-02a originally shipped Theme B (#ffc70a + #0e305d) because it matched
+       the existing torin.bg, which it genuinely did — that site's CSS carries
+       those two values four times each and the logo colours zero times. The
+       reversal is not a correction of a mis-wiring: the labels were consistent,
+       the switcher was consistent, and Theme B rendered live exactly as decided.
+       What went wrong is that OWNER-QUESTIONS.md:591 asked for the owner to be
+       shown both palettes on real pages before cutover, that follow-up was
+       never owned by any plan, and the dev switcher was deleted on schedule at
+       04-07 — so the first real look happened after the comparison was gone.
+
+       The values below are the ones the deleted css/theme-a.css declared under
+       [data-theme="a"], recovered verbatim from ec3595c^. Colour only: radius,
+       spacing, type and motion were never themed and are untouched.         */
 :root {
 	/* Themed colours — the exactly-10 set the deleted override could replace.
 	   The grouping is KEPT rather than merged into the invariant block below:
-	   these ten are the ones a future re-theme would touch, and that is worth
-	   more as a standing record than the two lines the merge would save.
-	   Amber is a SURFACE token: #ffc70a on white is 1.56:1. */
-	--c-brand: #ffc70a;   /* D-01: business.css --color-primary */
-	--c-brand-dim: #e8b400;
-	--c-ink-deep: #0e305d;   /* D-01/D-05: navy, deliberately NOT the logo blue */
-	--c-ink-deep-2: #1a4f8f;
-	--c-ink-deepest: #0a2547;
-	--c-on-brand: #16223a;   /* text on amber — 10.14:1 */
-	--c-link: #0b4a9c;
-	--c-link-hover: #093a7a;
-	--c-shadow-tint: 14 48 93;   /* shadows are brand-tinted, never black */
-	--c-hero-glow: rgba(255, 199, 10, .16);
+	   these ten are the ones a re-theme touches. That standing record is what
+	   made the 2026-09-23 reversal a single-block edit, which is the whole
+	   reason it was worth more than the two lines a merge would have saved.
+	   Amber is a SURFACE token: #fbad03 on white is 1.90:1. */
+	--c-brand: #fbad03;   /* D-01: the logo's amber */
+	--c-brand-dim: #dd9803;
+	--c-ink-deep: #0547dc;   /* the logo's electric blue */
+	--c-ink-deep-2: #1c56d8;
+	--c-ink-deepest: #062f8f;
+	--c-on-brand: #1a1200;   /* text on amber — 9.80:1 */
+	--c-link: #0440c2;
+	--c-link-hover: #0334a0;
+	--c-shadow-tint: 5 71 220;   /* shadows are brand-tinted, never black */
+	--c-hero-glow: rgba(251, 173, 3, .16);
 
 	/* Theme-invariant colours */
 	--c-page: #ffffff;
@@ -315,13 +325,20 @@ p, li { max-width: var(--measure); }
    the footer and the call bar — effectively no visible focus at all for
    keyboard users on the six most important controls on the site
    (02-VERIFICATION gap 1 / CR-02).
-   Light surfaces keep --c-on-brand #16223a, which is 15.86:1 on white.
-   Dark surfaces take --c-focus-on-dark #ffd84d, recomputed against every
-   surface the offset ring actually lands on. Theme B: 9.49:1 on --c-ink-deep
-   #0e305d, 5.93:1 on the --c-ink-deep-2 #1a4f8f far gradient stop, 4.69:1 on
-   the worst-case #3f627a hero glow corner, 11.09:1 on --c-ink-deepest
-   #0a2547. Theme A: 5.16:1 on #0547dc, 4.50:1 on #1c56d8, 8.38:1 on #062f8f.
-   Every one clears the 3:1 floor of WCAG 2.1 SC 1.4.11. The same #ffd84d is
+   Light surfaces keep --c-on-brand, now #1a1200, which is 18.58:1 on white
+   (it was #16223a at 15.86:1 under Theme B — the reversal improved this one).
+   Dark surfaces take --c-focus-on-dark #ffd84d, which is theme-INVARIANT and
+   so had to be re-measured against the new fills rather than assumed. The ring
+   is recomputed against every surface it actually lands on.
+   SHIPPING (Theme A, since 2026-09-23): 5.16:1 on --c-ink-deep #0547dc,
+   4.50:1 on the --c-ink-deep-2 #1c56d8 far gradient stop, 8.38:1 on
+   --c-ink-deepest #062f8f.
+   Theme B, which this replaced, ran wider: 9.49:1 on #0e305d, 5.93:1 on
+   #1a4f8f, 4.69:1 on the worst-case #3f627a hero glow corner, 11.09:1 on
+   #0a2547.
+   Every one of them clears the 3:1 floor of WCAG 2.1 SC 1.4.11, but the
+   shipping worst case is now 4.50:1 rather than 4.69:1 — still 1.5x the floor,
+   and the number to watch if these fills are ever lightened. The same #ffd84d is
    1.38:1 on white, which is why the group below names three surfaces by class
    instead of styling all primary buttons.
    LOAD-BEARING, do not simplify: the three dark-surface selectors below must

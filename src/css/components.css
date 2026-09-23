@@ -236,10 +236,11 @@
    new label is not quoted either. The wording lives in site-config.php; the
    element that renders it lives in the homepage hero.
    A trust/conversion element, never a line item in a service list. The pair
-   that actually applies is --c-on-brand ink on the --c-brand fill: #16223a on
-   #ffc70a = 10.14:1 in the shipping Theme B, #1a1200 on #fbad03 = 9.80:1 in
-   the dev-only Theme A — both far above the 4.5:1 WCAG 2.1 SC 1.4.3 floor for
-   normal text.
+   that actually applies is --c-on-brand ink on the --c-brand fill: #1a1200 on
+   #fbad03 = 9.80:1 in the shipping palette (Theme A, since the owner reversed
+   D-02a on 2026-09-23), and #16223a on #ffc70a = 10.14:1 in the Theme B it
+   replaced — both far above the 4.5:1 WCAG 2.1 SC 1.4.3 floor for normal text,
+   so the reversal cost 0.34 of a ratio point and no compliance.
    LOAD-BEARING, do not simplify: the hero's prose rule above is deliberately
    scoped away from this element as `.hero__inner > p:not(.trust-badge)`.
    Collapsing it back to a class plus a bare paragraph type re-creates a

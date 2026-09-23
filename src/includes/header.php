@@ -123,10 +123,18 @@ if (isset($torin_track) && $torin_track !== '') {
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<?php // D-01: the brand colour is #ffc70a. The #3ed2a7 this replaced was an
-      // unchanged leftover from the purchased "Liquid" template, used nowhere
-      // in actual styling. ?>
-<meta name="theme-color" content="#ffc70a">
+<?php // D-01: the brand colour is #fbad03 — the logo's amber, as of the owner's
+      // 2026-09-23 reversal of D-02a (it was #ffc70a while Theme B shipped).
+      // The #3ed2a7 this replaced was an unchanged leftover from the purchased
+      // "Liquid" template, used nowhere in actual styling.
+      //
+      // THIS IS THE ONE BRAND COLOUR THAT IS NOT A CSS TOKEN, and therefore the
+      // one a re-theme can silently miss. It cannot read var(--c-brand): a meta
+      // tag is not styled, and its value goes to the browser UI (the address bar
+      // tint on Android Chrome), not to the page. Any future re-theme must edit
+      // base.css's ten-token block AND this literal; a grep for the outgoing hex
+      // across src/ is what catches it. ?>
+<meta name="theme-color" content="#fbad03">
 <meta name="description" content="<?php echo htmlspecialchars($torin_desc, ENT_QUOTES, 'UTF-8'); ?>">
 <?php // PER-PAGE ROBOTS DIRECTIVE (UI-SPEC C-8, plan 04-07). A page assigns
       // $torin_robots before this include; anything that does not assign it
