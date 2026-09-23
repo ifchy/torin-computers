@@ -62,6 +62,17 @@ function main() {
 			? 'measured (CDP Runtime events)'
 			: 'NOT MEASURED — empty lists below mean nothing')
 	);
+	// Printed on every run, clean ones included, for the same reason as the line
+	// above: "0 broken assets" is only information if something was watching.
+	// This check exists because a run reporting 20/20 PASS once did so against a
+	// homepage with six 404ing images.
+	out.push(
+		INDENT + 'subresource failures: ' +
+		(result.subresourceFailuresMeasured
+			? (result.subresourceFailureCount || 0) + ' same-origin (fatal), ' +
+			  (result.thirdPartyFailureCount || 0) + ' third-party (reported only) — CDP Network events'
+			: 'NOT MEASURED — a missing image or stylesheet would pass unseen')
+	);
 	out.push('');
 
 	const widest = result.pages.reduce((w, p) => Math.max(w, pageName(p).length), 0);
@@ -89,6 +100,12 @@ function main() {
 			for (const i of page.inconclusive || []) out.push(INDENT + '  inconclusive: ' + i);
 			for (const c of page.consoleErrors || []) out.push(INDENT + '  console:      ' + c);
 			for (const d of page.diagnostics || []) out.push(INDENT + '  diagnostic:   ' + d);
+			for (const s of page.subresourceFailures || []) {
+				out.push(INDENT + '  subresource:  ' + s.reason + '  ' + s.url);
+			}
+			for (const s of page.thirdPartyFailures || []) {
+				out.push(INDENT + '  third-party:  ' + s.reason + '  ' + s.url + '  (not fatal)');
+			}
 		}
 	}
 

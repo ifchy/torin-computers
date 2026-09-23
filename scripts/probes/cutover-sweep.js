@@ -75,6 +75,38 @@ async function run(session, cdp, opts) {
 		consoleMeasured = true;
 	}
 
+	// SUBRESOURCE FAILURES — the check that was missing on 2026-09-23, when this
+	// probe reported 20/20 PASS against a homepage showing six broken images.
+	// Same buffer-and-slice shape as consoleErrors above, same awaited-enable
+	// requirement, and the same refusal to report an unmeasured empty as a pass.
+	const subFailures = [];
+	let subMeasured = false;
+	if (typeof cdp.onSubresourceFailure === 'function') {
+		await cdp.onSubresourceFailure(session, (f) => subFailures.push(f));
+		subMeasured = true;
+	}
+
+	// SAME-ORIGIN ONLY IS FATAL, and the first real run is what taught this.
+	// The synthetic test passed cleanly, then the sweep against staging failed
+	// 19 of 20 pages on one repeated entry: net::ERR_BLOCKED_BY_CLIENT for
+	// https://gateway.umami.is/api/send — the analytics beacon, blocked by the
+	// browser's own shields. Brave blocks trackers by default and Brave is the
+	// engine this harness drives.
+	//
+	// That is not a deploy defect and must never fail a cutover: the file is not
+	// ours, the server is not involved, and the same run would pass or fail
+	// depending on the visitor's ad-blocker. This check exists to answer ONE
+	// question — is the origin serving what our own markup asks for — so the
+	// answer is scoped to our own origin.
+	//
+	// Cross-origin failures are still REPORTED, never dropped: a third-party
+	// script that has started 404ing is worth seeing, it is just not a reason to
+	// abort a root cutover. Same discipline as truth-gate.js's class-B tokens.
+	const sameOrigin = (failureUrl, pageUrl) => {
+		try { return new URL(failureUrl).origin === new URL(pageUrl).origin; }
+		catch (e) { return false; }   // an unparseable URL is not ours to fail on
+	};
+
 	const pageExpression = `(() => {
 		const minCyrillicTokens = ${minCyrillicTokens};
 
@@ -151,8 +183,10 @@ async function run(session, cdp, opts) {
 
 	const pages = [];
 	for (const url of urls) {
-		// Where this page's console errors start in the shared buffer.
+		// Where this page's console errors and subresource failures start in the
+		// shared buffers.
 		const consoleFrom = consoleErrors.length;
+		const subFrom = subFailures.length;
 		let page;
 
 		try {
@@ -167,6 +201,7 @@ async function run(session, cdp, opts) {
 				failures: ['probe threw while rendering: ' + e.message],
 				inconclusive: [],
 				consoleErrors: consoleErrors.slice(consoleFrom),
+				subresourceFailures: subFailures.slice(subFrom),
 				pageVerdict: 'FAIL'
 			});
 			continue;
@@ -196,6 +231,28 @@ async function run(session, cdp, opts) {
 			if (page.pageVerdict === 'PASS') page.pageVerdict = 'INCONCLUSIVE';
 		}
 
+		// SUBRESOURCE FAILURES. A 404 on an image or a stylesheet does not stop
+		// the page rendering prose, so none of the in-page checks above can see
+		// it — which is exactly how a homepage with six broken images passed this
+		// probe. It is a FAIL, not a warning: at cutover a missing asset is a
+		// visibly broken page, and the whole point of this instrument is to stop
+		// that reaching the root.
+		const allSub = subMeasured ? subFailures.slice(subFrom) : null;
+		page.subresourceFailures = allSub ? allSub.filter(f => sameOrigin(f.url, url)) : null;
+		page.thirdPartyFailures = allSub ? allSub.filter(f => !sameOrigin(f.url, url)) : null;
+		if (subMeasured && page.subresourceFailures.length > 0) {
+			page.failures = (page.failures || []).concat(
+				page.subresourceFailures.map(f => 'subresource ' + f.reason + ': ' + f.url)
+			);
+			page.pageVerdict = 'FAIL';
+		}
+		if (!subMeasured) {
+			page.inconclusive = (page.inconclusive || []).concat(
+				['subresource failures NOT MEASURED — this cdp-client exports no onSubresourceFailure, so a missing image or stylesheet would pass unseen']
+			);
+			if (page.pageVerdict === 'PASS') page.pageVerdict = 'INCONCLUSIVE';
+		}
+
 		pages.push(page);
 	}
 
@@ -216,6 +273,17 @@ async function run(session, cdp, opts) {
 		viewport: opts.width + 'x' + opts.height,
 		minCyrillicTokens: minCyrillicTokens,
 		consoleErrorsMeasured: consoleMeasured,
+		subresourceFailuresMeasured: subMeasured,
+		// Same-origin only — the number that can fail a cutover.
+		subresourceFailureCount: subMeasured
+			? pages.reduce((n, p) => n + ((p.subresourceFailures || []).length), 0)
+			: null,
+		// Reported, never fatal: not our server, and dependent on the visitor's
+		// ad-blocker. Brave blocks the analytics beacon by default, which is what
+		// made the first real run fail 19 of 20 pages.
+		thirdPartyFailureCount: subMeasured
+			? pages.reduce((n, p) => n + ((p.thirdPartyFailures || []).length), 0)
+			: null,
 		pages: pages
 	};
 }
