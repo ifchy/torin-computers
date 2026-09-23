@@ -98,15 +98,56 @@ $torin_cat_page = array(
 
 	'crumbs' => $torin_crumbs,
 
-	// Provable content only: the board-level capability is already stated
-	// elsewhere on the site, and the equipment class is the owner's own
-	// wording (D3.5-06). The VOCABULARY of the second sentence is corrected,
-	// not its content — the work it describes, power circuits and individual
-	// failed components, is precisely what D3.5-02 KEEPS. Deleting it would
-	// have destroyed a surviving capability to remove a withdrawn label.
-	// The closing sentence no longer promises the free assessment; it states
-	// the exclusion and stops there.
-	'intro'  => 'Техника, която е на години, вече не се произвежда или просто не е масова — включително медицинска и индустриална апаратура — често се връща от сервиз с отговора, че за нея няма части. Ние работим по самата платка, а не по каталожния номер на модела: ремонтираме захранващи вериги и подменяме отделни дефектирали компоненти на ниво компонент. Затова в част от случаите има какво да се направи и след като другаде са отказали. Безплатната първоначална диагностика не обхваща нестандартната техника, но каквото видим, ви го казваме честно.',
+	// REORDERED 2026-09-23 ON OWNER INSTRUCTION. NOT ONE NEW CLAIM WAS ADDED —
+	// every clause below already stood on this page or in an owner answer; what
+	// changed is which one comes first and why the page exists at all.
+	//
+	// THE CATEGORY'S PURPOSE CHANGED, AND THE OPENING HAD TO FOLLOW IT. The
+	// owner's ruling: category 6 will not win customers. Companies running
+	// medical or industrial equipment do not bring it to a shop this size, and
+	// it was never realistic that they would. What the category IS for is
+	// EVIDENCE — it tells the cat-1..cat-5 visitor, who is standing there with a
+	// dead laptop, that the people who will open their machine work at component
+	// level. So the page now opens on the capability and not on the equipment
+	// class, because the capability is the part that reader is buying.
+	//
+	// THE FREE-DIAGNOSTICS EXCLUSION MOVED, IT WAS NOT DELETED. It now sits in
+	// the pricing FAQ, VERBATIM, because a page whose job is to build confidence
+	// must not open on what the customer does not get — and because an exclusion
+	// that appears NOWHERE is worse than one that opens the page: the customer
+	// then learns it at the counter, which is the expectation gap that produces
+	// the review this whole exercise is trying to earn. Moved, stated once.
+	//
+	// THE LAST SENTENCE IS THE ONE THAT DOES THE WORK, and it is a connection
+	// between two facts already on the site, not a new capability: the `fixes`
+	// list below already claims «Ремонт на ниво компонент по дънни платки», and
+	// zalivane-technosti.html and tokov-udar.html are the pages where that work
+	// is sold. Saying so out loud is what carries the credibility from a
+	// category nobody searches for to the two that pay. Without it this page is
+	// a cul-de-sac that impresses nobody who was going to buy anything.
+	//
+	// WHAT IS DELIBERATELY NOT HERE. On 2026-09-23 the owner asked whether to
+	// advertise the high-end board-rework speciality — the one truth-gate.js
+	// carries as a class-A token, which is why this comment describes it instead
+	// of naming it. The shop CAN do that work but has no interest in taking it,
+	// so the proposal was explicitly a ranking play rather than a service offer.
+	//
+	// DECLINED, and the reasoning is recorded so it is not re-litigated from
+	// scratch: it matches search queries for the jobs the shop does not want,
+	// barely touches the cat-1..cat-5 queries it does, and a service listed here
+	// but refused on the telephone produces precisely the negative review that
+	// damages the recommendation goal the listing was meant to serve. It is also
+	// the same shape as the discontinued-service claim D3.5-01 had to hunt off
+	// remont-na-portove.html, which cost a whole gap-closure plan.
+	//
+	// Worth knowing if it is ever reconsidered: writing the term into this file
+	// at all — even inside a comment saying «we do not do this» — makes
+	// truth-gate.js FAIL the whole tree, because the gate matches the token and
+	// cannot read the sentence around it. That is the gate behaving correctly.
+	// The capability that carries the same credibility WITHOUT the liability is
+	// «ремонт на ниво компонент», which is true, owner-confirmed, and already
+	// the first thing the intro says.
+	'intro'  => 'Ремонтираме на ниво компонент: работим по самата платка, а не по каталожния номер на модела — поправяме захранващи вериги и подменяме отделни дефектирали компоненти. Това включва медицинска и индустриална апаратура, както и техника, която е на години или вече не се произвежда и често се връща от сервиз с отговора, че за нея няма части; затова в част от случаите има какво да се направи и след като другаде са отказали. Същата работа на ниво компонент стои и зад ремонта на дънни платки на лаптопи — след заливане или след повреда от токов удар.',
 
 	// [ASSUMED] — OWNER-QUESTIONS #3b. Each capability below is PROVABLE for
 	// the equipment the site already describes; what is ASSUMED is that the
@@ -223,15 +264,32 @@ $torin_cat_page = array(
 		),
 		array(
 			'q' => 'Как определяте цената?',
-			'a' => 'След прегледа, не преди него. Обаждаме се с диагнозата и с цената и продължаваме само ако се съгласите. При по-стара техника това е особено важно, защото цената на ремонта понякога надхвърля стойността на самото устройство и това е решение, което вземате вие.',
+			// The second sentence is the free-diagnostics exclusion, moved here
+			// VERBATIM from the intro on 2026-09-23. It is quoted exactly rather
+			// than rewritten, because 03.5-05 had to strip two clauses from this
+			// page that priced the assessment at zero and NOTHING was put in
+			// their place — the owner has never said what the assessment costs
+			// for this category. Restating the exclusion is safe; describing the
+			// charge is the invented claim that must not appear. A pricing
+			// question is also the right home for it: it is where the reader is
+			// already thinking about money, and the FAQ is the most
+			// machine-legible part of the page.
+			'a' => 'След прегледа, не преди него. Обаждаме се с диагнозата и с цената и продължаваме само ако се съгласите. При по-стара техника това е особено важно, защото цената на ремонта понякога надхвърля стойността на самото устройство и това е решение, което вземате вие. Безплатната първоначална диагностика не обхваща нестандартната техника, но каквото видим, ви го казваме честно.',
 		),
 	),
 
 	// The third entry pointed at a page retired in plan 03.5-01 (SEO-05) and
 	// named a service the shop no longer offers (D3.5-01). REMOVED, not
 	// replaced — the list is one entry shorter rather than back-filled.
+	// cat-1 ADDED 2026-09-23, and the ordering is deliberate. This page exists
+	// to make the cat-1..cat-5 visitor trust the shop, so its exits must lead
+	// to the categories that actually earn: liquid and board damage first,
+	// mechanical second, power surge third. A visitor who arrives here from
+	// search — which is the only way anyone arrives here — should leave holding
+	// the page for the problem they actually have.
 	'related' => array(
 		array('text' => 'Заливане и ремонт на дънни платки', 'href' => 'zalivane-technosti.html'),
+		array('text' => 'Счупвания и механични повреди', 'href' => 'mehanichni-problemi.html'),
 		array('text' => 'Повреди от токов удар', 'href' => 'tokov-udar.html'),
 	),
 
