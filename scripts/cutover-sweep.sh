@@ -197,6 +197,58 @@ for f in "${SRC_ROOT}"/*.html; do
 done
 echo "  (${PAGE_COUNT} pages checked)"
 
+# ── 3b. Every static asset in the tree is actually SERVED ──────────────────
+# THE CHECK THAT WOULD HAVE CAUGHT 2026-09-23. index.html was deployed
+# referencing six icon files that were still local; all six returned 404, the
+# live homepage showed six broken images, and this script reported 20/20 PASS,
+# because nothing it asserted was about whether the ORIGIN HAS THE FILES.
+#
+# deploy-new.sh uploads and never deletes, keeps no manifest, and the origin
+# holds no record of what it is missing — so an incomplete deploy is invisible
+# from both ends unless something walks the tree and asks.
+#
+# THIS IS THE OPPOSITE DIRECTION FROM THE RENDERED PROBE, and both are needed.
+# Section 9 asks what the PAGES request, catching a reference to a path that was
+# never committed. This asks what the TREE contains, catching a file committed
+# but never uploaded EVEN WHEN NO PAGE REFERENCES IT YET — which is the stronger
+# check before a cutover, because it fails before the markup that needs the file
+# ships.
+#
+# WHAT IT DOES NOT COVER, stated so it is never assumed: files on the ORIGIN
+# that are no longer in src/. deploy-new.sh never deletes and nothing in this
+# project can list remote files, so orphans are undetectable from here. That is
+# the Phase 3.5 withdrawn-photographs problem — three unreferenced but still
+# fetchable JPEGs plus four retired pages — and it stays a manual FileZilla pass
+# at cutover.
+#
+# It also does not compare CONTENT, so a stale-but-present file still passes.
+# That is the other half of the 2026-09-23 pair (staging silently two days
+# behind) and needs a deployed-vs-committed digest, which this is not.
+echo
+echo "[3b] Static assets present on the origin — walked from src/, not hardcoded"
+ASSET_COUNT=0
+ASSET_MISSING=()
+while IFS= read -r f; do
+  rel="${f#${SRC_ROOT}/}"
+  case "$rel" in
+    # Deliberate exceptions, each for a stated reason:
+    vendor/phpmailer/*) continue ;;   # deny block returns 403 BY DESIGN (ledger 42)
+    *.htaccess)         continue ;;   # deploy-new.sh refuses it — root form (D4-30)
+  esac
+  ASSET_COUNT=$((ASSET_COUNT + 1))
+  code="$(curl "${CURL_OPTS[@]}" -o /dev/null -w '%{http_code}' "${TARGET}/${rel}" 2>/dev/null || echo "000")"
+  [ "$code" = "200" ] || ASSET_MISSING+=("${rel} -> ${code}")
+done < <(find "${SRC_ROOT}" -type f \
+           \( -name '*.css' -o -name '*.js' -o -name '*.svg' -o -name '*.png' \
+              -o -name '*.jpg' -o -name '*.webp' -o -name '*.ico' -o -name '*.woff2' \) 2>/dev/null)
+
+if [ "${#ASSET_MISSING[@]}" -eq 0 ]; then
+  pass "all ${ASSET_COUNT} static assets served"
+else
+  fail "${#ASSET_MISSING[@]} of ${ASSET_COUNT} static assets NOT served — the tree is deployed INCOMPLETELY:"
+  for m in "${ASSET_MISSING[@]}"; do printf '          %s\n' "$m"; done
+fi
+
 # ── 4. The noindex header, asserted in BOTH directions ─────────────────────
 echo
 echo "[4] X-Robots-Tag — required on staging, forbidden at the root"
