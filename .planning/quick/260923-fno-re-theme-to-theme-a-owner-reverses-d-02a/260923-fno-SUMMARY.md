@@ -103,3 +103,23 @@ The plan said to verify with `scripts/probes/contrast.js`. That file is **not a 
 it exports a `HELPERS` source string injected into the page by other probes, and has no `run()`.
 Contrast is covered by `focus-rings.js`, which uses those helpers; the ratios above come from it
 and from direct computation.
+
+## Deployed and re-verified live, 2026-09-23
+
+Owner ran `deploy-new.sh css/base.css css/components.css includes/header.php`.
+
+| Check | Live result |
+|---|---|
+| Tokens | `--c-brand #fbad03`, `--c-brand-dim #dd9803`, `--c-ink-deep #0547dc`, `--c-link #0440c2` |
+| Primary button paint | `rgb(251,173,3)` fill, `rgb(26,18,0)` ink |
+| `theme-color` meta, as served | `#fbad03` — the non-token colour landed |
+| Focus rings @1440×900 | theme **A** (measured from the token), 30 controls, **0** missing, worst **4.50:1** |
+| Focus rings @390×844 | theme **A**, 30 controls, **0** missing, worst **4.50:1**, 14 dark-surface controls |
+| Full sweep | **20/20 pages PASS**, 34 pass / 0 fail / 4 skip |
+
+Cyrillic token counts are **identical on all 20 pages** to the pre-re-theme run — which is the
+evidence the change was colour-only and moved no content, exactly the boundary `theme-a.css`
+itself observed.
+
+The probe now self-reports `"theme": "A"` with `"brandToken": "#fbad03"`, so the artefact says
+what it measured rather than what the URL implied.
