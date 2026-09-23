@@ -590,6 +590,32 @@ Which should ship?
 **Answer:** **Theme B** confirmed by the owner.
  **Theme B** (`#ffc70a` + `#0e305d`) is the default and ships live. Theme A stays in the dev switcher as the comparison option. Still worth showing the owner both at `torin.bg/new` before cutover, since it's their brand.
 
+> ### ⟲ REVERSED 2026-09-23 — the site now ships **Theme A** (`#fbad03` + `#0547dc`)
+>
+> The answer above is left exactly as it was: it is a true record of what was decided in Phase 2
+> and why. This is a later, different decision, not a correction of that one.
+>
+> **What the owner said:** the shipped palette "is exactly the opposite theme of that being chosen".
+>
+> **Nothing was mis-wired, and that was checked before changing anything.** The switcher labelled
+> the two consistently, live staging measured `#ffc70a` / `#0e305d` with no `data-theme` and no
+> cookie, and the old `torin.bg` CSS carries those two values four times each and the logo colours
+> zero times — so Theme B genuinely was the current-site palette this answer describes, and it was
+> genuinely what shipped.
+>
+> **The cause is the sentence immediately above this box.** "Still worth showing the owner both at
+> `torin.bg/new` before cutover" was written into the record and **never owned by any plan**. The
+> dev switcher was deleted on schedule at 04-07, and the owner's first proper look at real pages
+> happened after the comparison mechanism was gone. The palette was therefore chosen from a written
+> description — "amber + navy, matching the current site" — rather than by looking at it.
+>
+> **The transferable lesson:** a follow-up recorded as *worth doing* is not a plan until someone
+> owns it. Same shape as the Phase 3.5 finding that an unowned tree-wide sweep is invisible to
+> every plan — and here it cost a full re-theme after the comparison tooling had been deleted.
+>
+> Implemented in quick task `260923-fno`. Contrast re-measured, not assumed: all pairings clear AA
+> and AAA, focus rings 30/30 with worst 4.50:1.
+
 ---
 
 ### 11. Is there an original vector or high-resolution logo file?
