@@ -159,8 +159,32 @@ $torin_categories = array(
 		// name deliberately keeps the options open.
 		'id'        => 'kat-6',
 		'name'      => 'Нестандартна техника',
-		// [ASSUMED] Placeholder customer phrasing pending OWNER-QUESTIONS #16.
-		'symptoms'  => 'нестандартна или стара техника, която другаде не приемат',
+		// OWNER-WRITTEN, 2026-09-23 — this closes the [ASSUMED] placeholder that
+		// OWNER-QUESTIONS #16 held open, and it is a DELIBERATE CHANGE OF VOICE.
+		//
+		// The other five symptom lines are customer voice — what the visitor
+		// would say about their own machine («залят с течност», «прегрява»).
+		// This one is shop voice, because category 6's job changed: the owner's
+		// instruction is that it exists as EVIDENCE OF COMPETENCE for the cat-1
+		// to cat-5 customer, not as a lead source. Nobody arrives at this site
+		// searching for industrial board repair; the line is here to tell a
+		// laptop owner that the people who will open their machine work at
+		// component level. A symptom line would be the wrong instrument for
+		// that, so the voice shift is the point rather than an inconsistency.
+		//
+		// LENGTH IS MEASURED, NOT ESTIMATED. The owner's first draft ran 80
+		// characters, which rendered as FOUR lines at both 360px and 390px and
+		// made this the tallest card by 28px. This wording is 66 and holds three
+		// lines at both, level with cards 1, 2 and 4. Character count alone does
+		// not predict it — another 66-character variant wrapped to four, because
+		// wrapping depends on where the words break. Re-measure, do not estimate,
+		// if this is ever reworded:
+		//   scripts/render-check.sh <probe> 'https://torin.bg/new/index.html' 360 640
+		//
+		// «Ремонт на» is deliberately absent: the section heading directly above
+		// the six cards is «Какво ремонтираме», so every card already carries the
+		// verb and none of the other five repeats it.
+		'symptoms'  => 'ремонт на електронни платки за медицинска и индустриална апаратура',
 		// D3-05: category 6 lands on problem-stari.html, an EXISTING indexed URL
 		// whose slug reads as «стари» and whose semantics match this symptom
 		// line, rather than on a new slug. It inherits whatever authority that
