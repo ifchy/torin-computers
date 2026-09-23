@@ -12,6 +12,18 @@
 function torin_icon($name) {
 	switch ($name) {
 	// --- The six owner-priority categories (D-09/D-40, subjects per UI-SPEC C-1)
+	//
+	// NO LONGER RENDERED BY index.html AS OF 2026-09-23. The homepage cards now
+	// show the owner's illustrations from img/icons/cat-N.svg through the D-38
+	// <img> path; these six cases are kept deliberately, not left behind:
+	//   · they are the only record of the original geometry, and a re-theme or
+	//     a change of mind is a one-line revert rather than a redraw;
+	//   · they still answer torin_icon('cat-N') for any future caller that
+	//     wants a small monochrome glyph inheriting currentColor, which the
+	//     illustrations cannot do — the artwork carries its own fixed palette;
+	//   · deleting them would leave torin_icon() silently returning '' for six
+	//     names the category data still uses as its icon key.
+	// The eleven utility icons below ARE still rendered, throughout the site.
 	case 'cat-1':   // laptop with a fracture line across the lid corner
 		return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 6.5h14v9H5zM2.5 18.5h19M16.5 6.5l-2.4 3.4 3 1-2.2 3"/></svg>';
 	case 'cat-2':   // screen panel lifting away, ribbon connector visible
