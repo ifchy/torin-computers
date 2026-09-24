@@ -47,7 +47,50 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 CRED_FILE="${TORIN_CRED_FILE:-${REPO_ROOT}/filezilla-server-data.xml}"
 SERVER_NAME="TORIN"
 SRC_ROOT="${REPO_ROOT}/src"
-REMOTE_ROOT="public_html/new"
+
+# ---------------------------------------------------------------------------
+# WHERE THIS DEPLOYS, AND WHY IT IS NOW A CHOICE.
+#
+# Until the 04-10 root swap this script had exactly one destination: the
+# staging subtree. The swap moved src/ up to the document root and deleted
+# public_html/new, so the old default now points at a directory that returns
+# 404 — every invocation would fail, and the project was left with NO working
+# deploy path for the live site. deploy-live.sh does not fill the gap: it reads
+# from site-current/ (the legacy tree) and its allowlist contains one filename.
+#
+# So the target is selectable, and writing to the live root is gated the same
+# way deploy-live.sh gates it — an explicit flag AND an explicit confirmation
+# variable. Two deliberate acts, because this writes to a site real customers
+# are using.
+#
+#   scripts/deploy-new.sh <paths>                      -> public_html/new  (staging)
+#   TORIN_LIVE_DEPLOY_CONFIRM=1 \
+#     scripts/deploy-new.sh --live <paths>             -> public_html      (LIVE)
+#
+# The default stays staging on purpose. A script that silently began writing to
+# production because a directory disappeared is precisely the kind of surprise
+# this project keeps out of its tooling.
+DEPLOY_LIVE=0
+ARGS=()
+for a in "$@"; do
+  case "$a" in
+    --live) DEPLOY_LIVE=1 ;;
+    *)      ARGS+=("$a") ;;
+  esac
+done
+set -- ${ARGS[@]+"${ARGS[@]}"}
+
+if [ "$DEPLOY_LIVE" = "1" ]; then
+  if [ "${TORIN_LIVE_DEPLOY_CONFIRM:-}" != "1" ]; then
+    echo "REFUSING: --live writes to the LIVE production root (public_html/) on torin.bg." >&2
+    echo "          Re-run with the confirmation set:" >&2
+    echo "            TORIN_LIVE_DEPLOY_CONFIRM=1 $0 --live <paths>" >&2
+    exit 1
+  fi
+  REMOTE_ROOT="public_html"
+else
+  REMOTE_ROOT="public_html/new"
+fi
 
 if [ ! -f "$CRED_FILE" ]; then
   echo "ERROR: credentials file not found at ${CRED_FILE}" >&2
@@ -219,10 +262,17 @@ if [ "$#" -gt 0 ]; then
   for rel in "$@"; do
     if is_root_htaccess "$rel" && [ "${TORIN_DEPLOY_HTACCESS:-}" != "1" ]; then
       echo "ERROR: refusing to upload '${rel}' to ${REMOTE_ROOT}/" >&2
-      echo "       src/.htaccess is in ROOT form (RewriteBase /). Uploading it to the" >&2
-      echo "       staging subtree breaks every redirect in it -- this project has" >&2
-      echo "       already shipped that defect once. It goes up by hand with the" >&2
-      echo "       04-10 root swap." >&2
+      if [ "$DEPLOY_LIVE" = "1" ]; then
+        echo "       src/.htaccess is in ROOT form, so it is the CORRECT file for the" >&2
+        echo "       live root -- but it governs every redirect, the canonicalisation" >&2
+        echo "       and the handler mapping that makes .html execute as PHP. A bad" >&2
+        echo "       upload here takes the whole site down at once, and this script" >&2
+        echo "       cannot roll it back. Put it up by hand, with the old one saved." >&2
+      else
+        echo "       src/.htaccess is in ROOT form (RewriteBase /). Uploading it to the" >&2
+        echo "       staging subtree breaks every redirect in it -- this project has" >&2
+        echo "       already shipped that defect once." >&2
+      fi
       echo "       Override only if you know why: TORIN_DEPLOY_HTACCESS=1" >&2
       exit 1
     fi
