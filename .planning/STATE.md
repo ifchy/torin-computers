@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 04
 current_phase_name: hardening-cutover
 status: executing
-stopped_at: Phase 4 UI-SPEC approved
-last_updated: "2026-09-20T11:09:55.634Z"
-last_activity: 2026-09-20
-last_activity_desc: Phase 04 execution resumed (wave continue)
+stopped_at: 04-10 Task 1 — blocking human-action checkpoint (the swap)
+last_updated: "2026-09-24T10:30:00.000Z"
+last_activity: 2026-09-24
+last_activity_desc: 04-10 pre-flight cleared; swap blocked on owner action
 progress:
   total_phases: 5
   completed_phases: 4
   total_plans: 40
-  completed_plans: 32
+  completed_plans: 39
 ---
 
 # Project State
@@ -28,21 +28,46 @@ See: .planning/PROJECT.md (updated 2026-08-04)
 ## Current Position
 
 Phase: 04 (hardening-cutover) — EXECUTING
-Plan: 1 of 10
-Status: Executing Phase 04
-        live measurement. SC-1 stays PARTIAL because the sweep **confirmed** its defect.
-Next: **Phase 4 — Hardening & Cutover.** The gap-closure plan (03.5-08) that owned
-`src/remont-na-portove.html` is DONE, merged and live-verified. `scripts/truth-gate.js` was
-deliberately NOT amended — see F2 below; that remit carries forward, it is not a blocker.
-Last activity: 2026-09-20 — Phase 04 execution resumed (wave continue)
-        `03.5-TRUTH-AUDIT.md` completed
+Plan: 10 of 10 (04-01 … 04-09 complete)
+Status: **04-10 is PAUSED at Task 1, a blocking human-action checkpoint.** Everything in the
+        plan that a machine can do is done. What remains is server work no script here can
+        perform — by design: a remote-delete capability was deliberately rejected (D4-31).
 
-Progress: [██████████] 100%
+Next: **The swap itself, by the developer/owner.** Runbook published 2026-09-24:
+      https://claude.ai/code/artifact/16c7f852-1d60-476d-af2d-29fe037afe25
+      Blocked on four §0 gates (three Search Console, one owner sign-off), the eleven-file
+      manual deletion pass, the two cPanel directory moves, and re-applying the per-directory
+      PHP setup at the new root.
 
-> ⚠ **The 100% is plan completion over plans that EXIST — it is not project completion, and it is
-> not phase completion.** 30 of 30 written plans have SUMMARYs. Phase 4 has no plans authored yet
-> and contributes 0/0 to that ratio; the bar will fall when Phase 4 is planned. It is derived from
-> disk by `state.update-progress`, which counts SUMMARY files and cannot see an open defect.
+Last activity: 2026-09-24 — 04-10 pre-flight cleared, sweep hardened, four ledger entries closed
+
+**What changed on 2026-09-24 — a runtime appeared and unblocked a phase-wide stall.**
+PHP 8.5.10 now exists on the build machine. Every artifact in this phase was written around
+its absence ("no php binary, no Docker daemon"), so a large block of pre-flight was recorded
+as impossible. It is no longer:
+
+- `php -l` across 43 files (22 `.php` + 21 `.html`-as-PHP) — **zero parse errors**.
+  `header.php` was the acute case: included by every page, edited by 04-06/07/08, never once
+  parsed. Clean.
+- All four self-tests now run: upload 18/18, settings 27/27, notify 9/9, spam-guard 27/27 —
+  **81 assertions, zero unrun.**
+- All 21 pages executed under `E_ALL` via `php -S`: **21/21, zero rendered diagnostics.**
+  04-HOST-CAPABILITIES.md said the sweep could not supply this evidence; a local runtime can.
+
+**Ledger movement:** #35, #43, #44, #53 closed; #56 closed on its static half; #40 and #47
+narrowed to the halves that genuinely remain; **#57 raised** (a stale PHP-rendered page still
+passes every check — the larger half of the 2026-09-23 staleness incident).
+
+**The sweep now says NO-GO, correctly.** Section 3c compares served bytes against the wire form
+the tree would upload. Four JS files are genuinely stale on staging because comment-stripping
+and the #44 focus move landed today and were not redeployed. Step 2.0 of the runbook carries
+the fix. Before today this condition read as 20/20 PASS.
+
+Progress: [█████████░] ~98%
+
+> ⚠ **That bar counts SUMMARY files on disk and cannot see a blocked checkpoint.** 39 of 40
+> plans have SUMMARYs. The fortieth is 04-10, and it is not "nearly done" — it is paused at a
+> gate that only a human with cPanel and Search Console access can pass.
 
 **Phase 3.5 is CLOSED. What remains open is an owner decision, not engineering:**
 
