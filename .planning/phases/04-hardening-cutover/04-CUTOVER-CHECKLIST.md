@@ -55,11 +55,31 @@ redirects go live, traffic moves to the canonical form and the property holding 
 history falls to zero — during precisely the window in which this phase's success is judged by
 watching for new errors and ranking drops.
 
-- [ ] **Identify which Search Console property currently holds this site's data, and how it is
-      verified.** Unresolved: the only discoverable token is `google1718743335455f1c.html`,
-      dated 2020; there is no verification meta tag on the live homepage and no verification
-      DNS record — yet sixteen months of impression data exists. Something verifies an active
-      property that has not been identified. *(Settings → Ownership verification)*
+- [x] **ANSWERED 2026-09-24 by the owner, corroborated by measurement.** The property is a
+      **URL-prefix property on `http://www.torin.bg`**, verified by the **HTML file method
+      only** — `google1718743335455f1c.html`. Nothing else is in play. Independently confirmed
+      here: the token is live at the root (`200`, 53 bytes, correct body), there is **no**
+      verification meta tag on either the live or the staging homepage, and DNS carried **no**
+      google-site-verification TXT. The "something unidentified" is resolved.
+
+      > **THIS IS THE WORST OF THE FOUR VARIANTS, and it converts this gate from a question
+      > into a blocking action.** The property differs from the canonical target in **both**
+      > protocol and host. Measured 2026-09-24 — all four variants still answer `200` in `0`
+      > hops, which is the split this cutover exists to fix:
+      >
+      > | variant | status | hops |
+      > |---|---|---|
+      > | `http://torin.bg/` | 200 | 0 |
+      > | `https://torin.bg/` | 200 | 0 |
+      > | `http://www.torin.bg/` | 200 | 0 |
+      > | `https://www.torin.bg/` | 200 | 0 |
+      >
+      > The moment canonicalisation ships, every request to `http://www.torin.bg/*` `301`s to
+      > `https://torin.bg/*`. **The property holding sixteen months of history flatlines on swap
+      > day** — during exactly the window whose success criterion is "no unexplained drops and
+      > no new missing pages". Search Console does **not** backfill a new property; it collects
+      > from verification onward. That is precisely why this goes BEFORE the swap: the
+      > replacement needs baseline days in it while traffic is still arriving at the old form.
 - [ ] **Create and verify the property that will carry post-launch traffic, BEFORE the swap.**
       Prefer a **domain-level** property: it unifies all four variants and is immune to any
       file move. Failing that, a URL-prefix property on `https://torin.bg/`.
@@ -69,7 +89,30 @@ watching for new errors and ranking drops.
 
 ### GATE 0.2 — Is DNS record editing available at all?
 
-- [ ] Check cPanel → Zone Editor, or the registrar's DNS panel.
+- [x] **YES — confirmed by the owner 2026-09-24.** cPanel → Zone Editor is available and
+      editable, so a **Domain property is possible** — and it is the right answer: one action
+      closes GATE 0.1, 0.2 and 0.3 together, and it survives any future file move.
+
+      > **THE ONE DNS HAZARD, measured rather than assumed.** The apex carries **exactly one**
+      > TXT record today, and it is the **SPF record** on which all outbound mail depends:
+      >
+      > ```
+      > v=spf1 +a +mx +ip4:217.174.156.172 +ip4:217.174.156.173
+      >   +include:bell.spf.superhosting.bg +include:smtp-out.spf.superhosting.bg
+      >   +ip4:217.174.156.170 +include:spamexpert-outgoing.host.bg ~all
+      > ```
+      >
+      > **ADD a new TXT record. Never EDIT or DELETE that one.** Several TXT records at one name
+      > are normal and correct; several *SPF* records are not — but a google-site-verification
+      > TXT is not SPF, so adding it alongside is safe. Editing the SPF by mistake breaks the
+      > contact-form notification pipeline this entire phase exists to protect.
+      >
+      > Also measured, and the reason the record goes at the **apex**: `www.torin.bg` is a
+      > **CNAME** to `torin.bg.`, and a name carrying a CNAME cannot also carry TXT. A Domain
+      > property wants the apex anyway.
+      >
+      > **Do not touch:** the `A` record (`217.174.156.170`), the `MX` record (`0 torin.bg.`),
+      > the `NS` records (`ns71` / `ns72.bgdns.net`), or the existing SPF TXT.
 
 This single answer decides two things: whether a **domain-level** property (GATE 0.1) is
 possible, and whether a mail authentication policy record is possible at all. **If DNS is
@@ -83,8 +126,15 @@ The current verification depends on a single file at the document root. This cut
 the document root**. If that file is left behind, verification lapses and the property stops
 reporting — during the observation window.
 
-- [ ] Establish a second method (DNS TXT if GATE 0.2 allows; otherwise the HTML meta tag in
-      `includes/header.php`, which travels with the build and cannot be orphaned by a move).
+- [x] **RE-SCOPED 2026-09-24 — the orphaning fear is smaller than this gate assumed.** The
+      token is **in the source tree** (`src/google1718743335455f1c.html`), is already served
+      from staging, and is **byte-identical** in all three places (src vs live root: IDENTICAL;
+      src vs staging: IDENTICAL; 53 bytes, no trailing newline). Step 2.3 therefore **carries**
+      it up to the root rather than stranding it. This gate was written at 04-09, before the
+      file existed in the tree.
+- [ ] **Still worth doing, for a different reason:** the Domain property in GATE 0.1 is verified
+      by a DNS TXT record, which *is* a second, move-proof method. Fixing 0.1 supplies this for
+      free — no separate action needed.
 
 ### GATE 0.4 — Owner sign-off on public commitments
 
