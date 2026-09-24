@@ -97,8 +97,9 @@ reporting — during the observation window.
 
 ### 1.1 — `php -l` ON EVERY PHP FILE. BEFORE ANYTHING ELSE. (ledger #47, #30)
 
-**No PHP in this entire phase has ever been parsed.** There is no `php` binary and no Docker
-daemon on the build machine, so not one file has been syntax-checked.
+**RESOLVED 2026-09-24 — a `php` binary now exists on the build machine (PHP 8.5.10 cli, the
+same 8.5 line the host runs).** The blocker this section was written around is gone. Both boxes
+below are measured, not asserted.
 
 `src/includes/header.php` is the acute case: it has been edited by **three separate plans**
 (04-06, 04-07, 04-08) without once being parsed, and it is `include`d by **all 19 pages**. One
@@ -106,34 +107,59 @@ parse error there takes the whole site down at once — the precise failure mode
 exists to prevent, arriving from the other direction. Five more files from 04-06 are in the
 same state.
 
-- [ ] **UNRUN** — run `php -l` on **`src/includes/header.php` first**, then on every other
-      PHP file in the tree. At minimum: `settings.php`, `banner.php`, `site-config.php`,
-      `jsonld.php`, `footer.php` (the 04-06 five), plus `category-page.php`, `contact-form.php`,
-      `notify.php`, `upload.php`, `spam-guard.php`, `contact-send.php`, and the 19 `.html`
-      pages — which are PHP wearing a `.html` extension and are parsed as code on this host.
-- [ ] **GATE:** zero parse errors. A parse error found here is free; found after the swap it
-      is an outage.
+- [x] **RUN 2026-09-24** — `php -l` on `src/includes/header.php` **first**: *No syntax errors
+      detected.* Then every other PHP file in the tree, and all 21 `.html` pages (PHP wearing a
+      `.html` extension, parsed as code on this host).
+      `php -v` → `PHP 8.5.10 (cli)`
+      `for f in $(find src scripts -name '*.php' -not -path '*/vendor/*'); do php -l "$f"; done` → **22 files, 0 errors**
+      `for f in $(find src -maxdepth 1 -name '*.html'); do php -l "$f"; done` → **21 files, 0 errors**
+- [x] **GATE PASSED 2026-09-24: zero parse errors across 43 files.** `header.php` — the acute
+      case, edited by 04-06/04-07/04-08 and included by every page without once being parsed —
+      is clean.
 
 **Deploy the PHP includes TOGETHER, not one at a time.** These files include each other, so a
 partial upload can leave the site calling a function that has not landed yet.
 
 ### 1.2 — The four self-tests that have never run (ledger #19, #29, #35, #40)
 
-All four wait on the same single missing dependency: a PHP runtime. The moment one exists:
+All four waited on the same single missing dependency: a PHP runtime. **It now exists
+(PHP 8.5.10 cli), and three of the four were run on 2026-09-24. All three pass.**
 
-- [ ] **UNRUN** — `php scripts/upload-selftest.php` (#19). Eight behaviours, authored as the
-      RED half of a TDD cycle whose RED was never observed failing and whose GREEN was never
-      observed passing.
-- [ ] **UNRUN** — `php scripts/settings-selftest.php` (#29). 22 assertions over the behaviour
-      block, the date gate and the structured-data entry counts.
-- [ ] **UNRUN** — `php scripts/notify-selftest.php` (#40). Encodes the all-channels-failed
-      branch, still unproven at runtime.
+- [x] **RUN 2026-09-24 — PASS 18/18** — `php scripts/upload-selftest.php` (#19). Authored as
+      the RED half of a TDD cycle whose GREEN had never been observed. It is observed now; the
+      suite has grown to 18 behaviours and includes the negative-path containment cases added
+      when ledger #54 was closed. **GREEN observed for the first time.**
+- [x] **RUN 2026-09-24 — PASS 27/27** — `php scripts/settings-selftest.php` (#29). Covers the
+      behaviour block, the date gate and the structured-data entry counts (the checklist said
+      22; the suite is now 27).
+- [x] **RUN 2026-09-24 — PASS 9/9** — `php scripts/notify-selftest.php` (#40). The
+      all-channels-failed branch is now proven at runtime, not merely encoded.
 - [ ] **NOT EVEN WRITTEN** — `scripts/spam-guard-selftest.php` (#35) was never authored. Nine
       assertions matching 04-05's behaviour list would close it, in the same shape as the
       other three.
 
-A test that has never run is a **specification, not a gate.** None of these may be reported as
-passing.
+A test that has never run is a **specification, not a gate.** That rule is what made the three
+runs above necessary; they are now gates. **#35 remains a specification and is still not a gate** —
+it may not be reported as passing.
+
+**Additional evidence available for the first time, 2026-09-24 (not previously obtainable).**
+`04-HOST-CAPABILITIES.md` records that the host masks `E_DEPRECATED` (`error_reporting = 22519`),
+and notes the consequence: *"the sweep cannot be used as evidence that the tree is
+deprecation-clean."* With a local 8.5 runtime that evidence can now be produced directly. All 21
+pages were executed through `php -S` under `error_reporting=E_ALL, display_errors=1` and their
+served bodies scanned for rendered diagnostics:
+
+    php -d error_reporting=E_ALL -d display_errors=1 -S 127.0.0.1:8099 _router.php
+    # per page: curl the body, grep -oiE '(Deprecated|Warning|Notice|Fatal error|Parse error):'
+
+**Result: 21/21 pages HTTP 200, zero diagnostics of any severity rendered into any body.** The
+page-render path is deprecation-clean on 8.5 as measured, not as asserted.
+
+One deprecation *does* exist off that path: `src/includes/upload.php` calls `imagedestroy()` at
+8 sites (plus 1 in the selftest), deprecated since 8.5. It surfaced only because the local run
+used `E_ALL`. **It is not a cutover blocker** — the host's `error_reporting` masks `E_DEPRECATED`,
+so it cannot render for a visitor — and `imagedestroy()` has been a no-op since PHP 8.0, so the
+calls are inert either way. Recorded as cheap post-launch cleanup, not a gate.
 
 ### 1.3 — Two cheap open decisions, both still open
 
