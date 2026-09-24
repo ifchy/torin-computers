@@ -260,13 +260,56 @@ measured in seconds, and rollback is the same move in reverse.
       > window. Doing it first costs only a brief cosmetic mismatch on a staging tree that is
       > about to stop existing.
 
-- [ ] **2.1 — Point cPanel → Select PHP Version at `public_html/` (the ROOT) and set PHP 8.5.**
-      **This is not optional and was not in the original cutover sketch.** That action is what
-      *generates* `/home/torin/public_html/php.fcgi` and `php85-fcgi.ini`. The promoted
-      `.htaccess` names `/home/torin/public_html/php.fcgi` in three `FcgidWrapper` directives;
-      the wrapper embeds an **absolute path** that the directory move invalidates, and the root
-      has never had one generated because D4-03 deliberately left it untouched. **A stale or
-      missing wrapper path does not warn — it 500s every page at once.**
+- [ ] **2.1 — Run cPanel → Select PHP Version *against `public_html/`* so the panel REGENERATES
+      `php.fcgi` and `php85-fcgi.ini` there.**
+
+      > **CORRECTED 2026-09-24, on owner information plus direct measurement.** This step was
+      > written as "set PHP 8.5 at the root". **That half is already done and has been for a
+      > while: the 8.5 selection is account-wide, not `/new/`-only.** Measured at the live root:
+      > `curl -sI https://torin.bg/mailer.php` → `x-powered-by: PHP/8.5.10`. There is **no
+      > version risk in the move**, and the owner's inference is right as far as version goes.
+      >
+      > **The step survives for a different reason, and it is not the version.** What the
+      > account-wide selection does *not* do is put a wrapper in the root directory:
+      >
+      > | path | status | meaning |
+      > |---|---|---|
+      > | `torin.bg/php.fcgi` | **404** | **absent** |
+      > | `torin.bg/new/php.fcgi` | 200 | present |
+      > | `torin.bg/error_log` | 403 | exists, denied — calibrates the signal |
+      > | `torin.bg/definitely-not-here.txt` | 404 | absent — calibrates the signal |
+      >
+      > 403-for-denied and 404-for-absent are distinguishable on this host, so the 404 is a real
+      > absence, not a deny rule.
+      >
+      > The promoted `.htaccess` names `/home/torin/public_html/php.fcgi` in **three**
+      > `FcgidWrapper` directives. `mailer.php` proves `.php` runs on 8.5 at the root through the
+      > account handler with **no local wrapper at all** — but nothing proves `.html` does, and
+      > **`.html` → PHP is supplied purely by that `AddHandler`/`FcgidWrapper` block.** Every
+      > page on this site is `.html`.
+      >
+      > **MOVING THE STAGING WRAPPER UP IS NOT SUFFICIENT, and this is the trap.** `/new/php.fcgi`
+      > was fetched and read; its body is:
+      >
+      > ```
+      > DEFAULTPHPINI=/home/torin/public_html/new/php85-fcgi.ini
+      > exec /opt/cpanel/ea-php85/root/usr/bin/php-cgi -c ${DEFAULTPHPINI}
+      > ```
+      >
+      > The absolute path is **inside the file**, not just in its location. Carried up to the root
+      > by step 2.3 it would point at an ini that no longer exists — and `php-cgi` does **not**
+      > fail loudly on a missing `-c`; it falls back to the system ini. So the failure mode is not
+      > the 500 this step originally predicted. It is **silent**: every limit the ini governs
+      > (`upload_max_filesize`, `post_max_size`, `memory_limit`) reverts to
+      > `/opt/cpanel/ea-php85/root/etc/php.ini` defaults, which is precisely what the photo-upload
+      > pipeline depends on. Regenerate via the panel, or hand-correct the moved file's
+      > `DEFAULTPHPINI` line — and verify by re-probing, not by reading.
+
+- [ ] **2.1b — `php.fcgi` and `php85-fcgi.ini` are PUBLICLY READABLE on staging right now**
+      (both `200`; the wrapper discloses the account home path and the PHP binary path). The
+      promoted root `.htaccess` closes this with
+      `<FilesMatch "^(settings\.txt|\.user\.ini|php\.fcgi|php[0-9]*-fcgi\.ini)$">`, so the
+      swap fixes it — **confirm it is 403 after the swap** rather than assuming the block landed.
 
 - [ ] **2.2 — Move the current live root OUTSIDE the document root.**
       Move it to `/home/torin/old-site/` — **NOT** to `public_html/old/`.
@@ -479,7 +522,9 @@ None of these can be closed by a script. Each needs a person looking at a screen
 
 ### 6.4 — Retire the transition guard
 
-- [ ] Confirm `x-powered-by` at the root does **not** report PHP 5.2.
+- [ ] Confirm `x-powered-by` at the root does **not** report PHP 5.2. *(Expected to pass: the
+      root already reports `PHP/8.5.10` today, measured 2026-09-24 on `mailer.php`. Run it
+      anyway — the point is to confirm the fail-safe is not what is holding the site up.)*
 - [ ] **Only then**, delete the `<IfModule !mod_fcgid.c>` fail-safe block from the root
       `.htaccess`. It is kept through the swap on purpose: if the Section 2.1 panel step is
       missed, the block degrades the failure from "20 pages served to the public as readable
