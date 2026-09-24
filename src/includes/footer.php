@@ -94,10 +94,24 @@ require_once(dirname(__FILE__) . '/icons.php');
 				      // are gone here and from the nav, and both URLs 301 from
 				      // src/.htaccess. Three items now — a subtraction, not a
 				      // rebalancing. ?>
+				<?php // The third label is «поверителност», NOT «условия» — corrected
+				      // 2026-09-24 at the owner's review of GATE 0.4. uslovia.html is
+				      // wholly a Декларация за поверителност: what is collected, why,
+				      // retention, enquiry-form data, visit statistics. It contains no
+				      // general terms, and none are owed — общи условия bind distance
+				      // contracts, and this site sells nothing, takes no payment and
+				      // holds no accounts. The shop's actual terms are the warranty
+				      // ones, which «гаранция» above already names correctly.
+				      //
+				      // Do not restore «условия» here. The contact form's consent
+				      // label is the one place that word belongs, and it is already
+				      // scoped precisely — «условията за обработка на личните ми
+				      // данни» — so the consent stays accurate while this link stops
+				      // promising a document that does not exist. ?>
 				<ul class="footer-links">
 					<li><a href="about.html">за нас</a></li>
 					<li><a href="warrently.html">гаранция</a></li>
-					<li><a href="uslovia.html">условия</a></li>
+					<li><a href="uslovia.html">поверителност</a></li>
 				</ul>
 
 			</div>

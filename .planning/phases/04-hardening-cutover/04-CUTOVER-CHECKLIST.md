@@ -138,8 +138,30 @@ reporting — during the observation window.
 
 ### GATE 0.4 — Owner sign-off on public commitments
 
-- [ ] The privacy / terms wording on `uslovia.html` is flagged for **owner approval before
-      launch** — it becomes a public commitment the moment it is served from the root.
+- [x] **SIGNED OFF 2026-09-24.** The owner read `uslovia.html` and approved the wording as it
+      stands. Two findings were surfaced during that review and **deliberately deferred** — a
+      logged decision, not an oversight:
+
+      > **General terms are NOT owed, and this was checked rather than assumed.** Общи условия
+      > bind distance contracts — online sales, payments, bookings, accounts. This site has none
+      > of those. The shop's real terms are the warranty ones on `warrently.html` (Общи
+      > положения, Общи гаранционни условия, and four more), which the footer already names
+      > correctly as «гаранция».
+      >
+      > **FIXED NOW — the footer label.** It linked `uslovia.html` as «условия», a page that is
+      > wholly a Декларация за поверителност. Relabelled «поверителност». The contact form's
+      > consent label needed no change: «условията за обработка на личните ми данни» was already
+      > scoped precisely to data processing.
+      >
+      > **DEFERRED to post-launch — ledger #58 and #59.** `uslovia.html` carries none of the
+      > GDPR Art. 13(2) rights disclosures: access, rectification, erasure, restriction,
+      > objection, portability, **withdrawal of consent**, or the right to complain to КЗЛД. The
+      > withdrawal gap is the sharpest, because the contact form has a consent checkbox and
+      > consent is therefore the legal basis being relied on. No ЕИК or седалище appears
+      > anywhere in the tree either (ЗЕТ чл.4). **The cutover neither creates nor worsens this** —
+      > the live site has the same gaps today — which is the basis on which deferring it is
+      > reasonable. #59 additionally notes the page names `www.torin.bg` while the canonical is
+      > becoming the apex.
 
 ---
 
