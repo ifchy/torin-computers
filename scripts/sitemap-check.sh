@@ -216,6 +216,45 @@ if [ "$LIVE" -eq 1 ]; then
 	echo
 fi
 
+# ---------------------------------------------------------------------------
+# Check F -- the file is actually WELL-FORMED XML.
+#
+# WHY THIS EXISTS, and it is not hypothetical. Every assertion above this line
+# is a grep. Greps cannot see malformed markup, so on 2026-09-24 this script
+# reported PASS on all five checks against a sitemap that no XML parser would
+# accept -- caught one step before the file was due to be submitted to Search
+# Console, and present in every sitemap this project had ever generated.
+#
+# The cause: the generated header comment contained "--", which is ILLEGAL
+# inside an XML comment. gen-sitemap.sh no longer emits it. This check is the
+# backstop, because the next malformation will be something else.
+#
+# A sitemap that does not parse is not a partially-working sitemap. The search
+# engine rejects the whole file, and the failure is reported in a console the
+# person who deployed it may never open.
+echo
+echo "Check F -- the sitemap parses as XML"
+if command -v python3 >/dev/null 2>&1; then
+	if xml_err="$(python3 -c '
+import sys, xml.etree.ElementTree as ET
+try:
+    r = ET.parse(sys.argv[1]).getroot()
+except Exception as e:
+    print(e); sys.exit(1)
+ns = "{http://www.sitemaps.org/schemas/sitemap/0.9}"
+n = len(list(r.iter(ns + "loc")))
+if n == 0:
+    print("parsed, but no <loc> elements in the sitemap namespace"); sys.exit(1)
+print(n)
+' "$SITEMAP" 2>&1)"; then
+		ok "well-formed XML, ${xml_err} <loc> elements in the sitemap namespace"
+	else
+		fail "sitemap is NOT well-formed XML: ${xml_err}"
+	fi
+else
+	echo "  SKIP: no python3 to parse with -- Check F did not run"
+fi
+
 if [ "$FAILURES" -gt 0 ]; then
 	echo "sitemap-check: ${FAILURES} failure(s)" >&2
 	exit 1

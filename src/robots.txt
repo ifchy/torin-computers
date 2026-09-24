@@ -17,29 +17,8 @@
 #    of the same instruction.
 #  - contact-send.php needs no rule: it answers any non-POST request with 405
 #    and a one-line plain-text pointer. Verified, not assumed.
-#
-# WHERE THIS FILE HAS TO LIVE TO DO ANYTHING.
-# robots.txt is honoured ONLY at the domain root. While this tree is served from
-# https://torin.bg/new/, this file is reachable but INERT -- a crawler never asks
-# for /new/robots.txt. It starts working the moment the cutover promotes src/ to
-# the document root. (Staging is kept out of the index by the X-Robots-Tag
-# header in .htaccess, not by this file.) A green "it returns 200" check on
-# staging therefore proves reachability, never effectiveness.
-#
-#   ##########################################################################
-#   ## The sitemap directive at the end of this file is an ABSOLUTE URL, and
-#   ## it is the second place in the tree that encodes the /new/ staging
-#   ## segment -- site-config.php base_url is the first. At cutover BOTH
-#   ## change. scripts/sitemap-check.sh asserts the two agree and fails loudly
-#   ## if one is updated without the other.
-#   ##
-#   ## This paragraph deliberately does NOT spell the directive keyword, so
-#   ## that counting it with a plain grep yields exactly one hit: the real
-#   ## directive. A keyword named in prose is indistinguishable from a second
-#   ## declaration to any counter, and to a hurried reader.
-#   ##########################################################################
 
 User-agent: *
 Allow: /
 
-Sitemap: https://torin.bg/new/sitemap.xml
+Sitemap: https://torin.bg/sitemap.xml
