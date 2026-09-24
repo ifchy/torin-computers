@@ -526,9 +526,24 @@ exec /opt/cpanel/ea-php85/root/usr/bin/php-cgi -c ${DEFAULTPHPINI}</pre>
     </li>
 
     <li class="is-gate">
-      <p class="step-title">Confirm the promoted <code>.htaccess</code> landed, and check <em>both</em> edits</p>
+      <p class="step-title">Upload <code>src/.htaccess</code> to the root <em>by hand</em> <span class="chip stop">nothing else places it</span></p>
       <div class="step-body">
-        <p>Read the file at the root by eye before running anything. Two things changed and <b>one being right does not imply the other</b>: the rewrite base must be <code>/</code>, and the canonicalisation substitution target must be the bare apex.</p>
+        <div class="note stop">
+          <span class="tag">Corrected 2026-09-24 — this step used to say "confirm it landed"</span>
+          <p>That wording was a trap, because an <code>.htaccess</code> <em>will</em> be sitting at the root after the previous step — <b>the wrong one</b>. Verified on the live origin today:</p>
+          <div class="tbl-scroll">
+          <table>
+            <thead><tr><th></th><th>Rewrite base</th><th>Canonicalisation target</th></tr></thead>
+            <tbody>
+              <tr><td><code>src/.htaccess</code> (tree, promoted)</td><td class="mono">/</td><td class="mono">https://torin.bg/$1</td></tr>
+              <tr><td>what staging actually runs</td><td class="mono">/new/</td><td>into <code>/new/</code></td></tr>
+            </tbody>
+          </table>
+          </div>
+          <p>Proof rather than inference: <code>https://torin.bg/new/covid.html</code> follows to <code>https://torin.bg/new/about.html</code>. Under the promoted form it would land on <code>https://torin.bg/about.html</code>.</p>
+          <p><b><code>deploy-new.sh</code> refuses this file by design</b> — hard error when named, skipped in a no-argument run. It has never been deployed and cannot be. <b>A manual FileZilla upload is the only way it reaches the root.</b> Moving <code>/new/*</code> up carries the <code>/new/</code>-form file there instead, leaving <code>RewriteBase /new/</code> governing the live domain, every retirement redirect broken, and the canonicalisation pointing into a directory about to be deleted.</p>
+        </div>
+        <p>Upload it, <b>then</b> read the file at the root by eye. Two things changed and <b>one being right does not imply the other</b>: the rewrite base must be <code>/</code>, and the canonicalisation substitution target must be the bare apex.</p>
         <p class="why">This is not hypothetical. It shipped once: a relative substitution with no rewrite base made Apache build the redirect target from the filesystem path, and all four retired URLs answered a perfectly well-formed <code>301</code> pointing at <code>https://torin.bg/home/torin/public_html/new/…</code>, which 404'd on follow. Nothing in any build failed. Only following the redirect found it.</p>
       </div>
     </li>

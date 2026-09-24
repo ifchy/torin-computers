@@ -392,10 +392,33 @@ measured in seconds, and rollback is the same move in reverse.
 
 - [ ] **2.3 — Move `public_html/new/*` up to `public_html/`.**
 
-- [ ] **2.4 — Confirm `.htaccess` landed at the root** and is the promoted form. Spot-check the
-      two edits by eye before running anything: the rewrite base is `/`, and the
-      canonicalisation substitution target is the bare apex. **One being right does not imply
-      the other** — that is the whole of warning D4-30.
+- [ ] **2.4 — UPLOAD `src/.htaccess` to the root BY HAND, overwriting the one the move just
+      carried up.** Then confirm it is the promoted form.
+
+      > **CORRECTED 2026-09-24. This step used to read "confirm `.htaccess` landed", and nothing
+      > in this section placed it.** That wording is a trap, because an `.htaccess` *will* be
+      > sitting at the root after 2.3 — the WRONG one. Verified on the live origin today:
+      >
+      > | | rewrite base | canonicalisation target |
+      > |---|---|---|
+      > | `src/.htaccess` (the tree, promoted) | `/` | `https://torin.bg/$1` |
+      > | what staging is actually running | `/new/` | into `/new/` |
+      >
+      > Proof rather than inference: `https://torin.bg/new/covid.html` follows to
+      > `https://torin.bg/new/about.html`. Under the promoted form it would land on
+      > `https://torin.bg/about.html`.
+      >
+      > **`deploy-new.sh` REFUSES this file by design** (hard error when named, skipped in a
+      > no-argument run, override `TORIN_DEPLOY_HTACCESS=1`), so it has never been deployed and
+      > cannot be. **The only way it reaches the root is a manual FileZilla upload.** Step 2.3
+      > moves `/new/*` up, which carries the `/new/`-form file to the root — leaving
+      > `RewriteBase /new/` governing the live domain, every retirement redirect broken, and the
+      > canonicalisation pointing into a directory that is about to be deleted. That is the
+      > D4-30 class of defect this project has already shipped once.
+      >
+      > Upload it, **then** spot-check both edits by eye: the rewrite base is `/`, and the
+      > canonicalisation substitution target is the bare apex. **One being right does not imply
+      > the other** — that is the whole of warning D4-30.
 
 - [ ] **2.5 — Confirm `src/google1718743335455f1c.html` is present at the root.** Verified
       byte-identical to what the live root serves (53 bytes, no trailing newline, compared with
