@@ -74,32 +74,22 @@ $torin_cat_page = array(
 
 	'intro'  => 'Заливането с течност е една от най-честите причини лаптоп да спре да дава признаци на живот. Промиваме и почистваме залятата платка, премахваме корозията и възстановяваме разядените пътечки, подменяме дефектиралите компоненти и ремонтираме захранващите вериги. Когато платката вече не подлежи на ремонт, подменяме я. Първоначалната диагностика е безплатна и ви казваме честно какво може да се направи.',
 
-	// TWO of the shop's own photographs of liquid damage, ported from
-	// site-current/assets1/img/ into src/img/repairs/ (UI-SPEC §4). The w/h
-	// values are each FILE'S TRUE INTRINSIC PIXELS, read off the files
-	// themselves on 2026-09-12 — they are not the display size, which CSS
-	// sets at 100x100, and they are what reserves the box before the bytes
-	// arrive. Both were re-read off the files for this revision rather than
-	// trusted: 257x257 and 200x200, unchanged.
+	// NO EVIDENCE STRIP ON THIS PAGE — withdrawn 2026-09-24 at the owner's
+	// request, before the root cutover.
 	//
-	// TWO, not three, and deliberately so. A third photograph stood here
-	// until 2026-09-12. Opened and looked at rather than judged by its
-	// filename, it showed a package lifted clear of the board beside its
-	// empty footprint — no liquid, no corrosion, no residue anywhere in the
-	// frame. It illustrated ONLY the service line the business has
-	// discontinued, so both it and its caption went with that line. It was
-	// NOT replaced: reaching for an unrelated image to keep the count at
-	// three would be padding in visual form. UI-SPEC §4 specifies "2-3" and
-	// the grid uses content-sized columns, so two photographs render as a
-	// complete strip with no stretched orphan cell.
+	// Two photographs of liquid damage stood here (zalivane1, zalivane2),
+	// captioned with what each one proved. A third had already been withdrawn
+	// on 2026-09-12 because it illustrated only a discontinued service line;
+	// the remaining two now go for a different reason, and the key is omitted
+	// rather than emptied — torin_render_evidence() emits nothing when no
+	// item survives, so this page renders prose-only and still reads as
+	// complete.
 	//
-	// The captions say what each photograph PROVES, which is the whole reason
-	// the strip is on a page about liquid damage rather than a decorative rail.
-	// No caption is a label, a filename or the word «снимка».
-	'evidence' => array(
-		array('file' => 'zalivane1.jpg', 'w' => '257', 'h' => '257', 'caption' => 'Корозия по пътечките на дънна платка след заливане'),
-		array('file' => 'zalivane2.jpg', 'w' => '200', 'h' => '200', 'caption' => 'Разядена от течност зона около компонент на платката'),
-	),
+	// THE FILES WERE DELETED FROM THE TREE TOO, .jpg and .webp alike, and
+	// added to the cutover deletion list. Removing the reference alone would
+	// have left them deployed and fetchable by direct URL: deploy-new.sh
+	// uploads and never deletes, which is exactly how the withdrawn
+	// profilaktika photographs ended up needing a manual pass.
 
 	// The re-scoped service definition (D3.5-02 / OWNER-QUESTIONS #31), stated
 	// as services a customer would recognise rather than as technique names.

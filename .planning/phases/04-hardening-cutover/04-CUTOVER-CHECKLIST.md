@@ -292,7 +292,7 @@ measured in seconds, and rollback is the same move in reverse.
 
 ---
 
-## Section 3 — The manual deletion list: ELEVEN files, by exact path
+## Section 3 — The manual deletion list: TWENTY-ONE files, by exact path
 
 **Why this is manual.** `scripts/deploy-new.sh` **uploads and never deletes**, and no script in
 this project can delete a remote file. Giving the deploy script a delete capability was
@@ -323,8 +323,32 @@ root after the swap**.
 > it from seven files to eleven *after* D4-31 was written, so every older reference to "the
 > seven stale files" is short by exactly these two. Check them by name.
 
-- [ ] All eleven deleted.
-- [ ] **GATE:** re-fetch each of the eleven and confirm **404**. Deleting and not checking is
+### Added 2026-09-24 — the withdrawn evidence photographs (ten more)
+
+The owner asked for the evidence strips to come off `mehanichni-problemi.html` and
+`zalivane-technosti.html`. The references were removed and **the files were deleted from the
+tree**, so by the rule stated above they are now stranded on the server. Each photograph has a
+`.webp` sibling; **both halves of every pair must go**, because the `<picture>` source and the
+`<img>` fallback are separate fetchable URLs.
+
+12. `img/repairs/meh-prob2.jpg` — impact damage; strip withdrawn 2026-09-24.
+13. `img/repairs/meh-prob2.webp` — sibling of the above.
+14. `img/repairs/meh-prob3.jpg` — impact damage; strip withdrawn 2026-09-24.
+15. `img/repairs/meh-prob3.webp` — sibling of the above.
+16. `img/repairs/meh-prob5.jpg` — impact damage; strip withdrawn 2026-09-24.
+17. `img/repairs/meh-prob5.webp` — sibling of the above.
+18. `img/repairs/zalivane1.jpg` — liquid damage; strip withdrawn 2026-09-24.
+19. `img/repairs/zalivane1.webp` — sibling of the above.
+20. `img/repairs/zalivane2.jpg` — liquid damage; strip withdrawn 2026-09-24.
+21. `img/repairs/zalivane2.webp` — sibling of the above.
+
+> **These ten are the newest entries and therefore the likeliest to be missed**, exactly as
+> entries 10 and 11 were when they expanded the list from seven. If the swap happens before
+> they are deleted, two sets of photographs the owner has withdrawn stay publicly fetchable at
+> the live root by direct URL — the same defect Phase 3.5 already had to correct once.
+
+- [ ] All twenty-one deleted.
+- [ ] **GATE:** re-fetch each of the twenty-one and confirm **404**. Deleting and not checking is
       how a file survives a deletion pass.
 
 ---

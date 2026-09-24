@@ -75,23 +75,21 @@ $torin_meh_page = array(
 
 	'intro'  => 'Изпускането рядко чупи само това, което се вижда. Ударът се разпределя през целия корпус и стига до неща, които отвън изглеждат непокътнати: диска, който в този момент е работил, механизма на капака, панела на екрана и буксата, в която е бил включен адаптерът. Затова оглеждаме цялата машина, а не само видимата повреда. Първоначалната диагностика е безплатна и ви казваме какво сме намерили, преди да започне каквато и да е работа.',
 
-	// Three of the shop own photographs of impact damage, ported from
-	// site-current/assets1/img/ into src/img/repairs/ (UI-SPEC §4). Each was
-	// OPENED and looked at before it was captioned: meh-prob2 is a keyboard
-	// with keycaps torn off and the scissor mechanisms exposed, meh-prob3 is a
-	// panel cracked from the lower right corner outwards, meh-prob5 is a hinge
-	// bracket torn out of the lid with the mounting posts stripped. The w/h
-	// values are each FILE TRUE INTRINSIC PIXELS, read off the files
-	// themselves — not the display size, which CSS sets at 100x100 — and they
-	// are what reserves the box before the bytes arrive.
+	// NO EVIDENCE STRIP ON THIS PAGE — withdrawn 2026-09-24 at the owner's
+	// request, before the root cutover.
 	//
-	// The captions say what each photograph PROVES. No caption is a label, a
-	// filename or the word «снимка».
-	'evidence' => array(
-		array('file' => 'meh-prob2.jpg', 'w' => '200', 'h' => '200', 'caption' => 'Изкъртени клавиши и оголени механизми под тях след удар по клавиатурата'),
-		array('file' => 'meh-prob3.jpg', 'w' => '200', 'h' => '200', 'caption' => 'Счупен панел на екран — пукнатината тръгва от ъгъла и се разлива по картината'),
-		array('file' => 'meh-prob5.jpg', 'w' => '300', 'h' => '300', 'caption' => 'Панта, откъртена от капака заедно с гнездата, в които е била затегната'),
-	),
+	// Three photographs of impact damage stood here (meh-prob2, meh-prob3,
+	// meh-prob5) with captions describing what each one proved. The key is
+	// omitted rather than left as an empty array: torin_render_evidence()
+	// emits nothing when no item survives, so the feature section renders
+	// prose-only and still reads as complete.
+	//
+	// THE FILES WERE DELETED FROM THE TREE TOO, and both .jpg and .webp
+	// siblings went with them. Dropping only the reference would have left
+	// them deployed and fetchable by direct URL forever — deploy-new.sh
+	// uploads and never deletes. That is the standing problem behind the
+	// withdrawn profilaktika photographs already on the cutover deletion
+	// list, and these six files are now on it for the same reason.
 
 	'fixes'  => array(
 		array('text' => 'Ремонт на корпус и шаси след изпускане'),
