@@ -311,7 +311,7 @@ $site = array(
 	// will publish a structured-data URL pointing at a staging tree that no
 	// longer exists. This is also why rel=canonical was NOT taken this phase
 	// (RESEARCH OQ-5): it is a Phase 4 decision for the same reason.
-	'base_url' => 'https://torin.bg/new/',
+	'base_url' => 'https://torin.bg/',
 
 	// The ABSOLUTE server path of the credentials file, provisioned by hand in
 	// cPanel File Manager on 2026-09-19 (plan 04-02 Task 1) and confirmed by the
