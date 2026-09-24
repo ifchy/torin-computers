@@ -608,6 +608,37 @@ body:not(:has(.callbar)) {
 	margin-block-end: var(--sp-md);
 }
 
+/* «Къде да ни намерите» on kontakti.html — an icon beside a line of contact
+   detail, on a LIGHT tinted surface. Same two-track shape as .footer-item
+   below and for the same reason: a fixed icon track keeps a wrapped address
+   aligned under the text rather than under the pin.
+
+   WHY THIS RULE HAD TO EXIST AT ALL. torin_icon() emits `viewBox="0 0 24 24"`
+   with NO width or height, and base.css sets `img, svg, picture { display:
+   block; max-width: 100% }`. Every other icon site in this stylesheet scopes
+   its own size — .btn svg, .footer-item > svg, .notice > svg and the rest —
+   but these three paragraphs carried no class, so nothing caught them and each
+   glyph expanded to fill its container. Measured live at 390px on 2026-09-24:
+   358x358 CSS pixels apiece, the full width of the column, where a ~20px
+   inline glyph was intended.
+
+   A bare `svg { width: 1.25em }` in base.css would fix this one case and
+   silently resize every deliberately-sized icon on the site, so the size stays
+   scoped here, exactly as it is everywhere else. */
+.contact-line {
+	display: grid;
+	grid-template-columns: 1.25em 1fr;
+	gap: var(--sp-sm);
+	align-items: start;
+}
+
+.contact-line > svg {
+	width: 1.25em;
+	height: 1.25em;
+	margin-block-start: .2em;
+	color: var(--c-ink-muted);
+}
+
 /* Icon column + content column. Fixed first track so a wrapped second line
    aligns under the first rather than under the icon. */
 .footer-item {

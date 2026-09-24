@@ -154,11 +154,11 @@ require_once(dirname(__FILE__) . '/includes/header.php');
 			      // consent-banner problem D4-18 was chosen to avoid. The link
 			      // costs nothing, and jsonld.php already publishes geo and
 			      // hasMap so local search still gets the location. ?>
-			<p><?php echo torin_icon('pin'); ?> <a href="<?php echo torin_esc($site['maps_url']); ?>" rel="noopener"><?php echo torin_esc($site['address']); ?></a></p>
+			<p class="contact-line"><?php echo torin_icon('pin'); ?> <a href="<?php echo torin_esc($site['maps_url']); ?>" rel="noopener"><?php echo torin_esc($site['address']); ?></a></p>
 
-			<p><?php echo torin_icon('mail'); ?> <a href="mailto:<?php echo torin_esc($site['email']); ?>"><?php echo torin_esc($site['email']); ?></a></p>
+			<p class="contact-line"><?php echo torin_icon('mail'); ?> <a href="mailto:<?php echo torin_esc($site['email']); ?>"><?php echo torin_esc($site['email']); ?></a></p>
 
-			<p><?php echo torin_icon('clock'); ?> <?php echo torin_esc($site['hours']); ?></p>
+			<p class="contact-line"><?php echo torin_icon('clock'); ?> <?php echo torin_esc($site['hours']); ?></p>
 		</div>
 	</section>
 </main>
