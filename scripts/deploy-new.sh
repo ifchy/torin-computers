@@ -29,6 +29,11 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+
+# The shared source-to-wire transform. scripts/cutover-sweep.sh sources the same
+# file to assert the origin serves what this script uploads (ledger #56).
+# shellcheck source=lib/wire-form.sh
+. "${SCRIPT_DIR}/lib/wire-form.sh"
 # The credentials file is gitignored, so it exists ONLY in the primary checkout
 # — a git worktree (used for parallel plan execution) has its own root and no
 # copy of it. Rather than duplicating secret material into every worktree, or
@@ -148,17 +153,20 @@ urlencode_path() {
 # scripts/strip-js-selftest.sh proves all of that, including that every file in
 # src/js/ still parses after stripping.
 #
+# THE TRANSFORM ITSELF LIVES IN scripts/lib/wire-form.sh, not here. The cutover
+# sweep has to know what bytes this script uploads in order to assert the origin
+# is serving them (ledger #56), and a second copy of the rule would drift the
+# first time this pipeline changed -- with the sweep lying in whichever direction
+# it drifted. One definition, two callers.
+#
 # Prints the path to upload: either a stripped temp copy, or the original when
 # the file is neither CSS nor JS, or when stripping failed.
 resolve_upload_path() {
   local rel="$1" src="$2"
   case "$rel" in
     *.css|*.js)
-      local stripper="lib/strip-css-comments.py"
-      case "$rel" in *.js) stripper="lib/strip-js-comments.py" ;; esac
       local out="${STRIP_DIR}/$(echo "$rel" | tr '/' '_')"
-      if python3 "${SCRIPT_DIR}/${stripper}" < "$src" > "$out" 2>/dev/null \
-         && [ -s "$out" ]; then
+      if torin_wire_form "$rel" "$src" "$out"; then
         printf '%s' "$out"
         return 0
       fi

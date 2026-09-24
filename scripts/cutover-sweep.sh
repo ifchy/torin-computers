@@ -102,6 +102,18 @@ else
   PROFILE="root"
 fi
 
+# The shared source-to-wire transform, the SAME file scripts/deploy-new.sh uses
+# to decide what bytes it uploads. Sourcing it rather than reimplementing the
+# rule is the whole point of ledger #56 -- see the header of wire-form.sh.
+# shellcheck source=lib/wire-form.sh
+. "${SCRIPT_DIR}/lib/wire-form.sh"
+
+# One cleanup registry, one trap. Sections used to set their own EXIT trap,
+# which silently replaced any trap set earlier and leaked the other's temp file.
+CLEANUP_PATHS=()
+cleanup() { [ "${#CLEANUP_PATHS[@]}" -gt 0 ] && rm -rf "${CLEANUP_PATHS[@]}" 2>/dev/null || true; }
+trap cleanup EXIT
+
 CURL_OPTS=(--silent --show-error --max-time 30)
 
 PASS_N=0
@@ -221,13 +233,17 @@ echo "  (${PAGE_COUNT} pages checked)"
 # fetchable JPEGs plus four retired pages — and it stays a manual FileZilla pass
 # at cutover.
 #
-# It also does not compare CONTENT, so a stale-but-present file still passes.
-# That is the other half of the 2026-09-23 pair (staging silently two days
-# behind) and needs a deployed-vs-committed digest, which this is not.
+# It also does not compare CONTENT. That is [3c], which shares this walk and
+# this fetch -- see there.
 echo
 echo "[3b] Static assets present on the origin — walked from src/, not hardcoded"
 ASSET_COUNT=0
 ASSET_MISSING=()
+ASSET_STALE=()
+ASSET_UNKNOWN=()
+FRESH_N=0
+WIRE_DIR="$(mktemp -d "${TMPDIR:-/tmp}/cutover-wire-XXXXXX")"
+CLEANUP_PATHS+=("${WIRE_DIR}")
 while IFS= read -r f; do
   rel="${f#${SRC_ROOT}/}"
   case "$rel" in
@@ -236,8 +252,34 @@ while IFS= read -r f; do
     *.htaccess)         continue ;;   # deploy-new.sh refuses it — root form (D4-30)
   esac
   ASSET_COUNT=$((ASSET_COUNT + 1))
-  code="$(curl "${CURL_OPTS[@]}" -o /dev/null -w '%{http_code}' "${TARGET}/${rel}" 2>/dev/null || echo "000")"
-  [ "$code" = "200" ] || ASSET_MISSING+=("${rel} -> ${code}")
+  # ONE fetch feeds both [3b] and [3c]. The body is kept rather than discarded
+  # so the content comparison costs no extra request.
+  served="${WIRE_DIR}/served"
+  code="$(curl "${CURL_OPTS[@]}" -o "${served}" -w '%{http_code}' "${TARGET}/${rel}" 2>/dev/null || echo "000")"
+  if [ "$code" != "200" ]; then
+    ASSET_MISSING+=("${rel} -> ${code}")
+    continue
+  fi
+
+  # --- [3c] deployed bytes == committed bytes -----------------------------
+  # THREE-WAY on purpose. rc 2 means the transform itself is broken, and an
+  # unknown expected form is not a comparison — it must never be silently
+  # folded into "expected the source bytes", which is how a broken gate starts
+  # reporting confident nonsense in whichever direction the breakage leans.
+  expect="${WIRE_DIR}/expect"
+  set +e
+  torin_wire_form "$rel" "$f" "$expect"; wf_rc=$?
+  set -e
+  case "$wf_rc" in
+    0) form="stripped" ;;
+    1) form="source"   ;;
+    *) ASSET_UNKNOWN+=("${rel} — wire form could not be computed (rc ${wf_rc})"); continue ;;
+  esac
+  if cmp -s "$expect" "$served"; then
+    FRESH_N=$((FRESH_N + 1))
+  else
+    ASSET_STALE+=("${rel} (${form} form: $(wc -c <"$expect" | tr -d ' ') B local vs $(wc -c <"$served" | tr -d ' ') B served)")
+  fi
 done < <(find "${SRC_ROOT}" -type f \
            \( -name '*.css' -o -name '*.js' -o -name '*.svg' -o -name '*.png' \
               -o -name '*.jpg' -o -name '*.webp' -o -name '*.ico' -o -name '*.woff2' \) 2>/dev/null)
@@ -247,6 +289,53 @@ if [ "${#ASSET_MISSING[@]}" -eq 0 ]; then
 else
   fail "${#ASSET_MISSING[@]} of ${ASSET_COUNT} static assets NOT served — the tree is deployed INCOMPLETELY:"
   for m in "${ASSET_MISSING[@]}"; do printf '          %s\n' "$m"; done
+fi
+
+# ── 3c. Every served asset is not just PRESENT but CURRENT ─────────────────
+# LEDGER #56. On 2026-09-23 staging was roughly TWO DAYS behind the tree and
+# this script reported 20/20 PASS throughout, because [3b] asks whether a file
+# EXISTS and [9] asks whether a page RENDERS PROSE. A stale file exists, and it
+# renders prose. Nothing asked whether the bytes on the origin were the bytes in
+# the commit.
+#
+# THE COMPARISON IS AGAINST THE WIRE FORM, NOT THE SOURCE. deploy-new.sh strips
+# comments from CSS and JS, so those files are DELIBERATELY not byte-identical
+# to src/ and a naive digest would fail permanently on every stylesheet and
+# every script — and a gate that always fails is a gate that gets switched off.
+# The expected bytes come from scripts/lib/wire-form.sh, the same function
+# deploy-new.sh calls to decide what it uploads, so the two cannot drift.
+#
+# WHAT THIS DOES NOT COVER — stated plainly, because #56 was raised precisely
+# because an earlier check's limits were assumed away:
+#   - PHP-RENDERED PAGE BODIES. The .html pages execute on this host, so served
+#     bytes never equal source bytes and no digest can compare them. A stale
+#     includes/footer.php serves stale markup on all 20 pages and passes this
+#     check untouched. THAT IS HALF OF WHAT ACTUALLY HAPPENED ON 2026-09-23 (the
+#     removed footer band), so this section MUST NOT be read as closing that
+#     incident. Tracked separately.
+#   - ORPHANS. Files on the origin no longer in src/ — the other half of that
+#     incident, the deleted dev-theme scaffolding still being served. Nothing
+#     here can list remote files; it stays a manual pass at cutover ([3b] note).
+# What it DOES cover: any css, js, svg, png, jpg, webp, ico or woff2 that was
+# edited in the tree and never redeployed, which is the everyday staleness mode
+# and the one #56's suggested shape targets.
+echo
+echo "[3c] Deployed bytes == committed wire form (ledger #56)"
+if [ "${#ASSET_MISSING[@]}" -gt 0 ]; then
+  echo "  (${#ASSET_MISSING[@]} missing asset(s) from [3b] are not content-compared — they have no bytes to compare)"
+fi
+if [ "${#ASSET_UNKNOWN[@]}" -gt 0 ]; then
+  fail "${#ASSET_UNKNOWN[@]} asset(s) could not be content-compared AT ALL — the transform is broken, so this section proves NOTHING about them:"
+  for m in "${ASSET_UNKNOWN[@]}"; do printf '          %s\n' "$m"; done
+fi
+if [ "${#ASSET_STALE[@]}" -eq 0 ] && [ "${#ASSET_UNKNOWN[@]}" -eq 0 ]; then
+  pass "all ${FRESH_N} served assets match the tree byte-for-byte"
+elif [ "${#ASSET_STALE[@]}" -eq 0 ]; then
+  : # the unknown-count failure above already spoke
+else
+  fail "${#ASSET_STALE[@]} of $((FRESH_N + ${#ASSET_STALE[@]})) served assets are STALE — the origin is behind the tree:"
+  for m in "${ASSET_STALE[@]}"; do printf '          %s\n' "$m"; done
+  printf '          %s\n' "Redeploy before the swap. A stale asset passes [3b] and [9] and is invisible to both."
 fi
 
 # ── 4. The noindex header, asserted in BOTH directions ─────────────────────
@@ -290,7 +379,7 @@ elif [ -z "$GSC_SRC" ]; then
 else
   GSC_NAME="$(basename "$GSC_SRC")"
   GSC_TMP="$(mktemp)"
-  trap 'rm -f "${GSC_TMP}"' EXIT
+  CLEANUP_PATHS+=("${GSC_TMP}")
   if curl "${CURL_OPTS[@]}" -o "${GSC_TMP}" "${TARGET}/${GSC_NAME}" 2>/dev/null \
      && cmp -s "${GSC_SRC}" "${GSC_TMP}"; then
     pass "${GSC_NAME} served byte-identical to the source copy"

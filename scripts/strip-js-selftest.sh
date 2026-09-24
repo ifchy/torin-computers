@@ -80,6 +80,55 @@ expect_refuse "after return a slash is a regex"     'function f() { return /x/; 
 echo "--- bang comments are kept (license convention) ---"
 expect_has "/*! ... */ survives"                    '/*! keep me */ var a = 1;' 'keep me'
 
+echo "--- wire-form.sh resolves its strippers (ledger #56 regression) ---"
+# THE BUG THIS LOCKS IN. wire-form.sh first computed its own directory from
+# ${BASH_SOURCE[0]} at CALL time. Under zsh -- which has no BASH_SOURCE -- that
+# came back empty, the stripper path resolved against the caller's cwd, the file
+# was not there, and the function fell into its "ships unchanged" branch. A
+# MISSING STRIPPER WAS THEREFORE INDISTINGUISHABLE FROM A LEGITIMATE ANSWER, and
+# the sweep would have called every stylesheet stale on that basis. Both shells
+# are asserted because the repo's scripts run under bash while an interactive
+# operator pasting the same line runs zsh.
+for sh in bash zsh; do
+  if ! command -v "$sh" >/dev/null 2>&1; then
+    printf 'SKIP wire-form under %s -- not installed\n' "$sh"; continue
+  fi
+  out="$("$sh" -c '
+    . "'"${SCRIPT_DIR}"'/lib/wire-form.sh"
+    t=$(mktemp -d)
+    torin_wire_form "css/base.css" "'"${SCRIPT_DIR}"'/../src/css/base.css" "$t/e"
+    echo "rc=$? bytes=$(wc -c <"$t/e" | tr -d " ")"
+    rm -rf "$t"' 2>/dev/null)"
+  case "$out" in
+    rc=0*) ok "wire-form transforms CSS under $sh ($out)" ;;
+    *)     bad "wire-form transforms CSS under $sh" "got <<$out>>; rc must be 0 (transformed), not 1 (ships unchanged)" ;;
+  esac
+done
+
+# A stripper that is not where we think it is must be LOUD (rc 2), never
+# mistaken for "this file ships unchanged".
+hidden="${SCRIPT_DIR}/lib/strip-css-comments.py"
+if [ -f "$hidden" ]; then
+  # This test MOVES a real file out of the way. An interrupt between the two
+  # mv calls would leave the repo without its CSS stripper and every later
+  # deploy shipping unstripped stylesheets -- so restoration is a trap, not a
+  # line further down that assumes it will be reached.
+  trap 'if [ -f "${hidden}.selftest-hidden" ]; then mv "${hidden}.selftest-hidden" "$hidden"; fi' EXIT INT TERM
+  mv "$hidden" "${hidden}.selftest-hidden"
+  out="$(bash -c '
+    . "'"${SCRIPT_DIR}"'/lib/wire-form.sh"
+    t=$(mktemp -d)
+    torin_wire_form "css/base.css" "'"${SCRIPT_DIR}"'/../src/css/base.css" "$t/e"
+    echo "rc=$?"
+    rm -rf "$t"' 2>/dev/null)"
+  mv "${hidden}.selftest-hidden" "$hidden"
+  trap - EXIT INT TERM
+  case "$out" in
+    rc=2*) ok "a MISSING stripper returns rc 2 (loud), not rc 1 (silently 'unchanged')" ;;
+    *)     bad "a MISSING stripper returns rc 2" "got <<$out>> — a broken transform must not look like a legitimate answer" ;;
+  esac
+fi
+
 echo "--- the real tree: every file still parses after stripping ---"
 if ! command -v node >/dev/null 2>&1; then
   printf 'SKIP every-file parse check -- no node binary to parse with\n'
