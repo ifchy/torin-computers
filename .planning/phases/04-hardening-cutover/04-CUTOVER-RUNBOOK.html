@@ -1,0 +1,757 @@
+<title>Torin Cutover Runbook</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Serif:ital,wght@0,400;0,500;1,400&display=swap">
+
+<style>
+:root{
+  --paper:#eef1f4;
+  --surface:#ffffff;
+  --surface-2:#e4e9ee;
+  --ink:#151d26;
+  --ink-2:#3d4c5c;
+  --ink-3:#66798c;
+  --rule:#c8d2db;
+  --rule-soft:#dbe3ea;
+
+  --gate:#8a5406;
+  --gate-bg:#fbf0dc;
+  --gate-edge:#e0ae57;
+
+  --stop:#95302a;
+  --stop-bg:#fbe9e7;
+  --stop-edge:#d9817a;
+
+  --go:#1f6152;
+  --go-bg:#e2f0ec;
+  --go-edge:#7ab3a4;
+
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,sans-serif;
+  --serif:"IBM Plex Serif",Georgia,serif;
+
+  --col:68ch;
+}
+
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#10161d;
+    --surface:#172029;
+    --surface-2:#1e2935;
+    --ink:#e6ecf2;
+    --ink-2:#b3c1cf;
+    --ink-3:#8194a6;
+    --rule:#2e3d4c;
+    --rule-soft:#243140;
+
+    --gate:#e8b462;
+    --gate-bg:#2a2011;
+    --gate-edge:#7a5a22;
+
+    --stop:#f0938a;
+    --stop-bg:#2c1614;
+    --stop-edge:#7d3b35;
+
+    --go:#7fc9b5;
+    --go-bg:#122520;
+    --go-edge:#33695c;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#10161d;
+  --surface:#172029;
+  --surface-2:#1e2935;
+  --ink:#e6ecf2;
+  --ink-2:#b3c1cf;
+  --ink-3:#8194a6;
+  --rule:#2e3d4c;
+  --rule-soft:#243140;
+
+  --gate:#e8b462;
+  --gate-bg:#2a2011;
+  --gate-edge:#7a5a22;
+
+  --stop:#f0938a;
+  --stop-bg:#2c1614;
+  --stop-edge:#7d3b35;
+
+  --go:#7fc9b5;
+  --go-bg:#122520;
+  --go-edge:#33695c;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--sans);
+  font-size:16px;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:82ch;margin:0 auto;padding:0 1.5rem 6rem}
+
+/* ---------- masthead ---------- */
+.mast{padding:3.5rem 0 1.75rem;border-bottom:2px solid var(--ink)}
+.eyebrow{
+  font-family:var(--mono);font-size:.7rem;font-weight:500;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);
+  margin:0 0 .9rem;
+}
+h1{
+  font-size:clamp(2rem,5.5vw,2.9rem);line-height:1.08;margin:0;
+  font-weight:700;letter-spacing:-.022em;text-wrap:balance;
+}
+.standfirst{
+  font-family:var(--serif);font-size:1.075rem;line-height:1.62;
+  color:var(--ink-2);max-width:var(--col);margin:1.1rem 0 0;
+}
+.mast-meta{
+  display:flex;flex-wrap:wrap;gap:.5rem 1.4rem;margin-top:1.4rem;
+  font-family:var(--mono);font-size:.74rem;color:var(--ink-3);
+}
+
+/* ---------- status board ---------- */
+.board{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));
+  gap:1px;background:var(--rule);border:1px solid var(--rule);
+  margin:2rem 0 0;
+}
+.cell{background:var(--surface);padding:1.15rem 1.2rem}
+.cell h3{
+  margin:0 0 .75rem;font-family:var(--mono);font-size:.7rem;font-weight:600;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);
+}
+.cell.go h3{color:var(--go)}
+.cell.gate h3{color:var(--gate)}
+.tally{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.4rem}
+.tally li{
+  display:flex;justify-content:space-between;gap:1rem;align-items:baseline;
+  font-size:.88rem;color:var(--ink-2);
+}
+.tally b{
+  font-family:var(--mono);font-variant-numeric:tabular-nums;
+  font-weight:600;color:var(--ink);white-space:nowrap;
+}
+.cell.go .tally b{color:var(--go)}
+.cell.gate .tally b{color:var(--gate)}
+
+/* ---------- sections ---------- */
+section{margin:3.25rem 0 0;scroll-margin-top:1rem}
+.sec-head{display:flex;align-items:baseline;gap:.85rem;border-bottom:1px solid var(--rule);padding-bottom:.5rem}
+.sec-num{
+  font-family:var(--mono);font-size:.78rem;font-weight:600;color:var(--ink-3);
+  letter-spacing:.06em;flex:none;
+}
+h2{font-size:1.32rem;margin:0;font-weight:600;letter-spacing:-.01em;line-height:1.25}
+.lede{font-family:var(--serif);color:var(--ink-2);max-width:var(--col);margin:.9rem 0 0;font-size:1rem}
+
+h3.sub{
+  font-size:.95rem;font-weight:600;margin:1.9rem 0 .6rem;
+  letter-spacing:-.005em;
+}
+
+p{max-width:var(--col);margin:.85rem 0}
+.why{font-family:var(--serif);color:var(--ink-2);font-size:.97rem}
+
+code,kbd{font-family:var(--mono);font-size:.855em}
+code{
+  background:var(--surface-2);padding:.1em .34em;border-radius:2px;
+  color:var(--ink);word-break:break-word;
+}
+kbd{
+  background:var(--surface);border:1px solid var(--rule);border-bottom-width:2px;
+  border-radius:3px;padding:.08em .4em;color:var(--ink-2);font-size:.8em;
+  white-space:nowrap;
+}
+
+/* ---------- steps ---------- */
+ol.steps{list-style:none;counter-reset:s;margin:1.4rem 0 0;padding:0;display:flex;flex-direction:column;gap:1.5rem}
+ol.steps>li{counter-increment:s;display:grid;grid-template-columns:2.6rem 1fr;column-gap:1rem;row-gap:0}
+/* BOTH text children are pinned to column 2. Without this the li holds THREE
+   grid items — the ::before counter, the title and the body — and auto-placement
+   puts the counter at (1,1), the title at (1,2) and then wraps the BODY onto
+   (2,1), rendering every step's reasoning inside the 2.6rem counter track. */
+ol.steps>li>.step-title,
+ol.steps>li>.step-body{grid-column:2;min-width:0}
+ol.steps>li::before{
+  content:counter(s);font-family:var(--mono);font-size:.82rem;font-weight:600;
+  color:var(--ink-3);background:var(--surface);border:1px solid var(--rule);
+  width:2.1rem;height:2.1rem;display:grid;place-items:center;border-radius:50%;
+  font-variant-numeric:tabular-nums;
+}
+ol.steps>li.is-gate::before{color:var(--gate);border-color:var(--gate-edge);background:var(--gate-bg)}
+ol.steps>li.is-done::before{content:"✓";color:var(--go);border-color:var(--go-edge);background:var(--go-bg)}
+.step-title{font-weight:600;margin:.25rem 0 .1rem;font-size:1rem;line-height:1.35;max-width:var(--col)}
+.step-body{margin:0}
+.step-body>*:first-child{margin-top:.5rem}
+.step-body>*:last-child{margin-bottom:0}
+
+/* ---------- chips ---------- */
+.chip{
+  display:inline-block;font-family:var(--mono);font-size:.64rem;font-weight:600;
+  letter-spacing:.1em;text-transform:uppercase;padding:.2em .5em;border-radius:2px;
+  border:1px solid;vertical-align:.14em;margin-left:.5rem;white-space:nowrap;
+}
+.chip.you{color:var(--gate);border-color:var(--gate-edge);background:var(--gate-bg)}
+.chip.done{color:var(--go);border-color:var(--go-edge);background:var(--go-bg)}
+.chip.stop{color:var(--stop);border-color:var(--stop-edge);background:var(--stop-bg)}
+
+/* ---------- callouts ---------- */
+.note{
+  border-left:3px solid var(--rule);background:var(--surface);
+  padding:.85rem 1.1rem;margin:1.1rem 0;max-width:var(--col);
+}
+.note.gate{border-left-color:var(--gate-edge);background:var(--gate-bg)}
+.note.stop{border-left-color:var(--stop-edge);background:var(--stop-bg)}
+.note.go{border-left-color:var(--go-edge);background:var(--go-bg)}
+.note p{margin:.4rem 0;font-size:.93rem}
+.note p:first-child{margin-top:0}
+.note p:last-child{margin-bottom:0}
+.note pre{margin:.55rem 0;background:var(--surface);font-size:.74rem}
+.note .tag{
+  font-family:var(--mono);font-size:.66rem;font-weight:600;letter-spacing:.11em;
+  text-transform:uppercase;display:block;margin-bottom:.4rem;
+}
+.note.gate .tag{color:var(--gate)}
+.note.stop .tag{color:var(--stop)}
+.note.go .tag{color:var(--go)}
+.note:not(.gate):not(.stop):not(.go) .tag{color:var(--ink-3)}
+
+/* ---------- where-to-click ---------- */
+.where{
+  font-family:var(--mono);font-size:.78rem;color:var(--ink-2);
+  background:var(--surface-2);border:1px dashed var(--rule);
+  padding:.45rem .65rem;margin:.6rem 0;display:block;max-width:var(--col);
+  border-radius:2px;
+}
+.where b{color:var(--ink);font-weight:600}
+
+/* ---------- file list ---------- */
+.files{
+  list-style:none;margin:1.1rem 0;padding:0;
+  border:1px solid var(--rule);background:var(--surface);
+}
+.files li{
+  display:grid;grid-template-columns:2.2rem 1fr;gap:.75rem;align-items:start;
+  padding:.6rem .85rem;border-bottom:1px solid var(--rule-soft);
+}
+.files li:last-child{border-bottom:0}
+.files .n{
+  font-family:var(--mono);font-size:.74rem;color:var(--ink-3);
+  font-variant-numeric:tabular-nums;padding-top:.15rem;
+}
+.files .path{font-family:var(--mono);font-size:.84rem;color:var(--ink);font-weight:500;word-break:break-all}
+.files .note-l{font-size:.82rem;color:var(--ink-3);display:block;margin-top:.15rem;font-family:var(--sans)}
+.files li.flag{background:var(--gate-bg)}
+.files li.flag .path{color:var(--gate)}
+
+/* ---------- keep list ---------- */
+.keep{list-style:none;margin:1.1rem 0;padding:0;display:flex;flex-direction:column;gap:.55rem}
+.keep li{display:grid;grid-template-columns:auto 1fr;gap:.65rem;align-items:baseline;font-size:.9rem;color:var(--ink-2)}
+.keep .path{font-family:var(--mono);font-size:.84rem;color:var(--ink);font-weight:500;white-space:nowrap}
+
+/* ---------- command block ---------- */
+pre{
+  font-family:var(--mono);font-size:.8rem;line-height:1.7;
+  background:var(--surface);border:1px solid var(--rule);
+  padding:.85rem 1rem;overflow-x:auto;margin:.9rem 0;max-width:var(--col);
+  border-radius:2px;
+}
+pre .c{color:var(--ink-3)}
+pre .ok{color:var(--go)}
+pre .no{color:var(--stop)}
+
+/* ---------- table ---------- */
+.tbl-scroll{overflow-x:auto;margin:1.1rem 0;max-width:100%}
+table{border-collapse:collapse;font-size:.86rem;min-width:30rem;width:100%}
+th,td{text-align:left;padding:.48rem .7rem;border-bottom:1px solid var(--rule-soft);vertical-align:top}
+th{
+  font-family:var(--mono);font-size:.68rem;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--ink-3);font-weight:600;border-bottom:1px solid var(--rule);white-space:nowrap;
+}
+td.num{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+td .mono{font-family:var(--mono);font-size:.82rem}
+
+hr.rule{border:0;border-top:1px solid var(--rule);margin:2.5rem 0}
+
+a{color:var(--ink);text-underline-offset:.16em;text-decoration-color:var(--rule)}
+a:focus-visible,li:focus-visible{outline:2px solid var(--gate);outline-offset:2px}
+
+footer{
+  margin-top:4rem;padding-top:1.25rem;border-top:1px solid var(--rule);
+  font-family:var(--mono);font-size:.72rem;color:var(--ink-3);
+}
+footer p{max-width:var(--col);margin:.35rem 0}
+
+@media (max-width:34rem){
+  ol.steps>li{grid-template-columns:1.9rem 1fr;column-gap:.7rem;row-gap:0}
+  ol.steps>li::before{width:1.7rem;height:1.7rem;font-size:.72rem}
+  .files li{grid-template-columns:1.7rem 1fr;gap:.5rem}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap">
+
+<header class="mast">
+  <p class="eyebrow">Phase 04 · Plan 04-10 · torin.bg</p>
+  <h1>Torin Cutover Runbook</h1>
+  <p class="standfirst">Everything the swap needs that no script in this project can do — and in the order it has to happen, because the order is load-bearing. The engineering side of plan 04-10 is finished and gated. What is left is server work and panel work.</p>
+  <div class="mast-meta">
+    <span>prepared 2026-09-24</span>
+    <span>source: 04-CUTOVER-CHECKLIST.md</span>
+    <span>rollback: seconds, by construction</span>
+    <span>staging rehearsal: PASS 36/0/4</span>
+  </div>
+</header>
+
+<div class="board">
+  <div class="cell go">
+    <h3>Cleared — no longer blocking</h3>
+    <ul class="tally">
+      <li><span><code>php -l</code>, whole tree</span><b>43 / 0 err</b></li>
+      <li><span>Self-tests, all four</span><b>81 pass</b></li>
+      <li><span>Pages under <code>E_ALL</code></span><b>21 / 21 clean</b></li>
+      <li><span>§0 pre-flight gates</span><b>4 / 4 resolved</b></li>
+    </ul>
+  </div>
+  <div class="cell gate">
+    <h3>Still yours to do</h3>
+    <ul class="tally">
+      <li><span>Files to delete by hand</span><b>21</b></li>
+      <li><span>Directory moves</span><b>2</b></li>
+      <li><span>Panel steps, silent if missed</span><b>1</b></li>
+      <li><span>Files left to deploy</span><b>3</b></li>
+    </ul>
+  </div>
+  <div class="cell go">
+    <h3>Staging rehearsal — 2026-09-24</h3>
+    <ul class="tally">
+      <li><span>Assets present &amp; current</span><b>93 / 93</b></li>
+      <li><span>Pages rendered</span><b>20 / 20</b></li>
+      <li><span>Same-origin failures</span><b>0</b></li>
+      <li><span>Verdict</span><b>PASS · 36/0/4</b></li>
+    </ul>
+  </div>
+</div>
+
+<div class="note go">
+  <span class="tag">Staging is current — the tree and the origin agree</span>
+  <p>Everything changed on 2026-09-24 is deployed and byte-verified: the six optimized icons, the two pages whose evidence strips were withdrawn, the four comment-stripped scripts, and the corrected footer label. The sweep is a <b>rehearsal PASS</b>, with all 93 assets present <em>and</em> matching the tree byte-for-byte.</p>
+  <p>That matters more than usual here: <b>the swap is a server-side rename that re-uploads nothing</b>, so whatever staging holds at the moment of the move is exactly what the live root publishes.</p>
+</div>
+
+<div class="note stop">
+  <span class="tag">What a green rehearsal still does not authorise</span>
+  <p>It was not run against the root, so the root-only assertions were all skipped — <code>robots.txt</code>, <code>sitemap.xml</code>, the verification file, and the <em>absence</em> of the staging noindex header, which is a required pass on staging and a critical failure at the root. <b>A passing rehearsal is a statement about the build, not permission to swap.</b> The go decision is §5, run against the real domain.</p>
+</div>
+
+<!-- ===================== 0 ===================== -->
+<section id="s0">
+  <div class="sec-head"><span class="sec-num">§0</span><h2>Pre-flight gates — all resolved</h2></div>
+  <p class="lede">Four questions that had to be answered before the swap could begin. All four were worked through on 2026-09-24. They are kept here with their outcomes, because two of them changed what the rest of this runbook says.</p>
+
+  <div class="note go">
+    <span class="tag">Resolved — and one was worse than the checklist guessed</span>
+    <p>The Search Console property turned out to be a URL-prefix property on <code>http://www.torin.bg</code>, verified by the <b>HTML file method only</b>. That is the worst of the four variants: it differs from the canonical target in <em>both</em> protocol and host, so publishing the canonicalisation would have flatlined the property holding sixteen months of history — during exactly the observation window. A <b>Domain property</b> now stands behind it.</p>
+  </div>
+
+  <ol class="steps">
+    <li class="is-done">
+      <p class="step-title">Identify what verifies the existing property <span class="chip done">answered</span></p>
+      <div class="step-body">
+        <p>URL-prefix property on <code>http://www.torin.bg</code>, verified by <b>HTML file only</b> — <code>google1718743335455f1c.html</code>.</p>
+        <p class="why">Corroborated rather than taken on trust: the token is live at the root (<code>200</code>, 53 bytes, correct body), there is <b>no</b> verification meta tag on either the live or the staging homepage, and DNS carried <b>no</b> google-site-verification TXT. The checklist's "something unidentified verifies an active property" is closed.</p>
+      </div>
+    </li>
+
+    <li class="is-done">
+      <p class="step-title">Create a Domain property, verified by DNS TXT <span class="chip done">record live</span></p>
+      <div class="step-body">
+        <p>TXT added at the <b>apex</b>, confirmed present on both authoritative nameservers:</p>
+        <pre>google-site-verification=fIFCcniEjLBKQoRvVBLppDh8oiiMamRKLQcnzWGhev8</pre>
+        <div class="tbl-scroll">
+        <table>
+          <thead><tr><th>Check</th><th>Result</th></tr></thead>
+          <tbody>
+            <tr><td>TXT at apex, straight from authoritative NS</td><td><b style="color:var(--go)">present</b></td></tr>
+            <tr><td>Both nameservers agree (ns71 / ns72)</td><td>1 each</td></tr>
+            <tr><td>Trailing-dot error (<span class="mono">torin.bg.torin.bg</span>)</td><td>none</td></tr>
+            <tr><td><b>SPF records at apex</b></td><td><b>exactly 1 — mail safe</b></td></tr>
+            <tr><td>A / MX / NS / www CNAME</td><td>untouched</td></tr>
+          </tbody>
+        </table>
+        </div>
+        <p class="why"><b>The hazard this avoided.</b> The apex carries exactly one TXT record and it is the SPF on which all outbound mail depends. The rule was <em>add, never edit</em> — several TXT records at one name are fine, several SPF records are not, and a verification TXT is not SPF. Editing it by mistake would have broken the contact-form notification pipeline this entire phase exists to protect.</p>
+        <p class="why">Keep the old <code>http://www.torin.bg</code> property rather than deleting it. It will flatline after the swap, but its history stays readable and you will want it for comparison during the observation window.</p>
+      </div>
+    </li>
+
+    <li class="is-done">
+      <p class="step-title">A second, move-proof verification method <span class="chip done">free</span></p>
+      <div class="step-body">
+        <p>The DNS TXT above <em>is</em> the move-proof method. No separate action was needed.</p>
+        <p class="why">This gate also turned out smaller than written. It feared the move would orphan the HTML token — but that file is in the source tree, already on staging, and byte-identical in all three places (src vs live root: identical; src vs staging: identical). Step 5 of §2 <b>carries</b> it up to the root rather than stranding it. The gate was written at 04-09, before the file existed in the tree.</p>
+      </div>
+    </li>
+
+    <li class="is-done">
+      <p class="step-title">Owner sign-off on public commitments <span class="chip done">signed off</span></p>
+      <div class="step-body">
+        <p>The owner read <code>uslovia.html</code> and approved the wording. Two findings surfaced during that review.</p>
+
+        <p><b>Fixed now — the footer label.</b> It linked the page as «условия», but the page is wholly a Декларация за поверителност. Relabelled <b>«поверителност»</b> and verified on all 20 pages. The contact form's consent label needed no change: «условията за обработка на личните ми данни» was already scoped precisely to data processing.</p>
+
+        <p class="why"><b>General terms are not owed, and this was checked rather than assumed.</b> Общи условия bind distance contracts — online sales, payments, bookings, accounts. This site has none of those. The shop's real terms are the warranty ones on <code>warrently.html</code>, which the adjacent «гаранция» link already names correctly.</p>
+
+        <div class="note gate">
+          <span class="tag">Deferred by owner decision — ledger #58, #59</span>
+          <p><code>uslovia.html</code> carries none of the GDPR Article 13(2) rights: access, rectification, erasure, restriction, objection, portability, <b>withdrawal of consent</b>, or the right to complain to КЗЛД. Withdrawal is the sharpest gap, because the form has a consent checkbox and consent is therefore the legal basis being relied on. No <b>ЕИК</b> or седалище appears anywhere in the tree either (ЗЕТ чл.4).</p>
+          <p><b>The cutover neither creates nor worsens this</b> — the live site has the same gaps today. That is what makes deferring it a reasonable call rather than a risk the swap takes on.</p>
+        </div>
+      </div>
+    </li>
+  </ol>
+</section>
+
+<!-- ===================== 1 ===================== -->
+<section id="s1">
+  <div class="sec-head"><span class="sec-num">§1</span><h2>Pre-flight</h2></div>
+  <p class="lede">Most of this section was blocked for the whole phase on a missing PHP runtime. That runtime now exists, and everything it gated has been run.</p>
+
+  <div class="note go">
+    <span class="tag">Done 2026-09-24 — no action needed</span>
+    <p><b>Syntax.</b> <code>php -l</code> across 43 files — 22 <code>.php</code> plus the 21 pages that are PHP wearing an <code>.html</code> extension. Zero parse errors. <code>header.php</code> was checked first: it is included by every page and had been edited by three separate plans without once being parsed.</p>
+    <p><b>Self-tests.</b> All four now run and pass — upload 18/18, settings 27/27, notify 9/9, spam-guard 27/27. Eighty-one assertions, none unrun.</p>
+    <p><b>Runtime cleanliness.</b> All 21 pages executed under <code>E_ALL</code> and their served bodies scanned: zero rendered diagnostics of any severity.</p>
+  </div>
+
+  <h3 class="sub">Still yours to do</h3>
+  <ol class="steps">
+    <li class="is-gate">
+      <p class="step-title">Take a fresh backup of the live root <span class="chip you">you</span></p>
+      <div class="step-body">
+        <p>Run <code>scripts/backup-live-site.sh</code> and confirm the archive is complete and restorable before touching anything. This is the floor under every rollback below.</p>
+      </div>
+    </li>
+  </ol>
+</section>
+
+<!-- ===================== 2 ===================== -->
+<section id="s2">
+  <div class="sec-head"><span class="sec-num">§2</span><h2>The swap</h2></div>
+  <p class="lede">Server-side renames in both directions. No re-upload, a window measured in seconds, and the old site stays on disk as a live safety net. The order below is not a suggestion — a sitemap submitted early points a crawler at a state about to change, and a runtime setup not re-applied serves source on every page.</p>
+
+  <ol class="steps">
+    <li class="is-gate">
+      <p class="step-title">Retarget the base URL, regenerate, redeploy — <em>before</em> the rename</p>
+      <div class="step-body">
+        <p class="why">The swap re-uploads nothing. Whatever these files say at the moment of the move is what the live root publishes.</p>
+        <p><b>a.</b> In <code>src/includes/site-config.php</code>, change <code>'base_url'</code> from <code>https://torin.bg/new/</code> to <code>https://torin.bg/</code>. This is the only place the staging segment appears in a page-serving file, and every canonical link and breadcrumb URL on the site is built from it.</p>
+        <p><b>b.</b> Regenerate the sitemap with <code>scripts/gen-sitemap.sh</code>. Confirm <b>19</b> entries — not 20. <code>msg.html</code> is deliberately noindexed and the Google verification token is not a page; both are excluded by rule.</p>
+        <p><b>c.</b> Edit <code>src/robots.txt</code> <em>by hand</em> — change the <code>Sitemap:</code> line to <code>https://torin.bg/sitemap.xml</code>. Nothing regenerates this for you, and it is the second place in the tree encoding the staging segment.</p>
+        <p><b>d.</b> Run <code>scripts/sitemap-check.sh</code> offline. Checks D and E exist for exactly this moment. Both must pass before you go further.</p>
+        <p><b>e.</b> Deploy, naming the paths explicitly:</p>
+<pre><span class="c"># the three staging-segment files — the only ones left</span>
+scripts/deploy-new.sh includes/site-config.php sitemap.xml robots.txt
+
+<span class="c"># scripts, icons, pages and footer: <span class="ok">ALREADY DONE 2026-09-24</span></span>
+<span class="c"># js/*.js · img/icons/cat-{1..6}.svg · includes/footer.php</span>
+<span class="c"># mehanichni-problemi.html · zalivane-technosti.html</span>
+<span class="c"># all byte-verified against the origin</span></pre>
+        <div class="note go">
+          <span class="tag">Already deployed — nothing to do for these</span>
+          <p>Comment stripping now runs on upload, so scripts ship without their rationale: <code>analytics.js</code> is <b>764 B gzipped against its 1024 B budget</b>, and <code>photo-resize.js</code> went from six bytes of headroom to 574. All four match the origin byte-for-byte.</p>
+          <p>Verified as <em>working</em>, not merely loading — a dead listener raises no console error either. A click probe against the served, stripped <code>site.js</code> confirms the nav opens, the list really becomes visible, a second click closes it and Escape closes it; a second probe confirms the relocated error-band focus still fires.</p>
+        </div>
+        <p class="why">Name the paths rather than running a bare no-argument deploy. A no-argument run uploads everything under <code>src/</code> — a far larger blast radius than this step needs. It is no longer dangerous (the script now refuses the root <code>.htaccess</code> in code), but a deploy that names what it changes is one you can reason about afterwards.</p>
+      </div>
+    </li>
+
+    <li class="is-gate">
+      <p class="step-title">Regenerate the root's PHP wrapper <span class="chip stop">silent if missed</span></p>
+      <div class="step-body">
+        <div class="note go">
+          <span class="tag">Corrected — the version half is already done</span>
+          <p>PHP 8.5 is set <b>account-wide</b>, not just for <code>/new/</code>, and has been since 8.5 was adopted. Measured at the live root: <code>curl -sI https://torin.bg/mailer.php</code> → <code>x-powered-by: PHP/8.5.10</code>. <b>There is no version risk in the move.</b></p>
+        </div>
+        <p class="why">The step survives for a different reason. What the account-wide selection does <em>not</em> do is put a wrapper in the root directory — and the promoted <code>.htaccess</code> names <code>/home/torin/public_html/php.fcgi</code> in <b>three</b> <code>FcgidWrapper</code> directives.</p>
+
+        <div class="tbl-scroll">
+        <table>
+          <thead><tr><th>Probe</th><th>Status</th><th>Meaning</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">torin.bg/php.fcgi</td><td class="num"><b style="color:var(--stop)">404</b></td><td><b>absent</b></td></tr>
+            <tr><td class="mono">torin.bg/new/php.fcgi</td><td class="num">200</td><td>present</td></tr>
+            <tr><td class="mono">torin.bg/error_log</td><td class="num">403</td><td>exists, denied — calibrates the signal</td></tr>
+            <tr><td class="mono">torin.bg/not-here.txt</td><td class="num">404</td><td>absent — calibrates the signal</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <p class="why">403-for-denied and 404-for-absent are distinguishable here, so that 404 is a real absence rather than a deny rule. <code>mailer.php</code> proves <code>.php</code> runs on 8.5 at the root through the account handler with <b>no local wrapper at all</b> — but nothing proves <code>.html</code> does, and <code>.html</code> → PHP comes purely from that <code>AddHandler</code>/<code>FcgidWrapper</code> block. <b>Every page on this site is <code>.html</code>.</b></p>
+
+        <div class="note stop">
+          <span class="tag">Moving the staging wrapper up is not enough — the trap</span>
+          <p><code>/new/php.fcgi</code> was fetched and read. The absolute path is <em>inside the file</em>, not just in its location:</p>
+          <pre>DEFAULTPHPINI=/home/torin/public_html/new/php85-fcgi.ini
+exec /opt/cpanel/ea-php85/root/usr/bin/php-cgi -c ${DEFAULTPHPINI}</pre>
+          <p>Carried up by a later step it points at an ini that no longer exists — and <code>php-cgi</code> does <b>not</b> fail loudly on a missing <code>-c</code>. It falls back to the system ini. So the failure is <b>not</b> the 500 this step originally predicted; it is silent, and every limit the ini governs — <code>upload_max_filesize</code>, <code>post_max_size</code>, <code>memory_limit</code> — reverts to defaults. Those are exactly what the photo-upload pipeline depends on.</p>
+        </div>
+
+        <span class="where"><b>cPanel →</b> Select PHP Version → target <b>public_html/</b> → re-apply <b>8.5</b> so the panel writes a root-correct <code>php.fcgi</code> + <code>php85-fcgi.ini</code></span>
+        <p class="why">Or hand-correct the moved file's <code>DEFAULTPHPINI</code> line. Either way, <b>verify by re-probing, not by reading the file.</b></p>
+      </div>
+    </li>
+
+    <li class="is-gate">
+      <p class="step-title">Move the current live root <em>outside</em> the document root</p>
+      <div class="step-body">
+        <p>Move it to <code>/home/torin/old-site/</code>. <b>Not</b> to <code>public_html/old/</code>.</p>
+        <div class="note stop">
+          <span class="tag">The distinction is the whole point</span>
+          <p>A subdirectory of the document root publishes a complete crawlable copy of every retired page and of the unstaffed chat widget this project exists to remove. The old site must stay on <em>disk</em>. It must not stay <em>reachable</em>.</p>
+        </div>
+        <p>Leave the §4 files where they are — do not sweep them along with the move.</p>
+      </div>
+    </li>
+
+    <li class="is-gate">
+      <p class="step-title">Move the staging contents up to the root</p>
+      <div class="step-body">
+        <p>Move <code>public_html/new/*</code> up to <code>public_html/</code>. Server-side rename; no re-upload.</p>
+      </div>
+    </li>
+
+    <li class="is-gate">
+      <p class="step-title">Confirm the promoted <code>.htaccess</code> landed, and check <em>both</em> edits</p>
+      <div class="step-body">
+        <p>Read the file at the root by eye before running anything. Two things changed and <b>one being right does not imply the other</b>: the rewrite base must be <code>/</code>, and the canonicalisation substitution target must be the bare apex.</p>
+        <p class="why">This is not hypothetical. It shipped once: a relative substitution with no rewrite base made Apache build the redirect target from the filesystem path, and all four retired URLs answered a perfectly well-formed <code>301</code> pointing at <code>https://torin.bg/home/torin/public_html/new/…</code>, which 404'd on follow. Nothing in any build failed. Only following the redirect found it.</p>
+      </div>
+    </li>
+
+    <li class="is-gate">
+      <p class="step-title">Confirm the Search Console token is at the root</p>
+      <div class="step-body">
+        <p><code>google1718743335455f1c.html</code> — 53 bytes, no trailing newline.</p>
+        <p class="why">Trap specific to this host: its <code>.html</code> extension means it is <em>executed as PHP</em> before being served. It must come back byte-identical, not merely exist. The sweep fetches and compares it rather than taking a 200 for an answer. Less critical than it was — the Domain property in §0 now holds verification independently — but the file is still what the old URL-prefix property hangs on.</p>
+      </div>
+    </li>
+
+    <li class="is-gate">
+      <p class="step-title">Confirm the wrapper files stop being publicly readable</p>
+      <div class="step-body">
+        <p><code>php.fcgi</code> and <code>php85-fcgi.ini</code> both return <b>200 on staging right now</b> — the wrapper discloses the account home path and the PHP binary path.</p>
+        <p class="why">The promoted <code>.htaccess</code> closes this with a <code>FilesMatch</code> block covering <code>settings.txt</code>, <code>.user.ini</code>, <code>php.fcgi</code> and <code>php*-fcgi.ini</code>, so the swap fixes it as a side effect. <b>Confirm 403 afterwards</b> rather than assuming the block landed.</p>
+      </div>
+    </li>
+
+    <li class="is-gate">
+      <p class="step-title">Remove the staging subtree — once the root is confirmed serving</p>
+      <div class="step-body"><p>Not before.</p></div>
+    </li>
+  </ol>
+
+  <div class="note gate">
+    <span class="tag">Watch item during any panel visit</span>
+    <p>cPanel may write <em>its own</em> handler block into the root <code>.htaccess</code>, where it will coexist with the hand-written one. If pages start 500ing or serving as readable source after you touch the panel, look here first — the panel's block covers <code>.php</code> only, and <b>every page on this site is PHP wearing an <code>.html</code> extension</b>. Report what it added before changing anything.</p>
+  </div>
+</section>
+
+<!-- ===================== 3 ===================== -->
+<section id="s3">
+  <div class="sec-head"><span class="sec-num">§3</span><h2>Delete these twenty-one, by exact path</h2></div>
+  <p class="lede">Paths are relative to the document root after the swap. Delete by name, not by pattern.</p>
+
+  <p class="why">This is manual because <code>deploy-new.sh</code> uploads and never deletes, and nothing in this project can remove a remote file. Giving the deploy script that capability was deliberately rejected: it means building a tool whose worst-case failure is destructive, to solve a problem that happens once.</p>
+
+  <ul class="files">
+    <li><span class="n">1</span><span><span class="path">covid.html</span><span class="note-l">Retired page — source-deleted, still on disk behind its redirect</span></span></li>
+    <li><span class="n">2</span><span><span class="path">laptopi.html</span><span class="note-l">Retired page — same</span></span></li>
+    <li><span class="n">3</span><span><span class="path">rezervni-chasti.html</span><span class="note-l">Retired page — same</span></span></li>
+    <li><span class="n">4</span><span><span class="path">za-bateriite.html</span><span class="note-l">Retired page — same</span></span></li>
+    <li><span class="n">5</span><span><span class="path">img/repairs/profilaktika7.jpg</span><span class="note-l">Withdrawn photograph — referenced by no page, but fetchable by direct URL (200 confirmed)</span></span></li>
+    <li><span class="n">6</span><span><span class="path">img/repairs/profilaktika15.jpg</span><span class="note-l">Withdrawn photograph — same</span></span></li>
+    <li><span class="n">7</span><span><span class="path">img/repairs/profilaktika17.jpg</span><span class="note-l">Withdrawn photograph — same</span></span></li>
+    <li><span class="n">8</span><span><span class="path">css/theme-a.css</span><span class="note-l">Dev scaffolding — deleted from the tree at 04-07, still resident on the server</span></span></li>
+    <li><span class="n">9</span><span><span class="path">includes/dev-switcher.php</span><span class="note-l">Dev scaffolding — has been rendering on all 19 staging pages since Phase 2. Leaving it publishes it.</span></span></li>
+    <li class="flag"><span class="n">10</span><span><span class="path">header.js</span><span class="note-l">Superseded by the rebuild — still returning 200 at the live root</span></span></li>
+    <li class="flag"><span class="n">11</span><span><span class="path">otpuska.js</span><span class="note-l">Superseded by the rebuild — still returning 200 at the live root</span></span></li>
+  </ul>
+
+  <div class="note gate">
+    <span class="tag">The two that fall off this list</span>
+    <p><b>10 and 11.</b> They are what expanded this from seven files to eleven <em>after</em> the decision was written, so every older reference to "the seven stale files" is short by exactly these two. Check them by name.</p>
+  </div>
+
+  <h3 class="sub">Added 2026-09-24 — the withdrawn evidence photographs</h3>
+  <p class="why">The evidence strips came off <code>mehanichni-problemi.html</code> and <code>zalivane-technosti.html</code> at the owner's request, and the files were deleted from the tree. By the rule above they are now stranded on the server. <b>Each photograph has a <code>.webp</code> sibling and both halves must go</b> — the <code>&lt;picture&gt;</code> source and the <code>&lt;img&gt;</code> fallback are separate fetchable URLs.</p>
+
+  <ul class="files">
+    <li class="flag"><span class="n">12</span><span><span class="path">img/repairs/meh-prob2.jpg</span></span></li>
+    <li class="flag"><span class="n">13</span><span><span class="path">img/repairs/meh-prob2.webp</span></span></li>
+    <li class="flag"><span class="n">14</span><span><span class="path">img/repairs/meh-prob3.jpg</span></span></li>
+    <li class="flag"><span class="n">15</span><span><span class="path">img/repairs/meh-prob3.webp</span></span></li>
+    <li class="flag"><span class="n">16</span><span><span class="path">img/repairs/meh-prob5.jpg</span></span></li>
+    <li class="flag"><span class="n">17</span><span><span class="path">img/repairs/meh-prob5.webp</span></span></li>
+    <li class="flag"><span class="n">18</span><span><span class="path">img/repairs/zalivane1.jpg</span></span></li>
+    <li class="flag"><span class="n">19</span><span><span class="path">img/repairs/zalivane1.webp</span></span></li>
+    <li class="flag"><span class="n">20</span><span><span class="path">img/repairs/zalivane2.jpg</span></span></li>
+    <li class="flag"><span class="n">21</span><span><span class="path">img/repairs/zalivane2.webp</span></span></li>
+  </ul>
+
+  <div class="note stop">
+    <span class="tag">Confirmed fetchable right now, not theorised</span>
+    <p>All ten were re-fetched on staging after the pages were redeployed without them: <b>200 on every one.</b> The swap promotes staging to the root, so skipping this pass publishes two sets of photographs the owner has withdrawn — at the live domain, by direct URL. Phase 3.5 already had to correct exactly this once.</p>
+  </div>
+
+  <div class="note stop">
+    <span class="tag">Gate</span>
+    <p>Re-fetch all twenty-one and confirm <b>404</b> on each. Deleting and not checking is how a file survives a deletion pass. Verify by fetching the URL — never by looking at a directory listing.</p>
+  </div>
+
+  <p class="why">This list is one instance of a standing problem, not a one-off: removing a file from <code>src/</code> removes it from the tree and leaves it live on the server forever. Any future deletion needs a manual pass too.</p>
+</section>
+
+<!-- ===================== 4 ===================== -->
+<section id="s4">
+  <div class="sec-head"><span class="sec-num">§4</span><h2>Leave these at the root</h2></div>
+  <p class="lede">Do not move them, do not sweep them along with the old site.</p>
+
+  <ul class="keep">
+    <li><span class="path">.well-known/</span><span>The certificate challenge directory. The TLS certificate renews within weeks of an autumn cutover, and a missing challenge path <b>fails renewal silently until the certificate expires</b> — by which point the whole site is untrustworthy in every browser.</span></li>
+    <li><span class="path">cgi-bin/</span><span>The host's script directory.</span></li>
+    <li><span class="path">error_log</span><span>Host-generated. It stays, and it stays <b>refused over HTTP</b> — the root is about to gain executing pages and a submission handler, so it will start accumulating entries that must not be publicly readable.</span></li>
+    <li><span class="path">php.fcgi</span><span>Generated by the panel step in §2.</span></li>
+    <li><span class="path">php85-fcgi.ini</span><span>Generated alongside it. <b>Set <code>display_errors = Off</code> here at cutover</b> — it is currently On, which renders PHP warnings, filesystem paths included, into the page for a visitor.</span></li>
+    <li><span class="path">.user.ini</span><span>Owner-edited; denied by the authorisation block.</span></li>
+    <li><span class="path">settings.txt</span><span>Owner-edited; denied by the authorisation block.</span></li>
+  </ul>
+</section>
+
+<!-- ===================== 5 ===================== -->
+<section id="s5">
+  <div class="sec-head"><span class="sec-num">§5</span><h2>Go / no-go</h2></div>
+  <p class="lede">One command decides. A homepage spot-check was explicitly rejected as the go decision, because it would not have caught the redirect defect this project actually shipped.</p>
+
+<pre>bash scripts/cutover-sweep.sh --target https://torin.bg</pre>
+
+  <div class="tbl-scroll">
+  <table>
+    <thead><tr><th>Section</th><th>What it asserts</th><th>Proven able to fail</th></tr></thead>
+    <tbody>
+      <tr><td class="num">1–2</td><td>Every redirect <b>followed to its terminal response</b> — final status, final URL, hop count</td><td>Yes — against a seeded known-bad case</td></tr>
+      <tr><td class="num">3</td><td>Every page 200</td><td>—</td></tr>
+      <tr><td class="num">3b</td><td>Every static asset in the tree is actually served</td><td>Yes — 2026-09-23 incident</td></tr>
+      <tr><td class="num">3c</td><td>Served bytes equal committed bytes</td><td>Yes — both directions, on staging</td></tr>
+      <tr><td class="num">4</td><td>Staging noindex header <b>absent</b> at the root</td><td>Asserted both ways</td></tr>
+      <tr><td class="num">5–6</td><td>robots, sitemap, favicon present; token byte-identical</td><td>—</td></tr>
+      <tr><td class="num">7</td><td>Host error log refused</td><td>—</td></tr>
+      <tr><td class="num">8</td><td>Contact page reachable, <code>no-store</code> intact</td><td>—</td></tr>
+      <tr><td class="num">9</td><td>Cyrillic prose, zero diagnostics, no chat widget — every page, rendered</td><td>Yes — found a dead console hook</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="note stop">
+    <span class="tag">Any failure means rollback</span>
+    <p>Move the files back, record what failed, and stop. <b>Do not attempt a partial fix under a live domain with a half-promoted config.</b></p>
+  </div>
+
+  <div class="note">
+    <span class="tag">What the sweep cannot prove</span>
+    <p>That a phone dials, that an enquiry arrives, and that a search engine is happy. Those are §6.</p>
+    <p>It also cannot detect a stale <em>PHP-rendered page</em> — the pages execute, so no digest compares them. A stale <code>footer.php</code> would pass everything. That is tracked as an open item; the static-asset half is covered by 3c.</p>
+  </div>
+</section>
+
+<!-- ===================== 6 ===================== -->
+<section id="s6">
+  <div class="sec-head"><span class="sec-num">§6</span><h2>After the swap</h2></div>
+  <p class="lede">Only once the sweep is green.</p>
+
+  <h3 class="sub">Re-run what was measured against the old build</h3>
+  <pre>node scripts/seo-metadata-check.js --live
+scripts/asset-version-check.sh
+bash scripts/sitemap-check.sh --live</pre>
+  <p class="why">The tuned pages served pre-plan metadata throughout this phase, so every earlier "served matches source" result was measuring the old build. The version stamps are the <em>precondition</em> for the one-year cache lifetimes, not a nicety — a year-long lifetime on an unstamped URL is unreachable by any correction.</p>
+
+  <h3 class="sub">Submit the sitemap <span class="chip you">you</span></h3>
+  <p><b>Only after</b> <code>sitemap-check.sh --live</code> passes. If step 1 of §2 was skipped, the file still lists 19 staging URLs, and submitting those is the exact opposite of the URL continuity this cutover exists to preserve.</p>
+  <span class="where"><b>Search Console →</b> Sitemaps → submit to the <b>Domain property</b> → <b>https://torin.bg/sitemap.xml</b> → timestamp it in the log</span>
+
+  <h3 class="sub">Watch the mail cascade fall through <span class="chip you">you</span></h3>
+  <p class="why">The functional heart of the notification design, and no real authentication failure has ever been watched falling through. It cannot be simulated on the build machine — it needs a live host, a relay to fail against, and a deliberately wrong credential.</p>
+  <div class="tbl-scroll">
+  <table>
+    <thead><tr><th>Case</th><th>Setup</th><th>Expect in the log</th></tr></thead>
+    <tbody>
+      <tr><td>a — none</td><td>Shipped state</td><td><span class="mono">no smtp credential, using sendmail</span> → <span class="mono">delivered via=sendmail</span></td></tr>
+      <tr><td>b — wrong</td><td><span class="mono">'smtp_password' =&gt; 'definitely-wrong'</span></td><td><span class="mono">smtp failed before acceptance, falling through</span> → <span class="mono">delivered via=sendmail</span>, a 303, mail arrives</td></tr>
+      <tr><td>c — correct</td><td>Real credential</td><td><span class="mono">delivered via=smtp</span>, and <b>no</b> fall-through line</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="note stop">
+    <span class="tag">In all three cases the enquiry must arrive exactly once</span>
+    <p>Two copies means the pre/post-acceptance boundary is wrong — the single outcome this design exists to prevent. Remove the deliberately wrong credential afterwards.</p>
+  </div>
+
+  <h3 class="sub">Three things only a person can check <span class="chip you">you</span></h3>
+  <ol class="steps">
+    <li class="is-gate">
+      <p class="step-title">One <em>portrait</em> photo, from a real handset, checked upright in Telegram</p>
+      <div class="step-body"><p class="why">Every fixture used so far was produced by macOS <code>sips</code>, which bakes rotation into pixels and writes <b>no orientation tag</b> — and a file with no tag passes a completely broken pipeline identically to a correct one. Unverified on both sides.</p></div>
+    </li>
+    <li class="is-gate">
+      <p class="step-title">Somebody actually looks at the owner's phone</p>
+      <div class="step-body"><p class="why">Every API call returned <code>ok:true</code> and the photos reached Telegram's servers — but that is an assertion about the API's answer, not about what rendered. Confirm the single photo carries the enquiry <b>as its caption</b>, and that three photos arrive as <b>one media group</b>, not three separate messages. One glance closes it.</p></div>
+    </li>
+    <li class="is-gate">
+      <p class="step-title">Submit one WebP — or stop advertising WebP</p>
+      <div class="step-body"><p class="why">The form advertises <code>image/webp</code> and routes it through <code>imagecreatefromwebp()</code> behind a guard, but no WebP was ever submitted. GD's WebP decoder is a <em>separate build option</em> from the extension itself, which is what was actually measured. If it is absent, every WebP the picker happily offers is refused. Either prove it works or drop it from the accept list.</p></div>
+    </li>
+  </ol>
+
+  <h3 class="sub">Retire the transition guard — last</h3>
+  <p>Confirm <code>x-powered-by</code> at the root does <b>not</b> report PHP 5.2. <b>Only then</b> delete the <code>&lt;IfModule !mod_fcgid.c&gt;</code> fail-safe from the root <code>.htaccess</code>. <em>Expected to pass — the root already reports <code>PHP/8.5.10</code> today. Run it anyway: the point is to confirm the fail-safe is not what is holding the site up.</em></p>
+  <p class="why">It is kept through the swap on purpose: if the panel step in §2 is missed, the block degrades the failure from "20 pages served to the public as readable PHP source" to "still on 5.2, which is where we already were". A fallback quietly keeping 5.2 alive must never be allowed to pass as success.</p>
+
+  <h3 class="sub">The observation window</h3>
+  <div class="note">
+    <span class="tag">Read the success criterion correctly or it fails by construction</span>
+    <p>Google's own guidance is that consolidation after a host change takes <b>a few weeks or more</b>. <b>Movement during consolidation is expected and normal.</b> The criterion is <em>no unexplained drops and no new missing pages</em> — not <em>no movement</em>.</p>
+    <p>Watch the <b>Domain property</b>, not the old <code>http://www.torin.bg</code> one. That one will flatline by design the moment canonicalisation ships — it is not a signal, it is the expected consequence.</p>
+  </div>
+</section>
+
+<!-- ===================== 7 ===================== -->
+<section id="s7">
+  <div class="sec-head"><span class="sec-num">§7</span><h2>Rollback</h2></div>
+  <p class="lede">The same move in reverse, and it takes seconds. This is the entire reason the swap was designed as server-side renames rather than a re-upload.</p>
+
+  <ol class="steps">
+    <li><p class="step-title">Move <code>public_html/*</code> back down to <code>public_html/new/</code></p></li>
+    <li><p class="step-title">Move <code>/home/torin/old-site/*</code> back up to <code>public_html/</code></p></li>
+    <li><p class="step-title">Restore the previous root <code>.htaccess</code> from the §1 backup</p></li>
+    <li><p class="step-title">Re-point cPanel → Select PHP Version back at <code>public_html/new/</code></p>
+      <div class="step-body"><p>So the wrapper path in the staging <code>.htaccess</code> resolves again.</p></div></li>
+    <li><p class="step-title">Re-fetch the homepage and confirm the old site is serving</p></li>
+  </ol>
+
+  <div class="note stop">
+    <span class="tag">One thing rollback does not undo</span>
+    <p>The canonicalisation redirects are a <b>one-way door</b>. Moving files back restores the content; it does not un-consolidate a search index that has begun following <code>301</code>s to the apex. If the swap is rolled back, those redirects keep pointing at the apex — which is still correct for the old site, since it is served on the same four variants. Rolling back the <em>content</em> is cheap. Rolling back the <em>canonical host choice</em> is not, and is not attempted here.</p>
+  </div>
+</section>
+
+<footer>
+  <p>Derived from .planning/phases/04-hardening-cutover/04-CUTOVER-CHECKLIST.md, which remains the authority. Where this page and the checklist disagree, the checklist wins.</p>
+  <p>Sweep figures measured against https://torin.bg/new on 2026-09-24, after the icon, evidence-strip, script and footer deploys. 93 assets present and current; 20 pages rendered; 0 same-origin subresource failures.</p>
+  <p>This file is version-controlled at .planning/phases/04-hardening-cutover/04-CUTOVER-RUNBOOK.html — an earlier copy lived only in a scratch directory and was lost to a cleanup.</p>
+</footer>
+
+</div>
