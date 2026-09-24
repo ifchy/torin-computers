@@ -381,6 +381,24 @@ would not have caught the redirect defect this project actually shipped.
 
 - [ ] Run `scripts/cutover-sweep.sh --target https://torin.bg` and read the verdict.
 
+> **Staging rehearsal, 2026-09-24: PASS — 36 pass / 0 fail / 4 skipped.** Run after the icon,
+> evidence-strip and script deploys, with rendering enabled. All **93** assets present *and*
+> byte-identical to the tree (section 3c, ledger #56). All **20** pages rendered: 95–1070
+> Cyrillic tokens each against a floor of 40, one `<h1>` each, no runtime diagnostics, no chat
+> widget, **0 same-origin subresource failures** (19 third-party, the umami beacon blocked by
+> Brave shields — reported, never fatal, per ledger #55).
+>
+> **This does NOT authorise the cutover** and the script says so itself: it was not run against
+> the root, so `robots.txt`, `sitemap.xml`, the verification file and the *absence* of the
+> staging noindex header were all skipped. Section 0 is also still unanswered.
+>
+> **Comment-stripped JS was verified as WORKING, not merely loading** — a dead listener raises
+> no console error either, which is the ledger #54 lesson. Two probes against the served,
+> stripped files: the nav opens on click (`aria-expanded` false→true, list really
+> `display:block`), closes on a second click, and closes on Escape; and the relocated C-8
+> error-band focus still fires. Wire weight now `analytics.js` **764 B** gzipped against a
+> 1024 B budget, `photo-resize.js` **1474 B** against 2048 B.
+
 The sweep **follows every redirect to its terminal response** and asserts the final status and
 the final URL, not the first status line. This is the single most important property of the
 instrument: **a check that reads only the first response line and the `Location` header PASSES
