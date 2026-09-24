@@ -452,7 +452,12 @@ footer p{max-width:var(--col);margin:.35rem 0}
         <p><b>a.</b> In <code>src/includes/site-config.php</code>, change <code>'base_url'</code> from <code>https://torin.bg/new/</code> to <code>https://torin.bg/</code>. This is the only place the staging segment appears in a page-serving file, and every canonical link and breadcrumb URL on the site is built from it.</p>
         <p><b>b.</b> Regenerate the sitemap with <code>scripts/gen-sitemap.sh</code>. Confirm <b>19</b> entries — not 20. <code>msg.html</code> is deliberately noindexed and the Google verification token is not a page; both are excluded by rule.</p>
         <p><b>c.</b> Edit <code>src/robots.txt</code> <em>by hand</em> — change the <code>Sitemap:</code> line to <code>https://torin.bg/sitemap.xml</code>. Nothing regenerates this for you, and it is the second place in the tree encoding the staging segment.</p>
-        <p><b>d.</b> Run <code>scripts/sitemap-check.sh</code> offline. Checks D and E exist for exactly this moment. Both must pass before you go further.</p>
+        <p><b>d.</b> Run <code><b>bash</b> scripts/sitemap-check.sh</code> offline. Checks D and E exist for exactly this moment. Both must pass before you go further.</p>
+        <div class="note gate">
+          <span class="tag">Run it with bash, not sh</span>
+          <p><code>sh scripts/sitemap-check.sh</code> dies with <em>"syntax error near unexpected token <code>(</code>"</em> at line 122. That line uses process substitution — <code>comm -23 &lt;(…) &lt;(…)</code> — which is a bash feature POSIX <code>sh</code> does not have. On macOS <code>/bin/sh</code> is bash in POSIX mode, which switches it off. Nothing is wrong with the script or the sitemap.</p>
+          <p><code>bash scripts/sitemap-check.sh</code> or <code>./scripts/sitemap-check.sh</code> (it is executable and its shebang is already <code>#!/usr/bin/env bash</code>) both work.</p>
+        </div>
         <p><b>e.</b> Deploy, naming the paths explicitly:</p>
 <pre><span class="c"># the three staging-segment files — the only ones left</span>
 scripts/deploy-new.sh includes/site-config.php sitemap.xml robots.txt
@@ -579,7 +584,35 @@ exec /opt/cpanel/ea-php85/root/usr/bin/php-cgi -c ${DEFAULTPHPINI}</pre>
 <!-- ===================== 3 ===================== -->
 <section id="s3">
   <div class="sec-head"><span class="sec-num">§3</span><h2>Delete these twenty-one, by exact path</h2></div>
-  <p class="lede">Paths are relative to the document root after the swap. Delete by name, not by pattern.</p>
+  <p class="lede">Paths are relative to the document root after the swap — which hides <em>where each file is right now</em>, and that decides both whether you must delete it and when. Probed in both locations on 2026-09-24.</p>
+
+  <div class="tbl-scroll">
+  <table>
+    <thead><tr><th>Group</th><th>At the root</th><th>In <span class="mono">/new/</span></th><th>What to do</th></tr></thead>
+    <tbody>
+      <tr><td><b>A</b> — superseded scripts (10, 11) · 2 files</td><td class="num">200</td><td class="num">404</td><td><b style="color:var(--go)">Nothing.</b> The move takes them out.</td></tr>
+      <tr><td><b>B</b> — withdrawn media + scaffolding (5–9, 12–21) · <b>15 files</b></td><td class="num">404</td><td class="num">200</td><td><b style="color:var(--stop)">DELETE FROM /new/ BEFORE THE SWAP.</b></td></tr>
+      <tr><td><b>C</b> — retired pages (1–4) · 4 files</td><td class="num">200</td><td class="num">301</td><td>Check on disk in FileZilla.</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="note stop">
+    <span class="tag">Group B is the answer to "do I delete before the swap"</span>
+    <p><b>Yes — those fifteen, and yes, before.</b> They are absent from the root and present in staging, so the move promotes every one of them to the live document root. Deleting first means the thing you promote is already clean; deleting after leaves a window in which withdrawn photographs and dev scaffolding are live at the real domain. There is no reason to prefer the window.</p>
+  </div>
+
+  <div class="note go">
+    <span class="tag">Group A needs no action, and that is not an oversight</span>
+    <p><code>header.js</code> and <code>otpuska.js</code> exist only at the current root and are absent from <code>/new/</code>. Moving the current root to <code>/home/torin/old-site/</code> takes them out of the document root with it. Deleting them first is wasted work — the directory they live in is about to stop being served.</p>
+  </div>
+
+  <div class="note gate">
+    <span class="tag">Group C — HTTP cannot answer this, so go and look</span>
+    <p><code>/new/covid.html</code> returns <code>301</code> — and it would return <code>301</code> whether or not the file sits on disk, because the retirement rule in <code>.htaccess</code> fires before the file is served. <b>The redirect shadows the file.</b> Open <code>/new/</code> in FileZilla and check by eye. They are shadowed rather than dangerous, but a file that only a rewrite rule is hiding comes back the moment that rule is edited.</p>
+  </div>
+
+  <p class="why">Delete by exact name, not by pattern.</p>
 
   <p class="why">This is manual because <code>deploy-new.sh</code> uploads and never deletes, and nothing in this project can remove a remote file. Giving the deploy script that capability was deliberately rejected: it means building a tool whose worst-case failure is destructive, to solve a problem that happens once.</p>
 
@@ -624,8 +657,11 @@ exec /opt/cpanel/ea-php85/root/usr/bin/php-cgi -c ${DEFAULTPHPINI}</pre>
   </div>
 
   <div class="note stop">
-    <span class="tag">Gate</span>
-    <p>Re-fetch all twenty-one and confirm <b>404</b> on each. Deleting and not checking is how a file survives a deletion pass. Verify by fetching the URL — never by looking at a directory listing.</p>
+    <span class="tag">Gate — and it is NOT "404 on all twenty-one"</span>
+    <p>That wording was wrong and contradicted the sweep. Corrected 2026-09-24:</p>
+    <p><b>Seventeen must 404</b> — Groups A and B: <code>header.js</code>, <code>otpuska.js</code>, the three profilaktika photographs, <code>css/theme-a.css</code>, <code>includes/dev-switcher.php</code>, and the ten evidence files.</p>
+    <p><b>The four retired pages must NOT 404 — they must <code>301</code> to their replacements</b>, which is exactly what section [1] of the sweep asserts: <code>covid.html</code> → <code>about.html</code>, <code>laptopi.html</code> → <code>index.html</code>, <code>rezervni-chasti.html</code> → <code>ekran-klaviatura-portove.html</code>, <code>za-bateriite.html</code> → <code>zalivane-technosti.html</code>, each terminating at <code>200</code> in one hop. <b>Demanding 404 on those would have made a correct cutover look like a failed one.</b></p>
+    <p>And note what this gate cannot see: because the redirect shadows the file, a <code>301</code> does not prove the file is gone from disk. <b>Group C is verified in FileZilla, not over HTTP.</b></p>
   </div>
 
   <p class="why">This list is one instance of a standing problem, not a one-off: removing a file from <code>src/</code> removes it from the tree and leaves it live on the server forever. Any future deletion needs a manual pass too.</p>

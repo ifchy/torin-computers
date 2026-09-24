@@ -312,7 +312,11 @@ measured in seconds, and rollback is the same move in reverse.
       3. **`src/robots.txt`** — change the `Sitemap:` directive **by hand** to
          `https://torin.bg/sitemap.xml`. It is a static file and the **second** place in the
          tree encoding `/new/`; nothing regenerates it for you.
-      4. **`scripts/sitemap-check.sh`** — run it offline. Checks D and E exist for exactly this
+      4. **`bash scripts/sitemap-check.sh`** — run it offline. **With `bash`, not `sh`:** line 122
+         uses process substitution (`comm -23 <(…) <(…)`), which POSIX `sh` lacks, and on macOS
+         `/bin/sh` is bash in POSIX mode with it switched off. `sh scripts/sitemap-check.sh`
+         dies with "syntax error near unexpected token `('" and that is the invocation, not the
+         script or the sitemap. Checks D and E exist for exactly this
          moment: D asserts every `<loc>` derives from `base_url`, E asserts the robots directive
          does too. Both must pass before you go any further.
       5. **Deploy exactly those three, by explicit path:**
@@ -443,7 +447,34 @@ destructive, to solve an eleven-file problem that happens once.
 > instance of a standing problem, not a one-off.
 
 Delete each of the following by hand in FileZilla. Each path is **relative to the document
-root after the swap**.
+root after the swap** — which hides *where the file is right now*, and that determines both
+**whether** you must delete it and **when**.
+
+### WHERE THESE FILES ACTUALLY LIVE — probed 2026-09-24, both locations
+
+| group | count | at the ROOT | in `/new/` | what to do |
+|---|---|---|---|---|
+| **A** — superseded scripts (10, 11) | 2 | `200` | `404` | **Nothing.** The move takes them out. |
+| **B** — withdrawn media + scaffolding (5–9, 12–21) | 15 | `404` | `200` | **DELETE FROM `/new/`, BEFORE THE SWAP.** |
+| **C** — retired pages (1–4) | 4 | `200` | `301` — unknowable | Check on disk in FileZilla. |
+
+**Group A — `header.js`, `otpuska.js`. No action needed, and this is not an oversight.**
+They exist only at the current root and are absent from `/new/`. Step 2.2 moves the entire
+current root to `/home/torin/old-site/`, outside the document root, and they leave with it.
+Deleting them first is wasted work — the directory they live in is about to stop being served.
+
+**Group B — the fifteen that actually matter. Delete these from `/new/` BEFORE the swap.**
+They are absent from the root and present in staging, so **step 2.3 promotes every one of them
+to the live document root.** Doing it before the swap means the thing you promote is already
+clean; doing it after leaves a window in which withdrawn photographs and dev scaffolding are
+live at the real domain. There is no reason to prefer the window.
+
+**Group C — the four retired pages. HTTP CANNOT ANSWER THIS ONE, so go and look.**
+`/new/covid.html` returns `301` — and it would return `301` whether or not the file sits on
+disk, because the retirement rule in `.htaccess` fires before the file is ever served. The
+redirect shadows the file. Open `/new/` in FileZilla and check by eye; delete any that are
+there. They are shadowed rather than dangerous, but a file that only a rewrite rule is hiding
+comes back the moment that rule is edited.
 
 1. `covid.html` — retired page; source-deleted, unreachable behind its retirement redirect.
 2. `laptopi.html` — retired page; source-deleted, unreachable behind its retirement redirect.
@@ -485,9 +516,27 @@ tree**, so by the rule stated above they are now stranded on the server. Each ph
 > they are deleted, two sets of photographs the owner has withdrawn stay publicly fetchable at
 > the live root by direct URL — the same defect Phase 3.5 already had to correct once.
 
-- [ ] All twenty-one deleted.
-- [ ] **GATE:** re-fetch each of the twenty-one and confirm **404**. Deleting and not checking is
-      how a file survives a deletion pass.
+- [ ] Group B's fifteen deleted from `/new/` **before** the swap.
+- [ ] Group C's four checked on disk in FileZilla and deleted if present.
+- [ ] Group A needs nothing — confirm rather than delete.
+- [ ] **GATE — and it is NOT "404 on all twenty-one".** That wording was wrong and contradicted
+      the sweep. Corrected 2026-09-24:
+
+      > **Seventeen must 404** — Groups A and B. `header.js`, `otpuska.js`, the three
+      > profilaktika photographs, `css/theme-a.css`, `includes/dev-switcher.php` and the ten
+      > evidence files.
+      >
+      > **The four retired pages must NOT 404. They must `301` to their replacements**, which is
+      > what section [1] of the sweep asserts — `covid.html` → `about.html`,
+      > `laptopi.html` → `index.html`, `rezervni-chasti.html` → `ekran-klaviatura-portove.html`,
+      > `za-bateriite.html` → `zalivane-technosti.html`, each terminating at `200` in one hop.
+      > Demanding 404 on those would have made a correct cutover look like a failed one.
+      >
+      > And note what this gate cannot see: because the redirect shadows the file, a `301` does
+      > not prove the file is gone from disk. **Group C is verified in FileZilla, not over HTTP.**
+
+      Deleting and not checking is how a file survives a deletion pass — but checking for the
+      wrong status is how a good deploy gets rolled back.
 
 ---
 
