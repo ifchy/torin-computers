@@ -125,7 +125,7 @@ urlencode_path() {
   python3 -c 'import sys, urllib.parse; print(urllib.parse.quote(sys.argv[1], safe="/"))' "$1"
 }
 
-# Deploy-time transform: stylesheets ship without their comments.
+# Deploy-time transform: stylesheets AND scripts ship without their comments.
 #
 # This project has no build step, so source bytes are wire bytes. components.css
 # is ~60% comments by raw size, costing ~9.2 KB gzipped -- 45% of the 20 KB CSS
@@ -135,19 +135,36 @@ urlencode_path() {
 # here rather than deleted: source keeps the rationale, the wire does not pay.
 #
 # Stripping is string-aware, not a regex -- see scripts/lib/strip-css-comments.py
-# for why that distinction is load-bearing. Prints the path to upload: either a
-# stripped temp copy, or the original when the file is not CSS.
+# for why that distinction is load-bearing.
+#
+# JS goes through the same treatment for the same reason (ledger #43, option b).
+# analytics.js gzipped to 1959 B against a 1 KB budget while its CODE was only
+# 972 B -- the comments were the entire overage -- and photo-resize.js sat at
+# 2042 B against 2048 B, six bytes from breaking a gate. Stripped, they are
+# 782 B and 1492 B. The JS stripper carries one extra rule the CSS one does not
+# need: it REFUSES (exit 2) rather than guess at a regex literal, because
+# guessing wrong truncates a file silently. A refusal lands in the fail-open
+# branch below and ships the source unchanged, which is the safe direction.
+# scripts/strip-js-selftest.sh proves all of that, including that every file in
+# src/js/ still parses after stripping.
+#
+# Prints the path to upload: either a stripped temp copy, or the original when
+# the file is neither CSS nor JS, or when stripping failed.
 resolve_upload_path() {
   local rel="$1" src="$2"
   case "$rel" in
-    *.css)
+    *.css|*.js)
+      local stripper="lib/strip-css-comments.py"
+      case "$rel" in *.js) stripper="lib/strip-js-comments.py" ;; esac
       local out="${STRIP_DIR}/$(echo "$rel" | tr '/' '_')"
-      if python3 "${SCRIPT_DIR}/lib/strip-css-comments.py" < "$src" > "$out" 2>/dev/null \
+      if python3 "${SCRIPT_DIR}/${stripper}" < "$src" > "$out" 2>/dev/null \
          && [ -s "$out" ]; then
         printf '%s' "$out"
         return 0
       fi
       # Fail open: a stripper problem must not block a deploy. Ship the source.
+      # For JS this is also the deliberate landing spot for a REFUSAL (exit 2)
+      # on a regex literal -- loud in the log, unchanged on the wire.
       echo "WARNING: could not strip comments from ${rel}; uploading it unchanged" >&2
       printf '%s' "$src"
       ;;

@@ -55,12 +55,11 @@
 		else if (part[0] === 'form-error' && ok(FIELDS, part[1])) { track('form-error', 'field', part[1]); }
 	}
 
-	// NOT ANALYTICS, and not stray — do not delete it as out of place. UI-SPEC
-	// C-8's error band has carried tabindex="-1" since 04-05 with nothing to
-	// focus it, so a keyboard or screen-reader user landed at the top of the
-	// document rather than on the explanation of why their enquiry failed.
-	var band = document.getElementById('form-error');
-	if (band) { band.focus(); }
+	// The UI-SPEC C-8 error-band focus() MOVED OUT of this file to js/site.js
+	// (ledger #44). Content blockers match the filename `analytics.js` by
+	// pattern, and a blocked file took error-band focus down with it for
+	// exactly the keyboard and screen-reader users who depend on it. Do not
+	// move accessibility behaviour back into a blockable filename.
 
 	var form = document.getElementById('contact-form');
 	if (!form) { return; }

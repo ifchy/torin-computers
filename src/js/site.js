@@ -3,7 +3,9 @@
    arrow keys — six links in a nav are links. No library (N-7: Alpine.js is
    ~44 KB raw to replace this file). The only DOM writes are aria-expanded and
    focus(); components.css selects all visual state off that attribute, so the
-   announced state and the rendered state cannot desynchronise. */
+   announced state and the rendered state cannot desynchronise.
+   Also hosts the UI-SPEC C-8 error-band focus — see the second IIFE below for
+   why it lives in THIS file and not in analytics.js. */
 (function () {
 	'use strict';
 	var nav = document.querySelector('.nav');
@@ -57,4 +59,22 @@
 	document.addEventListener('click', function (e) {
 		if (!nav.contains(e.target)) { closeAll(null); }
 	});
+})();
+
+/* UI-SPEC C-8 — move focus to the error band when a submission comes back
+   failed. A SEPARATE IIFE ON PURPOSE, for two independent reasons.
+
+   WHY IT IS NOT IN analytics.js (ledger #44): content blockers commonly match
+   the filename `analytics.js` by pattern. A blocked file there meant error-band
+   focus silently stopped working for exactly the keyboard and screen-reader
+   users who need it, landing them at the top of the document instead of on the
+   explanation of why their enquiry failed. It is not analytics and never was.
+
+   WHY IT IS NOT FOLDED INTO THE NAV IIFE ABOVE: that one returns early on
+   `if (!nav)`. Error-band focus must not acquire a hidden dependency on a nav
+   element being present. Its only guard is the band's own existence. */
+(function () {
+	'use strict';
+	var band = document.getElementById('form-error');
+	if (band) { band.focus(); }
 })();

@@ -134,13 +134,15 @@ All four waited on the same single missing dependency: a PHP runtime. **It now e
       22; the suite is now 27).
 - [x] **RUN 2026-09-24 — PASS 9/9** — `php scripts/notify-selftest.php` (#40). The
       all-channels-failed branch is now proven at runtime, not merely encoded.
-- [ ] **NOT EVEN WRITTEN** — `scripts/spam-guard-selftest.php` (#35) was never authored. Nine
-      assertions matching 04-05's behaviour list would close it, in the same shape as the
-      other three.
+- [x] **RUN 2026-09-24 — PASS 27/27** — `php scripts/spam-guard-selftest.php` (#35). **This
+      checklist entry was wrong: the file WAS authored**, at commit c6cce02, and carries 27
+      assertions rather than the 9 predicted — the decoy field, timestamp signing (forged,
+      tampered, malformed, too-fast, stale, inclusive bounds), the per-address throttle, and
+      source-level assertions including `hash_equals`, no session, no superglobal in logs and
+      the PHP 5.2 short-array contract.
 
-A test that has never run is a **specification, not a gate.** That rule is what made the three
-runs above necessary; they are now gates. **#35 remains a specification and is still not a gate** —
-it may not be reported as passing.
+A test that has never run is a **specification, not a gate.** That rule is what made these runs
+necessary. **All four are now gates: 18/18 + 27/27 + 9/9 + 27/27 = 81 assertions, zero unrun.**
 
 **Additional evidence available for the first time, 2026-09-24 (not previously obtainable).**
 `04-HOST-CAPABILITIES.md` records that the host masks `E_DEPRECATED` (`error_reporting = 22519`),
@@ -161,9 +163,21 @@ used `E_ALL`. **It is not a cutover blocker** — the host's `error_reporting` m
 so it cannot render for a visitor — and `imagedestroy()` has been a no-op since PHP 8.0, so the
 calls are inert either way. Recorded as cheap post-launch cleanup, not a gate.
 
-### 1.3 — Two cheap open decisions, both still open
+### 1.3 — Two cheap open decisions — BOTH RESOLVED 2026-09-24
 
-- [ ] **#43 — the JS comment-stripping decision.** `analytics.js` gzips to 1959 B against a
+- [x] **#43 — DECIDED AND IMPLEMENTED 2026-09-24 (option b).**
+      `scripts/lib/strip-js-comments.py` mirrors the existing CSS stripper and `deploy-new.sh`
+      runs both from one `resolve_upload_path` case. Measured, gzipped: **analytics.js
+      1964 → 782 B against its ≤1024 B budget — inside, with 242 B of headroom**;
+      photo-resize.js 2042 → 1492 B against 2048 B (six bytes of headroom became 556);
+      site.js 1672 → 550 B; form-validate.js 2379 → 783 B. The JS stripper **refuses (exit 2)
+      rather than guess at a regex literal** — guessing wrong truncates a file silently — and a
+      refusal lands in the existing fail-open branch, shipping source unchanged.
+      `scripts/strip-js-selftest.sh` proves it: **21/21**, covering ASI newline preservation,
+      comment openers inside strings and template literals, division-vs-regex against
+      photo-resize.js's real expressions, refusal on three regex positions, and every file in
+      `src/js/` still parsing after stripping.
+      *Superseded original text:* **#43 — the JS comment-stripping decision.** `analytics.js` gzips to 1959 B against a
       ≤1024 B budget. **The code alone is 972 B — inside budget; the comments are the entire
       overage.** There is no build step, so comments are wire bytes. Second file to hit this
       exact wall (#20: `photo-resize.js`, 2042 B against 2048 B, six bytes of headroom). Pick
@@ -172,8 +186,13 @@ calls are inert either way. Recorded as cheap post-launch cleanup, not a gate.
       `scripts/lib/strip-css-comments.py` — brings `analytics.js` to ~972 B and gives
       `photo-resize.js` real headroom; **(c)** strip by hand and lose the documentation.
       **Recommended: (b).**
-- [ ] **#44 — move the C-8 error-band `.focus()` call out of `analytics.js` into
-      `src/js/site.js`.** **A two-line move.** Content blockers commonly match the filename
+- [x] **#44 — DONE 2026-09-24.** The `.focus()` call now lives in `src/js/site.js` as **its own
+      IIFE** — deliberately not folded into the existing one, which returns early on `if (!nav)`;
+      error-band focus must not acquire a hidden dependency on a nav element existing. A pointer
+      comment is left at the old site in `analytics.js` so it is not re-added there. Both files
+      pass `node --check`.
+      *Superseded original text:* **#44 — move the C-8 error-band `.focus()` call out of
+      `analytics.js` into `src/js/site.js`.** **A two-line move.** Content blockers commonly match the filename
       `analytics.js` by pattern; a blocked file means error-band focus silently stops working
       for exactly the keyboard and screen-reader users who need it, landing them at the top of
       the document instead of on the explanation of what went wrong. `site.js` is immune and is
