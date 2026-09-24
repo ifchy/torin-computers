@@ -162,21 +162,38 @@ $site = array(
 
 	// D3.5-06 (OWNER-QUESTIONS #24). The free-diagnostics claim, written here
 	// once and read by every consumer, so the reword has ONE writer instead of
-	// fifteen. TWO keys rather than one joined string, for the same reason the
-	// phone list is never joined: the claim and its exclusion are two separate
-	// facts, and a consumer with room for only the first must drop the second
-	// visibly, at its own call site, rather than silently.
+	// fifteen.
 	//
 	// The middle word is doing real work and is not a hedge: the owner scoped
 	// the promise to a quick initial assessment rather than an unlimited free
 	// investigation. Dropping it re-publishes a promise the shop did not make.
 	//
-	// The exclusion is category 6 — medical and industrial equipment. The owner
-	// ruled the claim applies to categories 1-5 ONLY, so a category-6 page must
-	// not render it at all; the second key is for the SHARED surfaces that
-	// render on every service page and therefore cannot know their category.
+	// THE EXCLUSION KEY WAS REMOVED 2026-09-24, ON THE OWNER'S INSTRUCTION, and
+	// the reasoning is worth keeping because it reverses an earlier ruling.
+	//
+	// It used to append «(освен за нестандартна техника)» to this claim on the
+	// homepage and all fifteen service-page call-to-action notes — the SHARED
+	// surfaces, which cannot know which category the reader arrived from. The
+	// owner has switched to the opposite default: state the claim globally, and
+	// let the one category it does not cover deny it on its own page.
+	//
+	// THAT ONLY HOLDS BECAUSE THE DENIAL ALREADY EXISTS THERE, and it was
+	// checked rather than assumed. Category 6 is medical and industrial
+	// equipment, published at problem-stari.html, and its FAQ answers: «Безплат-
+	// ната първоначална диагностика не обхваща нестандартната техника, но
+	// каквото видим, ви го казваме честно.»
+	//
+	// WHAT THE CHANGE COSTS, stated so a later reader does not rediscover it as
+	// a defect: the carve-out has moved from the note sitting directly above
+	// the call-to-action — the last moment it could still change what a visitor
+	// does — to an FAQ further down one page. The owner accepted that trade on
+	// the grounds that category 6 is not expected to bring customers.
+	//
+	// IF THAT FAQ ANSWER IS EVER EDITED OR REMOVED, the site returns to
+	// publishing an unqualified free-diagnostics promise over medical and
+	// industrial equipment, with nothing anywhere carving it out. It is now the
+	// only place the exclusion is stated.
 	'free_diagnostics'           => 'Безплатна първоначална диагностика',
-	'free_diagnostics_exception' => '(освен за нестандартна техника)',
 
 	// TRUST-01 (D3-09). The brand wordmark row, rendered by
 	// includes/brand-row.php on the homepage and every service page. A flat

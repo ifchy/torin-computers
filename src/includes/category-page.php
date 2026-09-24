@@ -571,15 +571,21 @@ function torin_render_service_page($page) {
 					      // pages — the same string the homepage and footer use. ?>
 					<a class="btn btn--primary" href="kontakti.html" data-slot="category"><?php echo torin_icon('chat'); ?>Пишете ни</a>
 				</div>
-<?php			// D3.5-06. The claim and its category-6 exclusion are READ from
-			// site-config.php, never typed here: this note renders on all 15 service
-			// pages, so a literal in this line would be fifteen copies of one fact.
+<?php			// D3.5-06. The claim is READ from site-config.php, never typed here:
+			// this note renders on all 15 service pages, so a literal in this line
+			// would be fifteen copies of one fact.
 			//
-			// The exclusion belongs HERE and not in a hero pill. This note sits
-			// directly above the call-to-action a visitor is about to use, which is
-			// the last moment the carve-out can still change what they do. A pill in
-			// a hero is decoration by the time they reach the phone number. ?>
-				<p class="cta-block__note"><?php echo torin_esc($site['free_diagnostics']); ?> <?php echo torin_esc($site['free_diagnostics_exception']); ?> · Отговаряме в работно време</p>
+			// THE CATEGORY-6 EXCLUSION NO LONGER APPEARS HERE — removed 2026-09-24
+			// on the owner's instruction, who reversed the default: state the claim
+			// globally and let the one category it does not cover deny it on its own
+			// page. problem-stari.html does exactly that, in an FAQ answer, and that
+			// answer is now the ONLY place the exclusion is stated anywhere.
+			//
+			// What that costs is recorded in site-config.php beside the key that was
+			// removed: the carve-out has moved off the note sitting directly above
+			// the call-to-action, which was the last moment it could still change
+			// what a visitor does. Do not re-add it here without saying so there. ?>
+				<p class="cta-block__note"><?php echo torin_esc($site['free_diagnostics']); ?> · Отговаряме в работно време</p>
 <?php			// TRUST-02, as the LAST CHILD of .cta-block — the rating sits where
 				// the visitor is being asked to call. This used to say the badge
 				// renders nothing and that the absence was the specified state. Both
